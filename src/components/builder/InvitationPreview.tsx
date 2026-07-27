@@ -1,0 +1,130 @@
+import { CalendarDays, Heart, MapPin, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import type { BuilderContent } from "@/lib/builder-content";
+import {
+  countdownDays,
+  formatInviteDate,
+  inviteThemes,
+  type InvitationDraft,
+} from "@/lib/invitation";
+import { easeSilk } from "@/components/landing/motion-primitives";
+
+export function InvitationPreview({
+  draft,
+  copy,
+  lang,
+  className,
+  compact = false,
+}: {
+  draft: InvitationDraft;
+  copy: BuilderContent;
+  lang: "tr" | "en";
+  className?: string;
+  compact?: boolean;
+}) {
+  const c = copy.inviteCard;
+  const theme = inviteThemes.find((item) => item.id === draft.theme) ?? inviteThemes[0];
+  const names =
+    draft.partnerOne || draft.partnerTwo
+      ? `${draft.partnerOne || "…"} & ${draft.partnerTwo || "…"}`
+      : c.namesFallback;
+  const dateLabel = formatInviteDate(draft.date, lang) || c.dateFallback;
+  const days = countdownDays(draft.date);
+
+  return (
+    <div
+      data-invite-theme={draft.theme}
+      className={cn(
+        "invite-canvas overflow-hidden rounded-3xl border border-border shadow-elevated",
+        className,
+      )}
+    >
+      <div className="relative">
+        <img
+          src={theme.image}
+          alt=""
+          aria-hidden="true"
+          className={cn("w-full object-cover", compact ? "aspect-[4/3]" : "aspect-[16/10]")}
+        />
+        <div
+          aria-hidden="true"
+          className="invite-canvas absolute inset-0 opacity-70 mix-blend-multiply"
+        />
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+          <p className="invite-accent-text text-[0.62rem] uppercase tracking-[0.3em]">
+            {draft.headline || c.save}
+          </p>
+          <motion.h2
+            key={names}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: easeSilk }}
+            className={cn(
+              "invite-display mt-3 font-light leading-tight",
+              compact ? "text-3xl" : "text-4xl sm:text-5xl",
+            )}
+          >
+            {names}
+          </motion.h2>
+          <span className="invite-accent-bg mt-4 grid size-8 place-items-center rounded-full">
+            <Heart className="size-4" aria-hidden="true" />
+          </span>
+        </div>
+      </div>
+
+      <div className={cn("invite-panel space-y-5", compact ? "p-5" : "p-7 sm:p-9")}>
+        <p className="invite-soft text-center text-sm leading-relaxed">
+          {draft.message || c.messageFallback}
+        </p>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <DetailRow
+            icon={<CalendarDays className="size-4" aria-hidden="true" />}
+            label={dateLabel}
+            sub={draft.time ? `${c.program} · ${draft.time}` : undefined}
+          />
+          <DetailRow
+            icon={<MapPin className="size-4" aria-hidden="true" />}
+            label={draft.venue || c.venueFallback}
+            sub={[draft.address, draft.city].filter(Boolean).join(", ") || undefined}
+          />
+        </div>
+
+        {days !== null ? (
+          <p className="invite-accent-text flex items-center justify-center gap-2 text-xs uppercase tracking-[0.24em]">
+            <Clock className="size-3.5" aria-hidden="true" />
+            {days > 0 ? `${days} ${c.countdown}` : days === 0 ? c.save : dateLabel}
+          </p>
+        ) : null}
+
+        <button
+          type="button"
+          className="invite-accent-bg min-h-11 w-full rounded-full text-sm font-semibold"
+        >
+          {draft.rsvpLabel || c.rsvpFallback}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({
+  icon,
+  label,
+  sub,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  sub?: string;
+}) {
+  return (
+    <div className="invite-accent-border flex min-w-0 items-start gap-3 rounded-2xl border border-current/25 px-4 py-3">
+      <span className="invite-accent-text mt-0.5 shrink-0">{icon}</span>
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium">{label}</span>
+        {sub ? <span className="invite-soft block truncate text-xs">{sub}</span> : null}
+      </span>
+    </div>
+  );
+}
