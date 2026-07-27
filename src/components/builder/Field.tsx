@@ -16,7 +16,10 @@ export function Field({
   const id = useId();
   return (
     <div className={cn("min-w-0", className)}>
-      <label htmlFor={id} className="mb-2 block text-xs uppercase tracking-[0.18em] text-muted-foreground">
+      <label
+        htmlFor={id}
+        className="mb-2 block text-xs uppercase tracking-[0.18em] text-muted-foreground"
+      >
         {label}
       </label>
       {children(id)}

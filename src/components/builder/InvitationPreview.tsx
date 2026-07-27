@@ -109,15 +109,7 @@ export function InvitationPreview({
   );
 }
 
-function DetailRow({
-  icon,
-  label,
-  sub,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  sub?: string;
-}) {
+function DetailRow({ icon, label, sub }: { icon: React.ReactNode; label: string; sub?: string }) {
   return (
     <div className="invite-accent-border flex min-w-0 items-start gap-3 rounded-2xl border border-current/25 px-4 py-3">
       <span className="invite-accent-text mt-0.5 shrink-0">{icon}</span>

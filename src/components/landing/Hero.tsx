@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import heroImage from "@/assets/hero-couple.jpg";
 import { useI18n } from "@/lib/i18n";
 import { easeSilk } from "./motion-primitives";

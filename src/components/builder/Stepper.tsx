@@ -25,9 +25,7 @@ export function Stepper({
               aria-current={active ? "step" : undefined}
               className={cn(
                 "relative w-full min-w-[8.5rem] rounded-2xl border px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                active
-                  ? "border-gold/50 bg-accent/50"
-                  : "border-border hover:bg-accent/30",
+                active ? "border-gold/50 bg-accent/50" : "border-border hover:bg-accent/30",
               )}
             >
               <span className="flex items-center gap-2">

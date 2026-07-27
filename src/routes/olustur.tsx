@@ -54,7 +54,10 @@ function BuilderPage() {
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden">
-      <div aria-hidden="true" className="aurora pointer-events-none absolute inset-x-0 top-0 h-[70vh]" />
+      <div
+        aria-hidden="true"
+        className="aurora pointer-events-none absolute inset-x-0 top-0 h-[70vh]"
+      />
 
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
         <Link
@@ -70,7 +73,11 @@ function BuilderPage() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-full border border-border p-0.5" role="group" aria-label="Language">
+          <div
+            className="flex items-center rounded-full border border-border p-0.5"
+            role="group"
+            aria-label="Language"
+          >
             {(["tr", "en"] as const).map((code) => (
               <button
                 key={code}

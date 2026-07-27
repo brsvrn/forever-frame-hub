@@ -149,9 +149,12 @@ export function useInvitationDraft() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   }, [draft, hydrated]);
 
-  const update = useCallback(<K extends keyof InvitationDraft>(key: K, value: InvitationDraft[K]) => {
-    setDraft((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  const update = useCallback(
+    <K extends keyof InvitationDraft>(key: K, value: InvitationDraft[K]) => {
+      setDraft((prev) => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
 
   const reset = useCallback(() => setDraft(emptyDraft), []);
   const fillSample = useCallback(() => setDraft(sampleDraft), []);
