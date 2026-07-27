@@ -146,10 +146,15 @@
     letter-spacing: -0.01em;
   }
 
+  section[id] {
+    scroll-margin-top: 6rem;
+  }
+
   ::selection {
     background: oklch(0.82 0.062 15 / 30%);
   }
 }
+
 
 @utility aurora {
   background-image: var(--gradient-aurora);
