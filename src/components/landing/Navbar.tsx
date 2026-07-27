@@ -72,12 +72,13 @@ export function Navbar() {
             >
               {t.nav.login}
             </a>
-            <a
-              href="#paketler"
+            <Link
+              to="/olustur"
               className="hidden rounded-full bg-gradient-to-r from-rose to-gold px-5 py-2.5 text-sm font-semibold text-background shadow-glow transition-transform duration-300 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline-flex"
             >
               {t.nav.cta}
-            </a>
+            </Link>
+
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
