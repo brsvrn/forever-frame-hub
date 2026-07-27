@@ -1,5 +1,4 @@
-export const builderContent = {
-  tr: {
+const tr = {
     meta: {
       title: "Davetiye Oluştur — MemoryWedding",
       description:
@@ -100,8 +99,11 @@ export const builderContent = {
       dateFallback: "Tarih seçilmedi",
       venueFallback: "Mekân eklenmedi",
     },
-  },
-  en: {
+  };
+
+export type BuilderContent = typeof tr;
+
+const en: BuilderContent = {
     meta: {
       title: "Create your invitation — MemoryWedding",
       description:
@@ -203,6 +205,6 @@ export const builderContent = {
       venueFallback: "No venue added",
     },
   },
-} as const;
+};
 
-export type BuilderContent = (typeof builderContent)["tr"];
+export const builderContent = { tr, en };
