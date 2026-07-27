@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X, Heart } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { easeSilk } from "./motion-primitives";
@@ -72,12 +73,13 @@ export function Navbar() {
             >
               {t.nav.login}
             </a>
-            <a
-              href="#paketler"
+            <Link
+              to="/olustur"
               className="hidden rounded-full bg-gradient-to-r from-rose to-gold px-5 py-2.5 text-sm font-semibold text-background shadow-glow transition-transform duration-300 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline-flex"
             >
               {t.nav.cta}
-            </a>
+            </Link>
+
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}

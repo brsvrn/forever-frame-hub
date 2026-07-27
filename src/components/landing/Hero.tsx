@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import heroImage from "@/assets/hero-couple.jpg";
 import { useI18n } from "@/lib/i18n";
 import { easeSilk } from "./motion-primitives";
@@ -62,13 +63,14 @@ export function Hero() {
             transition={{ duration: 0.9, ease: easeSilk, delay: 0.62 }}
             className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
-            <a
-              href="#paketler"
+            <Link
+              to="/olustur"
               className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose to-gold px-7 text-sm font-semibold text-background shadow-glow transition-transform duration-300 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
             >
               {t.hero.primary}
               <ArrowRight className="size-4" aria-hidden="true" />
-            </a>
+            </Link>
+
             <a
               href="#davetiye"
               className="glass inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full px-7 text-sm font-semibold text-foreground transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
