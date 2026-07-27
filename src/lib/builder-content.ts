@@ -204,7 +204,7 @@ const en: BuilderContent = {
       dateFallback: "No date selected",
       venueFallback: "No venue added",
     },
-  },
 };
+
 
 export const builderContent = { tr, en };
