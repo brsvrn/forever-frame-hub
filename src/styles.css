@@ -201,8 +201,108 @@
   }
 }
 
+/*
+ * Invitation theme palettes.
+ * The preview canvas reads --invite-* tokens, so a theme is swapped by
+ * setting data-invite-theme on the wrapper — never by hardcoding colors.
+ */
+[data-invite-theme="midnight"] {
+  --invite-bg: oklch(0.18 0.032 265);
+  --invite-panel: oklch(0.24 0.034 265);
+  --invite-ink: oklch(0.96 0.008 85);
+  --invite-soft: oklch(0.78 0.016 265);
+  --invite-accent: oklch(0.79 0.072 76);
+  --invite-accent-ink: oklch(0.19 0.032 265);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="blush"] {
+  --invite-bg: oklch(0.96 0.015 20);
+  --invite-panel: oklch(0.99 0.008 40);
+  --invite-ink: oklch(0.32 0.045 20);
+  --invite-soft: oklch(0.52 0.035 20);
+  --invite-accent: oklch(0.72 0.09 15);
+  --invite-accent-ink: oklch(0.99 0.005 40);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="garden"] {
+  --invite-bg: oklch(0.95 0.022 140);
+  --invite-panel: oklch(0.99 0.01 120);
+  --invite-ink: oklch(0.3 0.05 150);
+  --invite-soft: oklch(0.5 0.04 150);
+  --invite-accent: oklch(0.58 0.09 150);
+  --invite-accent-ink: oklch(0.98 0.01 120);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="noir"] {
+  --invite-bg: oklch(0.14 0.004 265);
+  --invite-panel: oklch(0.2 0.006 265);
+  --invite-ink: oklch(0.97 0.006 85);
+  --invite-soft: oklch(0.72 0.008 265);
+  --invite-accent: oklch(0.86 0.055 90);
+  --invite-accent-ink: oklch(0.14 0.004 265);
+  --invite-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
+@utility invite-canvas {
+  background-color: var(--invite-bg);
+  color: var(--invite-ink);
+}
+
+@utility invite-panel {
+  background-color: var(--invite-panel);
+  color: var(--invite-ink);
+}
+
+@utility invite-display {
+  font-family: var(--invite-display);
+}
+
+@utility invite-soft {
+  color: var(--invite-soft);
+}
+
+@utility invite-accent-text {
+  color: var(--invite-accent);
+}
+
+@utility invite-accent-bg {
+  background-color: var(--invite-accent);
+  color: var(--invite-accent-ink);
+}
+
+@utility invite-accent-border {
+  border-color: var(--invite-accent);
+}
+
+@utility field-base {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid var(--color-input);
+  background-color: oklch(0.96 0.008 85 / 4%);
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  color: var(--color-foreground);
+  transition:
+    border-color 0.3s var(--ease-silk),
+    background-color 0.3s var(--ease-silk);
+
+  &::placeholder {
+    color: var(--color-muted-foreground);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    background-color: oklch(0.96 0.008 85 / 7%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 }
+
