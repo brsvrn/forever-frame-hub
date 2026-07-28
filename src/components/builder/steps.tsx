@@ -328,29 +328,54 @@ export function StepPublish({
   const c = copy.publish;
   const [status, setStatus] = useState<"idle" | "publishing" | "done">("idle");
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const slug =
     draft.slug ||
     slugify(`${draft.partnerOne}-${draft.partnerTwo}`) ||
     (lang === "tr" ? "davetiyemiz" : "our-wedding");
-  const url = `memorywedding.app/${slug}`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const fullUrl = `${origin}/davet/${slug}`;
+  const url = `${origin.replace(/^https?:\/\//, "")}/davet/${slug}`;
 
-  const qr = useMemo(() => buildQrSvg(url), [url]);
+  const qr = useMemo(() => buildQrSvg(fullUrl), [fullUrl]);
 
-  const publish = () => {
+  const publish = async () => {
     setStatus("publishing");
-    window.setTimeout(() => setStatus("done"), 1400);
+    setError(null);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user.id;
+      if (!userId) {
+        window.location.href = "/giris";
+        return;
+      }
+      await publishInvitation({ ...draft, slug }, userId);
+      setStatus("done");
+    } catch (err) {
+      setError(
+        err instanceof Error && /duplicate|unique/i.test(err.message)
+          ? lang === "tr"
+            ? "Bu bağlantı adresi başka bir davetiye tarafından kullanılıyor."
+            : "This link is already used by another invitation."
+          : lang === "tr"
+            ? "Davetiye yayınlanamadı. Lütfen tekrar deneyin."
+            : "Could not publish the invitation. Please try again.",
+      );
+      setStatus("idle");
+    }
   };
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(`https://${url}`);
+      await navigator.clipboard.writeText(fullUrl);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       /* clipboard unavailable */
     }
   };
+
 
   const downloadQr = () => {
     const blob = new Blob([qr], { type: "image/svg+xml" });
