@@ -1,45 +1,69 @@
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, Music } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 
+function extractYouTubeId(url: string | undefined): string | null {
+  if (!url) return null;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+  return match ? match[1] : null;
+}
+
 export function PremiumAudioPlayer({ 
   theme,
-  autoPlay = false
+  autoPlay = false,
+  musicUrl
 }: { 
   theme: ThemeConfig;
   autoPlay?: boolean;
+  musicUrl?: string;
 }) {
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  const videoId = extractYouTubeId(musicUrl);
+
+  const sendCommand = (command: string, args: any[] = []) => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: "command",
+          func: command,
+          args: args
+        }),
+        "*"
+      );
+    }
+  };
 
   useEffect(() => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.play().catch(() => {
-          // Auto-play might be blocked by browser
-          setIsPlaying(false);
-        });
-      } else {
-        audioRef.current.pause();
-      }
+    if (isPlaying) {
+      sendCommand("playVideo");
+    } else {
+      sendCommand("pauseVideo");
     }
   }, [isPlaying]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.muted = isMuted;
+    if (isMuted) {
+      sendCommand("mute");
+    } else {
+      sendCommand("unMute");
     }
   }, [isMuted]);
 
+  if (!videoId) return null;
+
   return (
     <div className="fixed bottom-6 left-6 z-40">
-      <audio 
-        ref={audioRef} 
-        src={theme.music.defaultTrack} 
-        loop 
-        playsInline
+      {/* Hidden YouTube Iframe */}
+      <iframe
+        ref={iframeRef}
+        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=${autoPlay ? 1 : 0}&loop=1&playlist=${videoId}&controls=0`}
+        className="hidden"
+        allow="autoplay; encrypted-media"
+        title="Audio Player"
       />
       
       <motion.div 

@@ -88,12 +88,28 @@ export function StepTheme({ draft, update, copy, lang }: StepProps) {
   );
 }
 
-export function StepTexts({ draft, update, copy }: StepProps) {
+export function StepTexts({ draft, update, copy, lang }: StepProps) {
   const c = copy.texts;
   return (
     <div className="space-y-8">
       <StepHeader title={c.title} desc={c.desc} />
       <div className="grid gap-5 sm:grid-cols-2">
+        <Field label={c.category} className="sm:col-span-2">
+          {(id) => (
+            <select
+              id={id}
+              value={draft.category}
+              onChange={(e) => update("category", e.target.value as any)}
+              className="field-base min-h-11 w-full bg-transparent"
+            >
+              <option value="wedding">{lang === "tr" ? "Düğün" : "Wedding"}</option>
+              <option value="engagement">{lang === "tr" ? "Nişan" : "Engagement"}</option>
+              <option value="henna">{lang === "tr" ? "Kına" : "Henna"}</option>
+              <option value="birthday">{lang === "tr" ? "Doğum Günü" : "Birthday"}</option>
+              <option value="other">{lang === "tr" ? "Diğer" : "Other"}</option>
+            </select>
+          )}
+        </Field>
         <Field label={c.partnerOne}>
           {(id) => (
             <TextInput
@@ -143,7 +159,7 @@ export function StepTexts({ draft, update, copy }: StepProps) {
             />
           )}
         </Field>
-        <Field label={c.rsvpLabel}>
+        <Field label={c.rsvpLabel} className="sm:col-span-2">
           {(id) => (
             <TextInput
               id={id}
@@ -154,6 +170,54 @@ export function StepTexts({ draft, update, copy }: StepProps) {
             />
           )}
         </Field>
+        
+        <div className="sm:col-span-2 mt-6">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{c.family}</h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-4 rounded-2xl border border-border p-4">
+              <p className="text-sm font-medium">{draft.partnerOne || (lang === "tr" ? "1. Kişi" : "Partner 1")}</p>
+              <Field label={lang === "tr" ? "Anne Adı" : "Mother's Name"}>
+                {(id) => (
+                  <TextInput
+                    id={id}
+                    value={draft.familyInfo?.bride?.mother || ""}
+                    onChange={(e) => update("familyInfo", { ...draft.familyInfo, bride: { ...draft.familyInfo?.bride, mother: e.target.value } })}
+                  />
+                )}
+              </Field>
+              <Field label={lang === "tr" ? "Baba Adı" : "Father's Name"}>
+                {(id) => (
+                  <TextInput
+                    id={id}
+                    value={draft.familyInfo?.bride?.father || ""}
+                    onChange={(e) => update("familyInfo", { ...draft.familyInfo, bride: { ...draft.familyInfo?.bride, father: e.target.value } })}
+                  />
+                )}
+              </Field>
+            </div>
+            <div className="space-y-4 rounded-2xl border border-border p-4">
+              <p className="text-sm font-medium">{draft.partnerTwo || (lang === "tr" ? "2. Kişi" : "Partner 2")}</p>
+              <Field label={lang === "tr" ? "Anne Adı" : "Mother's Name"}>
+                {(id) => (
+                  <TextInput
+                    id={id}
+                    value={draft.familyInfo?.groom?.mother || ""}
+                    onChange={(e) => update("familyInfo", { ...draft.familyInfo, groom: { ...draft.familyInfo?.groom, mother: e.target.value } })}
+                  />
+                )}
+              </Field>
+              <Field label={lang === "tr" ? "Baba Adı" : "Father's Name"}>
+                {(id) => (
+                  <TextInput
+                    id={id}
+                    value={draft.familyInfo?.groom?.father || ""}
+                    onChange={(e) => update("familyInfo", { ...draft.familyInfo, groom: { ...draft.familyInfo?.groom, father: e.target.value } })}
+                  />
+                )}
+              </Field>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -213,6 +277,16 @@ export function StepDetails({ draft, update, copy }: StepProps) {
               value={draft.city}
               placeholder={c.cityPh}
               onChange={(e) => update("city", e.target.value)}
+            />
+          )}
+        </Field>
+        <Field label={c.map} className="sm:col-span-2">
+          {(id) => (
+            <TextInput
+              id={id}
+              value={draft.mapUrl}
+              placeholder={c.mapPh}
+              onChange={(e) => update("mapUrl", e.target.value)}
             />
           )}
         </Field>
@@ -320,17 +394,178 @@ export function StepPreview({ draft, copy, lang }: StepProps) {
   );
 }
 
+export function StepPremium({ draft, update, copy, lang }: StepProps) {
+  const c = (copy as any).premium;
+  return (
+    <div className="space-y-8">
+      <StepHeader title={c.title} desc={c.desc} />
+      <div className="grid gap-5">
+        <Field label={c.music}>
+          {(id) => (
+            <TextInput
+              id={id}
+              value={draft.musicUrl}
+              placeholder={c.musicPh}
+              onChange={(e) => update("musicUrl", e.target.value)}
+            />
+          )}
+        </Field>
+        <Field label={c.cover}>
+          {(id) => (
+            <TextInput
+              id={id}
+              value={draft.coverPhoto}
+              placeholder="https://..."
+              onChange={(e) => update("coverPhoto", e.target.value)}
+            />
+          )}
+        </Field>
+
+        <div className="mt-6 border-t border-border pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{c.program}</h3>
+            <button
+              type="button"
+              onClick={() => update("eventProgram", [...draft.eventProgram, { time: "", title: "", desc: "" }])}
+              className="text-xs text-gold hover:underline"
+            >
+              + {lang === "tr" ? "Yeni Ekle" : "Add New"}
+            </button>
+          </div>
+          <div className="space-y-4">
+            {draft.eventProgram.map((item, i) => (
+              <div key={i} className="flex gap-2 items-start bg-accent/10 p-3 rounded-2xl border border-border">
+                <TextInput
+                  value={item.time}
+                  placeholder="19:00"
+                  className="w-24 shrink-0 h-9 text-sm"
+                  onChange={(e) => {
+                    const newArr = [...draft.eventProgram];
+                    newArr[i].time = e.target.value;
+                    update("eventProgram", newArr);
+                  }}
+                />
+                <div className="flex-1 space-y-2">
+                  <TextInput
+                    value={item.title}
+                    placeholder={lang === "tr" ? "Başlık" : "Title"}
+                    className="h-9 text-sm"
+                    onChange={(e) => {
+                      const newArr = [...draft.eventProgram];
+                      newArr[i].title = e.target.value;
+                      update("eventProgram", newArr);
+                    }}
+                  />
+                  <TextInput
+                    value={item.desc}
+                    placeholder={lang === "tr" ? "Açıklama" : "Description"}
+                    className="h-9 text-sm"
+                    onChange={(e) => {
+                      const newArr = [...draft.eventProgram];
+                      newArr[i].desc = e.target.value;
+                      update("eventProgram", newArr);
+                    }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newArr = [...draft.eventProgram];
+                    newArr.splice(i, 1);
+                    update("eventProgram", newArr);
+                  }}
+                  className="p-2 text-muted-foreground hover:text-rose shrink-0"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 border-t border-border pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{c.story}</h3>
+            <button
+              type="button"
+              onClick={() => update("ourStory", [...draft.ourStory, { date: "", title: "", desc: "", photo: "" }])}
+              className="text-xs text-gold hover:underline"
+            >
+              + {lang === "tr" ? "Yeni Ekle" : "Add New"}
+            </button>
+          </div>
+          <div className="space-y-4">
+            {draft.ourStory.map((item, i) => (
+              <div key={i} className="flex gap-2 items-start bg-accent/10 p-3 rounded-2xl border border-border">
+                <TextInput
+                  value={item.date}
+                  placeholder={lang === "tr" ? "Mayıs 2023" : "May 2023"}
+                  className="w-28 shrink-0 h-9 text-sm"
+                  onChange={(e) => {
+                    const newArr = [...draft.ourStory];
+                    newArr[i].date = e.target.value;
+                    update("ourStory", newArr);
+                  }}
+                />
+                <div className="flex-1 space-y-2">
+                  <TextInput
+                    value={item.title}
+                    placeholder={lang === "tr" ? "Başlık" : "Title"}
+                    className="h-9 text-sm"
+                    onChange={(e) => {
+                      const newArr = [...draft.ourStory];
+                      newArr[i].title = e.target.value;
+                      update("ourStory", newArr);
+                    }}
+                  />
+                  <TextInput
+                    value={item.desc}
+                    placeholder={lang === "tr" ? "Açıklama" : "Description"}
+                    className="h-9 text-sm"
+                    onChange={(e) => {
+                      const newArr = [...draft.ourStory];
+                      newArr[i].desc = e.target.value;
+                      update("ourStory", newArr);
+                    }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newArr = [...draft.ourStory];
+                    newArr.splice(i, 1);
+                    update("ourStory", newArr);
+                  }}
+                  className="p-2 text-muted-foreground hover:text-rose shrink-0"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function StepPublish({
   draft,
   update,
   copy,
   lang,
   onEdit,
-}: StepProps & { onEdit: () => void }) {
+  isPublished,
+  onPublishChange,
+  saveStatus,
+}: StepProps & { 
+  onEdit: () => void;
+  isPublished: boolean;
+  onPublishChange: (val: boolean) => void;
+  saveStatus: string;
+}) {
   const c = copy.publish;
-  const [status, setStatus] = useState<"idle" | "publishing" | "done">("idle");
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const slug =
     draft.slug ||
@@ -340,32 +575,6 @@ export function StepPublish({
   const fullUrl = `${origin}/davet/${slug}`;
 
   const qr = useMemo(() => buildQrSvg(fullUrl), [fullUrl]);
-
-  const publish = async () => {
-    setStatus("publishing");
-    setError(null);
-    try {
-      const { data } = await supabase.auth.getSession();
-      const userId = data.session?.user.id;
-      if (!userId) {
-        window.location.href = "/giris";
-        return;
-      }
-      await publishInvitation({ ...draft, slug }, userId);
-      setStatus("done");
-    } catch (err) {
-      setError(
-        err instanceof Error && /duplicate|unique/i.test(err.message)
-          ? lang === "tr"
-            ? "Bu bağlantı adresi başka bir davetiye tarafından kullanılıyor."
-            : "This link is already used by another invitation."
-          : lang === "tr"
-            ? "Davetiye yayınlanamadı. Lütfen tekrar deneyin."
-            : "Could not publish the invitation. Please try again.",
-      );
-      setStatus("idle");
-    }
-  };
 
   const copyLink = async () => {
     try {
@@ -407,105 +616,88 @@ export function StepPublish({
         )}
       </Field>
 
-      <AnimatePresence mode="wait">
-        {status !== "done" ? (
-          <motion.div
-            key="publish-cta"
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3, ease: easeSilk }}
-            className="space-y-3"
+      <div className="glass rounded-3xl p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-medium">{c.successTitle || "Yayın Durumu"}</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {isPublished ? "Davetiyeniz yayında ve misafirlerinize açık." : "Davetiyeniz taslak modunda. Henüz kimse göremez."}
+            </p>
+          </div>
+          
+          <button
+            type="button"
+            onClick={() => onPublishChange(!isPublished)}
+            className={cn(
+              "relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              isPublished ? "bg-gold" : "bg-accent"
+            )}
+            role="switch"
+            aria-checked={isPublished}
           >
+            <span className="sr-only">Yayın Durumu</span>
+            <span
+              aria-hidden="true"
+              className={cn(
+                "pointer-events-none absolute left-1 h-6 w-6 transform rounded-full bg-background shadow ring-0 transition duration-300 ease-in-out",
+                isPublished ? "translate-x-6" : "translate-x-0"
+              )}
+            />
+          </button>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center border-t border-border pt-6">
+          <div className="min-w-0 space-y-3">
+            <p className="truncate rounded-2xl border border-border bg-accent/20 px-4 py-3 text-sm text-gold">
+              {fullUrl}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={copyLink}
+                disabled={!isPublished}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50 disabled:opacity-40"
+              >
+                {copied ? (
+                  <Check className="size-4 text-gold" aria-hidden="true" />
+                ) : (
+                  <Copy className="size-4" aria-hidden="true" />
+                )}
+                {copied ? c.copied : c.copy}
+              </button>
+              <a
+                href={isPublished ? `https://wa.me/?text=${encodeURIComponent(fullUrl)}` : undefined}
+                target="_blank"
+                rel="noreferrer"
+                className={cn("inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm transition-colors", isPublished ? "hover:bg-accent/50" : "opacity-40 cursor-not-allowed")}
+              >
+                {c.whatsapp}
+              </a>
+              <button
+                type="button"
+                onClick={downloadQr}
+                disabled={!isPublished}
+                className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50 disabled:opacity-40"
+              >
+                {c.qr}
+              </button>
+            </div>
             <button
               type="button"
-              onClick={publish}
-              disabled={status === "publishing"}
-              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose to-gold px-8 text-sm font-semibold text-background shadow-glow transition-transform duration-300 hover:scale-[1.01] disabled:opacity-70 sm:w-auto"
+              onClick={onEdit}
+              className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
-              {status === "publishing" ? (
-                <>
-                  <span className="size-4 animate-spin rounded-full border-2 border-background/40 border-t-background" />
-                  {c.publishing}
-                </>
-              ) : (
-                <>
-                  <PartyPopper className="size-4" aria-hidden="true" />
-                  {c.cta}
-                </>
-              )}
+              {c.edit}
             </button>
-            {error ? <p className="text-sm text-rose">{error}</p> : null}
-            <p className="text-xs text-muted-foreground">{c.note}</p>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="publish-done"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: easeSilk }}
-            className="glass rounded-3xl p-6 sm:p-8"
-          >
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-gradient-to-r from-rose to-gold text-background">
-                <Check className="size-5" aria-hidden="true" />
-              </span>
-              <div className="min-w-0">
-                <h3 className="truncate text-xl">{c.successTitle}</h3>
-                <p className="truncate text-sm text-muted-foreground">{c.successDesc}</p>
-              </div>
-            </div>
+          </div>
 
-            <div className="mt-6 grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
-              <div className="min-w-0 space-y-3">
-                <p className="truncate rounded-2xl border border-border bg-accent/20 px-4 py-3 text-sm text-gold">
-                  {fullUrl}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={copyLink}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50"
-                  >
-                    {copied ? (
-                      <Check className="size-4 text-gold" aria-hidden="true" />
-                    ) : (
-                      <Copy className="size-4" aria-hidden="true" />
-                    )}
-                    {copied ? c.copied : c.copy}
-                  </button>
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(fullUrl)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50"
-                  >
-                    {c.whatsapp}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={downloadQr}
-                    className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50"
-                  >
-                    {c.qr}
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={onEdit}
-                  className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                >
-                  {c.edit}
-                </button>
-              </div>
-
-              <div
-                className="mx-auto size-36 shrink-0 rounded-2xl bg-foreground p-3"
-                aria-label="QR"
-                dangerouslySetInnerHTML={{ __html: qr }}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div
+            className={cn("mx-auto size-36 shrink-0 rounded-2xl p-3 transition-opacity", isPublished ? "bg-foreground opacity-100" : "bg-foreground/50 opacity-50 blur-sm")}
+            aria-label="QR"
+            dangerouslySetInnerHTML={{ __html: qr }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ export type RsvpRow = Tables<"rsvps">;
 export function rowToDraft(row: InvitationRow): InvitationDraft {
   return {
     theme: (row.theme as InviteThemeId) ?? emptyDraft.theme,
+    category: (row.category as any) ?? emptyDraft.category,
     partnerOne: row.partner_one ?? "",
     partnerTwo: row.partner_two ?? "",
     headline: row.headline ?? "",
@@ -17,8 +18,15 @@ export function rowToDraft(row: InvitationRow): InvitationDraft {
     venue: row.venue ?? "",
     address: row.address ?? "",
     city: row.city ?? "",
+    mapUrl: row.map_url ?? "",
+    musicUrl: row.music_url ?? "",
+    coverPhoto: row.cover_photo ?? "",
     rsvpLabel: row.rsvp_label ?? "",
     slug: row.slug,
+    eventProgram: (row.event_program as any[]) ?? [],
+    ourStory: (row.our_story as any[]) ?? [],
+    familyInfo: (row.family_info as any) ?? {},
+    customSections: (row.custom_sections as any[]) ?? [],
   };
 }
 
@@ -26,6 +34,7 @@ function draftToRow(draft: InvitationDraft, slug: string) {
   return {
     slug,
     theme: draft.theme,
+    category: draft.category,
     partner_one: draft.partnerOne,
     partner_two: draft.partnerTwo,
     headline: draft.headline,
@@ -35,7 +44,14 @@ function draftToRow(draft: InvitationDraft, slug: string) {
     venue: draft.venue,
     address: draft.address,
     city: draft.city,
+    map_url: draft.mapUrl || null,
+    music_url: draft.musicUrl || null,
+    cover_photo: draft.coverPhoto || null,
     rsvp_label: draft.rsvpLabel,
+    event_program: draft.eventProgram,
+    our_story: draft.ourStory,
+    family_info: draft.familyInfo,
+    custom_sections: draft.customSections,
   };
 }
 
@@ -47,14 +63,14 @@ export function resolveSlug(draft: InvitationDraft) {
   );
 }
 
-/** Creates or updates the current user's invitation for this slug and publishes it. */
-export async function publishInvitation(draft: InvitationDraft, userId: string) {
+/** Creates or updates the current user's invitation for this slug. */
+export async function saveInvitation(draft: InvitationDraft, userId: string, isPublished = false) {
   const slug = resolveSlug(draft);
   const payload = {
     ...draftToRow(draft, slug),
     user_id: userId,
-    is_published: true,
-    published_at: new Date().toISOString(),
+    is_published: isPublished,
+    published_at: isPublished ? new Date().toISOString() : null,
   };
 
   const { data, error } = await supabase

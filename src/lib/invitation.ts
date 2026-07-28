@@ -8,6 +8,7 @@ export const inviteThemes: InviteTheme[] = Object.values(themes);
 
 export type InvitationDraft = {
   theme: InviteThemeId;
+  category: "wedding" | "engagement" | "henna" | "birthday" | "other";
   partnerOne: string;
   partnerTwo: string;
   headline: string;
@@ -17,12 +18,20 @@ export type InvitationDraft = {
   venue: string;
   address: string;
   city: string;
+  mapUrl: string;
+  musicUrl: string;
+  coverPhoto: string;
   rsvpLabel: string;
   slug: string;
+  eventProgram: Array<{ time: string; title: string; desc: string }>;
+  ourStory: Array<{ date: string; title: string; desc: string; photo?: string }>;
+  familyInfo: { bride?: { familyName?: string; mother?: string; father?: string }; groom?: { familyName?: string; mother?: string; father?: string } };
+  customSections: any[];
 };
 
 export const emptyDraft: InvitationDraft = {
   theme: "midnight",
+  category: "wedding",
   partnerOne: "",
   partnerTwo: "",
   headline: "",
@@ -32,12 +41,20 @@ export const emptyDraft: InvitationDraft = {
   venue: "",
   address: "",
   city: "",
+  mapUrl: "",
+  musicUrl: "",
+  coverPhoto: "",
   rsvpLabel: "",
   slug: "",
+  eventProgram: [],
+  ourStory: [],
+  familyInfo: {},
+  customSections: [],
 };
 
 export const sampleDraft: InvitationDraft = {
   theme: "midnight",
+  category: "wedding",
   partnerOne: "Elif",
   partnerTwo: "Kaan",
   headline: "Evleniyoruz",
@@ -48,8 +65,23 @@ export const sampleDraft: InvitationDraft = {
   venue: "Sait Halim Paşa Yalısı",
   address: "Köybaşı Cad. No: 83, Yeniköy",
   city: "İstanbul",
+  mapUrl: "https://maps.app.goo.gl/example",
+  musicUrl: "https://youtube.com/watch?v=example",
+  coverPhoto: "",
   rsvpLabel: "Katılıyorum",
   slug: "elif-kaan",
+  eventProgram: [
+    { time: "18:30", title: "Karşılama", desc: "Misafirlerin yerlerini alması" },
+    { time: "19:00", title: "Nikah Merasimi", desc: "Mutluluğa evet diyoruz" },
+  ],
+  ourStory: [
+    { date: "Mayıs 2023", title: "İlk Karşılaşma", desc: "Tesadüfler bizi bir araya getirdi." },
+  ],
+  familyInfo: {
+    bride: { familyName: "Yılmaz", mother: "Ayşe", father: "Ahmet" },
+    groom: { familyName: "Kaya", mother: "Fatma", father: "Mehmet" }
+  },
+  customSections: [],
 };
 
 export function slugify(value: string) {

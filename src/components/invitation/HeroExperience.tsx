@@ -4,6 +4,15 @@ import type { ThemeConfig } from "@/lib/theme-engine";
 import { formatInviteDate, type InvitationDraft } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
 
+function getDaysLeft(dateStr?: string | null): number | null {
+  if (!dateStr) return null;
+  const target = new Date(dateStr);
+  const now = new Date();
+  const diffTime = target.getTime() - now.getTime();
+  if (diffTime < 0) return null;
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
 export function HeroExperience({ 
   draft, 
   theme,
@@ -14,6 +23,7 @@ export function HeroExperience({
   lang: "tr" | "en";
 }) {
   const dateLabel = formatInviteDate(draft.date, lang);
+  const daysLeft = getDaysLeft(draft.date);
   
   return (
     <section className="relative min-h-dvh flex flex-col items-center justify-center p-6 text-center snap-start">
@@ -44,6 +54,33 @@ export function HeroExperience({
             <span className="text-sm tracking-widest uppercase">{draft.city || "Mekan Belirlenmedi"}</span>
           </div>
         </div>
+
+        {/* Aile Bilgileri */}
+        {draft.familyInfo && (
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-8 text-white/70 text-sm">
+            {draft.familyInfo.bride && (draft.familyInfo.bride.mother || draft.familyInfo.bride.father) && (
+              <div className="text-center">
+                <p className="tracking-widest uppercase text-xs mb-1 text-white/50">{lang === "tr" ? "Kız Tarafı" : "Bride's Family"}</p>
+                <p>{[draft.familyInfo.bride.mother, draft.familyInfo.bride.father].filter(Boolean).join(" & ")}</p>
+              </div>
+            )}
+            {draft.familyInfo.groom && (draft.familyInfo.groom.mother || draft.familyInfo.groom.father) && (
+              <div className="text-center">
+                <p className="tracking-widest uppercase text-xs mb-1 text-white/50">{lang === "tr" ? "Erkek Tarafı" : "Groom's Family"}</p>
+                <p>{[draft.familyInfo.groom.mother, draft.familyInfo.groom.father].filter(Boolean).join(" & ")}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Geri Sayım */}
+        {daysLeft !== null && (
+          <div className="mt-12 inline-block rounded-full border border-white/20 bg-white/5 px-6 py-2 backdrop-blur-sm">
+            <p className="text-sm font-medium text-white">
+              {daysLeft} {lang === "tr" ? "Gün Kaldı" : "Days Left"}
+            </p>
+          </div>
+        )}
       </motion.div>
 
       <motion.div 

@@ -14,7 +14,10 @@ import {
   StepPublish,
   StepTexts,
   StepTheme,
+  StepPremium,
 } from "@/components/builder/steps";
+import { supabase } from "@/integrations/supabase/client";
+import { saveInvitation } from "@/lib/invitations.api";
 
 const title = "Davetiye Oluştur — Tema, Metin, Tarih ve Yayınlama | MemoryWedding";
 const description =
@@ -46,8 +49,27 @@ function BuilderRoute() {
 function BuilderPage() {
   const { lang, setLang } = useI18n();
   const copy = builderContent[lang];
-  const { draft, update, reset, fillSample } = useInvitationDraft();
+  const { draft, update, reset, fillSample, hydrated } = useInvitationDraft();
   const [step, setStep] = useState(0);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [isPublished, setIsPublished] = useState(false);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const timeout = setTimeout(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setSaveStatus("saving");
+          await saveInvitation(draft, session.user.id, isPublished);
+          setSaveStatus("saved");
+        }
+      } catch (err) {
+        setSaveStatus("error");
+      }
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [draft, hydrated, isPublished]);
 
   const stepProps = { draft, update, copy, lang };
   const last = copy.steps.length - 1;
@@ -147,8 +169,9 @@ function BuilderPage() {
                 {step === 0 ? <StepTheme {...stepProps} /> : null}
                 {step === 1 ? <StepTexts {...stepProps} /> : null}
                 {step === 2 ? <StepDetails {...stepProps} /> : null}
-                {step === 3 ? <StepPreview {...stepProps} /> : null}
-                {step === 4 ? <StepPublish {...stepProps} onEdit={() => setStep(1)} /> : null}
+                {step === 3 ? <StepPremium {...stepProps} /> : null}
+                {step === 4 ? <StepPreview {...stepProps} /> : null}
+                {step === 5 ? <StepPublish {...stepProps} onEdit={() => setStep(1)} isPublished={isPublished} onPublishChange={setIsPublished} saveStatus={saveStatus} /> : null}
               </motion.div>
             </AnimatePresence>
 
@@ -162,7 +185,9 @@ function BuilderPage() {
                 <ArrowLeft className="size-4" aria-hidden="true" />
                 {copy.prev}
               </button>
-              <p className="hidden text-xs text-muted-foreground sm:block">{copy.autosave}</p>
+              <p className="hidden text-xs text-muted-foreground sm:block">
+                {saveStatus === "saving" ? "Kaydediliyor..." : saveStatus === "saved" ? "Kaydedildi" : saveStatus === "error" ? "Kayıt Hatası" : copy.autosave}
+              </p>
               <button
                 type="button"
                 onClick={() => setStep((s) => Math.min(last, s + 1))}

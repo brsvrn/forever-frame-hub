@@ -57,16 +57,21 @@ export const Route = createFileRoute("/davet/$slug")({
     const pageTitle = `${names} — ${inv.headline || "Davetiye"} | MemoryWedding`;
     const pageDesc =
       inv.message?.slice(0, 155) || `${names} sizi özel günlerinde aralarında görmek istiyor.`;
-    return {
-      meta: [
-        { title: pageTitle },
-        { name: "description", content: pageDesc },
-        { property: "og:title", content: pageTitle },
-        { property: "og:description", content: pageDesc },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-    };
+    const meta = [
+      { title: pageTitle },
+      { name: "description", content: pageDesc },
+      { property: "og:title", content: pageTitle },
+      { property: "og:description", content: pageDesc },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ];
+    
+    if (inv.cover_photo) {
+      meta.push({ property: "og:image", content: inv.cover_photo });
+      meta.push({ name: "twitter:image", content: inv.cover_photo });
+    }
+    
+    return { meta };
   },
   notFoundComponent: () => (
     <I18nProvider>
@@ -112,14 +117,14 @@ function PremiumInvitePage() {
           
           <main className="relative z-10 h-dvh overflow-y-auto snap-y snap-mandatory scroll-smooth pb-24">
             <HeroExperience draft={draft} theme={theme} lang={lang} />
-            <StoryTimeline theme={theme} />
+            <StoryTimeline draft={draft} theme={theme} />
             <EventDetails draft={draft} theme={theme} lang={lang} />
             <PremiumRSVP theme={theme} invitationId={invitation.id} />
             <PremiumQRExperience theme={theme} />
             <GuestGallery theme={theme} />
           </main>
 
-          <PremiumAudioPlayer theme={theme} autoPlay={true} />
+          <PremiumAudioPlayer theme={theme} autoPlay={true} musicUrl={draft.musicUrl} />
         </>
       )}
     </div>

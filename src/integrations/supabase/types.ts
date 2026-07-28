@@ -11,15 +11,23 @@ export type Database = {
       invitations: {
         Row: {
           address: string;
+          category: string;
           city: string;
           created_at: string;
           event_date: string | null;
           event_time: string | null;
           event_type: Database["public"]["Enums"]["event_type"];
+          family_info: Json | null;
           headline: string;
           id: string;
           is_published: boolean;
           message: string;
+          cover_photo: string | null;
+          custom_sections: Json | null;
+          event_program: Json | null;
+          map_url: string | null;
+          music_url: string | null;
+          our_story: Json | null;
           partner_one: string;
           partner_two: string;
           published_at: string | null;
@@ -32,6 +40,7 @@ export type Database = {
         };
         Insert: {
           address?: string;
+          category?: string;
           city?: string;
           created_at?: string;
           event_date?: string | null;
@@ -41,6 +50,12 @@ export type Database = {
           id?: string;
           is_published?: boolean;
           message?: string;
+          cover_photo?: string | null;
+          custom_sections?: Json | null;
+          event_program?: Json | null;
+          map_url?: string | null;
+          music_url?: string | null;
+          our_story?: Json | null;
           partner_one?: string;
           partner_two?: string;
           published_at?: string | null;
@@ -53,6 +68,7 @@ export type Database = {
         };
         Update: {
           address?: string;
+          category?: string;
           city?: string;
           created_at?: string;
           event_date?: string | null;
@@ -62,6 +78,12 @@ export type Database = {
           id?: string;
           is_published?: boolean;
           message?: string;
+          cover_photo?: string | null;
+          custom_sections?: Json | null;
+          event_program?: Json | null;
+          map_url?: string | null;
+          music_url?: string | null;
+          our_story?: Json | null;
           partner_one?: string;
           partner_two?: string;
           published_at?: string | null;
@@ -73,6 +95,47 @@ export type Database = {
           venue?: string;
         };
         Relationships: [];
+      };
+      guest_uploads: {
+        Row: {
+          created_at: string;
+          file_size: number;
+          file_type: string;
+          file_url: string;
+          guest_name: string | null;
+          id: string;
+          invitation_id: string;
+          status: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          file_size: number;
+          file_type: string;
+          file_url: string;
+          guest_name?: string | null;
+          id?: string;
+          invitation_id: string;
+          status?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          file_size?: number;
+          file_type?: string;
+          file_url?: string;
+          guest_name?: string | null;
+          id?: string;
+          invitation_id?: string;
+          status?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "guest_uploads_invitation_id_fkey";
+            columns: ["invitation_id"];
+            isOneToOne: false;
+            referencedRelation: "invitations";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       profiles: {
         Row: {
