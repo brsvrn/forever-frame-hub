@@ -5,7 +5,12 @@ import { Heart, Loader2, PartyPopper } from "lucide-react";
 import { appContent } from "@/lib/app-content";
 import { builderContent } from "@/lib/builder-content";
 import { I18nProvider, useI18n } from "@/lib/i18n";
-import { getPublicInvitation, rowToDraft, submitRsvp, type InvitationRow } from "@/lib/invitations.api";
+import {
+  getPublicInvitation,
+  rowToDraft,
+  submitRsvp,
+  type InvitationRow,
+} from "@/lib/invitations.api";
 import { InvitationPreview } from "@/components/builder/InvitationPreview";
 import { easeSilk } from "@/components/landing/motion-primitives";
 import { Field, TextArea, TextInput } from "@/components/builder/Field";
@@ -20,7 +25,10 @@ export const Route = createFileRoute("/davet/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Davetiye bulunamadı — MemoryWedding" }, { name: "robots", content: "noindex" }],
+        meta: [
+          { title: "Davetiye bulunamadı — MemoryWedding" },
+          { name: "robots", content: "noindex" },
+        ],
       };
     }
     const inv = loaderData.invitation;
@@ -78,7 +86,10 @@ function InvitePage() {
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden pb-24">
-      <div aria-hidden="true" className="aurora pointer-events-none absolute inset-x-0 top-0 h-[70vh]" />
+      <div
+        aria-hidden="true"
+        className="aurora pointer-events-none absolute inset-x-0 top-0 h-[70vh]"
+      />
 
       <main className="relative z-10 mx-auto w-full max-w-3xl px-4 pt-10 sm:px-6">
         <motion.div

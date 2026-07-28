@@ -103,8 +103,7 @@ const en: AppContent = {
   },
   dash: {
     metaTitle: "Dashboard — Invitations and RSVPs | MemoryWedding",
-    metaDesc:
-      "Manage your invitations, toggle publishing and see every guest RSVP in one place.",
+    metaDesc: "Manage your invitations, toggle publishing and see every guest RSVP in one place.",
     eyebrow: "Dashboard",
     title: "Your invitations",
     subtitle: "Publish, edit and follow your guests' replies.",

@@ -96,7 +96,10 @@ function AuthPage() {
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-hidden">
-      <div aria-hidden="true" className="aurora pointer-events-none absolute inset-x-0 top-0 h-[70vh]" />
+      <div
+        aria-hidden="true"
+        className="aurora pointer-events-none absolute inset-x-0 top-0 h-[70vh]"
+      />
 
       <header className="relative z-10 mx-auto w-full max-w-7xl px-4 py-5 sm:px-6">
         <Link to="/" className="inline-flex items-center gap-2.5">

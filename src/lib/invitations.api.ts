@@ -41,7 +41,9 @@ function draftToRow(draft: InvitationDraft, slug: string) {
 
 export function resolveSlug(draft: InvitationDraft) {
   return (
-    draft.slug || slugify(`${draft.partnerOne}-${draft.partnerTwo}`) || `davet-${Date.now() % 100000}`
+    draft.slug ||
+    slugify(`${draft.partnerOne}-${draft.partnerTwo}`) ||
+    `davet-${Date.now() % 100000}`
   );
 }
 
@@ -83,7 +85,10 @@ export async function deleteInvitation(id: string) {
 export async function setPublished(id: string, isPublished: boolean) {
   const { error } = await supabase
     .from("invitations")
-    .update({ is_published: isPublished, published_at: isPublished ? new Date().toISOString() : null })
+    .update({
+      is_published: isPublished,
+      published_at: isPublished ? new Date().toISOString() : null,
+    })
     .eq("id", id);
   if (error) throw error;
 }

@@ -10,7 +10,10 @@ export function Pricing() {
 
   return (
     <section id="paketler" className="section-y relative overflow-hidden">
-      <div className="aurora pointer-events-none absolute inset-0 -z-10 opacity-60" aria-hidden="true" />
+      <div
+        className="aurora pointer-events-none absolute inset-0 -z-10 opacity-60"
+        aria-hidden="true"
+      />
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         <SectionHeading
           eyebrow={t.pricing.eyebrow}

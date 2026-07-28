@@ -121,7 +121,12 @@ export const tr = {
       { title: "Yol tarifi", desc: "Tek dokunuşla harita ve ulaşım yönlendirmesi." },
       { title: "Hediye tercihi", desc: "Hesap bilgisi veya hediye listesi entegrasyonu." },
     ],
-    preview: { save: "Kaydedin", names: "Elif & Kaan", date: "14 Haziran 2026", rsvp: "Katılıyorum" },
+    preview: {
+      save: "Kaydedin",
+      names: "Elif & Kaan",
+      date: "14 Haziran 2026",
+      rsvp: "Katılıyorum",
+    },
   },
   pricing: {
     eyebrow: "Paketler",
@@ -185,8 +190,7 @@ export const tr = {
         role: "İstanbul, 2025",
       },
       {
-        quote:
-          "RSVP'yi kayınvalidem bile üç dokunuşta tamamladı. Masa planını iki günde bitirdik.",
+        quote: "RSVP'yi kayınvalidem bile üç dokunuşta tamamladı. Masa planını iki günde bitirdik.",
         name: "Zeynep & Mert",
         role: "İzmir, 2025",
       },
@@ -197,8 +201,7 @@ export const tr = {
         role: "Bodrum, 2024",
       },
       {
-        quote:
-          "Mekân olarak üç düğünde kullandık. Çiftler artık bunu bizden talep ediyor.",
+        quote: "Mekân olarak üç düğünde kullandık. Çiftler artık bunu bizden talep ediyor.",
         name: "Villa Reyhan",
         role: "Etkinlik mekânı",
       },
@@ -382,7 +385,12 @@ export const en: Content = {
       { title: "Directions", desc: "Maps and travel guidance in one tap." },
       { title: "Gift preferences", desc: "Bank details or gift registry integration." },
     ],
-    preview: { save: "Save the date", names: "Elif & Kaan", date: "June 14, 2026", rsvp: "I'm coming" },
+    preview: {
+      save: "Save the date",
+      names: "Elif & Kaan",
+      date: "June 14, 2026",
+      rsvp: "I'm coming",
+    },
   },
   pricing: {
     eyebrow: "Pricing",
@@ -446,12 +454,14 @@ export const en: Content = {
         role: "Istanbul, 2025",
       },
       {
-        quote: "Even my mother-in-law completed the RSVP in three taps. Seating plan done in two days.",
+        quote:
+          "Even my mother-in-law completed the RSVP in three taps. Seating plan done in two days.",
         name: "Zeynep & Mert",
         role: "Izmir, 2025",
       },
       {
-        quote: "I saw the guests' reaction when the invitation opened. It genuinely feels like a product.",
+        quote:
+          "I saw the guests' reaction when the invitation opened. It genuinely feels like a product.",
         name: "Selin & Arda",
         role: "Bodrum, 2024",
       },

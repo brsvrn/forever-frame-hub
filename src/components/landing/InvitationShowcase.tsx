@@ -37,7 +37,9 @@ export function InvitationShowcase() {
                     <p className="text-[0.65rem] uppercase tracking-[0.32em] text-gold">
                       {t.invitation.preview.save}
                     </p>
-                    <p className="mt-3 font-display text-4xl italic">{t.invitation.preview.names}</p>
+                    <p className="mt-3 font-display text-4xl italic">
+                      {t.invitation.preview.names}
+                    </p>
                     <p className="mt-2 text-xs tracking-[0.18em] text-muted-foreground">
                       {t.invitation.preview.date}
                     </p>

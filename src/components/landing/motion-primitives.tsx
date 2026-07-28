@@ -38,13 +38,7 @@ export function Reveal({
   );
 }
 
-export function RevealGroup({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function RevealGroup({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <motion.div
       className={className}

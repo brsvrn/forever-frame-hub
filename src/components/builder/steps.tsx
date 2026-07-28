@@ -377,7 +377,6 @@ export function StepPublish({
     }
   };
 
-
   const downloadQr = () => {
     const blob = new Blob([qr], { type: "image/svg+xml" });
     const href = URL.createObjectURL(blob);

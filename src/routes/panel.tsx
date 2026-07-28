@@ -87,7 +87,10 @@ function Dashboard({ userId, email }: { userId: string; email: string }) {
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden">
-      <div aria-hidden="true" className="aurora pointer-events-none absolute inset-x-0 top-0 h-[60vh]" />
+      <div
+        aria-hidden="true"
+        className="aurora pointer-events-none absolute inset-x-0 top-0 h-[60vh]"
+      />
 
       <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">

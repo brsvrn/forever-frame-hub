@@ -9,7 +9,10 @@ export function QRSection() {
 
   return (
     <section id="qr" className="section-y relative overflow-hidden">
-      <div className="aurora pointer-events-none absolute inset-0 -z-10 opacity-70" aria-hidden="true" />
+      <div
+        className="aurora pointer-events-none absolute inset-0 -z-10 opacity-70"
+        aria-hidden="true"
+      />
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <div>

@@ -136,7 +136,6 @@ export function Navbar() {
             >
               {t.nav.login}
             </Link>
-
           </motion.div>
         ) : null}
       </AnimatePresence>
