@@ -8,7 +8,7 @@ export type RsvpRow = Tables<"rsvps">;
 export function rowToDraft(row: InvitationRow): InvitationDraft {
   return {
     theme: (row.theme as InviteThemeId) ?? emptyDraft.theme,
-    category: (row.category as any) ?? emptyDraft.category,
+    category: (row.event_type as any) ?? emptyDraft.category,
     partnerOne: row.partner_one ?? "",
     partnerTwo: row.partner_two ?? "",
     headline: row.headline ?? "",
@@ -34,7 +34,7 @@ function draftToRow(draft: InvitationDraft, slug: string) {
   return {
     slug,
     theme: draft.theme,
-    category: draft.category,
+    event_type: draft.category,
     partner_one: draft.partnerOne,
     partner_two: draft.partnerTwo,
     headline: draft.headline,
