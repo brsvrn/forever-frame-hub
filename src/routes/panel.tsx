@@ -11,7 +11,6 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { appContent } from "@/lib/app-content";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { AuthProvider, useAuth } from "@/lib/auth";
@@ -313,6 +312,3 @@ function InvitationCard({
     </motion.article>
   );
 }
-
-// Ensures the client bundle keeps a single supabase instance reference in dev.
-export const _supabase = supabase;
