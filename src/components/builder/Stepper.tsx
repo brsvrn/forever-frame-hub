@@ -13,12 +13,12 @@ export function Stepper({
   onSelect: (index: number) => void;
 }) {
   return (
-    <ol className="flex gap-2 overflow-x-auto pb-1">
+    <ol className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {steps.map((step, index) => {
         const done = index < current;
         const active = index === current;
         return (
-          <li key={step.id} className="min-w-0 flex-1">
+          <li key={step.id} className="shrink-0 snap-start md:min-w-0 md:flex-1">
             <button
               type="button"
               onClick={() => onSelect(index)}
