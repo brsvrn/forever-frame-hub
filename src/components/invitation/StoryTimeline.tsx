@@ -29,8 +29,8 @@ export function StoryTimeline({ theme }: { theme: ThemeConfig }) {
               </div>
               
               <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ${theme.styles.cards.wrapper} p-6 rounded-2xl`}>
-                <h4 className="text-white font-medium mb-2">{story.title}</h4>
-                <p className="text-white/70 text-sm leading-relaxed">{story.desc}</p>
+                <h4 className={`font-medium mb-2 ${theme.id === "garden" || theme.id === "blush" ? "text-slate-900" : "text-white"}`}>{story.title}</h4>
+                <p className={`text-sm leading-relaxed ${theme.id === "garden" || theme.id === "blush" ? "text-slate-700" : "text-white/70"}`}>{story.desc}</p>
               </div>
             </motion.div>
           ))}
