@@ -145,7 +145,7 @@ export function StepTexts({ draft, update, copy, lang }: StepProps) {
         </Field>
         <Field
           label={c.message}
-          hint={`${draft.message.length}/280 ${c.counter}`}
+          hint={`${draft.message?.length || 0}/280 ${c.counter}`}
           className="sm:col-span-2"
         >
           {(id) => (
@@ -153,7 +153,7 @@ export function StepTexts({ draft, update, copy, lang }: StepProps) {
               id={id}
               rows={5}
               maxLength={280}
-              value={draft.message}
+              value={draft.message || ""}
               placeholder={c.messagePh}
               onChange={(e) => update("message", e.target.value)}
             />
@@ -316,7 +316,7 @@ export function checklistState(draft: InvitationDraft) {
   return {
     theme: Boolean(draft.theme),
     names: Boolean(draft.partnerOne && draft.partnerTwo),
-    message: draft.message.trim().length > 10,
+    message: (draft.message || "").trim().length > 10,
     date: Boolean(draft.date),
     venue: Boolean(draft.venue),
   };
@@ -426,14 +426,14 @@ export function StepPremium({ draft, update, copy, lang }: StepProps) {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{c.program}</h3>
             <button
               type="button"
-              onClick={() => update("eventProgram", [...draft.eventProgram, { time: "", title: "", desc: "" }])}
+              onClick={() => update("eventProgram", [...(draft.eventProgram || []), { time: "", title: "", desc: "" }])}
               className="text-xs text-gold hover:underline"
             >
               + {lang === "tr" ? "Yeni Ekle" : "Add New"}
             </button>
           </div>
           <div className="space-y-4">
-            {draft.eventProgram.map((item, i) => (
+            {(draft.eventProgram || []).map((item, i) => (
               <div key={i} className="flex gap-2 items-start bg-accent/10 p-3 rounded-2xl border border-border">
                 <TextInput
                   value={item.time}
@@ -488,14 +488,14 @@ export function StepPremium({ draft, update, copy, lang }: StepProps) {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{c.story}</h3>
             <button
               type="button"
-              onClick={() => update("ourStory", [...draft.ourStory, { date: "", title: "", desc: "", photo: "" }])}
+              onClick={() => update("ourStory", [...(draft.ourStory || []), { date: "", title: "", desc: "", photo: "" }])}
               className="text-xs text-gold hover:underline"
             >
               + {lang === "tr" ? "Yeni Ekle" : "Add New"}
             </button>
           </div>
           <div className="space-y-4">
-            {draft.ourStory.map((item, i) => (
+            {(draft.ourStory || []).map((item, i) => (
               <div key={i} className="flex gap-2 items-start bg-accent/10 p-3 rounded-2xl border border-border">
                 <TextInput
                   value={item.date}
