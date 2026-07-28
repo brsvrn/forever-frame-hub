@@ -11,6 +11,8 @@ import {
   type InviteThemeId,
 } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
+import { supabase } from "@/integrations/supabase/client";
+import { publishInvitation } from "@/lib/invitations.api";
 import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
 
@@ -395,7 +397,7 @@ export function StepPublish({
         {(id) => (
           <div className="flex items-center gap-2 rounded-2xl border border-input bg-accent/20 px-4">
             <Link2 className="size-4 shrink-0 text-gold" aria-hidden="true" />
-            <span className="shrink-0 text-sm text-muted-foreground">memorywedding.app/</span>
+            <span className="shrink-0 text-sm text-muted-foreground">/davet/</span>
             <input
               id={id}
               value={draft.slug}
@@ -433,6 +435,7 @@ export function StepPublish({
                 </>
               )}
             </button>
+            {error ? <p className="text-sm text-rose">{error}</p> : null}
             <p className="text-xs text-muted-foreground">{c.note}</p>
           </motion.div>
         ) : (
@@ -456,7 +459,7 @@ export function StepPublish({
             <div className="mt-6 grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="min-w-0 space-y-3">
                 <p className="truncate rounded-2xl border border-border bg-accent/20 px-4 py-3 text-sm text-gold">
-                  https://{url}
+                  {fullUrl}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
