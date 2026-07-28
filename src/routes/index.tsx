@@ -2,10 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/marketing/layout/Navbar";
 import { Footer } from "@/components/marketing/layout/Footer";
 import { TrustBand } from "@/components/marketing/layout/TrustBand";
-import { Hero } from "@/components/marketing/hero/Hero";
-import { InteractiveDemo } from "@/components/marketing/interactive-demo/InteractiveDemo";
+import { ProductExperience } from "@/components/marketing/experience/ProductExperience";
 import { Features } from "@/components/marketing/features/BentoGrid";
-import { ThemeGallery } from "@/components/marketing/theme-showcase/ThemeGallery";
 import { AnimatedQRFlow } from "@/components/marketing/qr-experience/AnimatedQRFlow";
 import { DashboardPreview } from "@/components/marketing/dashboard-preview/DashboardPreview";
 import { VersusTable } from "@/components/marketing/comparison/VersusTable";
@@ -34,27 +32,27 @@ export const Route = createFileRoute("/")({
   component: MarketingLandingPage,
 });
 
+import { PhoneProvider } from "@/contexts/PhoneContext";
+
 function MarketingLandingPage() {
   return (
     <I18nProvider>
-      <div className="relative min-h-[100dvh] overflow-x-hidden bg-background text-foreground selection:bg-primary/30 antialiased font-sans">
-        <Navbar />
-        <main>
-          <Hero />
-          <InteractiveDemo />
-          <Features />
-          <ThemeGallery />
-          <AnimatedQRFlow />
-          <DashboardPreview />
-          <VersusTable />
-          <PricingCards />
-          <Testimonials />
-          <FAQAccordion />
-          <TrustBand />
-          <PremiumCTA />
-        </main>
-        <Footer />
-      </div>
+      <PhoneProvider>
+        <div className="relative min-h-[100dvh] overflow-x-hidden bg-background text-foreground selection:bg-primary/30 antialiased font-sans">
+          <Navbar />
+          <main>
+            <ProductExperience />
+            <Features />
+            <VersusTable />
+            <PricingCards />
+            <Testimonials />
+            <FAQAccordion />
+            <TrustBand />
+            <PremiumCTA />
+          </main>
+          <Footer />
+        </div>
+      </PhoneProvider>
     </I18nProvider>
   );
 }

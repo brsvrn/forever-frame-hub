@@ -14,6 +14,7 @@ import { Route as GirisRouteImport } from './routes/giris'
 import { Route as OlusturRouteImport } from './routes/olustur'
 import { Route as PanelRouteImport } from './routes/panel'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as DavetSlugRouteImport } from './routes/davet.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DavetSlugRoute = DavetSlugRouteImport.update({
   id: '/davet/$slug',
   path: '/davet/$slug',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
 }
 export interface FileRoutesById {
@@ -70,14 +78,28 @@ export interface FileRoutesById {
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/giris' | '/olustur' | '/panel' | '/sitemap.xml' | '/davet/$slug'
+    | '/'
+    | '/giris'
+    | '/olustur'
+    | '/panel'
+    | '/sitemap.xml'
+    | '/auth/callback'
+    | '/davet/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/giris' | '/olustur' | '/panel' | '/sitemap.xml' | '/davet/$slug'
+  to:
+    | '/'
+    | '/giris'
+    | '/olustur'
+    | '/panel'
+    | '/sitemap.xml'
+    | '/auth/callback'
+    | '/davet/$slug'
   id:
     | '__root__'
     | '/'
@@ -85,6 +107,7 @@ export interface FileRouteTypes {
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
+    | '/auth/callback'
     | '/davet/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -94,6 +117,7 @@ export interface RootRouteChildren {
   OlusturRoute: typeof OlusturRoute
   PanelRoute: typeof PanelRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   DavetSlugRoute: typeof DavetSlugRoute
 }
 
@@ -134,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/davet/$slug': {
       id: '/davet/$slug'
       path: '/davet/$slug'
@@ -150,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   OlusturRoute: OlusturRoute,
   PanelRoute: PanelRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   DavetSlugRoute: DavetSlugRoute,
 }
 export const routeTree = rootRouteImport

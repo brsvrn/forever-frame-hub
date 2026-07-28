@@ -12,7 +12,7 @@ export function Features() {
               <br />
               Kusursuz Sistem
             </h2>
-            <p className="text-lg text-muted-foreground font-light leading-relaxed">
+            <p className="text-lg text-foreground/80 font-light leading-relaxed">
               Siz sadece düğününüzün tadını çıkarın. Geri kalan tüm organizasyon, davetli yönetimi
               ve anı biriktirme yükünü MemoryWedding devralıyor.
             </p>
@@ -30,7 +30,7 @@ export function Features() {
                 <CheckCircle2 className="w-7 h-7" />
               </div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4">Akıllı LCV (RSVP) Yönetimi</h3>
-              <p className="text-muted-foreground leading-relaxed text-lg font-light">
+              <p className="text-foreground/80 leading-relaxed text-lg font-light">
                 Tek tek misafir arama dönemi bitti. Davetlileriniz tek tuşla katılıp
                 katılamayacaklarını bildirir. Siz tüm listeyi tek ekrandan, kimin geleceğini tam
                 olarak bilerek yönetirsiniz.
@@ -43,7 +43,7 @@ export function Features() {
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
                 <div className="text-4xl font-bold text-foreground">142 Kişi</div>
-                <div className="text-sm text-muted-foreground uppercase tracking-widest mt-2 font-medium">
+                <div className="text-sm text-foreground/70 uppercase tracking-widest mt-2 font-medium">
                   Katılım Onaylandı
                 </div>
               </div>
@@ -59,7 +59,7 @@ export function Features() {
               <Globe2 className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold mb-3">Çoklu Dil Desteği</h3>
-            <p className="text-muted-foreground leading-relaxed font-light">
+            <p className="text-foreground/80 leading-relaxed font-light">
               Yurtdışından gelecek misafirleriniz için davetiyeniz İngilizce, Almanca ve Arapça gibi
               dillere otomatik uyarlanır.
             </p>
@@ -74,7 +74,7 @@ export function Features() {
               <QrCode className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold mb-3">Masadan Cebe QR</h3>
-            <p className="text-muted-foreground leading-relaxed font-light">
+            <p className="text-foreground/80 leading-relaxed font-light">
               Düğün mekanındaki masalara yerleştireceğiniz şık QR kodları ile tüm misafirlerinizi
               anında dijital deneyime dahil edin.
             </p>

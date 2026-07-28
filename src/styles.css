@@ -70,10 +70,10 @@
   --popover: oklch(0.21 0.032 265);
   --popover-foreground: oklch(0.96 0.008 85);
 
-  --primary: oklch(0.82 0.062 15);
-  --primary-foreground: oklch(0.19 0.032 265);
-  --rose: oklch(0.82 0.062 15);
-  --rose-foreground: oklch(0.19 0.032 265);
+  --primary: oklch(0.65 0.18 15);
+  --primary-foreground: oklch(0.98 0.02 15);
+  --rose: oklch(0.65 0.18 15);
+  --rose-foreground: oklch(0.98 0.02 15);
   --gold: oklch(0.79 0.072 76);
   --gold-foreground: oklch(0.19 0.032 265);
 
@@ -99,11 +99,8 @@
   --sidebar-border: oklch(0.96 0.008 85 / 12%);
   --sidebar-ring: oklch(0.79 0.072 76 / 60%);
 
-  --gradient-aurora: radial-gradient(
-      60% 60% at 20% 10%,
-      oklch(0.82 0.062 15 / 18%) 0%,
-      transparent 60%
-    ),
+  --gradient-aurora:
+    radial-gradient(60% 60% at 20% 10%, oklch(0.82 0.062 15 / 18%) 0%, transparent 60%),
     radial-gradient(50% 50% at 85% 20%, oklch(0.79 0.072 76 / 14%) 0%, transparent 65%),
     radial-gradient(70% 60% at 50% 100%, oklch(0.45 0.09 290 / 22%) 0%, transparent 70%);
   --gradient-gold: linear-gradient(
@@ -154,7 +151,6 @@
     background: oklch(0.82 0.062 15 / 30%);
   }
 }
-
 
 @utility aurora {
   background-image: var(--gradient-aurora);
@@ -305,4 +301,3 @@
     scroll-behavior: auto;
   }
 }
-

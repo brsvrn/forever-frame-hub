@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { SlideUp } from "@/components/motion";
+import { SlideUp, MagneticButton } from "@/components/motion";
 import { ArrowRight } from "lucide-react";
 
 export function PremiumCTA() {
@@ -30,16 +30,21 @@ export function PremiumCTA() {
         </SlideUp>
 
         <SlideUp delay={0.3}>
-          <Button
-            size="lg"
-            asChild
-            className="rounded-full h-16 px-10 text-lg shadow-[0_0_40px_rgba(var(--primary),0.4)] hover:shadow-[0_0_60px_rgba(var(--primary),0.6)] hover:scale-105 transition-all duration-300 group"
-          >
-            <Link to="/olustur">
-              Davetiyeni Oluştur{" "}
-              <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-2 transition-transform" />
-            </Link>
-          </Button>
+          <MagneticButton intensity={0.15}>
+            <Button
+              size="lg"
+              asChild
+              className="rounded-full h-16 px-10 text-lg shadow-[0_0_40px_rgba(var(--primary),0.4)] hover:shadow-[0_0_60px_rgba(var(--primary),0.6)] transition-all duration-300 group relative overflow-hidden"
+            >
+              <Link to="/olustur">
+                <span className="relative z-10 flex items-center">
+                  Davetiyeni Oluştur{" "}
+                  <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                </span>
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+              </Link>
+            </Button>
+          </MagneticButton>
           <p className="mt-6 text-sm text-neutral-500 font-medium tracking-wide">
             Anında kurulum • 7/24 Destek • Memnuniyet Garantisi
           </p>

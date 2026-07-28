@@ -1,23 +1,44 @@
 import { useState } from "react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { Heart, Loader2, PartyPopper } from "lucide-react";
-import { appContent } from "@/lib/app-content";
-import { builderContent } from "@/lib/builder-content";
-import { I18nProvider, useI18n } from "@/lib/i18n";
-import {
-  getPublicInvitation,
-  rowToDraft,
-  submitRsvp,
-  type InvitationRow,
-} from "@/lib/invitations.api";
-import { InvitationPreview } from "@/components/builder/InvitationPreview";
-import { easeSilk } from "@/components/landing/motion-primitives";
-import { Field, TextArea, TextInput } from "@/components/builder/Field";
-import { cn } from "@/lib/utils";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { getPublicInvitation, rowToDraft, type InvitationRow } from "@/lib/invitations.api";
+import { useI18n, I18nProvider } from "@/lib/i18n";
+import { themes } from "@/lib/theme-engine";
+
+// Import all new components
+import { CinematicOpening } from "@/components/invitation/CinematicOpening";
+import { LivingBackground } from "@/components/invitation/LivingBackground";
+import { PremiumAudioPlayer } from "@/components/invitation/PremiumAudioPlayer";
+import { HeroExperience } from "@/components/invitation/HeroExperience";
+import { StoryTimeline } from "@/components/invitation/StoryTimeline";
+import { EventDetails } from "@/components/invitation/EventDetails";
+import { PremiumRSVP } from "@/components/invitation/PremiumRSVP";
+import { PremiumQRExperience } from "@/components/invitation/PremiumQRExperience";
+import { GuestGallery } from "@/components/invitation/GuestGallery";
 
 export const Route = createFileRoute("/davet/$slug")({
   loader: async ({ params }) => {
+    if (params.slug === "demo") {
+      return {
+        invitation: {
+          id: "demo-id",
+          slug: "demo",
+          theme: "noir",
+          partner_one: "Ece",
+          partner_two: "Kaan",
+          headline: "Birlikte Yeni Bir Hayata",
+          message: "Hayatımızın en özel gününde, mutluluğumuzu paylaşmak üzere sizleri de aramızda görmekten onur duyarız.",
+          event_date: "2026-08-24",
+          event_time: "19:00",
+          venue: "Çırağan Sarayı",
+          address: "Yıldız, Çırağan Cd. No:32, Beşiktaş/İstanbul",
+          city: "İstanbul",
+          rsvp_label: "Lütfen 1 Ağustos tarihine kadar katılım durumunuzu bildirin",
+          is_published: true,
+          created_at: new Date().toISOString(),
+          user_id: "demo",
+        } as InvitationRow
+      };
+    }
     const invitation = await getPublicInvitation(params.slug);
     if (!invitation) throw notFound();
     return { invitation };
@@ -49,243 +70,58 @@ export const Route = createFileRoute("/davet/$slug")({
   },
   notFoundComponent: () => (
     <I18nProvider>
-      <InviteNotFound />
+      <div className="grid min-h-dvh place-items-center bg-black text-white px-4 text-center">
+        <div className="max-w-md">
+          <h1 className="font-display text-4xl">Davetiye Bulunamadı</h1>
+        </div>
+      </div>
     </I18nProvider>
   ),
   component: () => (
     <I18nProvider>
-      <InvitePage />
+      <PremiumInvitePage />
     </I18nProvider>
   ),
 });
 
-function InviteNotFound() {
-  const { lang } = useI18n();
-  const c = appContent[lang].invite;
-  return (
-    <div className="grid min-h-dvh place-items-center px-4 text-center">
-      <div className="max-w-md">
-        <h1 className="font-display text-4xl">{c.notFoundTitle}</h1>
-        <p className="mt-3 text-sm text-muted-foreground">{c.notFoundDesc}</p>
-        <Link
-          to="/"
-          className="mt-6 inline-flex min-h-11 items-center rounded-full border border-border px-6 text-sm transition-colors hover:bg-accent/50"
-        >
-          {c.home}
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function InvitePage() {
+function PremiumInvitePage() {
   const { invitation } = Route.useLoaderData();
   const { lang } = useI18n();
-  const c = appContent[lang].invite;
   const draft = rowToDraft(invitation as InvitationRow);
+  
+  // Lookup theme from config
+  const theme = themes[draft.theme] || themes.midnight;
+  
+  const [hasOpened, setHasOpened] = useState(false);
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden pb-24">
-      <div
-        aria-hidden="true"
-        className="aurora pointer-events-none absolute inset-x-0 top-0 h-[70vh]"
-      />
+    <div className={`relative bg-black min-h-dvh font-sans antialiased overflow-x-hidden selection:bg-white/30 ${theme.styles.typography.sans}`}>
+      
+      {!hasOpened && (
+        <CinematicOpening 
+          theme={theme} 
+          partnerOne={draft.partnerOne}
+          partnerTwo={draft.partnerTwo}
+          onOpen={() => setHasOpened(true)} 
+        />
+      )}
 
-      <main className="relative z-10 mx-auto w-full max-w-3xl px-4 pt-10 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 26 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: easeSilk }}
-        >
-          <InvitationPreview draft={draft} copy={builderContent[lang]} lang={lang} />
-        </motion.div>
+      {hasOpened && (
+        <>
+          <LivingBackground theme={theme} />
+          
+          <main className="relative z-10 h-dvh overflow-y-auto snap-y snap-mandatory scroll-smooth pb-24">
+            <HeroExperience draft={draft} theme={theme} lang={lang} />
+            <StoryTimeline theme={theme} />
+            <EventDetails draft={draft} theme={theme} lang={lang} />
+            <PremiumRSVP theme={theme} />
+            <PremiumQRExperience theme={theme} />
+            <GuestGallery theme={theme} />
+          </main>
 
-        <RsvpForm invitationId={invitation.id} copy={c} />
-
-        <p className="mt-10 text-center text-xs text-muted-foreground">
-          <Link to="/" className="inline-flex items-center gap-1.5 hover:text-foreground">
-            <Heart className="size-3 text-rose" aria-hidden="true" />
-            MemoryWedding
-          </Link>
-        </p>
-      </main>
+          <PremiumAudioPlayer theme={theme} autoPlay={true} />
+        </>
+      )}
     </div>
-  );
-}
-
-function RsvpForm({
-  invitationId,
-  copy,
-}: {
-  invitationId: string;
-  copy: (typeof appContent)["tr"]["invite"];
-}) {
-  const [status, setStatus] = useState<"yes" | "no" | "maybe">("yes");
-  const [guestName, setGuestName] = useState("");
-  const [guestEmail, setGuestEmail] = useState("");
-  const [guestPhone, setGuestPhone] = useState("");
-  const [partySize, setPartySize] = useState(1);
-  const [note, setNote] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "done">("idle");
-  const [error, setError] = useState<string | null>(null);
-
-  if (state === "done") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: easeSilk }}
-        className="glass mt-10 rounded-4xl p-8 text-center"
-      >
-        <span className="mx-auto grid size-12 place-items-center rounded-full bg-gradient-to-r from-rose to-gold text-background">
-          <PartyPopper className="size-5" aria-hidden="true" />
-        </span>
-        <h2 className="mt-4 font-display text-3xl">{copy.thanksTitle}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">{copy.thanksDesc}</p>
-      </motion.div>
-    );
-  }
-
-  const options = [
-    { id: "yes" as const, label: copy.yes },
-    { id: "maybe" as const, label: copy.maybe },
-    { id: "no" as const, label: copy.no },
-  ];
-
-  return (
-    <section className="glass mt-10 rounded-4xl p-6 sm:p-9">
-      <h2 className="font-display text-3xl">{copy.rsvpTitle}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{copy.rsvpDesc}</p>
-
-      <form
-        className="mt-7 space-y-5"
-        onSubmit={async (event) => {
-          event.preventDefault();
-          setState("sending");
-          setError(null);
-          try {
-            await submitRsvp({
-              invitationId,
-              guestName,
-              guestEmail,
-              guestPhone,
-              status,
-              partySize,
-              note,
-            });
-            setState("done");
-          } catch {
-            setError(copy.error);
-            setState("idle");
-          }
-        }}
-      >
-        <Field label={copy.name}>
-          {(id) => (
-            <TextInput
-              id={id}
-              required
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              autoComplete="name"
-            />
-          )}
-        </Field>
-
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Field label={copy.email}>
-            {(id) => (
-              <TextInput
-                id={id}
-                type="email"
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                autoComplete="email"
-              />
-            )}
-          </Field>
-          <Field label={copy.phone}>
-            {(id) => (
-              <TextInput
-                id={id}
-                type="tel"
-                value={guestPhone}
-                onChange={(e) => setGuestPhone(e.target.value)}
-                autoComplete="tel"
-              />
-            )}
-          </Field>
-        </div>
-
-        <fieldset>
-          <legend className="mb-2 block text-xs uppercase tracking-[0.18em] text-muted-foreground">
-            {copy.status}
-          </legend>
-          <div className="flex flex-wrap gap-2">
-            {options.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => setStatus(option.id)}
-                aria-pressed={status === option.id}
-                className={cn(
-                  "min-h-11 rounded-full border px-5 text-sm transition-all",
-                  status === option.id
-                    ? "border-gold bg-gradient-to-r from-rose to-gold font-semibold text-background"
-                    : "border-border text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        {status !== "no" ? (
-          <Field label={copy.party}>
-            {(id) => (
-              <TextInput
-                id={id}
-                type="number"
-                min={1}
-                max={20}
-                value={partySize}
-                onChange={(e) => setPartySize(Math.max(1, Number(e.target.value) || 1))}
-                className="max-w-32"
-              />
-            )}
-          </Field>
-        ) : null}
-
-        <Field label={copy.note}>
-          {(id) => (
-            <TextArea
-              id={id}
-              rows={3}
-              value={note}
-              placeholder={copy.notePh}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          )}
-        </Field>
-
-        {error ? <p className="text-sm text-rose">{error}</p> : null}
-
-        <button
-          type="submit"
-          disabled={state === "sending"}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose to-gold text-sm font-semibold text-background shadow-glow transition-transform duration-300 hover:scale-[1.01] disabled:opacity-60 sm:w-auto sm:px-10"
-        >
-          {state === "sending" ? (
-            <>
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              {copy.sending}
-            </>
-          ) : (
-            copy.submit
-          )}
-        </button>
-      </form>
-    </section>
   );
 }

@@ -11,7 +11,7 @@ export function TrustBand() {
               <ShieldCheck className="h-7 w-7" />
             </div>
             <h3 className="font-semibold text-lg">Ödeme Güvencesi</h3>
-            <p className="text-sm text-muted-foreground max-w-[250px] mx-auto leading-relaxed">
+            <p className="text-sm text-foreground/80 max-w-[250px] mx-auto leading-relaxed">
               256-bit SSL şifreleme ve global ödeme altyapısı (Stripe/Iyzico) ile kart bilgileriniz
               %100 güvende.
             </p>
@@ -22,7 +22,7 @@ export function TrustBand() {
               <Zap className="h-7 w-7" />
             </div>
             <h3 className="font-semibold text-lg">Anında Kurulum</h3>
-            <p className="text-sm text-muted-foreground max-w-[250px] mx-auto leading-relaxed">
+            <p className="text-sm text-foreground/80 max-w-[250px] mx-auto leading-relaxed">
               Ödemenizin hemen ardından yönetim paneliniz açılır, misafirlerinize davetiyenizi
               dakikalar içinde gönderebilirsiniz.
             </p>
@@ -33,7 +33,7 @@ export function TrustBand() {
               <HeadphonesIcon className="h-7 w-7" />
             </div>
             <h3 className="font-semibold text-lg">7/24 Düğün Desteği</h3>
-            <p className="text-sm text-muted-foreground max-w-[250px] mx-auto leading-relaxed">
+            <p className="text-sm text-foreground/80 max-w-[250px] mx-auto leading-relaxed">
               Düğün günü stresi yok. İhtiyaç duyduğunuz her an teknik ekibimiz WhatsApp veya e-posta
               üzerinden yanınızda.
             </p>

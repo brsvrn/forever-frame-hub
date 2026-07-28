@@ -1,44 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import themeNoir from "@/assets/theme-noir.jpg";
-import themeBlush from "@/assets/theme-blush.jpg";
-import themeGarden from "@/assets/theme-garden.jpg";
-import heroCouple from "@/assets/hero-couple.jpg";
+import { themes, type InviteThemeId, type ThemeConfig } from "./theme-engine";
 
-export type InviteThemeId = "midnight" | "blush" | "garden" | "noir";
+export type { InviteThemeId };
+export type InviteTheme = ThemeConfig;
 
-export type InviteTheme = {
-  id: InviteThemeId;
-  name: string;
-  tag: { tr: string; en: string };
-  image: string;
-};
-
-export const inviteThemes: InviteTheme[] = [
-  {
-    id: "midnight",
-    name: "Midnight Bloom",
-    tag: { tr: "Sinematik", en: "Cinematic" },
-    image: heroCouple,
-  },
-  {
-    id: "blush",
-    name: "Blush Atelier",
-    tag: { tr: "Romantik", en: "Romantic" },
-    image: themeBlush,
-  },
-  {
-    id: "garden",
-    name: "Garden Lumière",
-    tag: { tr: "Bahçe", en: "Garden" },
-    image: themeGarden,
-  },
-  {
-    id: "noir",
-    name: "Noir Or",
-    tag: { tr: "Minimal lüks", en: "Minimal luxe" },
-    image: themeNoir,
-  },
-];
+export const inviteThemes: InviteTheme[] = Object.values(themes);
 
 export type InvitationDraft = {
   theme: InviteThemeId;

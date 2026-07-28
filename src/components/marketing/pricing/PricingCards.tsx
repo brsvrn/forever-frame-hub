@@ -10,7 +10,7 @@ export function PricingCards() {
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
               Şeffaf ve Net Fiyatlandırma
             </h2>
-            <p className="text-lg text-muted-foreground font-light leading-relaxed">
+            <p className="text-lg text-foreground/80 font-light leading-relaxed">
               İhtiyacınız olan her şey tek bir pakette. Gizli ücret yok, sürpriz yok. Düğün
               bütçenizi zorlamadan premium deneyimi yaşayın.
             </p>
@@ -22,12 +22,12 @@ export function PricingCards() {
           <FadeIn delay={0.1} className="relative">
             <div className="bg-white dark:bg-neutral-900 border border-border rounded-[2rem] p-8 md:p-10 shadow-sm hover:shadow-lg transition-shadow">
               <h3 className="text-2xl font-bold text-foreground mb-2">Dijital Davetiye</h3>
-              <p className="text-muted-foreground text-sm font-light mb-6">
+              <p className="text-foreground/80 text-sm font-light mb-6">
                 Sadece dijital davetiye ve LCV takibi isteyenler için.
               </p>
               <div className="flex items-baseline gap-2 mb-8">
                 <span className="text-5xl font-bold tracking-tight text-foreground">₺950</span>
-                <span className="text-muted-foreground font-medium text-sm">/ Tek Seferlik</span>
+                <span className="text-foreground/80 font-medium text-sm">/ Tek Seferlik</span>
               </div>
               <button className="w-full py-4 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8">
                 Hemen Başla
@@ -58,12 +58,12 @@ export function PricingCards() {
 
               <div className="relative z-10">
                 <h3 className="text-2xl font-bold mb-2">Her Şey Dahil Premium</h3>
-                <p className="text-neutral-400 text-sm font-light mb-6">
+                <p className="text-neutral-300 text-sm font-light mb-6">
                   Unutulmaz bir deneyim ve anı arşivi isteyen çiftler için.
                 </p>
                 <div className="flex items-baseline gap-2 mb-8">
                   <span className="text-5xl font-bold tracking-tight">₺1.950</span>
-                  <span className="text-neutral-400 font-medium text-sm">/ Tek Seferlik</span>
+                  <span className="text-neutral-300 font-medium text-sm">/ Tek Seferlik</span>
                 </div>
                 <button className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors mb-8 shadow-[0_0_20px_rgba(var(--primary),0.3)]">
                   Premium ile Başla
@@ -96,13 +96,13 @@ function PricingFeature({
   dark?: boolean;
 }) {
   return (
-    <li className={`flex items-start gap-3 ${missing ? "opacity-40" : ""}`}>
+    <li className={`flex items-start gap-3 ${missing ? "opacity-60" : ""}`}>
       <div
-        className={`mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${missing ? (dark ? "bg-white/10 text-white/40" : "bg-muted text-muted-foreground") : dark ? "bg-primary/20 text-primary" : "bg-green-100 text-green-600"}`}
+        className={`mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${missing ? (dark ? "bg-white/20 text-white/70" : "bg-muted text-foreground/70") : dark ? "bg-primary/20 text-primary" : "bg-green-100 text-green-600"}`}
       >
         <Check className="w-3 h-3 stroke-[3]" />
       </div>
-      <span className={`text-sm ${dark ? "text-neutral-300" : "text-muted-foreground"}`}>
+      <span className={`text-sm ${dark ? "text-neutral-200" : "text-foreground/80"}`}>
         {text}
       </span>
     </li>

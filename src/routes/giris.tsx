@@ -3,11 +3,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Heart, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+
 import { appContent } from "@/lib/app-content";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { easeSilk } from "@/components/landing/motion-primitives";
 import { Field, TextInput } from "@/components/builder/Field";
+import { getAuthRedirectUrl } from "@/lib/auth-helpers";
 
 const title = "Giriş Yap veya Hesap Oluştur — MemoryWedding";
 const description =
@@ -83,15 +84,17 @@ function AuthPage() {
 
   const google = async () => {
     setError(null);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const redirectUrl = getAuthRedirectUrl();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: redirectUrl,
+      },
     });
-    if (result.error) {
+    
+    if (error) {
       setError(c.genericError);
-      return;
     }
-    if (result.redirected) return;
-    navigate({ to: "/panel" });
   };
 
   return (

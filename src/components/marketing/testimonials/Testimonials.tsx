@@ -36,7 +36,7 @@ export function Testimonials() {
               <br />
               Yanlarındaydık
             </h2>
-            <p className="text-lg text-muted-foreground font-light leading-relaxed">
+            <p className="text-lg text-foreground/80 font-light leading-relaxed">
               10.000'den fazla çiftin en özel gününü stresten uzak ve unutulmaz kıldık. İşte onların
               deneyimleri.
             </p>
@@ -55,7 +55,7 @@ export function Testimonials() {
                   <Star key={i} className="w-5 h-5 fill-current" />
                 ))}
               </div>
-              <p className="text-muted-foreground leading-relaxed flex-1 italic mb-8 font-light">
+              <p className="text-foreground/80 leading-relaxed flex-1 italic mb-8 font-light">
                 "{t.text}"
               </p>
               <div className="flex items-center gap-4 mt-auto">
@@ -64,7 +64,7 @@ export function Testimonials() {
                 </div>
                 <div>
                   <h4 className="font-bold text-foreground text-sm">{t.name}</h4>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mt-0.5">
+                  <p className="text-xs text-foreground/70 uppercase tracking-wider mt-0.5">
                     {t.role}
                   </p>
                 </div>
