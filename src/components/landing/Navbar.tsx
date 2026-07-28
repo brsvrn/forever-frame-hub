@@ -67,12 +67,13 @@ export function Navbar() {
 
           <div className="flex items-center gap-2">
             <LangSwitch lang={lang} setLang={setLang} />
-            <a
-              href="#paketler"
+            <Link
+              to="/giris"
               className="hidden rounded-full px-4 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
             >
               {t.nav.login}
-            </a>
+            </Link>
+
             <Link
               to="/olustur"
               className="hidden rounded-full bg-gradient-to-r from-rose to-gold px-5 py-2.5 text-sm font-semibold text-background shadow-glow transition-transform duration-300 hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline-flex"
@@ -121,13 +122,21 @@ export function Navbar() {
                 </motion.li>
               ))}
             </ul>
-            <a
-              href="#paketler"
+            <Link
+              to="/olustur"
               onClick={() => setOpen(false)}
               className="mt-3 flex min-h-11 items-center justify-center rounded-2xl bg-gradient-to-r from-rose to-gold px-5 py-3 text-sm font-semibold text-background"
             >
               {t.nav.cta}
-            </a>
+            </Link>
+            <Link
+              to="/giris"
+              onClick={() => setOpen(false)}
+              className="mt-2 flex min-h-11 items-center justify-center rounded-2xl border border-border px-5 py-3 text-sm text-muted-foreground"
+            >
+              {t.nav.login}
+            </Link>
+
           </motion.div>
         ) : null}
       </AnimatePresence>

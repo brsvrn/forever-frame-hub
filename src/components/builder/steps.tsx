@@ -11,6 +11,8 @@ import {
   type InviteThemeId,
 } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
+import { supabase } from "@/integrations/supabase/client";
+import { publishInvitation } from "@/lib/invitations.api";
 import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
 
@@ -328,29 +330,53 @@ export function StepPublish({
   const c = copy.publish;
   const [status, setStatus] = useState<"idle" | "publishing" | "done">("idle");
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const slug =
     draft.slug ||
     slugify(`${draft.partnerOne}-${draft.partnerTwo}`) ||
     (lang === "tr" ? "davetiyemiz" : "our-wedding");
-  const url = `memorywedding.app/${slug}`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const fullUrl = `${origin}/davet/${slug}`;
 
-  const qr = useMemo(() => buildQrSvg(url), [url]);
+  const qr = useMemo(() => buildQrSvg(fullUrl), [fullUrl]);
 
-  const publish = () => {
+  const publish = async () => {
     setStatus("publishing");
-    window.setTimeout(() => setStatus("done"), 1400);
+    setError(null);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user.id;
+      if (!userId) {
+        window.location.href = "/giris";
+        return;
+      }
+      await publishInvitation({ ...draft, slug }, userId);
+      setStatus("done");
+    } catch (err) {
+      setError(
+        err instanceof Error && /duplicate|unique/i.test(err.message)
+          ? lang === "tr"
+            ? "Bu bağlantı adresi başka bir davetiye tarafından kullanılıyor."
+            : "This link is already used by another invitation."
+          : lang === "tr"
+            ? "Davetiye yayınlanamadı. Lütfen tekrar deneyin."
+            : "Could not publish the invitation. Please try again.",
+      );
+      setStatus("idle");
+    }
   };
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(`https://${url}`);
+      await navigator.clipboard.writeText(fullUrl);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       /* clipboard unavailable */
     }
   };
+
 
   const downloadQr = () => {
     const blob = new Blob([qr], { type: "image/svg+xml" });
@@ -370,7 +396,7 @@ export function StepPublish({
         {(id) => (
           <div className="flex items-center gap-2 rounded-2xl border border-input bg-accent/20 px-4">
             <Link2 className="size-4 shrink-0 text-gold" aria-hidden="true" />
-            <span className="shrink-0 text-sm text-muted-foreground">memorywedding.app/</span>
+            <span className="shrink-0 text-sm text-muted-foreground">/davet/</span>
             <input
               id={id}
               value={draft.slug}
@@ -408,6 +434,7 @@ export function StepPublish({
                 </>
               )}
             </button>
+            {error ? <p className="text-sm text-rose">{error}</p> : null}
             <p className="text-xs text-muted-foreground">{c.note}</p>
           </motion.div>
         ) : (
@@ -431,7 +458,7 @@ export function StepPublish({
             <div className="mt-6 grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="min-w-0 space-y-3">
                 <p className="truncate rounded-2xl border border-border bg-accent/20 px-4 py-3 text-sm text-gold">
-                  https://{url}
+                  {fullUrl}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -447,7 +474,7 @@ export function StepPublish({
                     {copied ? c.copied : c.copy}
                   </button>
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`https://${url}`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(fullUrl)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50"
