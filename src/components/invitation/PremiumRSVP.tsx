@@ -1,13 +1,39 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, HelpCircle, ArrowRight } from "lucide-react";
+import { Check, X, HelpCircle, ArrowRight, Loader2 } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
+import { submitRsvp } from "@/lib/invitations.api";
 
-export function PremiumRSVP({ theme }: { theme: ThemeConfig }) {
+export function PremiumRSVP({ theme, invitationId }: { theme: ThemeConfig; invitationId: string }) {
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<"yes" | "no" | "maybe" | null>(null);
+  const [name, setName] = useState("");
+  const [partySize, setPartySize] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Simplified mock flow for RSVP mini-app
+  const handleSubmit = async () => {
+    if (!name.trim() || !status) {
+      setError("Lütfen isminizi girin.");
+      return;
+    }
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      await submitRsvp({
+        invitationId,
+        guestName: name.trim(),
+        status,
+        partySize: status === "yes" ? partySize : 1,
+      });
+      setStep(2);
+    } catch (err) {
+      setError("Bir hata oluştu, lütfen tekrar deneyin.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="relative py-24 px-6 flex flex-col items-center snap-center">
       <div className={`max-w-md w-full ${theme.styles.cards.wrapper} rounded-3xl overflow-hidden shadow-2xl transition-all duration-500`}>
@@ -61,19 +87,27 @@ export function PremiumRSVP({ theme }: { theme: ThemeConfig }) {
               {status !== "no" && (
                 <div className="mb-6">
                   <label className="block text-xs uppercase tracking-widest text-white/50 mb-2">Kişi Sayısı</label>
-                  <input type="number" defaultValue={1} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30" />
+                  <input type="number" min={1} max={10} value={partySize} onChange={(e) => setPartySize(parseInt(e.target.value) || 1)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30" />
                 </div>
               )}
               <div className="mb-6">
                 <label className="block text-xs uppercase tracking-widest text-white/50 mb-2">İsminiz</label>
-                <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30" />
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30" />
               </div>
+              
+              {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+
               <button 
-                onClick={() => setStep(2)}
-                className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-medium ${theme.styles.buttons.primary}`}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-medium transition-all ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''} ${theme.styles.buttons.primary}`}
               >
-                <span>Gönder</span>
-                <ArrowRight className="w-4 h-4" />
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                  <>
+                    <span>Gönder</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </motion.div>
           )}

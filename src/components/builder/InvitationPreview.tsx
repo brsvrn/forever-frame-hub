@@ -49,10 +49,10 @@ export function InvitationPreview({
         />
         <div
           aria-hidden="true"
-          className="invite-canvas absolute inset-0 opacity-70 mix-blend-multiply"
+          className={cn("absolute inset-0", theme.styles.overlay)}
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-          <p className="invite-accent-text text-[0.62rem] uppercase tracking-[0.3em]">
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-white">
+          <p className="text-[0.62rem] uppercase tracking-[0.3em] text-white/80">
             {draft.headline || c.save}
           </p>
           <motion.h2
@@ -67,7 +67,7 @@ export function InvitationPreview({
           >
             {names}
           </motion.h2>
-          <span className="invite-accent-bg mt-4 grid size-8 place-items-center rounded-full">
+          <span className="mt-4 grid size-8 place-items-center rounded-full bg-white/20 text-white backdrop-blur-sm">
             <Heart className="size-4" aria-hidden="true" />
           </span>
         </div>

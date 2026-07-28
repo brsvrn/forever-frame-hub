@@ -2,9 +2,21 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setIsLoggedIn(!!data.session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,10 +58,10 @@ export function Navbar() {
         </nav>
         <div className="flex items-center gap-4">
           <Link
-            to="/giris"
+            to={isLoggedIn ? "/panel" : "/giris"}
             className="text-sm font-medium hover:underline hidden sm:inline-block text-muted-foreground hover:text-foreground transition-colors"
           >
-            Giriş Yap
+            {isLoggedIn ? "Panel" : "Giriş Yap"}
           </Link>
           <Button asChild className="rounded-full px-6 shadow-md hover:shadow-lg transition-all">
             <Link to="/olustur">Davetiyeni Oluştur</Link>

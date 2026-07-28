@@ -114,7 +114,7 @@ function PremiumInvitePage() {
             <HeroExperience draft={draft} theme={theme} lang={lang} />
             <StoryTimeline theme={theme} />
             <EventDetails draft={draft} theme={theme} lang={lang} />
-            <PremiumRSVP theme={theme} />
+            <PremiumRSVP theme={theme} invitationId={invitation.id} />
             <PremiumQRExperience theme={theme} />
             <GuestGallery theme={theme} />
           </main>
