@@ -338,7 +338,6 @@ export function StepPublish({
     (lang === "tr" ? "davetiyemiz" : "our-wedding");
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const fullUrl = `${origin}/davet/${slug}`;
-  const url = `${origin.replace(/^https?:\/\//, "")}/davet/${slug}`;
 
   const qr = useMemo(() => buildQrSvg(fullUrl), [fullUrl]);
 
@@ -475,7 +474,7 @@ export function StepPublish({
                     {copied ? c.copied : c.copy}
                   </button>
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`https://${url}`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(fullUrl)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50"

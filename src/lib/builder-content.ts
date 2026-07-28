@@ -85,7 +85,7 @@ const tr = {
     whatsapp: "WhatsApp'ta paylaş",
     qr: "QR kodunu indir",
     edit: "Düzenlemeye dön",
-    note: "Bu bir demo yayın akışıdır; canlı yayın hesabınız oluşturulduğunda aktifleşir.",
+    note: "Yayınlamak için ücretsiz hesabınıza giriş yapmanız yeterli. Davetiyeniz anında canlıya alınır.",
   },
   inviteCard: {
     save: "Kaydedin",
