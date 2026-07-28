@@ -1,0 +1,25 @@
+
+> dev
+> vite dev
+
+[33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+Port 8080 is in use, trying another one...
+Port 8081 is in use, trying another one...
+[2m14:46:18[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+
+  [32m[1mVITE[22m v8.1.5[39m  [2mready in [0m[1m4696[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m8082[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.1.10:[1m8082[22m/[39m
+[2m14:47:26[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m connected.
+Error in renderToReadableStream: ReferenceError: useEffect is not defined
+    at BuilderPage (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\src\routes\olustur.tsx:57:1)
+    at Object.react_stack_bottom_frame (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:10288:18)
+    at renderWithHooks (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:5298:19)
+    at renderElement (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:5733:23)
+    at retryNode (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:6664:31)
+    at renderNodeDestructive (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:6614:11)
+    at renderElement (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:6300:15)
+    at retryNode (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:6664:31)
+    at renderNodeDestructive (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:6614:11)
+    at finishFunctionComponent (C:\Users\misafir\.codex\.chatgpt-projects\g-p-6a5b42b313b481918ee168a1b26eb549\forever-frame-hub\node_modules\react-dom\cjs\react-dom-server.node.development.js:5342:13) { componentStack: [Getter] }
