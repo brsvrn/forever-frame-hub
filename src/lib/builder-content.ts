@@ -190,7 +190,7 @@ const en: BuilderContent = {
     whatsapp: "Share on WhatsApp",
     qr: "Download QR code",
     edit: "Back to editing",
-    note: "This is a demo publishing flow; it goes live once your account is created.",
+    note: "Just sign in to your free account to publish. Your invitation goes live instantly.",
   },
   inviteCard: {
     save: "Save the date",
