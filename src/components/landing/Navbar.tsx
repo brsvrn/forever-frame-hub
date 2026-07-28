@@ -122,13 +122,21 @@ export function Navbar() {
                 </motion.li>
               ))}
             </ul>
-            <a
-              href="#paketler"
+            <Link
+              to="/olustur"
               onClick={() => setOpen(false)}
               className="mt-3 flex min-h-11 items-center justify-center rounded-2xl bg-gradient-to-r from-rose to-gold px-5 py-3 text-sm font-semibold text-background"
             >
               {t.nav.cta}
-            </a>
+            </Link>
+            <Link
+              to="/giris"
+              onClick={() => setOpen(false)}
+              className="mt-2 flex min-h-11 items-center justify-center rounded-2xl border border-border px-5 py-3 text-sm text-muted-foreground"
+            >
+              {t.nav.login}
+            </Link>
+
           </motion.div>
         ) : null}
       </AnimatePresence>
