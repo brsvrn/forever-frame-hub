@@ -11,6 +11,7 @@ import { PricingCards } from "@/components/marketing/pricing/PricingCards";
 import { Testimonials } from "@/components/marketing/testimonials/Testimonials";
 import { FAQAccordion } from "@/components/marketing/faq/FAQAccordion";
 import { PremiumCTA } from "@/components/marketing/cta/PremiumCTA";
+import { SecuritySection } from "@/components/marketing/security/SecuritySection";
 import { I18nProvider } from "@/lib/i18n";
 
 const title = "MemoryWedding — Dijital Davetiye, LCV ve Canlı Galeri";
@@ -27,7 +28,26 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://memorywedding.com/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "MemoryWedding",
+          "operatingSystem": "Web",
+          "applicationCategory": "LifestyleApplication",
+          "offers": {
+            "@type": "Offer",
+            "price": "1500",
+            "priceCurrency": "TRY"
+          },
+          "description": description,
+          "url": "https://memorywedding.com/"
+        })
+      }
+    ]
   }),
   component: MarketingLandingPage,
 });
@@ -47,6 +67,7 @@ function MarketingLandingPage() {
             <PricingCards />
             <Testimonials />
             <FAQAccordion />
+            <SecuritySection />
             <TrustBand />
             <PremiumCTA />
           </main>

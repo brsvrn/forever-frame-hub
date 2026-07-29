@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { getPublicInvitation, rowToDraft, type InvitationRow } from "@/lib/invitations.api";
+import { getPublicInvitation, rowToDraft, type InvitationRow, getPublicThemes } from "@/lib/invitations.api";
 import { useI18n, I18nProvider } from "@/lib/i18n";
-import { themes } from "@/lib/theme-engine";
 
 // Import all new components
-import { CinematicOpening } from "@/components/invitation/CinematicOpening";
+import { InvitationIntro } from "@/components/invitation/InvitationIntro";
 import { LivingBackground } from "@/components/invitation/LivingBackground";
 import { PremiumAudioPlayer } from "@/components/invitation/PremiumAudioPlayer";
 import { HeroExperience } from "@/components/invitation/HeroExperience";
@@ -41,7 +40,8 @@ export const Route = createFileRoute("/davet/$slug")({
     }
     const invitation = await getPublicInvitation(params.slug);
     if (!invitation) throw notFound();
-    return { invitation };
+    const publicThemes = await getPublicThemes();
+    return { invitation, publicThemes };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -90,42 +90,104 @@ export const Route = createFileRoute("/davet/$slug")({
 });
 
 function PremiumInvitePage() {
-  const { invitation } = Route.useLoaderData();
+  const { invitation, publicThemes } = Route.useLoaderData();
   const { lang } = useI18n();
   const draft = rowToDraft(invitation as InvitationRow);
   
-  // Lookup theme from config
-  const theme = themes[draft.theme] || themes.midnight;
+  // Lookup theme from DB
+  const currentTheme = publicThemes?.find((t: any) => t.theme_id === draft.theme);
+  
+  const themeConfig = currentTheme?.config || {
+    primaryColor: "#EAB308",
+    secondaryColor: "#18181B",
+    coverVideoUrl: "",
+    font: "Inter",
+  };
+  
+  // Mock legacy theme struct for components that still need it temporarily
+  const theme = {
+    id: draft.theme as any,
+    name: currentTheme?.name || "Premium Theme",
+    tag: { tr: "Premium", en: "Premium" },
+    image: "",
+    music: { defaultTrack: "", title: "Romantik Melodi" },
+    ambientEffect: { type: "particles" as const, intensity: "medium" as const },
+    openingAnimation: { duration: 1.5, style: "fade" as const },
+    styles: {
+      overlay: "bg-black/50",
+      typography: { sans: `font-["${themeConfig.font}"]`, display: `font-["${themeConfig.font}"]` },
+      motion: { transition: "transition-all duration-700 ease-in-out" },
+      buttons: { 
+        primary: `bg-[${themeConfig.primaryColor}] text-[${themeConfig.secondaryColor}]`,
+        secondary: `bg-white/10 text-white hover:bg-white/20 border border-white/20`
+      },
+      cards: { wrapper: "bg-black/40 backdrop-blur-md border border-white/10" },
+      gallery: { gridStyle: "masonry" as const },
+      icons: { color: `text-[${themeConfig.primaryColor}]` }
+    },
+    primaryColor: themeConfig.primaryColor,
+    secondaryColor: themeConfig.secondaryColor
+  };
+  
+  const pkg = (invitation as any).package;
+  const features = pkg?.features || { digital_invitation: true, qr_gallery: true, music: true };
   
   const [hasOpened, setHasOpened] = useState(false);
 
   return (
-    <div className={`relative bg-black min-h-dvh font-sans antialiased overflow-x-hidden selection:bg-white/30 ${theme.styles.typography.sans}`}>
+    <div className="relative bg-black min-h-dvh font-sans antialiased overflow-x-hidden selection:bg-white/30" style={{ fontFamily: `"${themeConfig.font}", sans-serif` }}>
       
-      {!hasOpened && (
-        <CinematicOpening 
-          theme={theme} 
-          partnerOne={draft.partnerOne}
-          partnerTwo={draft.partnerTwo}
-          onOpen={() => setHasOpened(true)} 
-        />
-      )}
+      {(!hasOpened && features.digital_invitation !== false) ? (
+        themeConfig.coverVideoUrl ? (
+          <InvitationIntro 
+            videoUrl={themeConfig.coverVideoUrl}
+            onComplete={() => setHasOpened(true)} 
+          />
+        ) : (
+          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black text-white">
+            <div className="relative z-10 flex h-full w-full flex-col items-center justify-center p-6 text-center">
+               <button
+                  onClick={() => setHasOpened(true)}
+                  className={`mt-4 rounded-full px-10 py-4 text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 bg-[${themeConfig.primaryColor}] text-[${themeConfig.secondaryColor}]`}
+                >
+                  Davetiyeyi Aç
+                </button>
+            </div>
+          </div>
+        )
+      ) : null}
 
-      {hasOpened && (
+      {(hasOpened || features.digital_invitation === false) && (
         <>
           <LivingBackground theme={theme} />
           
           <main className="relative z-10 h-dvh overflow-y-auto snap-y snap-mandatory scroll-smooth pb-24">
-            <HeroExperience draft={draft} theme={theme} lang={lang} />
-            <StoryTimeline draft={draft} theme={theme} />
-            <EventDetails draft={draft} theme={theme} lang={lang} />
-            <PremiumRSVP theme={theme} invitationId={invitation.id} />
-            <PremiumQRExperience theme={theme} />
-            <GuestGallery theme={theme} />
+            {features.digital_invitation !== false && (
+              <>
+                <HeroExperience draft={draft} theme={theme} lang={lang} />
+                <StoryTimeline draft={draft} theme={theme} />
+                <EventDetails draft={draft} theme={theme} lang={lang} />
+                <PremiumRSVP theme={theme} invitationId={invitation.id} />
+              </>
+            )}
+            
+            {features.qr_gallery !== false && (
+              <>
+                <PremiumQRExperience theme={theme} invitationId={invitation.id} />
+              </>
+            )}
           </main>
-
-          <PremiumAudioPlayer theme={theme} autoPlay={true} musicUrl={draft.musicUrl} />
         </>
+      )}
+
+      {/* Ses oynatıcıyı her zaman render ediyoruz ki iframe önden yüklensin, bekleme olmasın */}
+      {features.music !== false && (
+        <PremiumAudioPlayer 
+          theme={theme} 
+          autoPlay={hasOpened || features.digital_invitation === false} 
+          hideUI={!hasOpened}
+          musicUrl={draft.musicUrl} 
+        />
       )}
     </div>
   );

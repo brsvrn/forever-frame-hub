@@ -9,6 +9,8 @@ import {
   type InvitationDraft,
 } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
+import { getPublicThemes } from "@/lib/invitations.api";
+import { useState, useEffect } from "react";
 
 export function InvitationPreview({
   draft,
@@ -24,32 +26,58 @@ export function InvitationPreview({
   compact?: boolean;
 }) {
   const c = copy.inviteCard;
-  const theme = inviteThemes.find((item) => item.id === draft.theme) ?? inviteThemes[0];
+  
+  const [themes, setThemes] = useState<any[]>([]);
+  useEffect(() => {
+    getPublicThemes().then(res => setThemes(res));
+  }, []);
+
+  const currentTheme = themes.find((item) => item.theme_id === draft.theme);
+  const themeConfig = currentTheme?.config || {
+    primaryColor: "#EAB308",
+    secondaryColor: "#18181B",
+    thumbnailUrl: "https://images.unsplash.com/photo-1519741497674-611481863552",
+    font: "Inter",
+    cardRadius: "md",
+    shadow: "sm"
+  };
+
   const names =
     draft.partnerOne || draft.partnerTwo
       ? `${draft.partnerOne || "…"} & ${draft.partnerTwo || "…"}`
       : c.namesFallback;
   const dateLabel = formatInviteDate(draft.date, lang) || c.dateFallback;
   const days = countdownDays(draft.date);
+  
+  const radiusMap: any = { none: "rounded-none", sm: "rounded-sm", md: "rounded-md", lg: "rounded-lg", xl: "rounded-xl", "2xl": "rounded-2xl", full: "rounded-3xl" };
+  const shadowMap: any = { none: "shadow-none", sm: "shadow-sm", md: "shadow-md", lg: "shadow-lg", xl: "shadow-xl" };
 
   return (
     <div
       data-invite-theme={draft.theme}
       className={cn(
-        "invite-canvas overflow-hidden rounded-3xl border border-border shadow-elevated",
+        "invite-canvas overflow-hidden border border-border",
+        radiusMap[themeConfig.cardRadius || "md"] || "rounded-3xl",
+        shadowMap[themeConfig.shadow || "sm"] || "shadow-md",
+        themeConfig.styles?.typography?.sans,
         className,
       )}
+      style={{ 
+        fontFamily: `"${themeConfig.font}", sans-serif`,
+        backgroundColor: themeConfig.secondaryColor,
+        color: themeConfig.primaryColor
+      }}
     >
       <div className="relative">
         <img
-          src={theme.image}
+          src={themeConfig.thumbnailUrl}
           alt=""
           aria-hidden="true"
           className={cn("w-full object-cover", compact ? "aspect-[4/3]" : "aspect-[16/10]")}
         />
         <div
           aria-hidden="true"
-          className={cn("absolute inset-0", theme.styles.overlay)}
+          className={cn("absolute inset-0 bg-black/40", themeConfig.styles?.overlay)}
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-white">
           <p className="text-[0.62rem] uppercase tracking-[0.3em] text-white/80">
@@ -63,6 +91,7 @@ export function InvitationPreview({
             className={cn(
               "invite-display mt-3 font-light leading-tight",
               compact ? "text-3xl" : "text-4xl sm:text-5xl",
+              themeConfig.styles?.typography?.display
             )}
           >
             {names}

@@ -14,6 +14,32 @@ export function EventDetails({
 }) {
   const dateLabel = formatInviteDate(draft.date, lang);
   
+  const handleAddToCalendar = () => {
+    if (!draft.date) return;
+    const YYYYMMDD = draft.date.replace(/-/g, "");
+    const HHMMSS = draft.time ? draft.time.replace(":", "") + "00" : "120000";
+    const start = `${YYYYMMDD}T${HHMMSS}`;
+    
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART:${start}
+SUMMARY:${draft.partnerOne} & ${draft.partnerTwo}
+LOCATION:${draft.venue} - ${draft.address}
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "davetiye.ics";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  
   return (
     <section className="relative py-24 px-6 flex flex-col items-center snap-center">
       <div className={`max-w-xl w-full ${theme.styles.cards.wrapper} rounded-3xl p-8 sm:p-10 shadow-2xl`}>
@@ -97,7 +123,10 @@ export function EventDetails({
         )}
 
         <div className="mt-10 grid grid-cols-2 gap-4">
-          <button className={`py-3 rounded-full flex items-center justify-center gap-2 text-sm font-medium ${theme.styles.buttons.secondary}`}>
+          <button 
+            onClick={handleAddToCalendar}
+            className={`py-3 rounded-full flex items-center justify-center gap-2 text-sm font-medium ${theme.styles.buttons.secondary}`}
+          >
             <CalendarDays className="w-4 h-4" />
             <span>Takvime Ekle</span>
           </button>

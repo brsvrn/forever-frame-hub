@@ -1,12 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { emptyDraft, slugify, type InvitationDraft, type InviteThemeId } from "./invitation";
+import { themes } from "./theme-engine";
 
 export type InvitationRow = Tables<"invitations">;
 export type RsvpRow = Tables<"rsvps">;
 
 export function rowToDraft(row: InvitationRow): InvitationDraft {
   return {
+    packageId: row.package_id ?? "",
     theme: (row.theme as InviteThemeId) ?? emptyDraft.theme,
     category: (row.event_type as any) ?? emptyDraft.category,
     partnerOne: row.partner_one ?? "",
@@ -33,6 +35,7 @@ export function rowToDraft(row: InvitationRow): InvitationDraft {
 function draftToRow(draft: InvitationDraft, slug: string) {
   return {
     slug,
+    package_id: draft.packageId || null,
     theme: draft.theme,
     event_type: draft.category,
     partner_one: draft.partnerOne,
@@ -109,14 +112,34 @@ export async function setPublished(id: string, isPublished: boolean) {
   if (error) throw error;
 }
 
-export async function getPublicInvitation(slug: string) {
+export async function getInvitationById(id: string) {
   const { data, error } = await supabase
     .from("invitations")
     .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
+    .eq("id", id)
     .maybeSingle();
   if (error) throw error;
+  return data;
+}
+
+export async function getPublicInvitation(slug: string) {
+  const { data, error } = await supabase
+    .from("invitations")
+    .select("*, package:packages(*)")
+    .eq("slug", slug)
+    .maybeSingle();
+    
+  if (error) {
+    console.error("Join query failed, falling back to simple query:", error);
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from("invitations")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (fallbackError) throw fallbackError;
+    return fallbackData;
+  }
+  
   return data;
 }
 
@@ -149,4 +172,71 @@ export async function listRsvps(invitationId: string) {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data;
+}
+
+export async function getPublicThemes() {
+  return Object.values(themes).map((t, idx) => ({
+    id: String(idx + 1),
+    theme_id: t.id,
+    name: t.name,
+    config: { 
+      ...t,
+      thumbnailUrl: t.image 
+    },
+    is_active: true
+  }));
+}
+
+export async function getPublicPackages() {
+  const { data, error } = await supabase
+    .from("packages")
+    .select("*")
+    .eq("is_active", true)
+    .order("price", { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getDashboardStats(invitationId: string) {
+  // 1. RSVP Stats
+  const { data: rsvps, error: rsvpError } = await supabase
+    .from("rsvps")
+    .select("status, party_size, note")
+    .eq("invitation_id", invitationId);
+  
+  if (rsvpError) throw rsvpError;
+  
+  const totalRsvp = rsvps ? rsvps.length : 0;
+  const totalGuests = rsvps ? rsvps.reduce((acc, curr) => acc + (curr.party_size || 0), 0) : 0;
+  const messagesCount = rsvps ? rsvps.filter(r => r.note && r.note.trim().length > 0).length : 0;
+
+  // 2. Upload Stats (if guest_uploads table exists, otherwise fallback to 0)
+  let photoCount = 0;
+  let videoCount = 0;
+  let storageUsed = 0;
+
+  try {
+    const { data: uploads, error: uploadsError } = await supabase
+      .from("guest_uploads")
+      .select("file_type, file_size")
+      .eq("invitation_id", invitationId);
+
+    if (!uploadsError && uploads) {
+      photoCount = uploads.filter(u => u.file_type.startsWith("image/")).length;
+      videoCount = uploads.filter(u => u.file_type.startsWith("video/")).length;
+      storageUsed = uploads.reduce((acc, curr) => acc + (curr.file_size || 0), 0);
+    }
+  } catch (e) {
+    // Ignore if table doesn't exist yet in local setup
+  }
+
+  return {
+    totalRsvp,
+    totalGuests,
+    messagesCount,
+    photoCount,
+    videoCount,
+    storageUsed
+  };
 }

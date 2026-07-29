@@ -27,6 +27,7 @@ export type InvitationDraft = {
   ourStory: Array<{ date: string; title: string; desc: string; photo?: string }>;
   familyInfo: { bride?: { familyName?: string; mother?: string; father?: string }; groom?: { familyName?: string; mother?: string; father?: string } };
   customSections: any[];
+  packageId: string;
 };
 
 export const emptyDraft: InvitationDraft = {

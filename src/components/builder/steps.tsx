@@ -12,9 +12,10 @@ import {
 } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
 import { supabase } from "@/integrations/supabase/client";
-import { publishInvitation } from "@/lib/invitations.api";
+import { getPublicThemes, getPublicPackages } from "@/lib/invitations.api";
 import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
+import { useEffect } from "react";
 
 type StepProps = {
   draft: InvitationDraft;
@@ -33,56 +34,137 @@ export function StepHeader({ title, desc }: { title: string; desc: string }) {
 }
 
 export function StepTheme({ draft, update, copy, lang }: StepProps) {
+  const [themes, setThemes] = useState<any[]>([]);
+  const [packages, setPackages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedStyle, setSelectedStyle] = useState<string>("All");
+
+  useEffect(() => {
+    Promise.all([getPublicThemes(), getPublicPackages()]).then(([resThemes, resPackages]) => {
+      setThemes(resThemes);
+      setPackages(resPackages);
+      if (!draft.packageId && resPackages.length > 0) {
+        update("packageId", resPackages[0].id);
+      }
+      setLoading(false);
+    });
+  }, [draft.packageId, update]);
+
+  // Simple rule-based logic: filter by category or style
+  const filteredThemes = useMemo(() => {
+    let list = themes;
+    if (selectedStyle !== "All") {
+      list = list.filter(t => t.name.toLowerCase().includes(selectedStyle.toLowerCase()));
+    }
+    return list;
+  }, [themes, selectedStyle]);
+
+  const styles = ["All", "Minimal", "Luxury", "Floral", "Boho", "Modern", "Vintage", "Beach", "Dark", "Classic", "Nature"];
+
   return (
     <div className="space-y-8">
       <StepHeader title={copy.theme.title} desc={copy.theme.desc} />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {inviteThemes.map((theme) => {
-          const active = draft.theme === theme.id;
-          return (
-            <button
-              key={theme.id}
-              type="button"
-              onClick={() => update("theme", theme.id as InviteThemeId)}
-              aria-pressed={active}
-              className={cn(
-                "group relative overflow-hidden rounded-3xl border text-left transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                active ? "border-gold shadow-glow" : "border-border hover:border-gold/40",
-              )}
+      
+      {!loading && packages.length > 0 && (
+        <div className="mb-10">
+          <h3 className="text-xl font-medium mb-4">{lang === "tr" ? "Paket Seçimi" : "Package Selection"}</h3>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {packages.map(pkg => {
+              const active = draft.packageId === pkg.id;
+              return (
+                <button
+                  key={pkg.id}
+                  type="button"
+                  onClick={() => update("packageId", pkg.id)}
+                  className={cn(
+                    "p-4 rounded-2xl border text-left transition-all",
+                    active ? "border-gold bg-gold/10" : "border-border hover:border-gold/50"
+                  )}
+                >
+                  <div className="font-semibold text-lg">{pkg.name}</div>
+                  <div className="text-gold font-medium mt-1">{pkg.price} ₺</div>
+                  <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                    {pkg.features?.digital_invitation ? (pkg.features?.qr_gallery ? "Dijital Davetiye + QR Fotoğraf Yükleme" : "Sadece Dijital Davetiye") : "Sadece QR Fotoğraf Yükleme"}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-5 sm:grid-cols-1">
+        <Field label={lang === "tr" ? "Etkinlik Türü" : "Event Type"} className="sm:col-span-1">
+          {(id) => (
+            <select
+              id={id}
+              value={draft.category}
+              onChange={(e) => update("category", e.target.value as any)}
+              className="field-base min-h-11 w-full bg-transparent"
             >
-              <img
-                src={theme.image}
-                alt={theme.name}
-                loading="lazy"
-                className="aspect-[3/4] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"
-              />
-              <span className="absolute inset-x-0 bottom-0 p-4">
-                <span className="block text-[0.62rem] uppercase tracking-[0.22em] text-gold">
-                  {theme.tag[lang]}
+              <option className="bg-slate-900 text-white" value="wedding">{lang === "tr" ? "Düğün" : "Wedding"}</option>
+              <option className="bg-slate-900 text-white" value="engagement">{lang === "tr" ? "Nişan" : "Engagement"}</option>
+              <option className="bg-slate-900 text-white" value="henna">{lang === "tr" ? "Kına" : "Henna"}</option>
+              <option className="bg-slate-900 text-white" value="birthday">{lang === "tr" ? "Doğum Günü" : "Birthday"}</option>
+              <option className="bg-slate-900 text-white" value="other">{lang === "tr" ? "Diğer" : "Other"}</option>
+            </select>
+          )}
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {loading ? (
+          <div className="col-span-full py-10 text-center text-sm text-zinc-400">Temalar yükleniyor...</div>
+        ) : filteredThemes.length === 0 ? (
+          <div className="col-span-full py-10 text-center text-sm text-zinc-400">Bu tarza uygun tema bulunamadı.</div>
+        ) : (
+          filteredThemes.map((theme) => {
+            const active = draft.theme === theme.theme_id;
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => update("theme", theme.theme_id as InviteThemeId)}
+                aria-pressed={active}
+                className={cn(
+                  "group relative overflow-hidden rounded-3xl border text-left transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  active ? "border-gold shadow-glow" : "border-border hover:border-gold/40",
+                )}
+              >
+                <img
+                  src={theme.config.thumbnailUrl || "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=60"}
+                  alt={theme.name}
+                  loading="lazy"
+                  className="aspect-[3/4] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+                />
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"
+                />
+                <span className="absolute inset-x-0 bottom-0 p-4">
+                  <span className="block text-[0.62rem] uppercase tracking-[0.22em] text-gold">
+                    {theme.config.font}
+                  </span>
+                  <span className="mt-1 block truncate font-display text-xl">{theme.name}</span>
                 </span>
-                <span className="mt-1 block truncate font-display text-xl">{theme.name}</span>
-              </span>
-              <AnimatePresence>
-                {active ? (
-                  <motion.span
-                    initial={{ scale: 0.6, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.6, opacity: 0 }}
-                    transition={{ duration: 0.35, ease: easeSilk }}
-                    className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-gradient-to-r from-rose to-gold text-background"
-                  >
-                    <Check className="size-4" aria-hidden="true" />
-                    <span className="sr-only">{copy.theme.selected}</span>
-                  </motion.span>
-                ) : null}
-              </AnimatePresence>
-            </button>
-          );
-        })}
+                <AnimatePresence>
+                  {active ? (
+                    <motion.span
+                      initial={{ scale: 0.6, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.6, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: easeSilk }}
+                      className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-gradient-to-r from-rose to-gold text-background"
+                    >
+                      <Check className="size-4" aria-hidden="true" />
+                      <span className="sr-only">{copy.theme.selected}</span>
+                    </motion.span>
+                  ) : null}
+                </AnimatePresence>
+              </button>
+            );
+          })
+        )}
       </div>
     </div>
   );
@@ -94,22 +176,6 @@ export function StepTexts({ draft, update, copy, lang }: StepProps) {
     <div className="space-y-8">
       <StepHeader title={c.title} desc={c.desc} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label={c.category} className="sm:col-span-2">
-          {(id) => (
-            <select
-              id={id}
-              value={draft.category}
-              onChange={(e) => update("category", e.target.value as any)}
-              className="field-base min-h-11 w-full bg-transparent"
-            >
-              <option value="wedding">{lang === "tr" ? "Düğün" : "Wedding"}</option>
-              <option value="engagement">{lang === "tr" ? "Nişan" : "Engagement"}</option>
-              <option value="henna">{lang === "tr" ? "Kına" : "Henna"}</option>
-              <option value="birthday">{lang === "tr" ? "Doğum Günü" : "Birthday"}</option>
-              <option value="other">{lang === "tr" ? "Diğer" : "Other"}</option>
-            </select>
-          )}
-        </Field>
         <Field label={c.partnerOne}>
           {(id) => (
             <TextInput

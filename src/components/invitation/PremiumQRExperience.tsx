@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Camera, ImagePlus, UploadCloud } from "lucide-react";
+import { Camera, ImagePlus, UploadCloud, Lock } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
+import { GuestUploadForm } from "./GuestUploadForm";
 
-export function PremiumQRExperience({ theme }: { theme: ThemeConfig }) {
+export function PremiumQRExperience({ theme, invitationId }: { theme: ThemeConfig; invitationId: string }) {
   return (
     <section className="relative py-24 px-6 flex flex-col items-center snap-center">
       <div className={`max-w-xl w-full text-center ${theme.styles.cards.wrapper} rounded-3xl p-10 shadow-2xl`}>
@@ -16,22 +17,33 @@ export function PremiumQRExperience({ theme }: { theme: ThemeConfig }) {
         </p>
 
         <div className="grid grid-cols-2 gap-4">
-          <button className={`p-6 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all bg-white/5 hover:bg-white/10 border border-white/10`}>
-            <Camera className="w-6 h-6 text-white" />
-            <span className="text-white font-medium text-sm">Kamera</span>
-          </button>
+          <GuestUploadForm theme={theme} invitationId={invitationId}>
+            <div className={`p-6 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all bg-white/5 hover:bg-white/10 border border-white/10 h-full w-full`}>
+              <Camera className="w-6 h-6 text-white" />
+              <span className="text-white font-medium text-sm">Kamera</span>
+            </div>
+          </GuestUploadForm>
           
-          <button className={`p-6 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all bg-white/5 hover:bg-white/10 border border-white/10`}>
-            <ImagePlus className="w-6 h-6 text-white" />
-            <span className="text-white font-medium text-sm">Galeri</span>
-          </button>
+          <GuestUploadForm theme={theme} invitationId={invitationId}>
+            <div className={`p-6 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all bg-white/5 hover:bg-white/10 border border-white/10 h-full w-full`}>
+              <ImagePlus className="w-6 h-6 text-white" />
+              <span className="text-white font-medium text-sm">Galeri</span>
+            </div>
+          </GuestUploadForm>
         </div>
 
         <div className="mt-6">
-          <button className={`w-full py-4 rounded-2xl flex items-center justify-center gap-3 font-medium ${theme.styles.buttons.primary}`}>
-            <UploadCloud className="w-5 h-5" />
-            <span>Toplu Yükle</span>
-          </button>
+          <GuestUploadForm theme={theme} invitationId={invitationId}>
+            <div className={`w-full py-4 rounded-2xl flex items-center justify-center gap-3 font-medium ${theme.styles.buttons.primary}`}>
+              <UploadCloud className="w-5 h-5" />
+              <span>Toplu Yükle</span>
+            </div>
+          </GuestUploadForm>
+        </div>
+
+        <div className="flex items-center justify-center gap-2 text-white/40 text-sm mt-10">
+          <Lock className="w-4 h-4" />
+          <span>Yüklediğiniz tüm medya dosyaları şifrelenerek sadece çiftin erişimine açılır.</span>
         </div>
       </div>
     </section>

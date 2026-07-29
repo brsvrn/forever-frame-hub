@@ -12,15 +12,26 @@ function extractYouTubeId(url: string | undefined): string | null {
 export function PremiumAudioPlayer({ 
   theme,
   autoPlay = false,
-  musicUrl
+  musicUrl,
+  customTitle, // Opsiyonel manuel başlık
+  hideUI = false // UI'ı gizlemek için prop
 }: { 
   theme: ThemeConfig;
   autoPlay?: boolean;
   musicUrl?: string;
+  customTitle?: string;
+  hideUI?: boolean;
 }) {
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(false);
+  const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  useEffect(() => {
+    if (autoPlay) {
+      setIsPlaying(true);
+    }
+  }, [autoPlay]);
 
   const videoId = extractYouTubeId(musicUrl);
 
@@ -36,6 +47,20 @@ export function PremiumAudioPlayer({
       );
     }
   };
+
+  useEffect(() => {
+    if (videoId && !customTitle) {
+      // YouTube oEmbed ile metadata çekme (CORS için noembed proxy kullanımı)
+      fetch(`https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${videoId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.title) {
+            setDynamicTitle(data.title);
+          }
+        })
+        .catch(err => console.warn("Müzik bilgisi çekilemedi:", err));
+    }
+  }, [videoId, customTitle]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -66,12 +91,13 @@ export function PremiumAudioPlayer({
         title="Audio Player"
       />
       
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="flex items-center gap-3 bg-black/20 backdrop-blur-xl border border-white/10 rounded-full p-2 pr-4 shadow-2xl"
-      >
+      {!hideUI && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 1 }}
+          className="flex items-center gap-3 bg-black/20 backdrop-blur-xl border border-white/10 rounded-full p-2 pr-4 shadow-2xl"
+        >
         <button
           onClick={() => setIsPlaying(!isPlaying)}
           className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
@@ -83,7 +109,7 @@ export function PremiumAudioPlayer({
           <div className="flex items-center gap-2">
             <Music className="w-3 h-3 text-white/50" />
             <span className="text-xs text-white/90 font-medium truncate max-w-[120px]">
-              {theme.music.title}
+              {customTitle || dynamicTitle || theme.music.title}
             </span>
           </div>
           <span className="text-[10px] text-white/50 uppercase tracking-widest mt-0.5">
@@ -99,7 +125,8 @@ export function PremiumAudioPlayer({
         >
           {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
         </button>
-      </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }

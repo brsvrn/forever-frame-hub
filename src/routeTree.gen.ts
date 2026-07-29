@@ -10,16 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as GirisRouteImport } from './routes/giris'
 import { Route as OlusturRouteImport } from './routes/olustur'
 import { Route as PanelRouteImport } from './routes/panel'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as DavetSlugRouteImport } from './routes/davet.$slug'
+import { Route as PanelIdRouteImport } from './routes/panel_.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GirisRoute = GirisRouteImport.update({
@@ -52,73 +59,92 @@ const DavetSlugRoute = DavetSlugRouteImport.update({
   path: '/davet/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PanelIdRoute = PanelIdRouteImport.update({
+  id: '/panel_/$id',
+  path: '/panel/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/panel/$id': typeof PanelIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/panel/$id': typeof PanelIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/panel_/$id': typeof PanelIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/giris'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/panel/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/giris'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/panel/$id'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/giris'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/panel_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   GirisRoute: typeof GirisRoute
   OlusturRoute: typeof OlusturRoute
   PanelRoute: typeof PanelRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   DavetSlugRoute: typeof DavetSlugRoute
+  PanelIdRoute: typeof PanelIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -128,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/giris': {
@@ -172,17 +205,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DavetSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/panel_/$id': {
+      id: '/panel_/$id'
+      path: '/panel/$id'
+      fullPath: '/panel/$id'
+      preLoaderRoute: typeof PanelIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   GirisRoute: GirisRoute,
   OlusturRoute: OlusturRoute,
   PanelRoute: PanelRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   DavetSlugRoute: DavetSlugRoute,
+  PanelIdRoute: PanelIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

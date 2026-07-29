@@ -3,7 +3,7 @@ import themeBlush from "@/assets/theme-blush.jpg";
 import themeGarden from "@/assets/theme-garden.jpg";
 import themeNoir from "@/assets/theme-noir.jpg";
 
-export type InviteThemeId = "midnight" | "blush" | "garden" | "noir";
+export type InviteThemeId = "midnight" | "blush" | "garden" | "noir" | "beach";
 
 export interface ThemeConfig {
   id: InviteThemeId;

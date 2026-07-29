@@ -10,6 +10,7 @@ import {
   Plus,
   Trash2,
   Users,
+  LayoutDashboard,
 } from "lucide-react";
 import { appContent } from "@/lib/app-content";
 import { I18nProvider, useI18n } from "@/lib/i18n";
@@ -181,24 +182,13 @@ function InvitationCard({
   index: number;
   copy: (typeof appContent)["tr"]["dash"];
   lang: "tr" | "en";
-  open: boolean;
-  onToggle: () => void;
+  open?: boolean;
+  onToggle?: () => void;
   onChanged: () => Promise<void>;
 }) {
-  const [rsvps, setRsvps] = useState<RsvpRow[] | null>(null);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    if (!open || rsvps) return;
-    void listRsvps(row.id).then(setRsvps);
-  }, [open, rsvps, row.id]);
-
   const names = [row.partner_one, row.partner_two].filter(Boolean).join(" & ") || row.slug;
-  const totalGuests = (rsvps ?? [])
-    .filter((r) => r.status === "yes")
-    .reduce((sum, r) => sum + r.party_size, 0);
-
-  const statusLabel = { yes: copy.yes, no: copy.no, maybe: copy.maybe } as const;
 
   return (
     <motion.article
@@ -239,6 +229,14 @@ function InvitationCard({
             <ExternalLink className="size-4" aria-hidden="true" />
             {copy.view}
           </Link>
+          <Link
+            to="/panel/$id"
+            params={{ id: row.id }}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-gold px-4 text-sm text-black font-medium transition-transform hover:scale-105"
+          >
+            <LayoutDashboard className="size-4" aria-hidden="true" />
+            Yönet
+          </Link>
           <button
             type="button"
             disabled={busy}
@@ -269,49 +267,6 @@ function InvitationCard({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="mt-5 inline-flex items-center gap-2 text-sm text-gold transition-opacity hover:opacity-80"
-      >
-        <Users className="size-4" aria-hidden="true" />
-        {copy.rsvpTitle}
-      </button>
-
-      {open ? (
-        <div className="mt-4 border-t border-border pt-4">
-          {rsvps === null ? (
-            <p className="text-sm text-muted-foreground">{copy.loading}</p>
-          ) : rsvps.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{copy.rsvpEmpty}</p>
-          ) : (
-            <>
-              <p className="mb-3 text-sm text-muted-foreground">
-                {copy.total}: <span className="text-foreground">{totalGuests}</span>
-              </p>
-              <ul className="space-y-2">
-                {rsvps.map((r) => (
-                  <li
-                    key={r.id}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-accent/10 px-4 py-3 text-sm"
-                  >
-                    <span className="min-w-0 truncate">
-                      {r.guest_name}
-                      {r.note ? (
-                        <span className="ml-2 text-muted-foreground">— {r.note}</span>
-                      ) : null}
-                    </span>
-                    <span className="shrink-0 text-muted-foreground">
-                      {statusLabel[r.status]} · {r.party_size} {copy.guests}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-      ) : null}
     </motion.article>
   );
 }
