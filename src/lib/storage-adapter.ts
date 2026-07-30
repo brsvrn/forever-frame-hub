@@ -76,25 +76,22 @@ class CloudflareStorageAdapter implements StorageAdapter {
   }
 
   getPublicUrl(bucket: string, path: string): string {
-    // Cloudflare Public Domain'imiz. 
-    // .env içerisindeki VITE_CLOUDFLARE_R2_PUBLIC_URL değişkeninden alıyoruz. 
-    // Fallback olarak env yoksa varsayılan.
     const publicDomain = import.meta.env.VITE_CLOUDFLARE_R2_PUBLIC_URL || "https://pub-yourdomain.r2.dev";
-    return `${publicDomain}/${bucket}/${path}`;
+    const cleanDomain = publicDomain.replace(/\/+$/, "");
+    return `${cleanDomain}/${path.replace(/^\/+/, "")}`;
   }
 
   getFilePath(bucket: string, pathOrUrl: string): string {
     if (!pathOrUrl.startsWith("http")) return pathOrUrl.replace(/^\/+/, "");
     const cleanUrl = pathOrUrl.split("?")[0];
     const publicDomain = import.meta.env.VITE_CLOUDFLARE_R2_PUBLIC_URL || "https://pub-yourdomain.r2.dev";
+    const cleanDomain = publicDomain.replace(/\/+$/, "");
     
     // URL'den path'i çıkar
-    if (cleanUrl.startsWith(publicDomain)) {
-      const remaining = cleanUrl.replace(publicDomain, "").replace(/^\/+/, "");
-      // remaining: "bucket/path/to/file.jpg"
-      if (remaining.startsWith(bucket + "/")) {
-        return remaining.replace(bucket + "/", "");
-      }
+    if (cleanUrl.startsWith(cleanDomain)) {
+      const remaining = cleanUrl.replace(cleanDomain, "").replace(/^\/+/, "");
+      // Cloudflare R2 public URL format does not include bucket name
+      return remaining;
     }
     return "";
   }
