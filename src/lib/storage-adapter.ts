@@ -21,7 +21,7 @@ export interface StorageAdapter {
 
   getViewUrl: (bucket: string, pathOrUrl: string) => Promise<string>;
 
-  downloadFile: (bucket: string, pathOrUrl: string) => Promise<{ blob?: Blob; error?: Error }>;
+  downloadFile: (bucket: string, pathOrUrl: string) => Promise<{ url?: string; blob?: Blob; error?: Error }>;
 
   /**
    * Dosyayı siler.
@@ -110,11 +110,17 @@ class CloudflareStorageAdapter implements StorageAdapter {
 
   async downloadFile(bucket: string, pathOrUrl: string) {
     try {
-      const url = await this.getViewUrl(bucket, pathOrUrl);
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Dosya indirilemedi");
-      const blob = await response.blob();
-      return { blob };
+      const path = this.getFilePath(bucket, pathOrUrl) || pathOrUrl;
+      const { url, error } = await getR2DownloadUrl({
+        data: {
+          bucket,
+          fileName: path,
+        }
+      });
+      
+      if (error || !url) throw new Error(error || "İndirme linki alınamadı");
+      
+      return { url };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error("Dosya indirilemedi") };
     }

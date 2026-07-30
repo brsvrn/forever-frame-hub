@@ -42,3 +42,35 @@ export const getR2PresignedUrl = createServerFn({ method: "POST" })
       return { url: null, error: error instanceof Error ? error.message : "Yükleme linki oluşturulamadı" };
     }
   });
+
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+
+/**
+ * Generates a presigned GET URL for forcing file downloads.
+ */
+export const getR2DownloadUrl = createServerFn({ method: "POST" })
+  .validator((data: { bucket: string; fileName: string; originalName?: string }) => data)
+  .handler(async ({ data }) => {
+    try {
+      if (!process.env.CLOUDFLARE_ACCOUNT_ID) throw new Error("CLOUDFLARE_ACCOUNT_ID eksik");
+      if (!process.env.CLOUDFLARE_ACCESS_KEY_ID) throw new Error("CLOUDFLARE_ACCESS_KEY_ID eksik");
+      if (!process.env.CLOUDFLARE_SECRET_ACCESS_KEY) throw new Error("CLOUDFLARE_SECRET_ACCESS_KEY eksik");
+
+      const client = getS3Client();
+      const filename = data.originalName ? encodeURIComponent(data.originalName) : "download";
+      
+      const command = new GetObjectCommand({
+        Bucket: data.bucket,
+        Key: data.fileName,
+        ResponseContentDisposition: `attachment; filename="${filename}"`,
+      });
+
+      // URL is valid for 15 minutes
+      const url = await getSignedUrl(client, command, { expiresIn: 900 });
+
+      return { url, error: null };
+    } catch (error) {
+      console.error("Error generating download URL:", error);
+      return { url: null, error: error instanceof Error ? error.message : "İndirme linki oluşturulamadı" };
+    }
+  });

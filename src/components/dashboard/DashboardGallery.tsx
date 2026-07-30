@@ -133,19 +133,30 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
           "memorywedding-uploads",
           upload.file_path || upload.file_url,
         );
-        if (!result.blob) continue;
-        const path = upload.file_path || storage.getFilePath("memorywedding-uploads", upload.file_url);
-        const fallbackExtension = upload.file_type.startsWith("video/") ? "mp4" : "jpg";
-        const fileName = path.split("/").pop() || `memory-${upload.id}.${fallbackExtension}`;
-        const objectUrl = URL.createObjectURL(result.blob);
-        const link = document.createElement("a");
-        link.href = objectUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(objectUrl);
-        completed++;
+        
+        if (result.url) {
+          // Direct download via presigned URL with Content-Disposition
+          const link = document.createElement("a");
+          link.href = result.url;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          completed++;
+        } else if (result.blob) {
+          // Fallback logic
+          const path = upload.file_path || storage.getFilePath("memorywedding-uploads", upload.file_url);
+          const fallbackExtension = upload.file_type.startsWith("video/") ? "mp4" : "jpg";
+          const fileName = path.split("/").pop() || `memory-${upload.id}.${fallbackExtension}`;
+          const objectUrl = URL.createObjectURL(result.blob);
+          const link = document.createElement("a");
+          link.href = objectUrl;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(objectUrl);
+          completed++;
+        }
       }
 
       if (completed === items.length) toast.success(`${completed} medya indirildi`);
