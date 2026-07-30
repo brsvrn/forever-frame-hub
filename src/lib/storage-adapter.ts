@@ -1,4 +1,4 @@
-import { getR2PresignedUrl } from "@/server/storage/r2";
+import { getR2PresignedUrl } from "./r2-actions";
 // import { supabase } from "@/integrations/supabase/client"; // Supabase'i siliyoruz çünkü tamamen Cloudflare'a geçiyoruz
 
 export interface StorageAdapter {
