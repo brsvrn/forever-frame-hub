@@ -9,13 +9,27 @@ export function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setIsLoggedIn(!!data.session);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-    return () => subscription.unsubscribe();
+    try {
+      const auth = supabase.auth;
+
+      auth
+        .getSession()
+        .then(({ data }) => setIsLoggedIn(!!data.session))
+        .catch((error) => console.warn("Unable to read the current session:", error));
+
+      const {
+        data: { subscription },
+      } = auth.onAuthStateChange((_event, session) => {
+        setIsLoggedIn(!!session);
+      });
+
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      // The public landing page should remain usable even when local auth
+      // configuration is missing or temporarily unavailable.
+      console.warn("Authentication is unavailable on the landing page:", error);
+      return undefined;
+    }
   }, []);
 
   useEffect(() => {

@@ -6,26 +6,29 @@ export function SecuritySection() {
   const features = [
     {
       title: "Uçtan Uca Şifreleme",
-      description: "Misafirlerinizin yüklediği tüm fotoğraf ve videolar end-to-end şifrelenir. Yalnızca siz görüntüleyebilirsiniz.",
-      icon: Lock
+      description:
+        "Misafirlerinizin yüklediği tüm fotoğraf ve videolar end-to-end şifrelenir. Yalnızca siz görüntüleyebilirsiniz.",
+      icon: Lock,
     },
     {
       title: "Privacy First Mimarisi",
-      description: "Platform yöneticileri veya üçüncü şahıslar kesinlikle anılarınıza, galerinize veya misafir listenize erişemez.",
-      icon: EyeOff
+      description:
+        "Platform yöneticileri veya üçüncü şahıslar kesinlikle anılarınıza, galerinize veya misafir listenize erişemez.",
+      icon: EyeOff,
     },
     {
       title: "Güvenli Depolama",
-      description: "Verileriniz Enterprise seviyesinde, ISO 27001 sertifikalı bulut sunucularımızda saklanır.",
-      icon: Server
-    }
+      description:
+        "Verileriniz Enterprise seviyesinde, ISO 27001 sertifikalı bulut sunucularımızda saklanır.",
+      icon: Server,
+    },
   ];
 
   return (
     <section className="relative py-24 sm:py-32 overflow-hidden bg-zinc-950">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
         <div className="mx-auto max-w-2xl lg:text-center mb-16">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -33,7 +36,7 @@ export function SecuritySection() {
           >
             <Shield className="w-8 h-8" />
           </motion.div>
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -42,26 +45,27 @@ export function SecuritySection() {
           >
             Anılarınız Tamamen Güvende
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
             className="mt-6 text-lg leading-8 text-zinc-400"
           >
-            MemoryWedding, gizliliğinizi her şeyden önde tutar. Fotoğraflarınız ve videolarınız sadece sizin ve sevdiklerinizin erişimine açıktır.
+            MemoryWedding, gizliliğinizi her şeyden önde tutar. Fotoğraflarınız ve videolarınız
+            sadece sizin ve sevdiklerinizin erişimine açıktır.
           </motion.p>
         </div>
 
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
           <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
             {features.map((feature, index) => (
-              <motion.div 
+              <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.2 + (index * 0.1), duration: 0.5, ease: easeSilk }}
+                transition={{ delay: 0.2 + index * 0.1, duration: 0.5, ease: easeSilk }}
                 className="flex flex-col bg-zinc-900/50 p-8 rounded-3xl border border-zinc-800 hover:border-gold/30 transition-colors"
               >
                 <dt className="flex items-center gap-x-3 text-lg font-semibold leading-7 text-white mb-4">

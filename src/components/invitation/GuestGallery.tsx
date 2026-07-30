@@ -2,14 +2,23 @@ import { GuestUploadForm } from "./GuestUploadForm";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { Lock } from "lucide-react";
 
-export function GuestGallery({ theme, invitationId }: { theme: ThemeConfig, invitationId: string }) {
+export function GuestGallery({
+  theme,
+  invitationId,
+}: {
+  theme: ThemeConfig;
+  invitationId: string;
+}) {
   return (
     <section className="relative py-24 px-6 flex flex-col items-center snap-center">
       <div className="w-full max-w-2xl text-center">
-        <h3 className={`text-3xl text-white mb-6 ${theme.styles.typography.display}`}>Anıları Paylaş</h3>
-        
+        <h3 className={`text-3xl text-white mb-6 ${theme.styles.typography.display}`}>
+          Anıları Paylaş
+        </h3>
+
         <p className="text-white/70 mb-10 max-w-md mx-auto">
-          Bugün bizimle olduğunuz için teşekkür ederiz. Çektiğiniz fotoğraf ve videoları kalite kaybı olmadan bizimle paylaşabilirsiniz.
+          Bugün bizimle olduğunuz için teşekkür ederiz. Çektiğiniz fotoğraf ve videoları kalite
+          kaybı olmadan bizimle paylaşabilirsiniz.
         </p>
 
         <div className="flex justify-center mb-12">

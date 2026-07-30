@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { themes, type InviteThemeId, type ThemeConfig } from "./theme-engine";
+import { selectableThemes, type InviteThemeId, type ThemeConfig } from "./theme-engine";
 
 export type { InviteThemeId };
 export type InviteTheme = ThemeConfig;
 
-export const inviteThemes: InviteTheme[] = Object.values(themes);
+export const inviteThemes: InviteTheme[] = selectableThemes;
 
 export type InvitationDraft = {
   theme: InviteThemeId;
@@ -25,13 +25,17 @@ export type InvitationDraft = {
   slug: string;
   eventProgram: Array<{ time: string; title: string; desc: string }>;
   ourStory: Array<{ date: string; title: string; desc: string; photo?: string }>;
-  familyInfo: { bride?: { familyName?: string; mother?: string; father?: string }; groom?: { familyName?: string; mother?: string; father?: string } };
+  familyInfo: {
+    bride?: { familyName?: string; mother?: string; father?: string };
+    groom?: { familyName?: string; mother?: string; father?: string };
+  };
   customSections: any[];
   packageId: string;
 };
 
 export const emptyDraft: InvitationDraft = {
-  theme: "midnight",
+  packageId: "",
+  theme: "turquoise-cove",
   category: "wedding",
   partnerOne: "",
   partnerTwo: "",
@@ -54,7 +58,8 @@ export const emptyDraft: InvitationDraft = {
 };
 
 export const sampleDraft: InvitationDraft = {
-  theme: "midnight",
+  packageId: "",
+  theme: "turquoise-cove",
   category: "wedding",
   partnerOne: "Elif",
   partnerTwo: "Kaan",
@@ -80,7 +85,7 @@ export const sampleDraft: InvitationDraft = {
   ],
   familyInfo: {
     bride: { familyName: "Yılmaz", mother: "Ayşe", father: "Ahmet" },
-    groom: { familyName: "Kaya", mother: "Fatma", father: "Mehmet" }
+    groom: { familyName: "Kaya", mother: "Fatma", father: "Mehmet" },
   },
   customSections: [],
 };

@@ -9,11 +9,11 @@ export function InteractiveDemoContent() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
 
-  const { scrollYProgress } = useScroll({ 
+  const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
-  
+
   // Parallax effect
   const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
@@ -123,9 +123,9 @@ export function InteractiveDemoContent() {
           {/* Right side space for sticky phone on desktop */}
           <div className="hidden lg:flex items-center justify-center w-[350px] shrink-0 relative">
             {activeSection === "demo" && (
-              <motion.div 
-                layoutId="global-phone" 
-                style={{ y }} 
+              <motion.div
+                layoutId="global-phone"
+                style={{ y }}
                 className="w-[300px] h-[600px] z-30"
               >
                 <PhoneMockup />

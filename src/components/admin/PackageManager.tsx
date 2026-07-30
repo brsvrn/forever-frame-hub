@@ -1,6 +1,21 @@
 import { useState, useEffect } from "react";
-import { getPackages, createPackage, updatePackage, archivePackage, restorePackage, getUsageCount } from "@/lib/admin.api";
-import { Loader2, Plus, Edit2, Archive, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
+import {
+  getPackages,
+  createPackage,
+  updatePackage,
+  archivePackage,
+  restorePackage,
+  getUsageCount,
+} from "@/lib/admin.api";
+import {
+  Loader2,
+  Plus,
+  Edit2,
+  Archive,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+} from "lucide-react";
 
 export function PackageManager({ adminEmail }: { adminEmail: string }) {
   const [packages, setPackages] = useState<any[]>([]);
@@ -13,16 +28,18 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
   const [limits, setLimits] = useState<any>({});
   const [storage, setStorage] = useState<any>({});
   const [retention, setRetention] = useState<any>({});
-  
+
   const loadData = async () => {
     setLoading(true);
     try {
       const data = await getPackages(true);
       // Fetch usage counts for each package
-      const pkgsWithUsage = await Promise.all(data.map(async (pkg) => {
-        const usage = await getUsageCount("package", pkg.id);
-        return { ...pkg, usageCount: usage };
-      }));
+      const pkgsWithUsage = await Promise.all(
+        data.map(async (pkg) => {
+          const usage = await getUsageCount("package", pkg.id);
+          return { ...pkg, usageCount: usage };
+        }),
+      );
       setPackages(pkgsWithUsage);
     } catch (error) {
       console.error(error);
@@ -31,7 +48,9 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
     }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleOpenModal = (pkg: any = null) => {
     if (pkg) {
@@ -48,7 +67,16 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
     } else {
       setEditingPkg(null);
       setFormData({ name: "", description: "", price: 0 });
-      setFeatures({ qr_gallery: false, digital_invitation: true, music: true, timeline: true, story: true, gallery: true, guestbook: true, rsvp: true });
+      setFeatures({
+        qr_gallery: false,
+        digital_invitation: true,
+        music: true,
+        timeline: true,
+        story: true,
+        gallery: true,
+        guestbook: true,
+        rsvp: true,
+      });
       setLimits({ photoLimit: 1000, videoLimit: 50 });
       setStorage({ maxGb: 5 });
       setRetention({ days: 30 });
@@ -63,7 +91,7 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
         features,
         limits,
         storage,
-        retention
+        retention,
       };
       if (editingPkg) {
         await updatePackage(adminEmail, editingPkg.id, payload, editingPkg.price);
@@ -79,21 +107,29 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
 
   const handleArchive = async (pkg: any) => {
     if (pkg.usageCount > 0) {
-      if (!confirm(`Bu paket ${pkg.usageCount} aktif etkinlik tarafından kullanılıyor. Silinemez, ancak pasife alınabilir. Onaylıyor musunuz?`)) {
+      if (
+        !confirm(
+          `Bu paket ${pkg.usageCount} aktif etkinlik tarafından kullanılıyor. Silinemez, ancak pasife alınabilir. Onaylıyor musunuz?`,
+        )
+      ) {
         return;
       }
     }
     try {
       await archivePackage(adminEmail, pkg.id);
       loadData();
-    } catch (e) { alert("Hata"); }
+    } catch (e) {
+      alert("Hata");
+    }
   };
 
   const handleRestore = async (pkg: any) => {
     try {
       await restorePackage(adminEmail, pkg.id);
       loadData();
-    } catch (e) { alert("Hata"); }
+    } catch (e) {
+      alert("Hata");
+    }
   };
 
   return (
@@ -101,23 +137,37 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h2 className="text-2xl font-display text-white mb-1">Paket Yönetimi</h2>
-          <p className="text-sm text-zinc-400">Üyelik paketlerini, fiyatlarını ve özelliklerini (Feature Flags) yönetin.</p>
+          <p className="text-sm text-zinc-400">
+            Üyelik paketlerini, fiyatlarını ve özelliklerini (Feature Flags) yönetin.
+          </p>
         </div>
-        <button onClick={() => handleOpenModal()} className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-zinc-200 transition-colors flex items-center gap-2">
+        <button
+          onClick={() => handleOpenModal()}
+          className="bg-white text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-zinc-200 transition-colors flex items-center gap-2"
+        >
           <Plus className="w-4 h-4" /> Yeni Paket
         </button>
       </div>
 
       {loading ? (
-        <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>
+        <div className="py-20 flex justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gold" />
+        </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {packages.map(pkg => (
-            <div key={pkg.id} className={`border rounded-2xl p-6 relative ${pkg.is_active ? 'bg-zinc-900 border-gold/30' : 'bg-zinc-900/50 border-zinc-800 opacity-70'}`}>
-              {!pkg.is_active && <div className="absolute top-4 right-4 text-xs font-bold bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full">ARŞİVLENDİ</div>}
+          {packages.map((pkg) => (
+            <div
+              key={pkg.id}
+              className={`border rounded-2xl p-6 relative ${pkg.is_active ? "bg-zinc-900 border-gold/30" : "bg-zinc-900/50 border-zinc-800 opacity-70"}`}
+            >
+              {!pkg.is_active && (
+                <div className="absolute top-4 right-4 text-xs font-bold bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full">
+                  ARŞİVLENDİ
+                </div>
+              )}
               <h3 className="text-xl text-white font-display mb-1">{pkg.name}</h3>
               <div className="text-2xl text-white font-medium mb-4">{pkg.price} ₺</div>
-              
+
               <div className="mb-4 text-sm text-zinc-400">
                 <p>Kota: {pkg.storage?.maxGb || 0} GB</p>
                 <p>Fotoğraf Limiti: {pkg.limits?.photoLimit || 0}</p>
@@ -127,15 +177,24 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
               </div>
 
               <div className="flex gap-2 mt-6">
-                <button onClick={() => handleOpenModal(pkg)} className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-lg text-sm transition-colors">
+                <button
+                  onClick={() => handleOpenModal(pkg)}
+                  className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-lg text-sm transition-colors"
+                >
                   <Edit2 className="w-4 h-4" /> Düzenle
                 </button>
                 {pkg.is_active ? (
-                  <button onClick={() => handleArchive(pkg)} className="flex-1 flex justify-center items-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 py-2 rounded-lg text-sm transition-colors">
+                  <button
+                    onClick={() => handleArchive(pkg)}
+                    className="flex-1 flex justify-center items-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 py-2 rounded-lg text-sm transition-colors"
+                  >
                     <Archive className="w-4 h-4" /> Pasife Al
                   </button>
                 ) : (
-                  <button onClick={() => handleRestore(pkg)} className="flex-1 flex justify-center items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 py-2 rounded-lg text-sm transition-colors">
+                  <button
+                    onClick={() => handleRestore(pkg)}
+                    className="flex-1 flex justify-center items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 py-2 rounded-lg text-sm transition-colors"
+                  >
                     <RefreshCw className="w-4 h-4" /> Aktifleştir
                   </button>
                 )}
@@ -148,62 +207,131 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-display text-white mb-6">{editingPkg ? 'Paketi Düzenle' : 'Yeni Paket Oluştur'}</h3>
-            
+            <h3 className="text-xl font-display text-white mb-6">
+              {editingPkg ? "Paketi Düzenle" : "Yeni Paket Oluştur"}
+            </h3>
+
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm text-zinc-400 mb-1">Paket Adı</label>
-                <input type="text" className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                <input
+                  type="text"
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-zinc-400 mb-1">Fiyat (₺)</label>
-                  <input type="number" className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white" value={formData.price} onChange={e => setFormData({...formData, price: parseFloat(e.target.value)})} />
+                  <input
+                    type="number"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: parseFloat(e.target.value) })
+                    }
+                  />
                 </div>
                 <div>
                   <label className="block text-sm text-zinc-400 mb-1">Depolama (GB)</label>
-                  <input type="number" className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white" value={storage.maxGb} onChange={e => setStorage({...storage, maxGb: parseInt(e.target.value)})} />
+                  <input
+                    type="number"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    value={storage.maxGb}
+                    onChange={(e) => setStorage({ ...storage, maxGb: parseInt(e.target.value) })}
+                  />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm text-zinc-400 mb-1">Fotoğraf Limiti</label>
-                  <input type="number" className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white" value={limits.photoLimit} onChange={e => setLimits({...limits, photoLimit: parseInt(e.target.value)})} />
+                  <input
+                    type="number"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    value={limits.photoLimit}
+                    onChange={(e) => setLimits({ ...limits, photoLimit: parseInt(e.target.value) })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm text-zinc-400 mb-1">Video Limiti</label>
-                  <input type="number" className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white" value={limits.videoLimit} onChange={e => setLimits({...limits, videoLimit: parseInt(e.target.value)})} />
+                  <input
+                    type="number"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    value={limits.videoLimit}
+                    onChange={(e) => setLimits({ ...limits, videoLimit: parseInt(e.target.value) })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm text-zinc-400 mb-1">Saklama Süresi (Gün)</label>
-                  <input type="number" className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white" value={retention.days} onChange={e => setRetention({...retention, days: parseInt(e.target.value)})} />
+                  <input
+                    type="number"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    value={retention.days}
+                    onChange={(e) => setRetention({ ...retention, days: parseInt(e.target.value) })}
+                  />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm text-zinc-400 mb-2">Özellikler (Features)</label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {Object.keys(features).length > 0 ? Object.keys(features).map((key) => (
-                    <label key={key} className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
-                      <input type="checkbox" checked={features[key] || false} onChange={e => setFeatures({...features, [key]: e.target.checked})} className="rounded bg-zinc-900 border-zinc-700 text-gold focus:ring-gold" />
-                      {key}
-                    </label>
-                  )) : (
-                    ['qr_gallery', 'digital_invitation', 'music', 'timeline', 'story', 'gallery', 'guestbook', 'rsvp'].map(key => (
-                      <label key={key} className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
-                        <input type="checkbox" checked={features[key] || false} onChange={e => setFeatures({...features, [key]: e.target.checked})} className="rounded bg-zinc-900 border-zinc-700 text-gold focus:ring-gold" />
-                        {key}
-                      </label>
-                    ))
-                  )}
+                  {Object.keys(features).length > 0
+                    ? Object.keys(features).map((key) => (
+                        <label
+                          key={key}
+                          className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={features[key] || false}
+                            onChange={(e) => setFeatures({ ...features, [key]: e.target.checked })}
+                            className="rounded bg-zinc-900 border-zinc-700 text-gold focus:ring-gold"
+                          />
+                          {key}
+                        </label>
+                      ))
+                    : [
+                        "qr_gallery",
+                        "digital_invitation",
+                        "music",
+                        "timeline",
+                        "story",
+                        "gallery",
+                        "guestbook",
+                        "rsvp",
+                      ].map((key) => (
+                        <label
+                          key={key}
+                          className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={features[key] || false}
+                            onChange={(e) => setFeatures({ ...features, [key]: e.target.checked })}
+                            className="rounded bg-zinc-900 border-zinc-700 text-gold focus:ring-gold"
+                          />
+                          {key}
+                        </label>
+                      ))}
                 </div>
               </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
-              <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg text-sm text-zinc-400 hover:text-white">İptal</button>
-              <button onClick={handleSave} className="bg-white text-black px-6 py-2 rounded-lg text-sm font-medium hover:bg-zinc-200">Kaydet</button>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="px-4 py-2 rounded-lg text-sm text-zinc-400 hover:text-white"
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleSave}
+                className="bg-white text-black px-6 py-2 rounded-lg text-sm font-medium hover:bg-zinc-200"
+              >
+                Kaydet
+              </button>
             </div>
           </div>
         </div>

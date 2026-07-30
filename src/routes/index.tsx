@@ -35,19 +35,19 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "MemoryWedding",
-          "operatingSystem": "Web",
-          "applicationCategory": "LifestyleApplication",
-          "offers": {
+          name: "MemoryWedding",
+          operatingSystem: "Web",
+          applicationCategory: "LifestyleApplication",
+          offers: {
             "@type": "Offer",
-            "price": "1500",
-            "priceCurrency": "TRY"
+            price: "1500",
+            priceCurrency: "TRY",
           },
-          "description": description,
-          "url": "https://memorywedding.com/"
-        })
-      }
-    ]
+          description: description,
+          url: "https://memorywedding.com/",
+        }),
+      },
+    ],
   }),
   component: MarketingLandingPage,
 });

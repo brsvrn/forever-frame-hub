@@ -5,12 +5,10 @@ import type { BuilderContent } from "@/lib/builder-content";
 import {
   countdownDays,
   formatInviteDate,
-  inviteThemes,
   type InvitationDraft,
 } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
-import { getPublicThemes } from "@/lib/invitations.api";
-import { useState, useEffect } from "react";
+import { resolveTheme } from "@/lib/theme-engine";
 
 export function InvitationPreview({
   draft,
@@ -26,21 +24,8 @@ export function InvitationPreview({
   compact?: boolean;
 }) {
   const c = copy.inviteCard;
-  
-  const [themes, setThemes] = useState<any[]>([]);
-  useEffect(() => {
-    getPublicThemes().then(res => setThemes(res));
-  }, []);
 
-  const currentTheme = themes.find((item) => item.theme_id === draft.theme);
-  const themeConfig = currentTheme?.config || {
-    primaryColor: "#EAB308",
-    secondaryColor: "#18181B",
-    thumbnailUrl: "https://images.unsplash.com/photo-1519741497674-611481863552",
-    font: "Inter",
-    cardRadius: "md",
-    shadow: "sm"
-  };
+  const themeConfig = resolveTheme(draft.theme);
 
   const names =
     draft.partnerOne || draft.partnerTwo
@@ -48,29 +33,43 @@ export function InvitationPreview({
       : c.namesFallback;
   const dateLabel = formatInviteDate(draft.date, lang) || c.dateFallback;
   const days = countdownDays(draft.date);
-  
-  const radiusMap: any = { none: "rounded-none", sm: "rounded-sm", md: "rounded-md", lg: "rounded-lg", xl: "rounded-xl", "2xl": "rounded-2xl", full: "rounded-3xl" };
-  const shadowMap: any = { none: "shadow-none", sm: "shadow-sm", md: "shadow-md", lg: "shadow-lg", xl: "shadow-xl" };
+
+  const radiusMap: any = {
+    none: "rounded-none",
+    sm: "rounded-sm",
+    md: "rounded-md",
+    lg: "rounded-lg",
+    xl: "rounded-xl",
+    "2xl": "rounded-2xl",
+    full: "rounded-3xl",
+  };
+  const shadowMap: any = {
+    none: "shadow-none",
+    sm: "shadow-sm",
+    md: "shadow-md",
+    lg: "shadow-lg",
+    xl: "shadow-xl",
+  };
 
   return (
     <div
       data-invite-theme={draft.theme}
       className={cn(
         "invite-canvas overflow-hidden border border-border",
-        radiusMap[themeConfig.cardRadius || "md"] || "rounded-3xl",
-        shadowMap[themeConfig.shadow || "sm"] || "shadow-md",
+        radiusMap["full"],
+        shadowMap["xl"],
         themeConfig.styles?.typography?.sans,
         className,
       )}
-      style={{ 
-        fontFamily: `"${themeConfig.font}", sans-serif`,
+      style={{
+        fontFamily: `"${themeConfig.font || "Cormorant Garamond"}", sans-serif`,
         backgroundColor: themeConfig.secondaryColor,
-        color: themeConfig.primaryColor
+        color: themeConfig.primaryColor,
       }}
     >
       <div className="relative">
         <img
-          src={themeConfig.thumbnailUrl}
+          src={themeConfig.image}
           alt=""
           aria-hidden="true"
           className={cn("w-full object-cover", compact ? "aspect-[4/3]" : "aspect-[16/10]")}
@@ -91,7 +90,7 @@ export function InvitationPreview({
             className={cn(
               "invite-display mt-3 font-light leading-tight",
               compact ? "text-3xl" : "text-4xl sm:text-5xl",
-              themeConfig.styles?.typography?.display
+              themeConfig.styles?.typography?.display,
             )}
           >
             {names}

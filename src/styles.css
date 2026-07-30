@@ -242,6 +242,126 @@
   --invite-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
+[data-invite-theme="turquoise-cove"] {
+  --invite-bg: oklch(0.24 0.05 205);
+  --invite-panel: oklch(0.2 0.045 205);
+  --invite-ink: oklch(0.97 0.018 190);
+  --invite-soft: oklch(0.82 0.035 195);
+  --invite-accent: oklch(0.79 0.12 190);
+  --invite-accent-ink: oklch(0.22 0.05 205);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="golden-sunset"] {
+  --invite-bg: oklch(0.35 0.075 35);
+  --invite-panel: oklch(0.3 0.065 30);
+  --invite-ink: oklch(0.96 0.03 70);
+  --invite-soft: oklch(0.83 0.045 55);
+  --invite-accent: oklch(0.82 0.12 65);
+  --invite-accent-ink: oklch(0.27 0.07 30);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="tropical-lagoon"] {
+  --invite-bg: oklch(0.28 0.065 185);
+  --invite-panel: oklch(0.23 0.055 185);
+  --invite-ink: oklch(0.98 0.018 170);
+  --invite-soft: oklch(0.84 0.04 180);
+  --invite-accent: oklch(0.82 0.12 175);
+  --invite-accent-ink: oklch(0.23 0.06 185);
+  --invite-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
+[data-invite-theme="moonlit-shore"] {
+  --invite-bg: oklch(0.17 0.045 260);
+  --invite-panel: oklch(0.21 0.05 255);
+  --invite-ink: oklch(0.96 0.018 250);
+  --invite-soft: oklch(0.76 0.035 250);
+  --invite-accent: oklch(0.84 0.045 245);
+  --invite-accent-ink: oklch(0.18 0.045 260);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="aegean-morning"] {
+  --invite-bg: oklch(0.3 0.09 250);
+  --invite-panel: oklch(0.25 0.075 250);
+  --invite-ink: oklch(0.98 0.01 240);
+  --invite-soft: oklch(0.84 0.03 240);
+  --invite-accent: oklch(0.67 0.2 345);
+  --invite-accent-ink: oklch(0.98 0.01 240);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="soft-sand-dunes"] {
+  --invite-bg: oklch(0.91 0.035 75);
+  --invite-panel: oklch(0.96 0.025 78);
+  --invite-ink: oklch(0.31 0.035 58);
+  --invite-soft: oklch(0.5 0.035 60);
+  --invite-accent: oklch(0.7 0.075 70);
+  --invite-accent-ink: oklch(0.25 0.035 58);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="emerald-forest"] {
+  --invite-bg: oklch(0.25 0.055 155);
+  --invite-panel: oklch(0.2 0.045 155);
+  --invite-ink: oklch(0.97 0.025 105);
+  --invite-soft: oklch(0.82 0.045 125);
+  --invite-accent: oklch(0.82 0.09 125);
+  --invite-accent-ink: oklch(0.22 0.055 155);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="wildflower-meadow"] {
+  --invite-bg: oklch(0.92 0.035 88);
+  --invite-panel: oklch(0.96 0.022 88);
+  --invite-ink: oklch(0.34 0.04 105);
+  --invite-soft: oklch(0.52 0.04 75);
+  --invite-accent: oklch(0.75 0.09 335);
+  --invite-accent-ink: oklch(0.3 0.035 90);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="alpine-mist"] {
+  --invite-bg: oklch(0.25 0.03 175);
+  --invite-panel: oklch(0.21 0.028 175);
+  --invite-ink: oklch(0.96 0.012 160);
+  --invite-soft: oklch(0.79 0.025 165);
+  --invite-accent: oklch(0.78 0.045 165);
+  --invite-accent-ink: oklch(0.22 0.035 175);
+  --invite-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
+[data-invite-theme="amalfi-lemon-terrace"] {
+  --invite-bg: oklch(0.31 0.06 205);
+  --invite-panel: oklch(0.25 0.052 205);
+  --invite-ink: oklch(0.98 0.025 95);
+  --invite-soft: oklch(0.84 0.04 105);
+  --invite-accent: oklch(0.86 0.15 95);
+  --invite-accent-ink: oklch(0.25 0.06 205);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="tuscan-golden-hills"] {
+  --invite-bg: oklch(0.32 0.055 63);
+  --invite-panel: oklch(0.27 0.045 60);
+  --invite-ink: oklch(0.97 0.03 84);
+  --invite-soft: oklch(0.82 0.05 78);
+  --invite-accent: oklch(0.78 0.12 72);
+  --invite-accent-ink: oklch(0.27 0.05 58);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
+[data-invite-theme="lake-como-garden"] {
+  --invite-bg: oklch(0.27 0.045 220);
+  --invite-panel: oklch(0.22 0.04 220);
+  --invite-ink: oklch(0.97 0.015 92);
+  --invite-soft: oklch(0.8 0.025 205);
+  --invite-accent: oklch(0.81 0.035 95);
+  --invite-accent-ink: oklch(0.24 0.045 220);
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
 @utility invite-canvas {
   background-color: var(--invite-bg);
   color: var(--invite-ink);

@@ -1,4 +1,5 @@
 const tr = {
+  autosave: "Otomatik kayıt açık",
   meta: {
     title: "Davetiye Oluştur — MemoryWedding",
     description:
@@ -7,7 +8,7 @@ const tr = {
   back: "Ana sayfa",
   eyebrow: "Davetiye Stüdyosu",
   title: "Davetiyenizi oluşturun",
-  subtitle: "Beş kısa adım. Her değişiklik sağdaki önizlemeye anında yansır.",
+  subtitle: "Altı kısa adım. Her değişiklik sağdaki önizlemeye anında yansır.",
   sample: "Örnek içerikle doldur",
   clear: "Temizle",
   next: "Devam et",
@@ -117,6 +118,7 @@ const tr = {
 export type BuilderContent = typeof tr;
 
 const en: BuilderContent = {
+  autosave: "Autosave enabled",
   meta: {
     title: "Create your invitation — MemoryWedding",
     description:
@@ -125,7 +127,7 @@ const en: BuilderContent = {
   back: "Home",
   eyebrow: "Invitation Studio",
   title: "Create your invitation",
-  subtitle: "Five short steps. Every change appears instantly in the preview.",
+  subtitle: "Six short steps. Every change appears instantly in the preview.",
   sample: "Fill with sample content",
   clear: "Clear",
   next: "Continue",

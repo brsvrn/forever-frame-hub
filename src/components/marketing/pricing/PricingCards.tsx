@@ -102,9 +102,7 @@ function PricingFeature({
       >
         <Check className="w-3 h-3 stroke-[3]" />
       </div>
-      <span className={`text-sm ${dark ? "text-neutral-200" : "text-foreground/80"}`}>
-        {text}
-      </span>
+      <span className={`text-sm ${dark ? "text-neutral-200" : "text-foreground/80"}`}>{text}</span>
     </li>
   );
 }

@@ -17,11 +17,11 @@ export function AnimatedQRFlow() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
 
-  const { scrollYProgress } = useScroll({ 
+  const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
-  
+
   const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
   useEffect(() => {
@@ -59,23 +59,31 @@ export function AnimatedQRFlow() {
   ];
 
   return (
-    <section id="qr-flow" ref={ref} className="py-24 bg-neutral-950 text-white relative overflow-hidden min-h-[100dvh] flex flex-col justify-center">
+    <section
+      id="qr-flow"
+      ref={ref}
+      className="py-24 bg-neutral-950 text-white relative overflow-hidden min-h-[100dvh] flex flex-col justify-center"
+    >
       {/* Background decorations */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay"></div>
 
       <div className="container mx-auto px-4 relative z-10 md:pl-[40vw]">
-        
         {/* Phone Mockup Placeholder for Desktop */}
         <div className="hidden lg:flex items-center justify-center absolute left-[5vw] top-1/2 -translate-y-1/2 w-[350px]">
           <AnimatePresence mode="wait">
             {activeSection === "qr" && (
-              <motion.div 
-                layoutId="global-phone" 
-                style={{ y }} 
+              <motion.div
+                layoutId="global-phone"
+                style={{ y }}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5, filter: "blur(10px)", transition: { duration: 0.5 } }}
+                exit={{
+                  opacity: 0,
+                  scale: 0.5,
+                  filter: "blur(10px)",
+                  transition: { duration: 0.5 },
+                }}
                 className="w-[300px] h-[600px] z-30"
               >
                 <PhoneMockup />
@@ -101,10 +109,7 @@ export function AnimatedQRFlow() {
         {/* Desktop Flow */}
         <div className="hidden lg:grid grid-cols-2 gap-x-12 gap-y-16 max-w-3xl relative mt-12">
           {steps.map((step, idx) => (
-            <div
-              key={step.id}
-              className="relative z-10 flex flex-col items-start text-left group"
-            >
+            <div key={step.id} className="relative z-10 flex flex-col items-start text-left group">
               <FadeIn delay={step.delay}>
                 <div className="w-20 h-20 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:border-primary/50 group-hover:bg-primary/10 transition-all duration-300 mb-6">
                   <div className="text-neutral-300 group-hover:text-primary transition-colors">

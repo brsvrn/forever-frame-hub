@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { consumeAuthReturnTo } from "@/lib/auth-helpers";
 
 export const Route = createFileRoute("/auth/callback")({
   component: AuthCallbackPage,
 });
 
 function AuthCallbackPage() {
-  const navigate = useNavigate();
   const [status, setStatus] = useState<"loading" | "success" | "error" | "cancelled">("loading");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -20,10 +20,10 @@ function AuthCallbackPage() {
         // Supabase OAuth often returns errors in hash (e.g. #error=access_denied) or query params
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const queryParams = new URLSearchParams(window.location.search);
-        
+
         const errParam = hashParams.get("error") || queryParams.get("error");
         const errDesc = hashParams.get("error_description") || queryParams.get("error_description");
-        
+
         if (errParam) {
           if (errDesc?.includes("access_denied") || errDesc?.includes("cancelled")) {
             setStatus("cancelled");
@@ -33,14 +33,17 @@ function AuthCallbackPage() {
         }
 
         // Attempt to get session. Supabase client automatically processes the hash fragment token.
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
         if (error) throw error;
-        
+
         if (session) {
           setStatus("success");
           setTimeout(() => {
-            navigate({ to: "/panel" });
+            window.location.assign(consumeAuthReturnTo());
           }, 1500);
         } else {
           // It's possible that this route was loaded without any OAuth token
@@ -49,12 +52,14 @@ function AuthCallbackPage() {
         }
       } catch (err) {
         setStatus("error");
-        setErrorMsg(err instanceof Error ? err.message : "Giriş tamamlanamadı. Lütfen tekrar deneyin.");
+        setErrorMsg(
+          err instanceof Error ? err.message : "Giriş tamamlanamadı. Lütfen tekrar deneyin.",
+        );
       }
     };
 
     handleCallback();
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden">
@@ -68,8 +73,12 @@ function AuthCallbackPage() {
           <div className="flex flex-col items-center gap-5">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
             <div>
-              <h2 className="text-2xl font-light text-foreground tracking-tight mb-2">Giriş yapılıyor...</h2>
-              <p className="text-sm text-muted-foreground">Lütfen bekleyin, hesabınız doğrulanıyor.</p>
+              <h2 className="text-2xl font-light text-foreground tracking-tight mb-2">
+                Giriş yapılıyor...
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Lütfen bekleyin, hesabınız doğrulanıyor.
+              </p>
             </div>
           </div>
         )}
@@ -80,7 +89,9 @@ function AuthCallbackPage() {
               <CheckCircle2 className="w-7 h-7" />
             </div>
             <div>
-              <h2 className="text-2xl font-light text-foreground tracking-tight mb-2">Başarıyla giriş yapıldı</h2>
+              <h2 className="text-2xl font-light text-foreground tracking-tight mb-2">
+                Başarıyla giriş yapıldı
+              </h2>
               <p className="text-sm text-muted-foreground">Panele yönlendiriliyorsunuz...</p>
             </div>
           </div>
@@ -103,7 +114,10 @@ function AuthCallbackPage() {
               <Button asChild variant="outline" className="w-full rounded-full">
                 <Link to="/">Ana Sayfa</Link>
               </Button>
-              <Button asChild className="w-full rounded-full bg-gradient-to-r from-rose to-gold text-white border-0">
+              <Button
+                asChild
+                className="w-full rounded-full bg-gradient-to-r from-rose to-gold text-white border-0"
+              >
                 <Link to="/giris">Tekrar Dene</Link>
               </Button>
             </div>

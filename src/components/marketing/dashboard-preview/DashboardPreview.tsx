@@ -80,7 +80,11 @@ export function DashboardPreview() {
   }, []);
 
   return (
-    <section id="dashboard" ref={ref} className="py-24 lg:py-32 bg-stone-50 dark:bg-neutral-950 relative overflow-hidden min-h-[100dvh] flex flex-col justify-center border-t">
+    <section
+      id="dashboard"
+      ref={ref}
+      className="py-24 lg:py-32 bg-stone-50 dark:bg-neutral-950 relative overflow-hidden min-h-[100dvh] flex flex-col justify-center border-t"
+    >
       {/* Decorative background element */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/10 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse duration-700"></div>
 

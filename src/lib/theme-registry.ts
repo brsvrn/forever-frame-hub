@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { ThemeConfig, InviteThemeId } from "./theme-engine";
+import { resolveTheme, type ThemeConfig, type InviteThemeId } from "./theme-engine";
 
 export class ThemeRegistry {
   private static instance: ThemeRegistry;
@@ -21,25 +21,27 @@ export class ThemeRegistry {
    */
   async loadThemes(): Promise<ThemeConfig[]> {
     try {
-      const { data, error } = await supabase
-        .from('themes')
-        .select('*')
-        .eq('is_active', true);
+      const { data, error } = await supabase.from("themes").select("*").eq("is_active", true);
 
       if (error) throw error;
 
       if (data && data.length > 0) {
-        data.forEach(dbTheme => {
-          const config = typeof dbTheme.config === 'string' ? JSON.parse(dbTheme.config) : dbTheme.config;
+        data.forEach((dbTheme) => {
+          const config =
+            typeof dbTheme.config === "string" ? JSON.parse(dbTheme.config) : dbTheme.config;
+          const fallback = resolveTheme(dbTheme.theme_id);
           const themeConfig: ThemeConfig = {
+            ...fallback,
             id: dbTheme.theme_id as InviteThemeId,
             name: dbTheme.name,
             tag: config.tag || { tr: dbTheme.name, en: dbTheme.name },
-            image: dbTheme.preview_image_url || '',
-            music: config.music || { defaultTrack: '', title: '' },
-            ambientEffect: config.ambientEffect || { type: 'none', intensity: 'light' },
-            openingAnimation: config.openingAnimation || { duration: 2, style: 'fade' },
-            styles: config.styles || {}
+            image: dbTheme.preview_image_url || fallback.image,
+            coverVideoUrl: config.coverVideoUrl || fallback.coverVideoUrl,
+            qr: config.qr || fallback.qr,
+            music: config.music || fallback.music,
+            ambientEffect: config.ambientEffect || fallback.ambientEffect,
+            openingAnimation: config.openingAnimation || fallback.openingAnimation,
+            styles: config.styles || fallback.styles,
           };
           this.themesCache.set(dbTheme.theme_id, themeConfig);
         });
@@ -59,26 +61,30 @@ export class ThemeRegistry {
     if (this.themesCache.has(themeId)) {
       return this.themesCache.get(themeId) || null;
     }
-    
+
     // Attempt lazy load if not in cache
     try {
       const { data, error } = await supabase
-        .from('themes')
-        .select('*')
-        .eq('theme_id', themeId)
+        .from("themes")
+        .select("*")
+        .eq("theme_id", themeId)
         .single();
-        
+
       if (!error && data) {
-        const config = typeof data.config === 'string' ? JSON.parse(data.config) : data.config;
+        const config = typeof data.config === "string" ? JSON.parse(data.config) : data.config;
+        const fallback = resolveTheme(data.theme_id);
         const themeConfig: ThemeConfig = {
+          ...fallback,
           id: data.theme_id as InviteThemeId,
           name: data.name,
           tag: config.tag || { tr: data.name, en: data.name },
-          image: data.preview_image_url || '',
-          music: config.music || { defaultTrack: '', title: '' },
-          ambientEffect: config.ambientEffect || { type: 'none', intensity: 'light' },
-          openingAnimation: config.openingAnimation || { duration: 2, style: 'fade' },
-          styles: config.styles || {}
+          image: data.preview_image_url || fallback.image,
+          coverVideoUrl: config.coverVideoUrl || fallback.coverVideoUrl,
+          qr: config.qr || fallback.qr,
+          music: config.music || fallback.music,
+          ambientEffect: config.ambientEffect || fallback.ambientEffect,
+          openingAnimation: config.openingAnimation || fallback.openingAnimation,
+          styles: config.styles || fallback.styles,
         };
         this.themesCache.set(themeId, themeConfig);
         return themeConfig;
@@ -86,7 +92,7 @@ export class ThemeRegistry {
     } catch (e) {
       console.warn("Theme not found in DB, falling back to static config", e);
     }
-    
+
     return null;
   }
 }

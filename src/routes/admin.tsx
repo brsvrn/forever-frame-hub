@@ -12,17 +12,32 @@ export const Route = createFileRoute("/admin")({
   ),
 });
 
-const ADMIN_EMAILS = ["admin@memorywedding.com"];
-
 function AdminGate() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/giris" });
   }, [loading, user, navigate]);
 
-  if (loading || !user) {
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(null);
+      return;
+    }
+
+    let cancelled = false;
+    void supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data, error }) => {
+      if (!cancelled) setIsAdmin(!error && data === true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  if (loading || !user || isAdmin === null) {
     return (
       <div className="grid min-h-dvh place-items-center bg-zinc-950">
         <Loader2 className="size-6 animate-spin text-gold" />
@@ -32,21 +47,20 @@ function AdminGate() {
 
   // Demo / Test ortamı için yetkilendirme kontrolünü geçici olarak devredışı bırakıyoruz.
   // Gerçek ortamda burası RLS ve Admin Role tablosu ile korunmalıdır.
-  /*
-  if (!user.email || !ADMIN_EMAILS.includes(user.email)) {
+  if (!isAdmin) {
     return (
       <div className="grid min-h-dvh place-items-center bg-zinc-950 text-white text-center">
         <div>
           <h1 className="text-2xl font-bold mb-2 text-rose-500">Yetkisiz Erişim</h1>
           <p className="text-zinc-400 mb-6">Bu sayfayı görüntüleme yetkiniz yok.</p>
-          <Link to="/panel" className="text-gold hover:underline">Yönetim Paneline Dön</Link>
+          <Link to="/panel" className="text-gold hover:underline">
+            Yönetim Paneline Dön
+          </Link>
         </div>
       </div>
     );
   }
-  */
-
-  return <AdminDashboard email={user.email} />;
+  return <AdminDashboard email={user.email ?? ""} />;
 }
 
 type TabType = "themes" | "packages" | "audit" | "settings";
@@ -71,13 +85,13 @@ function AdminDashboard({ email }: { email: string }) {
           <p className="text-xs text-zinc-500 mt-1">{email}</p>
         </div>
         <nav className="flex-1 p-4 space-y-1">
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${
-                activeTab === tab.id 
-                  ? "bg-rose-500/20 text-rose-400 font-medium border border-rose-500/30" 
+                activeTab === tab.id
+                  ? "bg-rose-500/20 text-rose-400 font-medium border border-rose-500/30"
                   : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
               }`}
             >
@@ -87,7 +101,7 @@ function AdminDashboard({ email }: { email: string }) {
           ))}
         </nav>
         <div className="p-4 border-t border-zinc-800">
-          <button 
+          <button
             onClick={async () => {
               await signOut();
               navigate({ to: "/" });
@@ -121,7 +135,7 @@ function AuditLogs() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAuditLogs().then(data => {
+    getAuditLogs().then((data) => {
       setLogs(data);
       setLoading(false);
     });
@@ -131,11 +145,15 @@ function AuditLogs() {
     <div className="animate-in fade-in duration-500">
       <div className="mb-8">
         <h2 className="text-2xl font-display text-white mb-1">İşlem Kayıtları</h2>
-        <p className="text-sm text-zinc-400">Yöneticilerin sistem üzerinde yaptığı değişiklikler (Audit Trail).</p>
+        <p className="text-sm text-zinc-400">
+          Yöneticilerin sistem üzerinde yaptığı değişiklikler (Audit Trail).
+        </p>
       </div>
 
       {loading ? (
-        <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>
+        <div className="py-20 flex justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gold" />
+        </div>
       ) : (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
           <table className="w-full text-sm text-left">
@@ -148,15 +166,22 @@ function AuditLogs() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/50">
-              {logs.map(log => (
+              {logs.map((log) => (
                 <tr key={log.id} className="hover:bg-zinc-800/20 transition-colors">
-                  <td className="px-6 py-4 text-zinc-300">{new Date(log.created_at).toLocaleString('tr-TR')}</td>
+                  <td className="px-6 py-4 text-zinc-300">
+                    {new Date(log.created_at).toLocaleString("tr-TR")}
+                  </td>
                   <td className="px-6 py-4 text-zinc-300">{log.admin_email}</td>
                   <td className="px-6 py-4 text-white">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      log.action === 'create' ? 'bg-emerald-500/20 text-emerald-400' :
-                      log.action === 'archive' ? 'bg-rose-500/20 text-rose-400' : 'bg-blue-500/20 text-blue-400'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        log.action === "create"
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : log.action === "archive"
+                            ? "bg-rose-500/20 text-rose-400"
+                            : "bg-blue-500/20 text-blue-400"
+                      }`}
+                    >
                       {log.action.toUpperCase()}
                     </span>
                   </td>
@@ -165,7 +190,9 @@ function AuditLogs() {
               ))}
               {logs.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">Kayıt bulunamadı.</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">
+                    Kayıt bulunamadı.
+                  </td>
                 </tr>
               )}
             </tbody>

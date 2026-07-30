@@ -1,56 +1,29 @@
 import { usePhone } from "@/contexts/PhoneContext";
+import { resolveTheme } from "@/lib/theme-engine";
+import type { CSSProperties, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, MapPin, Camera, Image as ImageIcon, Send, ArrowLeft } from "lucide-react";
 
 interface PhoneMockupProps {
   className?: string;
+  children?: ReactNode;
 }
 
-// Theme configuration mapping
-const themeStyles: Record<
-  string,
-  {
-    bg: string;
-    textColor: string;
-    accent: string;
-    font: string;
-    overlay: string;
-  }
-> = {
-  classic: {
-    bg: "bg-[#FAF9F6]",
-    textColor: "text-stone-800",
-    accent: "bg-stone-900",
-    font: "font-serif italic",
-    overlay: "bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]",
-  },
-  floral: {
-    bg: "bg-rose-50",
-    textColor: "text-rose-950",
-    accent: "bg-rose-600",
-    font: "font-sans font-light",
-    overlay: "bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]",
-  },
-  minimal: {
-    bg: "bg-white",
-    textColor: "text-neutral-900",
-    accent: "bg-neutral-900",
-    font: "font-sans font-bold tracking-tight",
-    overlay: "bg-transparent",
-  },
-  royal: {
-    bg: "bg-slate-900",
-    textColor: "text-amber-100",
-    accent: "bg-amber-600",
-    font: "font-serif",
-    overlay: "bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]",
-  },
-};
-
-export function PhoneMockup({ className = "" }: PhoneMockupProps) {
+export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
   const { activeScreen, setActiveScreen, activeTheme, isPlaying, setIsPlaying } = usePhone();
-
-  const theme = themeStyles[activeTheme] || themeStyles.classic;
+  const themeConfig = resolveTheme(activeTheme);
+  const theme = {
+    bg: "bg-[var(--phone-theme-bg)]",
+    textColor: "text-[var(--phone-theme-text)]",
+    accent: "bg-[var(--phone-theme-accent)] text-[var(--phone-theme-accent-ink)]",
+    font: themeConfig.styles.typography.display,
+  };
+  const themeVariables = {
+    "--phone-theme-bg": themeConfig.secondaryColor || themeConfig.qr.ink,
+    "--phone-theme-text": themeConfig.primaryColor || themeConfig.qr.paper,
+    "--phone-theme-accent": themeConfig.qr.accent,
+    "--phone-theme-accent-ink": themeConfig.qr.ink,
+  } as CSSProperties;
 
   return (
     <div
@@ -68,7 +41,11 @@ export function PhoneMockup({ className = "" }: PhoneMockupProps) {
       <div className="absolute -right-[17px] top-[142px] rounded-r-md w-[3px] h-[64px] bg-gray-800"></div>
 
       {/* Screen Container with AnimatePresence for smooth transitions */}
-      <div className="w-full h-full bg-white relative overflow-hidden rounded-[2rem]">
+      <div
+        className="relative h-full w-full overflow-hidden rounded-[2rem] bg-white"
+        style={themeVariables}
+      >
+        {children}
         <AnimatePresence mode="wait">
           {activeScreen === "envelope" && (
             <motion.div
@@ -77,12 +54,19 @@ export function PhoneMockup({ className = "" }: PhoneMockupProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0 bg-stone-100 flex flex-col items-center justify-center p-6 z-20"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden p-6"
+              style={{ backgroundColor: themeConfig.qr.paper }}
             >
+              <img
+                src={themeConfig.image}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-20"
+                style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
+              />
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-full aspect-[4/3] bg-white rounded-md shadow-xl flex items-center justify-center cursor-pointer border-2 border-stone-200 relative overflow-hidden group"
+                className="group relative z-10 flex aspect-[4/3] w-full cursor-pointer items-center justify-center overflow-hidden rounded-md border-2 border-white/60 bg-white/70 shadow-xl backdrop-blur-md"
                 onClick={() => setActiveScreen("invite")}
               >
                 <div
@@ -91,7 +75,7 @@ export function PhoneMockup({ className = "" }: PhoneMockupProps) {
                 ></div>
                 <span className={`text-4xl z-0 mt-8 ${theme.font} ${theme.textColor}`}>A & E</span>
               </motion.div>
-              <p className="mt-12 text-stone-500 text-xs font-semibold tracking-[0.2em] uppercase animate-pulse">
+              <p className="relative z-10 mt-12 animate-pulse text-xs font-semibold uppercase tracking-[0.2em] text-stone-600">
                 Zarfı Açmak İçin Dokunun
               </p>
             </motion.div>
@@ -107,14 +91,16 @@ export function PhoneMockup({ className = "" }: PhoneMockupProps) {
               className={`absolute inset-0 flex flex-col z-10 ${theme.bg}`}
             >
               <div className="flex-1 overflow-y-auto pb-20 no-scrollbar relative">
-                <div
-                  className={`absolute inset-0 opacity-[0.05] pointer-events-none z-0 ${theme.overlay}`}
-                ></div>
                 <div className="h-[280px] bg-stone-200 relative">
                   <img
-                    src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80"
-                    alt="Couple"
-                    className="w-full h-full object-cover opacity-90 mix-blend-multiply"
+                    src={themeConfig.image}
+                    alt={themeConfig.name}
+                    className="h-full w-full object-cover"
+                    style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
+                  />
+                  <div
+                    className={`absolute inset-0 ${themeConfig.styles.overlay}`}
+                    aria-hidden="true"
                   />
                   <motion.div
                     whileHover={{ scale: 1.1 }}
@@ -165,7 +151,7 @@ export function PhoneMockup({ className = "" }: PhoneMockupProps) {
 
               {/* Bottom sticky bar */}
               <div
-                className={`absolute bottom-0 inset-x-0 flex shadow-[0_-10px_30px_rgba(0,0,0,0.15)] z-20 ${theme.accent} text-white`}
+                className={`absolute bottom-0 inset-x-0 flex shadow-[0_-10px_30px_rgba(0,0,0,0.15)] z-20 ${theme.accent}`}
               >
                 <button
                   className="flex-1 py-4 text-[10px] tracking-[0.15em] uppercase font-semibold hover:brightness-110 transition-all border-r border-white/10"
@@ -233,7 +219,7 @@ export function PhoneMockup({ className = "" }: PhoneMockupProps) {
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       <button
-                        className={`py-3 rounded-sm text-xs font-semibold text-white shadow-sm transition-colors ${theme.accent}`}
+                        className={`py-3 rounded-sm text-xs font-semibold shadow-sm transition-colors ${theme.accent}`}
                       >
                         Katılıyorum
                       </button>
@@ -246,7 +232,7 @@ export function PhoneMockup({ className = "" }: PhoneMockupProps) {
               </div>
               <div className="p-5 border-t border-stone-100 bg-white">
                 <button
-                  className={`w-full py-3.5 text-white text-[11px] tracking-[0.2em] uppercase font-bold rounded-sm flex items-center justify-center gap-2 hover:brightness-110 transition-colors shadow-md ${theme.accent}`}
+                  className={`w-full py-3.5 text-[11px] tracking-[0.2em] uppercase font-bold rounded-sm flex items-center justify-center gap-2 hover:brightness-110 transition-colors shadow-md ${theme.accent}`}
                   onClick={() => setActiveScreen("invite")}
                 >
                   <Send className="w-3.5 h-3.5" /> Formu Gönder
@@ -275,7 +261,7 @@ export function PhoneMockup({ className = "" }: PhoneMockupProps) {
                   <h3 className="font-semibold text-sm ml-1 text-stone-800">Canlı Galeri</h3>
                 </div>
                 <button
-                  className={`text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform ${theme.accent}`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform ${theme.accent}`}
                 >
                   <Camera className="w-3.5 h-3.5" />
                 </button>

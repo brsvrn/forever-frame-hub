@@ -1,18 +1,24 @@
 import { useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { getPublicInvitation, rowToDraft, type InvitationRow, getPublicThemes } from "@/lib/invitations.api";
+import { House, Palette, RotateCcw } from "lucide-react";
+import { getPublicInvitation, rowToDraft, type InvitationRow } from "@/lib/invitations.api";
 import { useI18n, I18nProvider } from "@/lib/i18n";
-
-// Import all new components
 import { InvitationIntro } from "@/components/invitation/InvitationIntro";
 import { LivingBackground } from "@/components/invitation/LivingBackground";
 import { PremiumAudioPlayer } from "@/components/invitation/PremiumAudioPlayer";
 import { HeroExperience } from "@/components/invitation/HeroExperience";
 import { StoryTimeline } from "@/components/invitation/StoryTimeline";
 import { EventDetails } from "@/components/invitation/EventDetails";
+import { EventProgramTimeline } from "@/components/invitation/EventProgramTimeline";
 import { PremiumRSVP } from "@/components/invitation/PremiumRSVP";
 import { PremiumQRExperience } from "@/components/invitation/PremiumQRExperience";
-import { GuestGallery } from "@/components/invitation/GuestGallery";
+import { MemoryWall } from "@/components/invitation/MemoryWall";
+import {
+  resolveTheme,
+  selectableThemes,
+  type InviteThemeId,
+  type ThemeCategory,
+} from "@/lib/theme-engine";
 
 export const Route = createFileRoute("/davet/$slug")({
   loader: async ({ params }) => {
@@ -21,27 +27,34 @@ export const Route = createFileRoute("/davet/$slug")({
         invitation: {
           id: "demo-id",
           slug: "demo",
-          theme: "noir",
+          theme: "turquoise-cove",
           partner_one: "Ece",
           partner_two: "Kaan",
           headline: "Birlikte Yeni Bir Hayata",
-          message: "Hayatımızın en özel gününde, mutluluğumuzu paylaşmak üzere sizleri de aramızda görmekten onur duyarız.",
+          message:
+            "Hayatımızın en özel gününde, mutluluğumuzu paylaşmak üzere sizleri de aramızda görmekten onur duyarız.",
           event_date: "2026-08-24",
           event_time: "19:00",
           venue: "Çırağan Sarayı",
           address: "Yıldız, Çırağan Cd. No:32, Beşiktaş/İstanbul",
           city: "İstanbul",
+          event_program: [
+            { time: "18:30", title: "Karşılama", desc: "Kokteyl ve hoş geldiniz ikramları" },
+            { time: "19:00", title: "Nikâh Töreni", desc: "Mutluluğumuza evet diyoruz" },
+            { time: "20:00", title: "Akşam Yemeği", desc: "Sofrada birlikte kutlama" },
+            { time: "21:30", title: "İlk Dans & Eğlence", desc: "Gecenin ritmi başlıyor" },
+          ],
           rsvp_label: "Lütfen 1 Ağustos tarihine kadar katılım durumunuzu bildirin",
           is_published: true,
           created_at: new Date().toISOString(),
           user_id: "demo",
-        } as InvitationRow
+        } as unknown as InvitationRow,
       };
     }
+
     const invitation = await getPublicInvitation(params.slug);
     if (!invitation) throw notFound();
-    const publicThemes = await getPublicThemes();
-    return { invitation, publicThemes };
+    return { invitation };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -52,6 +65,7 @@ export const Route = createFileRoute("/davet/$slug")({
         ],
       };
     }
+
     const inv = loaderData.invitation;
     const names = [inv.partner_one, inv.partner_two].filter(Boolean).join(" & ") || "Davetiye";
     const pageTitle = `${names} — ${inv.headline || "Davetiye"} | MemoryWedding`;
@@ -65,19 +79,19 @@ export const Route = createFileRoute("/davet/$slug")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ];
-    
+
     if (inv.cover_photo) {
       meta.push({ property: "og:image", content: inv.cover_photo });
       meta.push({ name: "twitter:image", content: inv.cover_photo });
     }
-    
+
     return { meta };
   },
   notFoundComponent: () => (
     <I18nProvider>
-      <div className="grid min-h-dvh place-items-center bg-black text-white px-4 text-center">
+      <div className="grid min-h-dvh place-items-center bg-black px-4 text-center text-white">
         <div className="max-w-md">
-          <h1 className="font-display text-4xl">Davetiye Bulunamadı</h1>
+          <h1 className="font-display text-4xl">Davetiye bulunamadı</h1>
         </div>
       </div>
     </I18nProvider>
@@ -90,105 +104,146 @@ export const Route = createFileRoute("/davet/$slug")({
 });
 
 function PremiumInvitePage() {
-  const { invitation, publicThemes } = Route.useLoaderData();
+  const { invitation } = Route.useLoaderData();
   const { lang } = useI18n();
   const draft = rowToDraft(invitation as InvitationRow);
-  
-  // Lookup theme from DB
-  const currentTheme = publicThemes?.find((t: any) => t.theme_id === draft.theme);
-  
-  const themeConfig = currentTheme?.config || {
-    primaryColor: "#EAB308",
-    secondaryColor: "#18181B",
-    coverVideoUrl: "",
-    font: "Inter",
+  const isDemo = invitation.slug === "demo";
+  const [previewThemeId, setPreviewThemeId] = useState<InviteThemeId>(draft.theme);
+  const theme = resolveTheme(isDemo ? previewThemeId : draft.theme);
+  const pkg = (invitation as InvitationRow & { package?: { features?: Record<string, boolean> } })
+    .package;
+  const features = pkg?.features || {
+    digital_invitation: true,
+    qr_gallery: true,
+    music: true,
   };
-  
-  // Mock legacy theme struct for components that still need it temporarily
-  const theme = {
-    id: draft.theme as any,
-    name: currentTheme?.name || "Premium Theme",
-    tag: { tr: "Premium", en: "Premium" },
-    image: "",
-    music: { defaultTrack: "", title: "Romantik Melodi" },
-    ambientEffect: { type: "particles" as const, intensity: "medium" as const },
-    openingAnimation: { duration: 1.5, style: "fade" as const },
-    styles: {
-      overlay: "bg-black/50",
-      typography: { sans: `font-["${themeConfig.font}"]`, display: `font-["${themeConfig.font}"]` },
-      motion: { transition: "transition-all duration-700 ease-in-out" },
-      buttons: { 
-        primary: `bg-[${themeConfig.primaryColor}] text-[${themeConfig.secondaryColor}]`,
-        secondary: `bg-white/10 text-white hover:bg-white/20 border border-white/20`
-      },
-      cards: { wrapper: "bg-black/40 backdrop-blur-md border border-white/10" },
-      gallery: { gridStyle: "masonry" as const },
-      icons: { color: `text-[${themeConfig.primaryColor}]` }
-    },
-    primaryColor: themeConfig.primaryColor,
-    secondaryColor: themeConfig.secondaryColor
-  };
-  
-  const pkg = (invitation as any).package;
-  const features = pkg?.features || { digital_invitation: true, qr_gallery: true, music: true };
-  
   const [hasOpened, setHasOpened] = useState(false);
 
   return (
-    <div className="relative bg-black min-h-dvh font-sans antialiased overflow-x-hidden selection:bg-white/30" style={{ fontFamily: `"${themeConfig.font}", sans-serif` }}>
-      
-      {(!hasOpened && features.digital_invitation !== false) ? (
-        themeConfig.coverVideoUrl ? (
-          <InvitationIntro 
-            videoUrl={themeConfig.coverVideoUrl}
-            onComplete={() => setHasOpened(true)} 
-          />
-        ) : (
-          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black text-white">
-            <div className="relative z-10 flex h-full w-full flex-col items-center justify-center p-6 text-center">
-               <button
-                  onClick={() => setHasOpened(true)}
-                  className={`mt-4 rounded-full px-10 py-4 text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 bg-[${themeConfig.primaryColor}] text-[${themeConfig.secondaryColor}]`}
-                >
-                  Davetiyeyi Aç
-                </button>
-            </div>
-          </div>
-        )
+    <div
+      className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30"
+      style={{ fontFamily: `"${theme.font || "Manrope"}", sans-serif` }}
+    >
+      {isDemo ? (
+        <DemoThemeSwitcher
+          value={previewThemeId}
+          lang={lang}
+          onChange={(themeId) => {
+            setPreviewThemeId(themeId);
+            setHasOpened(false);
+          }}
+          onReplay={() => setHasOpened(false)}
+        />
+      ) : null}
+
+      {!hasOpened && features.digital_invitation !== false ? (
+        <InvitationIntro
+          key={theme.id}
+          theme={theme}
+          partnerOne={draft.partnerOne}
+          partnerTwo={draft.partnerTwo}
+          onComplete={() => setHasOpened(true)}
+        />
       ) : null}
 
       {(hasOpened || features.digital_invitation === false) && (
-        <>
+        <div key={`invite-${theme.id}`}>
           <LivingBackground theme={theme} />
-          
-          <main className="relative z-10 h-dvh overflow-y-auto snap-y snap-mandatory scroll-smooth pb-24">
-            {features.digital_invitation !== false && (
+
+          <main className="relative z-10 h-dvh snap-y snap-mandatory overflow-y-auto scroll-smooth pb-24">
+            {features.digital_invitation !== false ? (
               <>
                 <HeroExperience draft={draft} theme={theme} lang={lang} />
                 <StoryTimeline draft={draft} theme={theme} />
+                <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
                 <EventDetails draft={draft} theme={theme} lang={lang} />
                 <PremiumRSVP theme={theme} invitationId={invitation.id} />
               </>
-            )}
-            
-            {features.qr_gallery !== false && (
+            ) : null}
+
+            {features.qr_gallery !== false ? (
               <>
+                <MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} />
                 <PremiumQRExperience theme={theme} invitationId={invitation.id} />
               </>
-            )}
+            ) : null}
           </main>
-        </>
+        </div>
       )}
 
-      {/* Ses oynatıcıyı her zaman render ediyoruz ki iframe önden yüklensin, bekleme olmasın */}
-      {features.music !== false && (
-        <PremiumAudioPlayer 
-          theme={theme} 
-          autoPlay={hasOpened || features.digital_invitation === false} 
+      {features.music !== false ? (
+        <PremiumAudioPlayer
+          theme={theme}
+          autoPlay={hasOpened || features.digital_invitation === false}
           hideUI={!hasOpened}
-          musicUrl={draft.musicUrl} 
+          musicUrl={draft.musicUrl}
         />
-      )}
+      ) : null}
+    </div>
+  );
+}
+
+function DemoThemeSwitcher({
+  value,
+  lang,
+  onChange,
+  onReplay,
+}: {
+  value: InviteThemeId;
+  lang: "tr" | "en";
+  onChange: (themeId: InviteThemeId) => void;
+  onReplay: () => void;
+}) {
+  const categories: Array<{ id: Exclude<ThemeCategory, "classic">; label: string }> = [
+    { id: "coastal", label: lang === "tr" ? "Deniz temaları" : "Coastal themes" },
+    { id: "nature", label: lang === "tr" ? "Doğa temaları" : "Nature themes" },
+    { id: "italy", label: lang === "tr" ? "İtalya temaları" : "Italian themes" },
+    { id: "luxury", label: lang === "tr" ? "Lüks temalar" : "Luxury themes" },
+  ];
+
+  return (
+    <div className="fixed left-1/2 top-3 z-[70] flex w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2 items-center gap-2 rounded-2xl border border-white/20 bg-slate-950/78 p-2 text-white shadow-2xl backdrop-blur-2xl sm:top-5 sm:w-auto sm:min-w-[30rem]">
+      <a
+        href="/"
+        className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white"
+        aria-label={lang === "tr" ? "Ana sayfaya dön" : "Back to home"}
+        title={lang === "tr" ? "Ana sayfaya dön" : "Back to home"}
+      >
+        <House className="size-4" aria-hidden="true" />
+      </a>
+      <span className="hidden size-10 shrink-0 place-items-center rounded-xl bg-white/10 text-white/80 sm:grid">
+        <Palette className="size-4" aria-hidden="true" />
+      </span>
+      <label className="min-w-0 flex-1">
+        <span className="sr-only">{lang === "tr" ? "Önizleme teması" : "Preview theme"}</span>
+        <select
+          data-testid="demo-theme-selector"
+          value={value}
+          onChange={(event) => onChange(event.target.value as InviteThemeId)}
+          className="min-h-10 w-full cursor-pointer rounded-xl border border-white/15 bg-white/10 px-3 text-sm font-medium text-white outline-none transition focus:border-white/40"
+        >
+          {categories.map((category) => (
+            <optgroup key={category.id} label={category.label} className="bg-slate-950 text-white">
+              {selectableThemes
+                .filter((theme) => theme.category === category.id)
+                .map((theme) => (
+                  <option key={theme.id} value={theme.id} className="bg-slate-950 text-white">
+                    {theme.name}
+                  </option>
+                ))}
+            </optgroup>
+          ))}
+        </select>
+      </label>
+      <button
+        type="button"
+        onClick={onReplay}
+        className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white"
+        aria-label={lang === "tr" ? "Açılışı yeniden oynat" : "Replay opening"}
+        title={lang === "tr" ? "Açılışı yeniden oynat" : "Replay opening"}
+      >
+        <RotateCcw className="size-4" aria-hidden="true" />
+      </button>
     </div>
   );
 }

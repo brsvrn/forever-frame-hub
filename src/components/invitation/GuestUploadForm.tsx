@@ -12,6 +12,18 @@ interface GuestUploadFormProps {
   children?: React.ReactNode;
 }
 
+const MAX_FILES_PER_UPLOAD = 20;
+const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+const ALLOWED_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+]);
+
 export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -25,7 +37,24 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+      const selectedFiles = Array.from(e.target.files);
+      if (selectedFiles.length > MAX_FILES_PER_UPLOAD) {
+        setFiles([]);
+        setErrorMessage(`Tek seferde en fazla ${MAX_FILES_PER_UPLOAD} dosya yükleyebilirsiniz.`);
+        return;
+      }
+
+      const invalidFile = selectedFiles.find(
+        (file) => !ALLOWED_MIME_TYPES.has(file.type) || file.size > MAX_FILE_SIZE_BYTES,
+      );
+      if (invalidFile) {
+        setFiles([]);
+        setErrorMessage(`${invalidFile.name} desteklenmiyor veya 100 MB sınırını aşıyor.`);
+        return;
+      }
+
+      setErrorMessage("");
+      setFiles(selectedFiles);
     }
   };
 
@@ -39,40 +68,79 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
       setErrorMessage("");
 
       for (const file of files) {
-        // 1. Lossless upload (No compression)
-        const path = `${invitationId}/${Date.now()}_${file.name}`;
-        const { url, error } = await storage.uploadFile("guest_uploads", path, file);
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${invitationId}/${crypto.randomUUID()}-${safeName}`;
+        const { url, error } = await storage.uploadFile("guest-uploads", path, file);
 
         if (error) {
           console.error("Storage Error:", error);
-          setErrorMessage(`Storage hatası (${file.name}): Supabase'de 'guest_uploads' isimli public bir bucket (depo) oluşturmanız gerekiyor. Lütfen Lovable/Supabase panelinizden bucket oluşturun.`);
+          setErrorMessage(
+            `Dosya yüklenemedi: ${error.message || "depolama yetkisi kontrol edilemedi"}.`,
+          );
           continue;
         }
 
         if (url) {
           // 2. Save metadata to database (only existing columns)
-          const { error: dbError } = await supabase.from("guest_uploads").insert({
+          const uploadRecord = {
             invitation_id: invitationId,
             guest_name: guestName || "İsimsiz Misafir",
+            note: note || null,
             file_url: url,
+            file_path: path,
             file_type: file.type,
             file_size: file.size,
-            status: "active"
-          });
-          
+            status: "active",
+          };
+          let { error: dbError } = await supabase.from("guest_uploads").insert(uploadRecord);
+
+          // Older installations do not have file_path yet. Keep uploads working
+          // and let gallery deletion derive the path from file_url in that case.
+          if (dbError?.message.includes("file_path")) {
+            const legacyRecord = {
+              invitation_id: uploadRecord.invitation_id,
+              guest_name: uploadRecord.guest_name,
+              note: uploadRecord.note,
+              file_url: uploadRecord.file_url,
+              file_type: uploadRecord.file_type,
+              file_size: uploadRecord.file_size,
+              status: uploadRecord.status,
+            };
+            const legacyInsert = await supabase
+              .from("guest_uploads")
+              .insert(legacyRecord as unknown as typeof uploadRecord);
+            dbError = legacyInsert.error;
+
+            if (dbError?.message.includes("note")) {
+              const minimalLegacyRecord = {
+                invitation_id: uploadRecord.invitation_id,
+                guest_name: uploadRecord.guest_name,
+                file_url: uploadRecord.file_url,
+                file_type: uploadRecord.file_type,
+                file_size: uploadRecord.file_size,
+                status: uploadRecord.status,
+              };
+              const minimalInsert = await supabase
+                .from("guest_uploads")
+                .insert(minimalLegacyRecord as unknown as typeof uploadRecord);
+              dbError = minimalInsert.error;
+            }
+          }
+
           if (dbError) {
             console.error("DB Insert Error:", dbError);
+            await storage.deleteFile("guest-uploads", path);
             setErrorMessage(`Veritabanı hatası: ${dbError.message}`);
           } else {
             completed++;
           }
         }
-        
+
         setProgress(Math.round((completed / files.length) * 100));
       }
 
       setUploading(false);
-      
+
       if (completed > 0) {
         setSuccess(true);
         setTimeout(() => {
@@ -125,21 +193,41 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
               </button>
 
               <div className="text-center mb-6 pt-2">
-                <h3 className={`text-2xl mb-2 ${theme.styles.typography.display}`}>Anılarını Paylaş</h3>
-                <p className="text-sm text-white/70">Orijinal kalitede fotoğraflarınızı ve videolarınızı yükleyebilirsiniz.</p>
+                <h3 className={`text-2xl mb-2 ${theme.styles.typography.display}`}>
+                  Anılarını Paylaş
+                </h3>
+                <p className="text-sm text-white/70">
+                  Orijinal kalitede fotoğraflarınızı ve videolarınızı yükleyebilirsiniz.
+                </p>
               </div>
 
               {!success ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 opacity-80">Adınız Soyadınız (Opsiyonel)</label>
+                    <label className="block text-sm font-medium mb-1 opacity-80">
+                      Adınız Soyadınız (Opsiyonel)
+                    </label>
                     <input
                       type="text"
                       value={guestName}
-                      onChange={e => setGuestName(e.target.value)}
+                      onChange={(e) => setGuestName(e.target.value)}
                       disabled={uploading}
                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 transition-colors"
                       placeholder="Örn: Ayşe Yılmaz"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 opacity-80">
+                      Notunuz (Opsiyonel)
+                    </label>
+                    <textarea
+                      value={note}
+                      onChange={(event) => setNote(event.target.value.slice(0, 500))}
+                      disabled={uploading}
+                      rows={3}
+                      className="w-full resize-none px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-white/30 transition-colors"
+                      placeholder="Çifte kısa bir not bırakın"
                     />
                   </div>
 
@@ -149,7 +237,7 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
                     </div>
                   )}
 
-                  <div 
+                  <div
                     className="border-2 border-dashed border-white/20 rounded-2xl p-6 text-center hover:border-white/40 transition-colors cursor-pointer"
                     onClick={() => !uploading && fileInputRef.current?.click()}
                   >
@@ -162,31 +250,42 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
                       onChange={handleFileSelect}
                       disabled={uploading}
                     />
-                    
+
                     {files.length === 0 ? (
                       <div className="flex flex-col items-center gap-2">
                         <Upload className="w-8 h-8 text-white/50" />
                         <span className="text-sm font-medium">Dosya Seç veya Sürükle</span>
-                        <span className="text-xs text-white/50">Fotoğraf ve Video (Sıkıştırma yapılmaz)</span>
+                        <span className="text-xs text-white/50">
+                          Fotoğraf ve Video (Sıkıştırma yapılmaz)
+                        </span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2">
                         <div className="flex gap-2 flex-wrap justify-center">
                           {files.map((f, i) => (
-                            <div key={i} className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded text-xs">
-                              {f.type.startsWith('video/') ? <FileVideo className="w-3 h-3"/> : <FileImage className="w-3 h-3"/>}
+                            <div
+                              key={i}
+                              className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded text-xs"
+                            >
+                              {f.type.startsWith("video/") ? (
+                                <FileVideo className="w-3 h-3" />
+                              ) : (
+                                <FileImage className="w-3 h-3" />
+                              )}
                               <span className="truncate max-w-[100px]">{f.name}</span>
                             </div>
                           ))}
                         </div>
-                        <span className="text-xs text-white/70 mt-2">{files.length} dosya seçildi</span>
+                        <span className="text-xs text-white/70 mt-2">
+                          {files.length} dosya seçildi
+                        </span>
                       </div>
                     )}
                   </div>
 
                   {uploading && (
                     <div className="w-full bg-white/10 rounded-full h-2 mt-4 overflow-hidden">
-                      <div 
+                      <div
                         className="bg-white h-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       />
@@ -197,14 +296,16 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
                     onClick={handleUpload}
                     disabled={files.length === 0 || uploading}
                     className={`w-full py-4 mt-2 rounded-xl font-medium transition-all ${
-                      files.length === 0 || uploading ? 'opacity-50 cursor-not-allowed bg-white/10' : theme.styles.buttons.primary
+                      files.length === 0 || uploading
+                        ? "opacity-50 cursor-not-allowed bg-white/10"
+                        : theme.styles.buttons.primary
                     }`}
                   >
-                    {uploading ? `Yükleniyor... %${progress}` : 'Yüklemeyi Başlat'}
+                    {uploading ? `Yükleniyor... %${progress}` : "Yüklemeyi Başlat"}
                   </button>
                 </div>
               ) : (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center justify-center py-10 space-y-4"
@@ -212,7 +313,8 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
                   <CheckCircle className="w-16 h-16 text-emerald-400" />
                   <h4 className="text-xl font-medium">Harika!</h4>
                   <p className="text-center text-white/70 text-sm">
-                    Anılarınız başarıyla kaydedildi. Hiçbir kalite kaybı yaşanmadan çifte ulaştırılacak.
+                    Anılarınız başarıyla kaydedildi. Hiçbir kalite kaybı yaşanmadan çifte
+                    ulaştırılacak.
                   </p>
                 </motion.div>
               )}

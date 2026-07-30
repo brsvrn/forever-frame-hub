@@ -11,6 +11,7 @@ export type Database = {
       invitations: {
         Row: {
           address: string;
+          auto_delete_date: string | null;
           category: string;
           city: string;
           created_at: string;
@@ -28,11 +29,13 @@ export type Database = {
           map_url: string | null;
           music_url: string | null;
           our_story: Json | null;
+          package_id: string | null;
           partner_one: string;
           partner_two: string;
           published_at: string | null;
           rsvp_label: string;
           slug: string;
+          storage_used: number;
           theme: string;
           updated_at: string;
           user_id: string;
@@ -40,12 +43,14 @@ export type Database = {
         };
         Insert: {
           address?: string;
+          auto_delete_date?: string | null;
           category?: string;
           city?: string;
           created_at?: string;
           event_date?: string | null;
           event_time?: string | null;
           event_type?: Database["public"]["Enums"]["event_type"];
+          family_info?: Json | null;
           headline?: string;
           id?: string;
           is_published?: boolean;
@@ -56,11 +61,13 @@ export type Database = {
           map_url?: string | null;
           music_url?: string | null;
           our_story?: Json | null;
+          package_id?: string | null;
           partner_one?: string;
           partner_two?: string;
           published_at?: string | null;
           rsvp_label?: string;
           slug: string;
+          storage_used?: number;
           theme?: string;
           updated_at?: string;
           user_id: string;
@@ -68,12 +75,14 @@ export type Database = {
         };
         Update: {
           address?: string;
+          auto_delete_date?: string | null;
           category?: string;
           city?: string;
           created_at?: string;
           event_date?: string | null;
           event_time?: string | null;
           event_type?: Database["public"]["Enums"]["event_type"];
+          family_info?: Json | null;
           headline?: string;
           id?: string;
           is_published?: boolean;
@@ -84,11 +93,13 @@ export type Database = {
           map_url?: string | null;
           music_url?: string | null;
           our_story?: Json | null;
+          package_id?: string | null;
           partner_one?: string;
           partner_two?: string;
           published_at?: string | null;
           rsvp_label?: string;
           slug?: string;
+          storage_used?: number;
           theme?: string;
           updated_at?: string;
           user_id?: string;
@@ -100,31 +111,40 @@ export type Database = {
         Row: {
           created_at: string;
           file_size: number;
+          file_path: string;
           file_type: string;
           file_url: string;
           guest_name: string | null;
           id: string;
           invitation_id: string;
+          is_favorite: boolean;
+          note: string | null;
           status: string | null;
         };
         Insert: {
           created_at?: string;
           file_size: number;
+          file_path: string;
           file_type: string;
           file_url: string;
           guest_name?: string | null;
           id?: string;
           invitation_id: string;
+          is_favorite?: boolean;
+          note?: string | null;
           status?: string | null;
         };
         Update: {
           created_at?: string;
           file_size?: number;
+          file_path?: string;
           file_type?: string;
           file_url?: string;
           guest_name?: string | null;
           id?: string;
           invitation_id?: string;
+          is_favorite?: boolean;
+          note?: string | null;
           status?: string | null;
         };
         Relationships: [
@@ -136,6 +156,207 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      packages: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          price: number;
+          features: Json;
+          limits: Json;
+          storage: Json;
+          retention: Json;
+          is_active: boolean;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          price?: number;
+          features?: Json;
+          limits?: Json;
+          storage?: Json;
+          retention?: Json;
+          is_active?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          price?: number;
+          features?: Json;
+          limits?: Json;
+          storage?: Json;
+          retention?: Json;
+          is_active?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      themes: {
+        Row: {
+          id: string;
+          theme_id: string;
+          name: string;
+          description: string | null;
+          preview_image_url: string | null;
+          config: Json;
+          is_active: boolean;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          theme_id: string;
+          name: string;
+          description?: string | null;
+          preview_image_url?: string | null;
+          config?: Json;
+          is_active?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          theme_id?: string;
+          name?: string;
+          description?: string | null;
+          preview_image_url?: string | null;
+          config?: Json;
+          is_active?: boolean;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      package_price_history: {
+        Row: {
+          id: string;
+          package_id: string;
+          old_price: number;
+          new_price: number;
+          changed_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          package_id: string;
+          old_price: number;
+          new_price: number;
+          changed_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          package_id?: string;
+          old_price?: number;
+          new_price?: number;
+          changed_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      admin_audit_logs: {
+        Row: {
+          id: string;
+          admin_id: string | null;
+          admin_email: string | null;
+          action: string;
+          target_type: string;
+          target_id: string | null;
+          details: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          admin_id?: string | null;
+          admin_email?: string | null;
+          action: string;
+          target_type: string;
+          target_id?: string | null;
+          details?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          admin_id?: string | null;
+          admin_email?: string | null;
+          action?: string;
+          target_type?: string;
+          target_id?: string | null;
+          details?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      system_settings: {
+        Row: {
+          id: string;
+          maintenance_mode: boolean;
+          allow_new_registrations: boolean;
+          default_package_id: string | null;
+          max_upload_size_mb: number;
+          support_email: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          maintenance_mode?: boolean;
+          allow_new_registrations?: boolean;
+          default_package_id?: string | null;
+          max_upload_size_mb?: number;
+          support_email?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          maintenance_mode?: boolean;
+          allow_new_registrations?: boolean;
+          default_package_id?: string | null;
+          max_upload_size_mb?: number;
+          support_email?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      activity_logs: {
+        Row: {
+          id: string;
+          invitation_id: string;
+          action_type: string;
+          details: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          invitation_id: string;
+          action_type: string;
+          details?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          invitation_id?: string;
+          action_type?: string;
+          details?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
       };
       profiles: {
         Row: {

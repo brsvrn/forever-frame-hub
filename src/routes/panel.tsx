@@ -11,6 +11,7 @@ import {
   Trash2,
   Users,
   LayoutDashboard,
+  Pencil,
 } from "lucide-react";
 import { appContent } from "@/lib/app-content";
 import { I18nProvider, useI18n } from "@/lib/i18n";
@@ -221,6 +222,13 @@ function InvitationCard({
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <a
+            href={`/olustur?edit=${encodeURIComponent(row.id)}`}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-rose/40 px-4 text-sm text-rose transition-colors hover:bg-rose/10"
+          >
+            <Pencil className="size-4" aria-hidden="true" />
+            Düzenle
+          </a>
           <Link
             to="/davet/$slug"
             params={{ slug: row.slug }}
@@ -266,7 +274,6 @@ function InvitationCard({
           </button>
         </div>
       </div>
-
     </motion.article>
   );
 }

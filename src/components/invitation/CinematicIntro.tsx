@@ -10,7 +10,13 @@ interface CinematicIntroProps {
   videoUrl?: string | null;
 }
 
-export function CinematicIntro({ theme, partnerOne, partnerTwo, onEnter, videoUrl }: CinematicIntroProps) {
+export function CinematicIntro({
+  theme,
+  partnerOne,
+  partnerTwo,
+  onEnter,
+  videoUrl,
+}: CinematicIntroProps) {
   const [phase, setPhase] = useState<"video" | "logo" | "names" | "action">("video");
   const [isVideoEnded, setIsVideoEnded] = useState(!videoUrl);
 
@@ -46,7 +52,7 @@ export function CinematicIntro({ theme, partnerOne, partnerTwo, onEnter, videoUr
     midnight: "https://cdn.coverr.co/videos/coverr-wedding-details-2521/1080p.mp4",
     blush: "https://cdn.coverr.co/videos/coverr-romantic-couple-on-the-beach-3595/1080p.mp4",
     garden: "https://cdn.coverr.co/videos/coverr-couple-walking-in-the-forest-3413/1080p.mp4",
-    noir: "https://cdn.coverr.co/videos/coverr-elegant-champagne-glasses-5246/1080p.mp4"
+    noir: "https://cdn.coverr.co/videos/coverr-elegant-champagne-glasses-5246/1080p.mp4",
   };
 
   const finalVideo = videoUrl || defaultVideoMap[theme.id] || defaultVideoMap["blush"];
@@ -109,7 +115,7 @@ export function CinematicIntro({ theme, partnerOne, partnerTwo, onEnter, videoUr
               <p className="text-sm tracking-[0.2em] uppercase text-white/70">
                 Sizi Mutlu Günümüze Davet Ediyoruz
               </p>
-              
+
               <button
                 onClick={onEnter}
                 className={`mt-4 rounded-full px-10 py-4 text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${theme.styles.buttons.primary}`}

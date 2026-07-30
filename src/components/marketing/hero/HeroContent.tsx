@@ -11,12 +11,12 @@ export function HeroContent() {
   const { activeSection, setActiveSection } = usePhone();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
-  
-  const { scrollYProgress } = useScroll({ 
+
+  const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
-  
+
   // Parallax effect: moves down as you scroll down
   const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
@@ -25,7 +25,10 @@ export function HeroContent() {
   }, [isInView, setActiveSection]);
 
   return (
-    <section ref={ref} className="relative min-h-[100dvh] flex items-center pt-28 pb-16 overflow-hidden">
+    <section
+      ref={ref}
+      className="relative min-h-[100dvh] flex items-center pt-28 pb-16 overflow-hidden"
+    >
       {/* Premium Cinematic Background - Dynamic Mesh Gradient */}
       <div className="absolute inset-0 bg-background z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] opacity-60 translate-x-1/3 -translate-y-1/4 z-0 pointer-events-none animate-pulse duration-10000"></div>
@@ -89,7 +92,11 @@ export function HeroContent() {
                   asChild
                   className="rounded-full w-full sm:w-auto h-14 px-8 text-base bg-background/50 backdrop-blur-md hover:bg-muted/80 transition-all group border-border shadow-sm"
                 >
-                  <Link to="/davet/$slug" params={{ slug: "demo" }} className="flex items-center cursor-pointer">
+                  <Link
+                    to="/davet/$slug"
+                    params={{ slug: "demo" }}
+                    className="flex items-center cursor-pointer"
+                  >
                     <PlayCircle className="mr-2 w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
                     Davetiyeyi Demo Olarak İncele
                   </Link>
@@ -132,9 +139,9 @@ export function HeroContent() {
           {/* Right side is intentionally empty to let the sticky phone show through */}
           <div className="hidden lg:flex items-center justify-center relative h-full w-[350px] shrink-0 lg:ml-auto lg:mr-8 xl:mr-16">
             {activeSection === "hero" && (
-              <motion.div 
-                layoutId="global-phone" 
-                style={{ y }} 
+              <motion.div
+                layoutId="global-phone"
+                style={{ y }}
                 className="w-[300px] h-[600px] z-30"
               >
                 <PhoneMockup />
@@ -142,51 +149,61 @@ export function HeroContent() {
             )}
 
             {/* The floating feature chips will be placed globally in ProductExperience or here, but let's put them here with absolute positioning so they scroll with Hero */}
-            <FloatingElement delay={0} amplitude={12} duration={3500} className="absolute top-[20%] -right-8 xl:-right-16 z-20 cursor-default">
+            <FloatingElement
+              delay={0}
+              amplitude={12}
+              duration={3500}
+              className="absolute top-[20%] -right-8 xl:-right-16 z-20 cursor-default"
+            >
               <div className="bg-background/80 border border-border/50 shadow-2xl rounded-2xl p-3 flex items-center gap-3 backdrop-blur-xl hover:scale-105 transition-transform">
-              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-              </div>
-              <div className="text-sm pr-2">
-                <p className="font-semibold text-foreground text-xs">LCV Onaylandı</p>
-                <p className="text-[10px] text-foreground/70">Kaan & Ece (+2 Kişi)</p>
-              </div>
+                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                </div>
+                <div className="text-sm pr-2">
+                  <p className="font-semibold text-foreground text-xs">LCV Onaylandı</p>
+                  <p className="text-[10px] text-foreground/70">Kaan & Ece (+2 Kişi)</p>
+                </div>
               </div>
             </FloatingElement>
 
-            <FloatingElement delay={1500} amplitude={15} duration={4500} className="absolute bottom-[25%] -left-8 xl:-left-16 z-20 cursor-default">
+            <FloatingElement
+              delay={1500}
+              amplitude={15}
+              duration={4500}
+              className="absolute bottom-[25%] -left-8 xl:-left-16 z-20 cursor-default"
+            >
               <div className="bg-background/80 border border-border/50 shadow-2xl rounded-2xl p-3 flex items-center gap-3 backdrop-blur-xl hover:scale-105 transition-transform">
-              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-              </div>
-              <div className="text-sm pr-2">
-                <p className="font-semibold text-foreground text-xs">Yeni Fotoğraf</p>
-                <p className="text-[10px] text-foreground/70">Masadaki QR'dan eklendi</p>
-              </div>
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                </div>
+                <div className="text-sm pr-2">
+                  <p className="font-semibold text-foreground text-xs">Yeni Fotoğraf</p>
+                  <p className="text-[10px] text-foreground/70">Masadaki QR'dan eklendi</p>
+                </div>
               </div>
             </FloatingElement>
           </div>
