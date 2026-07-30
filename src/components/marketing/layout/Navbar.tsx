@@ -70,15 +70,18 @@ export function Navbar() {
             Fiyatlar
           </a>
         </nav>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Link
             to={isLoggedIn ? "/panel" : "/giris"}
-            className="text-sm font-medium hover:underline hidden sm:inline-block text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm font-medium hover:underline text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isLoggedIn ? "Panel" : "Giriş Yap"}
+            {isLoggedIn ? "Panel" : "Giriş"}
           </Link>
-          <Button asChild className="rounded-full px-6 shadow-md hover:shadow-lg transition-all">
-            <Link to="/olustur">Davetiyeni Oluştur</Link>
+          <Button asChild className="rounded-full px-4 sm:px-6 shadow-md hover:shadow-lg transition-all">
+            <Link to="/olustur">
+              <span className="sm:hidden">Başla</span>
+              <span className="hidden sm:inline">Davetiyeni Oluştur</span>
+            </Link>
           </Button>
         </div>
       </div>
