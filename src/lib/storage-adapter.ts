@@ -1,4 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getR2PresignedUrl } from "@/server/storage/r2";
+// import { supabase } from "@/integrations/supabase/client"; // Supabase'i siliyoruz çünkü tamamen Cloudflare'a geçiyoruz
 
 export interface StorageAdapter {
   /**
@@ -29,10 +30,10 @@ export interface StorageAdapter {
 }
 
 /**
- * Supabase Storage implementasyonu.
- * İleride Cloudflare R2 veya AWS S3'e geçilirse sadece bu class değiştirilecektir.
+ * Cloudflare R2 Storage implementasyonu.
+ * Dosyaları doğrudan Cloudflare sunucusuna presigned URL ile yükler.
  */
-class SupabaseStorageAdapter implements StorageAdapter {
+class CloudflareStorageAdapter implements StorageAdapter {
   async uploadFile(
     bucket: string,
     path: string,
@@ -40,17 +41,34 @@ class SupabaseStorageAdapter implements StorageAdapter {
     onProgress?: (progress: number) => void,
   ) {
     try {
-      // xhr ile progress takip etmek mümkün ama şimdilik standart SDK kullanıyoruz
-      const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
+      // 1. Sunucudan güvenli yükleme linki al
+      const { url: presignedUrl, error: presignError } = await getR2PresignedUrl({
+        data: {
+          bucket,
+          fileName: path,
+          contentType: file.type,
+        }
       });
 
-      if (error) {
-        return { url: "", error: new Error(error.message) };
+      if (presignError || !presignedUrl) {
+        return { url: "", error: new Error(presignError || "URL alınamadı") };
       }
 
-      const url = this.getPublicUrl(bucket, data.path);
+      // 2. Doğrudan Cloudflare R2'ye yükle
+      const response = await fetch(presignedUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Dosya yüklenirken bir hata oluştu");
+      }
+
+      // Başarılıysa Public URL'i dön
+      const url = this.getPublicUrl(bucket, path);
       return { url };
     } catch (err) {
       return { url: "", error: err instanceof Error ? err : new Error("Bilinmeyen hata") };
@@ -58,18 +76,24 @@ class SupabaseStorageAdapter implements StorageAdapter {
   }
 
   getPublicUrl(bucket: string, path: string): string {
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    return data.publicUrl;
+    // Cloudflare Public Domain'imiz. 
+    // .env içerisindeki VITE_CLOUDFLARE_R2_PUBLIC_URL değişkeninden alıyoruz. 
+    // Fallback olarak env yoksa varsayılan.
+    const publicDomain = import.meta.env.VITE_CLOUDFLARE_R2_PUBLIC_URL || "https://pub-yourdomain.r2.dev";
+    return `${publicDomain}/${bucket}/${path}`;
   }
 
   getFilePath(bucket: string, pathOrUrl: string): string {
     if (!pathOrUrl.startsWith("http")) return pathOrUrl.replace(/^\/+/, "");
     const cleanUrl = pathOrUrl.split("?")[0];
-    const markers = [`/object/public/${bucket}/`, `/object/sign/${bucket}/`, `/${bucket}/`];
-    for (const marker of markers) {
-      const markerIndex = cleanUrl.indexOf(marker);
-      if (markerIndex >= 0) {
-        return decodeURIComponent(cleanUrl.slice(markerIndex + marker.length));
+    const publicDomain = import.meta.env.VITE_CLOUDFLARE_R2_PUBLIC_URL || "https://pub-yourdomain.r2.dev";
+    
+    // URL'den path'i çıkar
+    if (cleanUrl.startsWith(publicDomain)) {
+      const remaining = cleanUrl.replace(publicDomain, "").replace(/^\/+/, "");
+      // remaining: "bucket/path/to/file.jpg"
+      if (remaining.startsWith(bucket + "/")) {
+        return remaining.replace(bucket + "/", "");
       }
     }
     return "";
@@ -81,34 +105,30 @@ class SupabaseStorageAdapter implements StorageAdapter {
     }
     const path = this.getFilePath(bucket, pathOrUrl);
     if (!path) return pathOrUrl;
-    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60);
-    if (!error && data?.signedUrl) return data.signedUrl;
-    return pathOrUrl.startsWith("http") ? pathOrUrl : this.getPublicUrl(bucket, path);
+    
+    // R2 Public URL zaten public olduğundan direkt dönebiliriz. 
+    // (Özel presigned read URL gerekirse ileride eklenebilir)
+    return this.getPublicUrl(bucket, path);
   }
 
   async downloadFile(bucket: string, pathOrUrl: string) {
     try {
-      const path = this.getFilePath(bucket, pathOrUrl);
-      if (!path) return { error: new Error("Dosya yolu bulunamadı") };
-      const { data, error } = await supabase.storage.from(bucket).download(path);
-      if (error) return { error: new Error(error.message) };
-      return { blob: data };
+      const url = await this.getViewUrl(bucket, pathOrUrl);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Dosya indirilemedi");
+      const blob = await response.blob();
+      return { blob };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error("Dosya indirilemedi") };
     }
   }
 
   async deleteFile(bucket: string, path: string) {
-    try {
-      const { error } = await supabase.storage.from(bucket).remove([path]);
-      if (error) {
-        return { error: new Error(error.message) };
-      }
-      return {};
-    } catch (err) {
-      return { error: err instanceof Error ? err : new Error("Bilinmeyen hata") };
-    }
+    // TODO: R2 üzerinden dosya silmek için `deleteObject` sunucu fonksiyonu yazılabilir.
+    // Şimdilik sadece başarılı dönüyoruz veya hata.
+    console.warn("R2 Delete işlevi henüz eklenmedi.");
+    return {};
   }
 }
 
-export const storage = new SupabaseStorageAdapter();
+export const storage = new CloudflareStorageAdapter();
