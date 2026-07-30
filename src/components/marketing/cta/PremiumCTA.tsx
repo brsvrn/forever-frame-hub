@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 export function PremiumCTA() {
   return (
-    <section className="py-24 bg-neutral-950 text-white relative overflow-hidden">
+    <section className="py-24 bg-surface text-foreground relative overflow-hidden">
       {/* Dynamic Background Effects */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-full max-h-3xl bg-primary/20 rounded-full blur-[120px] opacity-60"></div>
@@ -23,7 +23,7 @@ export function PremiumCTA() {
         </SlideUp>
 
         <SlideUp delay={0.2}>
-          <p className="text-lg md:text-xl text-neutral-400 font-light mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-muted-foreground font-light mb-12 max-w-2xl mx-auto leading-relaxed">
             Hemen ücretsiz üye olun, temanızı seçin ve misafirlerinizi bu benzersiz deneyime davet
             edin. Kredi kartı gerekmez.
           </p>
@@ -45,7 +45,7 @@ export function PremiumCTA() {
               </Link>
             </Button>
           </MagneticButton>
-          <p className="mt-6 text-sm text-neutral-500 font-medium tracking-wide">
+          <p className="mt-6 text-sm text-muted-foreground font-medium tracking-wide">
             Anında kurulum • 7/24 Destek • Memnuniyet Garantisi
           </p>
         </SlideUp>
