@@ -49,7 +49,7 @@ export function InteractiveDemoContent() {
           <div className="hidden lg:flex flex-col gap-6 w-80 shrink-0 relative z-20">
             <FadeIn
               delay={0.1}
-              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "envelope" ? "bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40 dark:hover:bg-neutral-900/40 backdrop-blur-sm border-transparent"}`}
+              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "envelope" ? "bg-white/80  backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40  backdrop-blur-sm border-transparent"}`}
               onClick={() => setActiveScreen("envelope")}
             >
               <h3 className="font-semibold text-foreground flex items-center gap-3">
@@ -67,7 +67,7 @@ export function InteractiveDemoContent() {
 
             <FadeIn
               delay={0.2}
-              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "invite" ? "bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40 dark:hover:bg-neutral-900/40 backdrop-blur-sm border-transparent"}`}
+              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "invite" ? "bg-white/80  backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40  backdrop-blur-sm border-transparent"}`}
               onClick={() => setActiveScreen("invite")}
             >
               <h3 className="font-semibold text-foreground flex items-center gap-3">
@@ -85,7 +85,7 @@ export function InteractiveDemoContent() {
 
             <FadeIn
               delay={0.3}
-              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "rsvp" ? "bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40 dark:hover:bg-neutral-900/40 backdrop-blur-sm border-transparent"}`}
+              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "rsvp" ? "bg-white/80  backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40  backdrop-blur-sm border-transparent"}`}
               onClick={() => setActiveScreen("rsvp")}
             >
               <h3 className="font-semibold text-foreground flex items-center gap-3">
@@ -103,7 +103,7 @@ export function InteractiveDemoContent() {
 
             <FadeIn
               delay={0.4}
-              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "gallery" ? "bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40 dark:hover:bg-neutral-900/40 backdrop-blur-sm border-transparent"}`}
+              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "gallery" ? "bg-white/80  backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40  backdrop-blur-sm border-transparent"}`}
               onClick={() => setActiveScreen("gallery")}
             >
               <h3 className="font-semibold text-foreground flex items-center gap-3">

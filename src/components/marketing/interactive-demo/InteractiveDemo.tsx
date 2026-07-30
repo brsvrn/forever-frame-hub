@@ -12,7 +12,7 @@ export function InteractiveDemo() {
   return (
     <section
       id="demo"
-      className="py-24 lg:py-32 bg-neutral-50 dark:bg-neutral-900/20 relative overflow-hidden border-t"
+      className="py-24 lg:py-32 bg-neutral-50  relative overflow-hidden border-t"
     >
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24">
@@ -34,7 +34,7 @@ export function InteractiveDemo() {
           <div className="hidden lg:flex flex-col gap-6 w-72 shrink-0">
             <FadeIn
               delay={0.1}
-              className={`p-5 rounded-2xl cursor-pointer transition-all border ${activeScreen === "envelope" ? "bg-white dark:bg-neutral-900 border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] scale-105" : "hover:bg-white/50 dark:hover:bg-neutral-900/50 border-transparent"}`}
+              className={`p-5 rounded-2xl cursor-pointer transition-all border ${activeScreen === "envelope" ? "bg-white  border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] scale-105" : "hover:bg-white/50  border-transparent"}`}
               onClick={() => setActiveScreen("envelope")}
             >
               <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -52,7 +52,7 @@ export function InteractiveDemo() {
 
             <FadeIn
               delay={0.2}
-              className={`p-5 rounded-2xl cursor-pointer transition-all border ${activeScreen === "invite" ? "bg-white dark:bg-neutral-900 border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] scale-105" : "hover:bg-white/50 dark:hover:bg-neutral-900/50 border-transparent"}`}
+              className={`p-5 rounded-2xl cursor-pointer transition-all border ${activeScreen === "invite" ? "bg-white  border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] scale-105" : "hover:bg-white/50  border-transparent"}`}
               onClick={() => setActiveScreen("invite")}
             >
               <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -70,7 +70,7 @@ export function InteractiveDemo() {
 
             <FadeIn
               delay={0.3}
-              className={`p-5 rounded-2xl cursor-pointer transition-all border ${activeScreen === "rsvp" ? "bg-white dark:bg-neutral-900 border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] scale-105" : "hover:bg-white/50 dark:hover:bg-neutral-900/50 border-transparent"}`}
+              className={`p-5 rounded-2xl cursor-pointer transition-all border ${activeScreen === "rsvp" ? "bg-white  border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] scale-105" : "hover:bg-white/50  border-transparent"}`}
               onClick={() => setActiveScreen("rsvp")}
             >
               <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -88,7 +88,7 @@ export function InteractiveDemo() {
 
             <FadeIn
               delay={0.4}
-              className={`p-5 rounded-2xl cursor-pointer transition-all border ${activeScreen === "gallery" ? "bg-white dark:bg-neutral-900 border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] scale-105" : "hover:bg-white/50 dark:hover:bg-neutral-900/50 border-transparent"}`}
+              className={`p-5 rounded-2xl cursor-pointer transition-all border ${activeScreen === "gallery" ? "bg-white  border-primary/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] scale-105" : "hover:bg-white/50  border-transparent"}`}
               onClick={() => setActiveScreen("gallery")}
             >
               <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -183,7 +183,7 @@ export function InteractiveDemo() {
                   </div>
 
                   {/* Bottom sticky bar */}
-                  <div className="absolute bottom-0 inset-x-0 bg-stone-900 text-white flex shadow-[0_-10px_30px_rgba(0,0,0,0.15)] z-20">
+                  <div className="absolute bottom-0 inset-x-0 bg-primary text-white flex shadow-[0_-10px_30px_rgba(0,0,0,0.15)] z-20">
                     <button
                       className="flex-1 py-4 text-[10px] tracking-[0.15em] uppercase font-semibold hover:bg-black transition-colors border-r border-stone-800"
                       onClick={() => setActiveScreen("rsvp")}
@@ -243,7 +243,7 @@ export function InteractiveDemo() {
                           Katılım Durumu
                         </label>
                         <div className="grid grid-cols-2 gap-3">
-                          <button className="py-3 border-2 border-stone-900 rounded-sm text-xs font-semibold bg-stone-900 text-white shadow-sm">
+                          <button className="py-3 border-2 border-stone-900 rounded-sm text-xs font-semibold bg-primary text-white shadow-sm">
                             Katılıyorum
                           </button>
                           <button className="py-3 border border-stone-200 rounded-sm text-xs font-medium text-stone-500 hover:bg-stone-50 transition-colors">
@@ -255,7 +255,7 @@ export function InteractiveDemo() {
                   </div>
                   <div className="p-5 border-t border-stone-100 bg-white">
                     <button
-                      className="w-full py-3.5 bg-stone-900 text-white text-[11px] tracking-[0.2em] uppercase font-bold rounded-sm flex items-center justify-center gap-2 hover:bg-black transition-colors shadow-md"
+                      className="w-full py-3.5 bg-primary text-white text-[11px] tracking-[0.2em] uppercase font-bold rounded-sm flex items-center justify-center gap-2 hover:bg-black transition-colors shadow-md"
                       onClick={() => setActiveScreen("invite")}
                     >
                       <Send className="w-3.5 h-3.5" /> Formu Gönder
@@ -277,7 +277,7 @@ export function InteractiveDemo() {
                       </button>
                       <h3 className="font-semibold text-sm ml-1 text-stone-800">Canlı Galeri</h3>
                     </div>
-                    <button className="bg-stone-900 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform">
+                    <button className="bg-primary text-white w-9 h-9 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform">
                       <Camera className="w-4 h-4" />
                     </button>
                   </div>

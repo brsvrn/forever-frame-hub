@@ -25,7 +25,7 @@ export function SecuritySection() {
   ];
 
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden bg-zinc-950">
+    <section className="relative py-24 sm:py-32 overflow-hidden bg-background">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
         <div className="mx-auto max-w-2xl lg:text-center mb-16">
           <motion.div
@@ -41,7 +41,7 @@ export function SecuritySection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl font-display font-medium tracking-tight text-white sm:text-5xl"
+            className="text-3xl font-display font-medium tracking-tight text-foreground sm:text-5xl"
           >
             Anılarınız Tamamen Güvende
           </motion.h2>
@@ -50,7 +50,7 @@ export function SecuritySection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="mt-6 text-lg leading-8 text-zinc-400"
+            className="mt-6 text-lg leading-8 text-muted-foreground"
           >
             MemoryWedding, gizliliğinizi her şeyden önde tutar. Fotoğraflarınız ve videolarınız
             sadece sizin ve sevdiklerinizin erişimine açıktır.
@@ -66,15 +66,15 @@ export function SecuritySection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 + index * 0.1, duration: 0.5, ease: easeSilk }}
-                className="flex flex-col bg-zinc-900/50 p-8 rounded-3xl border border-zinc-800 hover:border-gold/30 transition-colors"
+                className="flex flex-col bg-surface/80 p-8 rounded-3xl border border-border hover:border-gold/30 transition-colors shadow-sm"
               >
-                <dt className="flex items-center gap-x-3 text-lg font-semibold leading-7 text-white mb-4">
+                <dt className="flex items-center gap-x-3 text-lg font-semibold leading-7 text-foreground mb-4">
                   <div className="p-2.5 bg-gold/10 rounded-xl text-gold">
                     <feature.icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   {feature.title}
                 </dt>
-                <dd className="mt-1 flex flex-auto flex-col text-base leading-7 text-zinc-400">
+                <dd className="mt-1 flex flex-auto flex-col text-base leading-7 text-muted-foreground">
                   <p className="flex-auto">{feature.description}</p>
                 </dd>
               </motion.div>

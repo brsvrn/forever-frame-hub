@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-neutral-950 text-neutral-300 py-16 border-t border-white/10">
+    <footer className="bg-surface text-muted-foreground py-16 border-t border-border">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2 space-y-6">
@@ -16,7 +16,7 @@ export function Footer() {
               </div>
               <span>MemoryWedding</span>
             </Link>
-            <p className="text-neutral-300 max-w-sm leading-relaxed text-sm">
+            <p className="text-muted-foreground max-w-sm leading-relaxed text-sm">
               Düğün gününüzü unutulmaz kılan premium dijital davetiye, LCV yönetimi ve misafir
               etkileşim platformu. Apple, Spotify ve WhatsApp kalitesinde pürüzsüz bir deneyim.
             </p>
@@ -38,7 +38,7 @@ export function Footer() {
           </div>
           <div>
             <h4 className="text-white font-semibold mb-6">Platform Özellikleri</h4>
-            <ul className="space-y-4 text-sm text-neutral-300">
+            <ul className="space-y-4 text-sm text-muted-foreground">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
                   Dijital Davetiye (Web & Mobil)
@@ -68,7 +68,7 @@ export function Footer() {
           </div>
           <div>
             <h4 className="text-white font-semibold mb-6">Kurumsal & Destek</h4>
-            <ul className="space-y-4 text-sm text-neutral-300">
+            <ul className="space-y-4 text-sm text-muted-foreground">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
                   Misyonumuz
@@ -97,12 +97,12 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
+        <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
           <p>
             © {new Date().getFullYear()} MemoryWedding. Tüm hakları saklıdır. Hiçbir yerde lorem
             ipsum kullanılmamıştır.
           </p>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-neutral-300">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-border text-muted-foreground">
             <ShieldCheck className="w-3.5 h-3.5 text-green-400" />
             <span>256-bit Güvenli Ödeme Altyapısı</span>
           </div>

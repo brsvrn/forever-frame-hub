@@ -62,7 +62,7 @@ export function AnimatedQRFlow() {
     <section
       id="qr-flow"
       ref={ref}
-      className="py-24 bg-neutral-950 text-white relative overflow-hidden min-h-[100dvh] flex flex-col justify-center"
+      className="py-24 bg-background relative overflow-hidden min-h-[100dvh] flex flex-col justify-center"
     >
       {/* Background decorations */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
@@ -111,15 +111,15 @@ export function AnimatedQRFlow() {
           {steps.map((step, idx) => (
             <div key={step.id} className="relative z-10 flex flex-col items-start text-left group">
               <FadeIn delay={step.delay}>
-                <div className="w-20 h-20 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:border-primary/50 group-hover:bg-primary/10 transition-all duration-300 mb-6">
+                <div className="w-20 h-20 rounded-2xl bg-surface border border-border flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:border-primary/50 group-hover:bg-primary/10 transition-all duration-300 mb-6">
                   <div className="text-neutral-300 group-hover:text-primary transition-colors">
                     {step.icon}
                   </div>
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-neutral-200 group-hover:text-white transition-colors">
+                <h3 className="text-xl font-bold mb-3 text-muted-foreground group-hover:text-foreground transition-colors">
                   {step.title}
                 </h3>
-                <p className="text-sm text-neutral-200 font-light leading-relaxed max-w-xs">
+                <p className="text-sm text-muted-foreground font-light leading-relaxed max-w-xs">
                   {step.desc}
                 </p>
               </FadeIn>
@@ -130,7 +130,7 @@ export function AnimatedQRFlow() {
         {/* Mobile Flow */}
         <div className="flex lg:hidden flex-col items-center max-w-xs mx-auto relative">
           {/* Vertical Connecting Line */}
-          <div className="absolute top-12 bottom-12 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-800 z-0">
+          <div className="absolute top-12 bottom-12 left-1/2 -translate-x-1/2 w-0.5 bg-border z-0">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-primary/20 via-primary to-primary/20 animate-[pulse_3s_infinite]"></div>
           </div>
 
@@ -140,11 +140,11 @@ export function AnimatedQRFlow() {
               className="relative z-10 flex flex-col items-center text-center w-full group mb-12"
             >
               <FadeIn delay={step.delay}>
-                <div className="w-20 h-20 mx-auto rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center shadow-xl mb-5">
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-surface border border-border flex items-center justify-center shadow-xl mb-5">
                   <div className="text-primary">{step.icon}</div>
                 </div>
-                <h3 className="text-lg font-bold mb-2 text-white">{step.title}</h3>
-                <p className="text-sm text-neutral-200 font-light">{step.desc}</p>
+                <h3 className="text-lg font-bold mb-2 text-foreground">{step.title}</h3>
+                <p className="text-sm text-muted-foreground font-light">{step.desc}</p>
               </FadeIn>
 
               {idx < steps.length - 1 && (

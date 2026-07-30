@@ -27,7 +27,7 @@ const TESTIMONIALS = [
 
 export function Testimonials() {
   return (
-    <section className="py-24 bg-neutral-50 dark:bg-neutral-900/30 relative overflow-hidden border-t">
+    <section className="py-24 bg-neutral-50  relative overflow-hidden border-t">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <SlideUp>
@@ -48,7 +48,7 @@ export function Testimonials() {
             <FadeIn
               key={idx}
               delay={0.1 * (idx + 1)}
-              className="bg-white dark:bg-neutral-900 rounded-[2rem] p-8 border border-border shadow-sm flex flex-col h-full hover:shadow-lg transition-shadow"
+              className="bg-white  rounded-[2rem] p-8 border border-border shadow-sm flex flex-col h-full hover:shadow-lg transition-shadow"
             >
               <div className="flex text-amber-400 mb-6">
                 {[1, 2, 3, 4, 5].map((i) => (

@@ -83,21 +83,21 @@ export function Features() {
           {/* Wide Feature */}
           <FadeIn
             delay={0.4}
-            className="md:col-span-3 bg-neutral-950 text-white rounded-[2.5rem] p-8 md:p-14 overflow-hidden relative group mt-2"
+            className="md:col-span-3 bg-surface rounded-[2.5rem] p-8 md:p-14 overflow-hidden relative group mt-2 border border-border shadow-sm"
           >
-            <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0"></div>
+            <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0"></div>
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] opacity-30 -translate-y-1/2 translate-x-1/3"></div>
 
             <div className="grid md:grid-cols-5 gap-12 items-center relative z-10">
               <div className="md:col-span-3">
-                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-white mb-8 backdrop-blur-md border border-white/10">
+                <div className="w-14 h-14 bg-background rounded-2xl flex items-center justify-center text-primary mb-8 shadow-sm border border-border">
                   <ImageIcon className="w-7 h-7" />
                 </div>
                 <h3 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
                   Canlı Galeri ve <br />
                   Fotoğraf Toplama Sistemi
                 </h3>
-                <p className="text-neutral-400 leading-relaxed mb-10 text-lg font-light max-w-xl">
+                <p className="text-muted-foreground leading-relaxed mb-10 text-lg font-light max-w-xl">
                   "Bana da atarsın" cümlesi tarih oluyor. Misafirleriniz kendi çektikleri
                   fotoğrafları QR okutarak anında canlı galeriye yükler. Düğün sonrası tüm anılar
                   orijinal kalitesinde tek bir yerde toplanır.
@@ -107,7 +107,7 @@ export function Features() {
                     {[1, 2, 3, 4].map((i) => (
                       <div
                         key={i}
-                        className="w-14 h-14 rounded-full border-4 border-neutral-950 bg-neutral-800 overflow-hidden relative shadow-lg"
+                        className="w-14 h-14 rounded-full border-4 border-background bg-muted overflow-hidden relative shadow-md"
                       >
                         <img
                           src={`https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=150&h=150&sig=${i}`}
@@ -118,8 +118,8 @@ export function Features() {
                     ))}
                   </div>
                   <div className="flex flex-col justify-center">
-                    <span className="font-bold text-2xl text-white">+850</span>
-                    <span className="text-xs text-neutral-500 uppercase tracking-[0.2em] font-semibold mt-1">
+                    <span className="font-bold text-2xl text-foreground">+850</span>
+                    <span className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold mt-1">
                       Fotoğraf Yüklendi
                     </span>
                   </div>
@@ -127,14 +127,14 @@ export function Features() {
               </div>
               <div className="md:col-span-2 relative h-[300px] md:h-[400px] hidden md:block">
                 {/* Decorative floating images */}
-                <div className="absolute right-0 top-12 w-48 h-64 bg-neutral-800 rounded-2xl overflow-hidden border-4 border-neutral-900 shadow-2xl rotate-6 group-hover:rotate-12 transition-transform duration-700 ease-out z-0">
+                <div className="absolute right-0 top-12 w-48 h-64 bg-background rounded-2xl overflow-hidden border-4 border-border shadow-xl rotate-6 group-hover:rotate-12 transition-transform duration-700 ease-out z-0">
                   <img
                     src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80"
-                    className="w-full h-full object-cover opacity-80"
+                    className="w-full h-full object-cover opacity-90"
                     alt="Cake"
                   />
                 </div>
-                <div className="absolute right-28 top-32 w-56 h-72 bg-neutral-800 rounded-2xl overflow-hidden border-4 border-neutral-900 shadow-2xl -rotate-6 group-hover:-rotate-12 transition-transform duration-700 ease-out z-10">
+                <div className="absolute right-28 top-32 w-56 h-72 bg-background rounded-2xl overflow-hidden border-4 border-border shadow-xl -rotate-6 group-hover:-rotate-12 transition-transform duration-700 ease-out z-10">
                   <img
                     src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80"
                     className="w-full h-full object-cover opacity-90"

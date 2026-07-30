@@ -41,7 +41,7 @@ export function ThemeGalleryContent() {
   return (
     <section
       ref={ref}
-      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden border-t bg-white py-24 dark:bg-black lg:py-32"
+      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden border-t bg-white py-24  lg:py-32"
     >
       <div className="pointer-events-none absolute right-0 top-0 z-0 h-[500px] w-full bg-gradient-to-b from-primary/5 to-transparent" />
 
