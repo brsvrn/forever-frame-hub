@@ -128,6 +128,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
     let completed = 0;
 
     try {
+      let lastError = "";
       for (const upload of items) {
         const result = await storage.downloadFile(
           "memorywedding-uploads",
@@ -156,13 +157,16 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
           link.remove();
           URL.revokeObjectURL(objectUrl);
           completed++;
+        } else if (result.error) {
+          console.error("Download failed for item:", upload.id, result.error);
+          lastError = result.error.message;
         }
       }
 
       if (completed === items.length) toast.success(`${completed} medya indirildi`);
       else if (completed > 0)
-        toast.warning(`${completed} medya indirildi, bazı dosyalar alınamadı`);
-      else toast.error("Dosyalar indirilemedi. Depo okuma yetkisini kontrol edin.");
+        toast.warning(`${completed} medya indirildi, bazı dosyalar alınamadı. Hata: ${lastError}`);
+      else toast.error(`Dosyalar indirilemedi. Hata detay: ${lastError || "Depo okuma yetkisini kontrol edin."}`);
     } finally {
       setDownloading(false);
     }
