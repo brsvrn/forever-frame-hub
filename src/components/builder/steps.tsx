@@ -156,19 +156,19 @@ export function StepTheme({
                 onChange={(e) => update("category", e.target.value as any)}
                 className="field-base min-h-11 w-full bg-transparent"
               >
-                <option className="bg-slate-900 text-white" value="wedding">
+                <option className="bg-background text-foreground" value="wedding">
                   {lang === "tr" ? "Düğün" : "Wedding"}
                 </option>
-                <option className="bg-slate-900 text-white" value="engagement">
+                <option className="bg-background text-foreground" value="engagement">
                   {lang === "tr" ? "Nişan" : "Engagement"}
                 </option>
-                <option className="bg-slate-900 text-white" value="henna">
+                <option className="bg-background text-foreground" value="henna">
                   {lang === "tr" ? "Kına" : "Henna"}
                 </option>
-                <option className="bg-slate-900 text-white" value="birthday">
+                <option className="bg-background text-foreground" value="birthday">
                   {lang === "tr" ? "Doğum Günü" : "Birthday"}
                 </option>
-                <option className="bg-slate-900 text-white" value="other">
+                <option className="bg-background text-foreground" value="other">
                   {lang === "tr" ? "Diğer" : "Other"}
                 </option>
               </select>
