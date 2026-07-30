@@ -27,10 +27,15 @@ export function InvitationPreview({
 
   const themeConfig = resolveTheme(draft.theme);
 
+  const showAmpersand = draft.partnerTwo || (draft.category !== "birthday" && draft.category !== "henna" && draft.category !== "other");
+  
   const names =
     draft.partnerOne || draft.partnerTwo
-      ? `${draft.partnerOne || "…"} & ${draft.partnerTwo || "…"}`
+      ? showAmpersand
+        ? `${draft.partnerOne || "…"} & ${draft.partnerTwo || "…"}`
+        : draft.partnerOne || "…"
       : c.namesFallback;
+
   const dateLabel = formatInviteDate(draft.date, lang) || c.dateFallback;
   const days = countdownDays(draft.date);
 

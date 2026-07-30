@@ -304,32 +304,60 @@ export function StepTheme({
 
 export function StepTexts({ draft, update, copy, lang }: StepProps) {
   const c = copy.texts;
+  
+  const isBirthday = draft.category === "birthday";
+  const isOther = draft.category === "other";
+  const isHenna = draft.category === "henna";
+
+  const partnerOneLabel = isBirthday 
+    ? (lang === "tr" ? "Doğum Günü Çocuğu Adı" : "Birthday Person's Name")
+    : isHenna 
+      ? (lang === "tr" ? "Gelin Adı" : "Bride's Name")
+      : isOther
+        ? (lang === "tr" ? "İsim" : "First Name")
+        : (lang === "tr" ? "1. Kişi (Örn: Gelin)" : "Partner 1 (e.g., Bride)");
+
+  const partnerTwoLabel = isHenna 
+    ? (lang === "tr" ? "Damat Adı (İsteğe bağlı)" : "Groom's Name (Optional)")
+    : isOther 
+      ? (lang === "tr" ? "İkinci isim (İsteğe bağlı)" : "Second Name (Optional)")
+      : (lang === "tr" ? "2. Kişi (Örn: Damat)" : "Partner 2 (e.g., Groom)");
+
+  const showPartnerTwo = !isBirthday;
+  const showFamilyInfo = !isBirthday && !isOther;
+
+  const familyTitle = isHenna 
+    ? (lang === "tr" ? `${c.family} (İsteğe bağlı)` : `${c.family} (Optional)`)
+    : c.family;
+
   return (
     <div className="space-y-8">
       <StepHeader title={c.title} desc={c.desc} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label={c.partnerOne}>
+        <Field label={partnerOneLabel} className={showPartnerTwo ? "" : "sm:col-span-2"}>
           {(id) => (
             <TextInput
               id={id}
               value={draft.partnerOne}
               maxLength={24}
-              placeholder="Elif"
+              placeholder={isBirthday ? (lang === "tr" ? "Can" : "Alex") : "Elif"}
               onChange={(e) => update("partnerOne", e.target.value)}
             />
           )}
         </Field>
-        <Field label={c.partnerTwo}>
-          {(id) => (
-            <TextInput
-              id={id}
-              value={draft.partnerTwo}
-              maxLength={24}
-              placeholder="Kaan"
-              onChange={(e) => update("partnerTwo", e.target.value)}
-            />
-          )}
-        </Field>
+        {showPartnerTwo && (
+          <Field label={partnerTwoLabel}>
+            {(id) => (
+              <TextInput
+                id={id}
+                value={draft.partnerTwo}
+                maxLength={24}
+                placeholder={isOther ? "" : "Kaan"}
+                onChange={(e) => update("partnerTwo", e.target.value)}
+              />
+            )}
+          </Field>
+        )}
         <Field label={c.headline} className="sm:col-span-2">
           {(id) => (
             <TextInput
@@ -369,85 +397,106 @@ export function StepTexts({ draft, update, copy, lang }: StepProps) {
           )}
         </Field>
 
-        <div className="sm:col-span-2 mt-6">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            {c.family}
-          </h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-4 rounded-2xl border border-border p-4">
-              <p className="text-sm font-medium">
-                {draft.partnerOne || (lang === "tr" ? "1. Kişi" : "Partner 1")}
-              </p>
-              <Field label={lang === "tr" ? "Anne Adı" : "Mother's Name"}>
-                {(id) => (
-                  <TextInput
-                    id={id}
-                    value={draft.familyInfo?.bride?.mother || ""}
-                    onChange={(e) =>
-                      update("familyInfo", {
-                        ...draft.familyInfo,
-                        bride: { ...draft.familyInfo?.bride, mother: e.target.value },
-                      })
-                    }
-                  />
-                )}
-              </Field>
-              <Field label={lang === "tr" ? "Baba Adı" : "Father's Name"}>
-                {(id) => (
-                  <TextInput
-                    id={id}
-                    value={draft.familyInfo?.bride?.father || ""}
-                    onChange={(e) =>
-                      update("familyInfo", {
-                        ...draft.familyInfo,
-                        bride: { ...draft.familyInfo?.bride, father: e.target.value },
-                      })
-                    }
-                  />
-                )}
-              </Field>
-            </div>
-            <div className="space-y-4 rounded-2xl border border-border p-4">
-              <p className="text-sm font-medium">
-                {draft.partnerTwo || (lang === "tr" ? "2. Kişi" : "Partner 2")}
-              </p>
-              <Field label={lang === "tr" ? "Anne Adı" : "Mother's Name"}>
-                {(id) => (
-                  <TextInput
-                    id={id}
-                    value={draft.familyInfo?.groom?.mother || ""}
-                    onChange={(e) =>
-                      update("familyInfo", {
-                        ...draft.familyInfo,
-                        groom: { ...draft.familyInfo?.groom, mother: e.target.value },
-                      })
-                    }
-                  />
-                )}
-              </Field>
-              <Field label={lang === "tr" ? "Baba Adı" : "Father's Name"}>
-                {(id) => (
-                  <TextInput
-                    id={id}
-                    value={draft.familyInfo?.groom?.father || ""}
-                    onChange={(e) =>
-                      update("familyInfo", {
-                        ...draft.familyInfo,
-                        groom: { ...draft.familyInfo?.groom, father: e.target.value },
-                      })
-                    }
-                  />
-                )}
-              </Field>
+        {showFamilyInfo && (
+          <div className="sm:col-span-2 mt-6">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              {familyTitle}
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-4 rounded-2xl border border-border p-4">
+                <p className="text-sm font-medium">
+                  {draft.partnerOne || (lang === "tr" ? "1. Kişi" : "Partner 1")}
+                </p>
+                <Field label={lang === "tr" ? "Anne Adı" : "Mother's Name"}>
+                  {(id) => (
+                    <TextInput
+                      id={id}
+                      value={draft.familyInfo?.bride?.mother || ""}
+                      onChange={(e) =>
+                        update("familyInfo", {
+                          ...draft.familyInfo,
+                          bride: { ...draft.familyInfo?.bride, mother: e.target.value },
+                        })
+                      }
+                    />
+                  )}
+                </Field>
+                <Field label={lang === "tr" ? "Baba Adı" : "Father's Name"}>
+                  {(id) => (
+                    <TextInput
+                      id={id}
+                      value={draft.familyInfo?.bride?.father || ""}
+                      onChange={(e) =>
+                        update("familyInfo", {
+                          ...draft.familyInfo,
+                          bride: { ...draft.familyInfo?.bride, father: e.target.value },
+                        })
+                      }
+                    />
+                  )}
+                </Field>
+              </div>
+              <div className="space-y-4 rounded-2xl border border-border p-4">
+                <p className="text-sm font-medium">
+                  {draft.partnerTwo || (lang === "tr" ? "2. Kişi" : "Partner 2")}
+                </p>
+                <Field label={lang === "tr" ? "Anne Adı" : "Mother's Name"}>
+                  {(id) => (
+                    <TextInput
+                      id={id}
+                      value={draft.familyInfo?.groom?.mother || ""}
+                      onChange={(e) =>
+                        update("familyInfo", {
+                          ...draft.familyInfo,
+                          groom: { ...draft.familyInfo?.groom, mother: e.target.value },
+                        })
+                      }
+                    />
+                  )}
+                </Field>
+                <Field label={lang === "tr" ? "Baba Adı" : "Father's Name"}>
+                  {(id) => (
+                    <TextInput
+                      id={id}
+                      value={draft.familyInfo?.groom?.father || ""}
+                      onChange={(e) =>
+                        update("familyInfo", {
+                          ...draft.familyInfo,
+                          groom: { ...draft.familyInfo?.groom, father: e.target.value },
+                        })
+                      }
+                    />
+                  )}
+                </Field>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
 export function StepQrDetails({ draft, update, lang }: StepProps) {
+  const isBirthday = draft.category === "birthday";
+  const isOther = draft.category === "other";
+  const isHenna = draft.category === "henna";
+  const showPartnerTwo = !isBirthday;
+
+  const partnerOneLabel = isBirthday 
+    ? (lang === "tr" ? "Doğum Günü Çocuğu Adı" : "Birthday Person's Name")
+    : isHenna 
+      ? (lang === "tr" ? "Gelin Adı" : "Bride's Name")
+      : isOther
+        ? (lang === "tr" ? "İsim" : "First Name")
+        : (lang === "tr" ? "İsim" : "First name");
+
+  const partnerTwoLabel = isHenna 
+    ? (lang === "tr" ? "Damat Adı (İsteğe bağlı)" : "Groom's Name (Optional)")
+    : isOther 
+      ? (lang === "tr" ? "İkinci isim (İsteğe bağlı)" : "Second Name (Optional)")
+      : (lang === "tr" ? "İkinci isim (isteğe bağlı)" : "Second name (optional)");
+
   return (
     <div className="space-y-8">
       <StepHeader
@@ -459,28 +508,30 @@ export function StepQrDetails({ draft, update, lang }: StepProps) {
         }
       />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label={lang === "tr" ? "İsim" : "First name"}>
+        <Field label={partnerOneLabel} className={showPartnerTwo ? "" : "sm:col-span-2"}>
           {(id) => (
             <TextInput
               id={id}
               value={draft.partnerOne}
               maxLength={24}
-              placeholder={lang === "tr" ? "Minel" : "Alex"}
+              placeholder={isBirthday ? (lang === "tr" ? "Can" : "Alex") : (lang === "tr" ? "Minel" : "Alex")}
               onChange={(event) => update("partnerOne", event.target.value)}
             />
           )}
         </Field>
-        <Field label={lang === "tr" ? "İkinci isim (isteğe bağlı)" : "Second name (optional)"}>
-          {(id) => (
-            <TextInput
-              id={id}
-              value={draft.partnerTwo}
-              maxLength={24}
-              placeholder={lang === "tr" ? "Barış" : "Taylor"}
-              onChange={(event) => update("partnerTwo", event.target.value)}
-            />
-          )}
-        </Field>
+        {showPartnerTwo && (
+          <Field label={partnerTwoLabel}>
+            {(id) => (
+              <TextInput
+                id={id}
+                value={draft.partnerTwo}
+                maxLength={24}
+                placeholder={isOther ? "" : (lang === "tr" ? "Barış" : "Taylor")}
+                onChange={(event) => update("partnerTwo", event.target.value)}
+              />
+            )}
+          </Field>
+        )}
       </div>
       <div className="rounded-3xl border border-border bg-accent/20 p-5 text-sm text-muted-foreground">
         {lang === "tr"
