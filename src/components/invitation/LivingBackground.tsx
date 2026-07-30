@@ -1,188 +1,209 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ThemeConfig } from "@/lib/theme-engine";
 
 export function LivingBackground({ theme }: { theme: ThemeConfig }) {
-  const themeId = theme.id;
-  
-  // Background images for different themes
-  const backgrounds: Record<string, string> = {
-    garden: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2000&auto=format&fit=crop",
-    blush: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=2000&auto=format&fit=crop",
-    midnight: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2000&auto=format&fit=crop",
-    noir: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2000&auto=format&fit=crop",
-    beach: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=2000&auto=format&fit=crop",
-  };
-
-  const bgImage = backgrounds[themeId] || backgrounds.midnight;
+  const reduceMotion = useReducedMotion();
+  const isLightTheme = theme.id === "soft-sand-dunes" || theme.id === "wildflower-meadow";
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-black">
-      {/* Background Image */}
-      <motion.div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${bgImage})` }}
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 2, ease: "easeOut" }}
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black">
+      <motion.div
+        className="absolute -inset-6 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url(${theme.image})`,
+          filter: isLightTheme ? "brightness(1.02) saturate(0.96)" : undefined,
+        }}
+        initial={reduceMotion ? false : { scale: 1.08 }}
+        animate={{ scale: 1.02 }}
+        transition={{ duration: 2.4, ease: "easeOut" }}
       />
-      
-      {/* Dark Overlay to make text readable */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
 
-      {/* Theme Specific Animations */}
-      {themeId === "garden" && <FallingLeaves />}
-      {(themeId === "midnight" || themeId === "noir") && <ElegantBokeh />}
-      {themeId === "blush" && <FloatingPetals />}
-      {themeId === "beach" && <FlyingBirds />}
-      
-      {/* Fallback particles if no specific theme matched */}
-      {(!["garden", "midnight", "noir", "blush", "beach"].includes(themeId)) && <ElegantBokeh />}
+      {/* Okunabilirlik katmanları sabittir; parlaklık/kararma animasyonu uygulanmaz. */}
+      <div className={`absolute inset-0 ${theme.styles.overlay}`} />
+      <div
+        className={isLightTheme ? "absolute inset-0 bg-black/12" : "absolute inset-0 bg-black/18"}
+      />
+
+      {!reduceMotion ? <AmbientMotion theme={theme} /> : null}
     </div>
   );
 }
 
-// 1. Düşen Yapraklar (Garden)
-function FallingLeaves() {
-  const leaves = Array.from({ length: 15 });
+function AmbientMotion({ theme }: { theme: ThemeConfig }) {
+  switch (theme.ambientEffect.type) {
+    case "foam":
+    case "waves":
+      return <SeaFoam accent={theme.qr.accent} />;
+    case "sunGlow":
+      return <SunGlow accent={theme.qr.accent} />;
+    case "palmShadows":
+      return <PalmShadow />;
+    case "moonSparkle":
+      return <Sparkles accent={theme.qr.accent} />;
+    case "bougainvillea":
+      return <FloatingPetals accent="#F08AB9" />;
+    case "duneBreeze":
+      return <DuneBreeze accent={theme.qr.accent} />;
+    case "forestLight":
+      return <ForestLight accent={theme.qr.accent} />;
+    case "wildflowers":
+      return <FloatingPetals accent={theme.qr.accent} />;
+    case "mountainMist":
+      return <MountainMist />;
+    case "lemonBreeze":
+      return <LemonBreeze accent={theme.qr.accent} />;
+    case "tuscanGlow":
+      return <SunGlow accent={theme.qr.accent} />;
+    case "lakeShimmer":
+      return <LakeShimmer accent={theme.qr.accent} />;
+    default:
+      return null;
+  }
+}
+
+function SeaFoam({ accent }: { accent: string }) {
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {leaves.map((_, i) => (
+    <div className="absolute inset-0 overflow-hidden opacity-35">
+      {[22, 58, 84].map((top, index) => (
         <motion.div
-          key={`leaf-${i}`}
-          className="absolute text-emerald-600/60"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: -50,
-          }}
-          animate={{
-            y: ['0vh', '110vh'],
-            x: [0, Math.random() * 100 - 50, Math.random() * 100 - 50],
-            rotate: [0, Math.random() * 360, Math.random() * 720],
-          }}
-          transition={{
-            duration: Math.random() * 10 + 15,
-            repeat: Infinity,
-            ease: "linear",
-            delay: Math.random() * -20, // Başlangıçta ekranda dağılmış olmaları için negatif delay
-          }}
-        >
-          {/* Basit bir SVG yaprak formu */}
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12,2C7.36,2 3,6.36 3,12C3,17.64 8.5,22 12,22C15.5,22 21,17.64 21,12C21,6.36 16.64,2 12,2ZM12,19.9C9.5,19.9 5.1,16.5 5.1,12C5.1,8.1 8.1,5.1 12,5.1C15.9,5.1 18.9,8.1 18.9,12C18.9,16.5 14.5,19.9 12,19.9Z" opacity="0.5"/>
-            <path d="M12,5.1C8.1,5.1 5.1,8.1 5.1,12C5.1,16.5 9.5,19.9 12,19.9C14.5,19.9 18.9,16.5 18.9,12C18.9,8.1 15.9,5.1 12,5.1Z"/>
-          </svg>
-        </motion.div>
+          key={top}
+          className="absolute -left-1/4 h-24 w-[150%] rounded-[50%] border-t border-white/45 blur-[1px]"
+          style={{ top: `${top}%`, boxShadow: `0 -8px 28px ${accent}30` }}
+          animate={{ x: ["-4%", "4%", "-4%"], y: [0, index % 2 ? -7 : 7, 0] }}
+          transition={{ duration: 10 + index * 3, repeat: Infinity, ease: "easeInOut" }}
+        />
       ))}
     </div>
   );
 }
 
-// 2. Uçan Kuşlar (Beach)
-function FlyingBirds() {
-  const birds = Array.from({ length: 5 });
+function SunGlow({ accent }: { accent: string }) {
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {birds.map((_, i) => (
-        <motion.div
-          key={`bird-${i}`}
-          className="absolute text-white/50"
-          style={{
-            top: `${Math.random() * 30 + 10}%`,
-            left: "-10%",
-          }}
-          animate={{
-            x: ['-10vw', '110vw'],
-            y: [0, Math.random() * -50 + 25, 0],
-            scale: [0.5, 0.8, 0.5]
-          }}
-          transition={{
-            duration: Math.random() * 15 + 20,
-            repeat: Infinity,
-            ease: "linear",
-            delay: Math.random() * -10,
-          }}
-        >
-          {/* Zarif uçan kuş silüeti */}
-          <svg width="40" height="20" viewBox="0 0 24 12" fill="currentColor">
-            <path d="M2.08,8.23C3.54,6.72 5.92,4.6 8.52,4.6C10.74,4.6 11.66,6.33 12,7.31C12.34,6.33 13.26,4.6 15.48,4.6C18.08,4.6 20.46,6.72 21.92,8.23L23.36,6.71C21.8,5.1 19.1,2.6 15.48,2.6C12.92,2.6 11.75,4.35 11.29,5.21C11.16,4.98 10.97,4.72 10.73,4.46L11.23,3.95L10.36,2.39L8.52,2.6C4.9,2.6 2.2,5.1 0.64,6.71L2.08,8.23Z" />
-          </svg>
-        </motion.div>
-      ))}
-    </div>
+    <motion.div
+      className="absolute -right-1/4 -top-1/4 size-[70vw] rounded-full blur-3xl"
+      style={{ background: `radial-gradient(circle, ${accent}40, transparent 68%)` }}
+      animate={{ scale: [0.95, 1.08, 0.95], x: [0, -18, 0] }}
+      transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+    />
   );
 }
 
-// 3. Zarif Işık Hüzmeleri (Noir / Midnight)
-function ElegantBokeh() {
-  const particles = Array.from({ length: 20 });
+function PalmShadow() {
+  return (
+    <motion.div
+      className="absolute -right-24 -top-16 h-[70vh] w-[55vw] origin-top-right bg-[radial-gradient(ellipse_at_top_right,rgba(0,40,35,.22),transparent_68%)] blur-xl"
+      animate={{ rotate: [-1.5, 2, -1.5] }}
+      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+    />
+  );
+}
+
+function Sparkles({ accent }: { accent: string }) {
   return (
     <div className="absolute inset-0">
-      {particles.map((_, i) => (
-        <motion.div
-          key={`bokeh-${i}`}
-          className="absolute rounded-full bg-gold/20 blur-xl"
-          style={{
-            width: Math.random() * 100 + 50,
-            height: Math.random() * 100 + 50,
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-            backgroundColor: i % 2 === 0 ? 'rgba(234, 179, 8, 0.15)' : 'rgba(255, 255, 255, 0.1)',
-          }}
-          animate={{
-            y: [0, Math.random() * -100 - 50, 0],
-            x: [0, Math.random() * 50 - 25, 0],
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.4, 0.1],
-          }}
+      {[12, 28, 45, 63, 78, 91].map((left, index) => (
+        <motion.span
+          key={left}
+          className="absolute size-1 rounded-full"
+          style={{ left: `${left}%`, top: `${18 + ((index * 17) % 64)}%`, backgroundColor: accent }}
+          animate={{ opacity: [0.15, 0.85, 0.15], scale: [0.7, 1.8, 0.7] }}
+          transition={{ duration: 3 + (index % 3), delay: index * 0.45, repeat: Infinity }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FloatingPetals({ accent }: { accent: string }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {[8, 22, 39, 57, 74, 91].map((left, index) => (
+        <motion.span
+          key={left}
+          className="absolute -top-6 h-3 w-2 rounded-[70%_30%_70%_30%] opacity-55"
+          style={{ left: `${left}%`, backgroundColor: accent }}
+          animate={{ y: ["-5vh", "110vh"], x: [0, index % 2 ? 46 : -38, 0], rotate: [0, 240, 520] }}
           transition={{
-            duration: Math.random() * 10 + 15,
+            duration: 15 + index * 1.4,
+            delay: -index * 2.2,
             repeat: Infinity,
-            ease: "easeInOut",
-            delay: Math.random() * -20,
+            ease: "linear",
           }}
         />
       ))}
-      
-      <motion.div 
-        className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"
-        animate={{ x: ["-100%", "100%"] }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-      />
     </div>
   );
 }
 
-// 4. Taç Yapraklar (Blush / Romantic)
-function FloatingPetals() {
-  const petals = Array.from({ length: 25 });
+function DuneBreeze({ accent }: { accent: string }) {
+  return (
+    <motion.div
+      className="absolute inset-x-[-20%] bottom-[12%] h-24 rounded-[50%] border-t blur-sm"
+      style={{ borderColor: `${accent}45` }}
+      animate={{ x: ["-3%", "3%", "-3%"], y: [0, -5, 0] }}
+      transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+    />
+  );
+}
+
+function ForestLight({ accent }: { accent: string }) {
+  return (
+    <motion.div
+      className="absolute -left-1/3 -top-1/4 h-[90vh] w-[75vw] rotate-12 blur-2xl"
+      style={{
+        background: `linear-gradient(110deg, transparent 30%, ${accent}18 50%, transparent 68%)`,
+      }}
+      animate={{ x: ["-8%", "16%", "-8%"], opacity: [0.35, 0.7, 0.35] }}
+      transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+    />
+  );
+}
+
+function MountainMist() {
+  return (
+    <>
+      <motion.div
+        className="absolute left-[-35%] top-[18%] h-48 w-[120%] rounded-full bg-white/12 blur-3xl"
+        animate={{ x: ["-8%", "18%", "-8%"] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute right-[-40%] top-[48%] h-40 w-[110%] rounded-full bg-slate-100/10 blur-3xl"
+        animate={{ x: ["10%", "-16%", "10%"] }}
+        transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </>
+  );
+}
+
+function LemonBreeze({ accent }: { accent: string }) {
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {petals.map((_, i) => (
-        <motion.div
-          key={`petal-${i}`}
-          className="absolute text-rose-400/50"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: -20,
-          }}
-          animate={{
-            y: ['0vh', '110vh'],
-            x: [0, Math.random() * 100 - 50, Math.random() * -100 + 50],
-            rotate: [0, Math.random() * 360, Math.random() * 720],
-          }}
+      {[9, 31, 68, 88].map((left, index) => (
+        <motion.span
+          key={left}
+          className="absolute -top-8 h-4 w-2.5 rounded-[80%_20%_70%_30%] opacity-45"
+          style={{ left: `${left}%`, backgroundColor: index % 2 ? "#6F8D35" : accent }}
+          animate={{ y: ["-5vh", "108vh"], x: [0, index % 2 ? 34 : -28, 0], rotate: [0, 200, 420] }}
           transition={{
-            duration: Math.random() * 12 + 15,
+            duration: 18 + index * 2,
+            delay: -index * 3,
             repeat: Infinity,
-            ease: "easeInOut",
-            delay: Math.random() * -25,
+            ease: "linear",
           }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12,2C17.52,2 22,6.48 22,12C22,17.52 17.52,22 12,22C6.48,22 2,17.52 2,12C2,6.48 6.48,2 12,2ZM12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4Z" opacity="0.3"/>
-            <path d="M12,4C16.42,4 20,7.58 20,12C20,16.42 16.42,20 12,20C7.58,20 4,16.42 4,12C4,7.58 7.58,4 12,4Z"/>
-          </svg>
-        </motion.div>
+        />
       ))}
     </div>
+  );
+}
+
+function LakeShimmer({ accent }: { accent: string }) {
+  return (
+    <motion.div
+      className="absolute inset-x-[-20%] bottom-[18%] h-24 rounded-[50%] blur-xl"
+      style={{ background: `linear-gradient(180deg, transparent, ${accent}20, transparent)` }}
+      animate={{ x: ["-5%", "5%", "-5%"], scaleX: [0.96, 1.04, 0.96] }}
+      transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+    />
   );
 }

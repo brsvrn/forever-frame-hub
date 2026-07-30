@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Heart, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { appContent } from "@/lib/app-content";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { easeSilk } from "@/components/landing/motion-primitives";
 import { Field, TextInput } from "@/components/builder/Field";
-import { getAuthRedirectUrl } from "@/lib/auth-helpers";
+import { consumeAuthReturnTo, getAuthRedirectUrl, peekAuthReturnTo } from "@/lib/auth-helpers";
 
 const title = "Giriş Yap veya Hesap Oluştur — MemoryWedding";
 const description =
@@ -36,7 +36,6 @@ export const Route = createFileRoute("/giris")({
 function AuthPage() {
   const { lang } = useI18n();
   const c = appContent[lang].auth;
-  const navigate = useNavigate();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [name, setName] = useState("");
@@ -48,9 +47,9 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/panel" });
+      if (data.session) window.location.assign(consumeAuthReturnTo());
     });
-  }, [navigate]);
+  }, []);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -63,17 +62,17 @@ function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/panel`,
+            emailRedirectTo: `${window.location.origin}${peekAuthReturnTo()}`,
             data: { full_name: name },
           },
         });
         if (signUpError) throw signUpError;
-        if (data.session) navigate({ to: "/panel" });
+        if (data.session) window.location.assign(consumeAuthReturnTo());
         else setInfo(c.checkEmail);
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
-        navigate({ to: "/panel" });
+        window.location.assign(consumeAuthReturnTo());
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : c.genericError);
@@ -91,7 +90,7 @@ function AuthPage() {
         redirectTo: redirectUrl,
       },
     });
-    
+
     if (error) {
       setError(c.genericError);
     }

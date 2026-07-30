@@ -1,1 +1,0 @@
-import { createClient } from '@supabase/supabase-js'; import dotenv from 'dotenv'; dotenv.config(); const s = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY); s.from('invitations').select('*, package:packages(*)').limit(1).then(r => console.log(JSON.stringify(r.error || r.data)));

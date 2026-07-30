@@ -22,7 +22,7 @@ const PhoneContext = createContext<PhoneState | undefined>(undefined);
 export function PhoneProvider({ children }: { children: ReactNode }) {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("envelope");
   const [activeSection, setActiveSection] = useState<ActiveSection>("hero");
-  const [activeTheme, setActiveTheme] = useState("classic");
+  const [activeTheme, setActiveTheme] = useState("turquoise-cove");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
 

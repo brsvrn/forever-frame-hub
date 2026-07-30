@@ -1,134 +1,146 @@
 import { FadeIn, SlideUp } from "@/components/motion";
 import { usePhone } from "@/contexts/PhoneContext";
-import { CheckCircle2 } from "lucide-react";
-import { useInView, motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { selectableThemes, type ThemeCategory } from "@/lib/theme-engine";
+import { CheckCircle2, Crown, Landmark, Leaf, Waves } from "lucide-react";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { PhoneMockup } from "../interactive-demo/PhoneMockup";
 
+const categories: Array<{
+  id: Exclude<ThemeCategory, "classic">;
+  label: string;
+  icon: typeof Waves;
+}> = [
+  { id: "coastal", label: "Deniz", icon: Waves },
+  { id: "nature", label: "Doğa", icon: Leaf },
+  { id: "italy", label: "İtalya", icon: Landmark },
+  { id: "luxury", label: "Lüks", icon: Crown },
+];
+
 export function ThemeGalleryContent() {
-  const { activeTheme, setActiveTheme, activeSection, setActiveSection } = usePhone();
+  const { activeTheme, setActiveTheme, setActiveScreen, activeSection, setActiveSection } =
+    usePhone();
+  const [activeCategory, setActiveCategory] =
+    useState<Exclude<ThemeCategory, "classic">>("coastal");
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
-
-  const { scrollYProgress } = useScroll({ 
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-  
-  const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
 
   useEffect(() => {
     if (isInView) setActiveSection("gallery");
   }, [isInView, setActiveSection]);
 
-  const themes = [
-    {
-      id: "classic",
-      name: "Klasik Zarafet",
-      description: "Siyah, beyaz ve bej tonlarının asil uyumu. Zamanın ötesinde bir tasarım.",
-      colorClass: "from-stone-800 to-stone-500",
-      bgClass: "bg-stone-50",
-    },
-    {
-      id: "floral",
-      name: "Bahar Çiçekleri",
-      description: "Canlı pastel tonlar ve floral desenlerle bezenmiş enerjik bir tema.",
-      colorClass: "from-rose-400 to-pink-300",
-      bgClass: "bg-rose-50/50",
-    },
-    {
-      id: "minimal",
-      name: "Modern Minimalist",
-      description: "Gereksiz detaylardan arınmış, tipografi odaklı şık ve net bir görünüm.",
-      colorClass: "from-neutral-800 to-neutral-400",
-      bgClass: "bg-neutral-50",
-    },
-    {
-      id: "royal",
-      name: "Royal Gece",
-      description: "Lacivert ve altın sarısının ihtişamlı buluşması. Gece düğünleri için ideal.",
-      colorClass: "from-slate-900 to-indigo-800",
-      bgClass: "bg-slate-50",
-    },
-  ];
+  const visibleThemes = selectableThemes.filter((theme) => theme.category === activeCategory);
+
+  const chooseTheme = (themeId: string) => {
+    setActiveTheme(themeId);
+    setActiveScreen("invite");
+  };
 
   return (
-    <section ref={ref} className="py-24 lg:py-32 bg-white dark:bg-black relative overflow-hidden min-h-[100dvh] flex flex-col justify-center border-t">
-      {/* Decorative Blur Background */}
-      <div className="absolute top-0 right-0 w-full h-[500px] bg-gradient-to-b from-primary/5 to-transparent z-0 pointer-events-none"></div>
+    <section
+      ref={ref}
+      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden border-t bg-white py-24 dark:bg-black lg:py-32"
+    >
+      <div className="pointer-events-none absolute right-0 top-0 z-0 h-[500px] w-full bg-gradient-to-b from-primary/5 to-transparent" />
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24">
+      <div className="container relative z-10 mx-auto px-4">
+        <div className="mx-auto mb-12 max-w-3xl text-center lg:mb-16">
           <SlideUp>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-              Tarzınızı Yansıtan <span className="text-primary">Temayı Seçin</span>
+            <h2 className="mb-6 text-3xl font-bold tracking-tight md:text-5xl">
+              Hikâyenize Uyan <span className="text-primary">Temayı Seçin</span>
             </h2>
-            <p className="text-lg text-foreground/80 font-light max-w-2xl mx-auto leading-relaxed">
-              Düğününüzün konseptine en uygun tasarımı seçin. Seçtiğiniz an canlı telefonda anında
-              nasıl göründüğünü deneyimleyin.
+            <p className="mx-auto max-w-2xl text-lg font-light leading-relaxed text-foreground/80">
+              Deniz, doğa, İtalya ve lüks koleksiyonlarından bir tema seçin. Telefon önizlemesi
+              seçiminize göre anında yenilensin.
             </p>
           </SlideUp>
         </div>
 
-        <div className="relative max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24">
-          {/* Theme Selector List */}
-          <div className="w-full lg:w-[45%] shrink-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
-              {themes.map((theme, index) => (
-                <FadeIn key={theme.id} delay={0.1 * index}>
-                  <div
-                    onClick={() => setActiveTheme(theme.id)}
-                    className={`p-6 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
-                      activeTheme === theme.id
-                        ? "border-primary shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-white dark:bg-neutral-900 scale-[1.02]"
-                        : "border-border/50 bg-background/50 hover:bg-white dark:hover:bg-neutral-900 hover:border-primary/30"
-                    }`}
-                  >
-                    {/* Active State Background Highlight */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-r ${theme.colorClass} opacity-0 transition-opacity duration-500 ${
-                        activeTheme === theme.id
-                          ? "opacity-[0.03] dark:opacity-[0.08]"
-                          : "group-hover:opacity-[0.02]"
+        <div className="mx-auto mb-10 flex w-fit gap-2 rounded-2xl border border-border/60 bg-background/70 p-1.5 shadow-sm backdrop-blur-xl">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            const selected = activeCategory === category.id;
+            return (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => setActiveCategory(category.id)}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all sm:px-6 ${
+                  selected
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
+                }`}
+              >
+                <Icon className="size-4" aria-hidden="true" />
+                {category.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-20">
+          <div className="w-full shrink-0 lg:w-[58%]">
+            <div className="grid max-h-[35rem] grid-cols-1 gap-4 overflow-y-auto pr-1 sm:grid-cols-2">
+              {visibleThemes.map((theme, index) => {
+                const selected = activeTheme === theme.id;
+                return (
+                  <FadeIn key={theme.id} delay={0.05 * index}>
+                    <button
+                      type="button"
+                      onClick={() => chooseTheme(theme.id)}
+                      className={`group relative min-h-44 w-full overflow-hidden rounded-3xl border text-left transition-all duration-300 ${
+                        selected
+                          ? "scale-[1.01] border-primary shadow-[0_16px_45px_rgba(0,0,0,0.14)]"
+                          : "border-white/15 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
                       }`}
-                    ></div>
-
-                    <div className="flex items-start justify-between relative z-10">
-                      <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <div
-                            className={`w-4 h-4 rounded-full bg-gradient-to-br ${theme.colorClass}`}
-                          ></div>
-                          <h3 className="font-bold text-lg text-foreground">{theme.name}</h3>
-                        </div>
-                        <p className="text-sm text-foreground/70 leading-relaxed pr-8">
-                          {theme.description}
-                        </p>
-                      </div>
-
-                      {/* Active Checkmark */}
+                    >
+                      <img
+                        src={theme.image}
+                        alt={theme.name}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        style={{ objectPosition: theme.qr.imagePosition || "center" }}
+                      />
                       <div
-                        className={`transition-all duration-300 ${activeTheme === theme.id ? "scale-100 opacity-100" : "scale-50 opacity-0"}`}
-                      >
-                        <CheckCircle2 className="w-6 h-6 text-primary" />
+                        className="absolute inset-0"
+                        style={{ background: theme.qr.overlay }}
+                        aria-hidden="true"
+                      />
+                      <div className="relative flex min-h-44 flex-col justify-end p-5 text-white">
+                        <div className="flex items-end justify-between gap-3">
+                          <div>
+                            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/65">
+                              {categories.find((item) => item.id === theme.category)?.label}
+                            </span>
+                            <h3 className="mt-1 text-xl font-semibold">{theme.name}</h3>
+                            <p className="mt-1 text-sm text-white/75">{theme.tag.tr}</p>
+                          </div>
+                          <CheckCircle2
+                            className={`size-7 shrink-0 transition-all ${
+                              selected ? "scale-100 opacity-100" : "scale-75 opacity-0"
+                            }`}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </FadeIn>
-              ))}
+                    </button>
+                  </FadeIn>
+                );
+              })}
             </div>
           </div>
 
-          {/* Right space for sticky phone */}
-          <div className="hidden lg:flex items-center justify-center w-[350px] shrink-0 relative">
-            {activeSection === "gallery" && (
-              <motion.div 
-                layoutId="global-phone" 
-                style={{ y }} 
-                className="w-[300px] h-[600px] z-30"
+          <div className="flex w-full items-center justify-center lg:w-[350px] lg:shrink-0">
+            {activeSection === "gallery" ? (
+              <motion.div
+                layoutId="global-phone"
+                style={{ y }}
+                className="z-30 h-[600px] w-[300px]"
               >
                 <PhoneMockup />
               </motion.div>
+            ) : (
+              <div className="h-[600px] w-[300px]" />
             )}
           </div>
         </div>

@@ -34,14 +34,10 @@ export function CinematicOpening({
         className="fixed inset-0 z-50 flex items-center justify-center bg-background"
       >
         <div className="absolute inset-0">
-          <img
-            src={theme.image}
-            alt=""
-            className="w-full h-full object-cover"
-          />
+          <img src={theme.image} alt="" className="w-full h-full object-cover" />
           <div className={`absolute inset-0 ${theme.styles.overlay}`} />
           {/* A heavy blur that animates out */}
-          <motion.div 
+          <motion.div
             initial={{ backdropFilter: "blur(60px)" }}
             animate={{ backdropFilter: "blur(10px)" }}
             transition={{ duration: theme.openingAnimation.duration, ease: "easeInOut" }}
@@ -58,7 +54,7 @@ export function CinematicOpening({
           >
             Lütfen Sesi Açın
           </motion.p>
-          
+
           <motion.h1
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -78,7 +74,9 @@ export function CinematicOpening({
                 onClick={onOpen}
                 className="group flex items-center gap-3 px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white transition-all shadow-[0_0_40px_rgba(255,255,255,0.1)]"
               >
-                <span className="text-sm tracking-[0.2em] uppercase font-medium">Davetiyeyi Aç</span>
+                <span className="text-sm tracking-[0.2em] uppercase font-medium">
+                  Davetiyeyi Aç
+                </span>
                 <span className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center">
                   <Play className="w-3 h-3 ml-0.5" />
                 </span>

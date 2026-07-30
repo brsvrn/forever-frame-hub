@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import type { ThemeConfig } from "@/lib/theme-engine";
-import { formatInviteDate, type InvitationDraft } from "@/lib/invitation";
+import type { InvitationDraft } from "@/lib/invitation";
 
 export function StoryTimeline({ draft, theme }: { draft: InvitationDraft; theme: ThemeConfig }) {
   if (!draft.ourStory || draft.ourStory.length === 0) return null;
@@ -8,25 +8,37 @@ export function StoryTimeline({ draft, theme }: { draft: InvitationDraft; theme:
   return (
     <section className="relative py-32 px-6 flex flex-col items-center snap-center">
       <div className="max-w-2xl w-full">
-        <h3 className={`text-3xl text-center text-white mb-16 ${theme.styles.typography.display}`}>Hikayemiz</h3>
-        
+        <h3 className={`text-3xl text-center text-white mb-16 ${theme.styles.typography.display}`}>
+          Hikayemiz
+        </h3>
+
         <div className="space-y-12 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/20 before:to-transparent">
           {draft.ourStory.map((story, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.8, delay: i * 0.08 }}
               className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
             >
               <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-black/50 backdrop-blur-md text-white/90 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 text-xs font-semibold">
                 {story.date}
               </div>
-              
-              <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ${theme.styles.cards.wrapper} p-6 rounded-2xl`}>
-                <h4 className={`font-medium mb-2 ${theme.id === "garden" || theme.id === "blush" ? "text-slate-900" : "text-white"}`}>{story.title}</h4>
-                <p className={`text-sm leading-relaxed ${theme.id === "garden" || theme.id === "blush" ? "text-slate-700" : "text-white/70"}`}>{story.desc}</p>
+
+              <div
+                className={`w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ${theme.styles.cards.wrapper} p-6 rounded-2xl`}
+              >
+                <h4
+                  className={`font-medium mb-2 ${theme.id === "garden" || theme.id === "blush" ? "text-slate-900" : "text-white"}`}
+                >
+                  {story.title}
+                </h4>
+                <p
+                  className={`text-sm leading-relaxed ${theme.id === "garden" || theme.id === "blush" ? "text-slate-700" : "text-white/70"}`}
+                >
+                  {story.desc}
+                </p>
               </div>
             </motion.div>
           ))}
