@@ -298,11 +298,11 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
             >
               {isVideo ? (
                 <video
-                  src={upload.file_url}
-                  className="h-full w-full object-cover"
-                  controls
+                  src={`${upload.file_url}#t=0.1`}
+                  className="h-full w-full object-cover pointer-events-none"
                   preload="metadata"
-                  onClick={(event) => event.stopPropagation()}
+                  muted
+                  playsInline
                 />
               ) : (
                 <img

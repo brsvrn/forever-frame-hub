@@ -94,7 +94,7 @@ export function MemoryWall({
     if (!error && data) {
       const activePhotos = data.filter(
         (upload) =>
-          upload.file_type.startsWith("image/") &&
+          (upload.file_type.startsWith("image/") || upload.file_type.startsWith("video/")) &&
           (!upload.status || upload.status === "active" || upload.status === "approved"),
       );
       const photosWithAccess = await Promise.all(
@@ -228,16 +228,26 @@ export function MemoryWall({
                         ? `Yükleyen: ${photo.guest_name}`
                         : "Bir misafir yükledi"}
                     </figcaption>
-                    <img
-                      src={photo.file_url}
-                      alt={
-                        photo.guest_name
-                          ? `${photo.guest_name} tarafından paylaşılan anı`
-                          : "Düğün anısı"
-                      }
-                      className="aspect-[4/5] w-full object-cover transition-transform duration-[4000ms] group-hover:scale-[1.025]"
-                      loading="lazy"
-                    />
+                    {photo.file_type.startsWith("video/") ? (
+                      <video
+                        src={`${photo.file_url}#t=0.1`}
+                        className="aspect-[4/5] w-full object-cover transition-transform duration-[4000ms] group-hover:scale-[1.025] pointer-events-none"
+                        preload="metadata"
+                        muted
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={photo.file_url}
+                        alt={
+                          photo.guest_name
+                            ? `${photo.guest_name} tarafından paylaşılan anı`
+                            : "Düğün anısı"
+                        }
+                        className="aspect-[4/5] w-full object-cover transition-transform duration-[4000ms] group-hover:scale-[1.025]"
+                        loading="lazy"
+                      />
+                    )}
                     <div className="px-1 pt-3">
                       <p className="text-[0.65rem] font-medium uppercase tracking-[0.12em] text-zinc-400">
                         {new Date(photo.created_at).toLocaleDateString("tr-TR", {
