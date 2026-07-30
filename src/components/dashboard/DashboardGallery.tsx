@@ -47,7 +47,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
         const accessibleUploads = await Promise.all(
           (data as GuestUpload[]).map(async (upload) => ({
             ...upload,
-            file_url: await storage.getViewUrl("guest-uploads", upload.file_url),
+            file_url: await storage.getViewUrl("memorywedding-uploads", upload.file_url),
           })),
         );
         setUploads(accessibleUploads);
@@ -72,7 +72,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
           const newUpload = payload.new as GuestUpload;
           const accessibleUpload = {
             ...newUpload,
-            file_url: await storage.getViewUrl("guest-uploads", newUpload.file_url),
+            file_url: await storage.getViewUrl("memorywedding-uploads", newUpload.file_url),
           };
           setUploads((prev) => [accessibleUpload, ...prev]);
         },
@@ -107,9 +107,9 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
     for (const upload of uploadsToDelete) {
       if (upload.file_url) {
         try {
-          const path = upload.file_path || storage.getFilePath("guest-uploads", upload.file_url);
+          const path = upload.file_path || storage.getFilePath("memorywedding-uploads", upload.file_url);
           if (path) {
-            await storage.deleteFile("guest-uploads", path);
+            await storage.deleteFile("memorywedding-uploads", path);
           }
         } catch (err) {
           console.error("Storage delete error", err);
@@ -130,11 +130,11 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
     try {
       for (const upload of items) {
         const result = await storage.downloadFile(
-          "guest-uploads",
+          "memorywedding-uploads",
           upload.file_path || upload.file_url,
         );
         if (!result.blob) continue;
-        const path = upload.file_path || storage.getFilePath("guest-uploads", upload.file_url);
+        const path = upload.file_path || storage.getFilePath("memorywedding-uploads", upload.file_url);
         const fallbackExtension = upload.file_type.startsWith("video/") ? "mp4" : "jpg";
         const fileName = path.split("/").pop() || `memory-${upload.id}.${fallbackExtension}`;
         const objectUrl = URL.createObjectURL(result.blob);

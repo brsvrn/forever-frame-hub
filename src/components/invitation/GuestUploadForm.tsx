@@ -70,7 +70,7 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
       for (const file of files) {
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = `${invitationId}/${crypto.randomUUID()}-${safeName}`;
-        const { url, error } = await storage.uploadFile("guest-uploads", path, file);
+        const { url, error } = await storage.uploadFile("memorywedding-uploads", path, file);
 
         if (error) {
           console.error("Storage Error:", error);
@@ -129,7 +129,7 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
 
           if (dbError) {
             console.error("DB Insert Error:", dbError);
-            await storage.deleteFile("guest-uploads", path);
+            await storage.deleteFile("memorywedding-uploads", path);
             setErrorMessage(`Veritabanı hatası: ${dbError.message}`);
           } else {
             completed++;

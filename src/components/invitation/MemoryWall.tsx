@@ -100,7 +100,7 @@ export function MemoryWall({
       const photosWithAccess = await Promise.all(
         activePhotos.map(async (photo) => ({
           ...photo,
-          file_url: await storage.getViewUrl("guest-uploads", photo.file_url),
+          file_url: await storage.getViewUrl("memorywedding-uploads", photo.file_url),
         })),
       );
       setPhotos(photosWithAccess);
