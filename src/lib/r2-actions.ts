@@ -22,6 +22,10 @@ export const getR2PresignedUrl = createServerFn({ method: "POST" })
   .validator((data: { bucket: string; fileName: string; contentType: string }) => data)
   .handler(async ({ data }) => {
     try {
+      if (!process.env.CLOUDFLARE_ACCOUNT_ID) throw new Error("CLOUDFLARE_ACCOUNT_ID eksik");
+      if (!process.env.CLOUDFLARE_ACCESS_KEY_ID) throw new Error("CLOUDFLARE_ACCESS_KEY_ID eksik");
+      if (!process.env.CLOUDFLARE_SECRET_ACCESS_KEY) throw new Error("CLOUDFLARE_SECRET_ACCESS_KEY eksik");
+
       const client = getS3Client();
       const command = new PutObjectCommand({
         Bucket: data.bucket,
@@ -35,6 +39,6 @@ export const getR2PresignedUrl = createServerFn({ method: "POST" })
       return { url, error: null };
     } catch (error) {
       console.error("Error generating presigned URL:", error);
-      return { url: null, error: "Yükleme linki oluşturulamadı" };
+      return { url: null, error: error instanceof Error ? error.message : "Yükleme linki oluşturulamadı" };
     }
   });
