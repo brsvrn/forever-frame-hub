@@ -120,8 +120,8 @@ export function InteractiveDemoContent() {
             </FadeIn>
           </div>
 
-          {/* Right side space for sticky phone on desktop */}
-          <div className="hidden lg:flex items-center justify-center w-[350px] shrink-0 relative">
+          {/* Phone Mockup space for desktop & mobile */}
+          <div className="flex items-center justify-center w-full lg:w-[350px] shrink-0 relative mt-8 lg:mt-0">
             {activeSection === "demo" && (
               <motion.div
                 layoutId="global-phone"
