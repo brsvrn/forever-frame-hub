@@ -70,21 +70,6 @@ export function HeroContent() {
               delay={0.4}
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
             >
-              <MagneticButton>
-                <Button
-                  size="lg"
-                  asChild
-                  className="rounded-full w-full sm:w-auto h-14 px-8 text-base shadow-[0_0_40px_rgba(var(--primary),0.3)] hover:shadow-[0_0_60px_rgba(var(--primary),0.5)] transition-all group relative overflow-hidden"
-                >
-                  <Link to="/olustur">
-                    <span className="relative z-10 flex items-center">
-                      Ücretsiz Başla{" "}
-                      <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
-                  </Link>
-                </Button>
-              </MagneticButton>
               <MagneticButton intensity={0.1}>
                 <Button
                   size="lg"
