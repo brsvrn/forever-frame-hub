@@ -432,6 +432,7 @@ function BuilderPage() {
                     onPublishChange={(value) => void handlePublishChange(value)}
                     saveStatus={saveStatus}
                     features={features}
+                    invitationId={editingId}
                   />
                 ) : null}
               </motion.div>

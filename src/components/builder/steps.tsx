@@ -990,6 +990,7 @@ export function StepPublish({
   onPublishChange,
   saveStatus,
   features,
+  invitationId,
 }: StepProps & {
   onEdit: () => void;
   isPublished: boolean;
@@ -997,6 +998,7 @@ export function StepPublish({
   onPublishChange: (val: boolean) => void;
   saveStatus: string;
   features: PackageFeatures;
+  invitationId?: string;
 }) {
   const c = copy.publish;
   const [copied, setCopied] = useState(false);
@@ -1021,16 +1023,9 @@ export function StepPublish({
   };
 
   const downloadQr = () => {
-    const svg = document.getElementById("publish-qr-code");
-    if (!svg) return;
-    const source = new XMLSerializer().serializeToString(svg);
-    const blob = new Blob([source], { type: "image/svg+xml" });
-    const href = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = href;
-    a.download = `${slug}-qr.svg`;
-    a.click();
-    URL.revokeObjectURL(href);
+    if (invitationId) {
+      window.location.href = `/panel/${invitationId}?tab=print`;
+    }
   };
 
   return (

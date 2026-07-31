@@ -56,7 +56,16 @@ type TabType = "overview" | "storage" | "gallery" | "rsvp" | "analytics" | "prin
 
 function PremiumDashboard({ userId, invitationId }: { userId: string; invitationId: string }) {
   const [invitation, setInvitation] = useState<InvitationRow | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab") as TabType;
+      if (tab && ["overview", "storage", "gallery", "rsvp", "analytics", "print", "settings"].includes(tab)) {
+        return tab;
+      }
+    }
+    return "overview";
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
