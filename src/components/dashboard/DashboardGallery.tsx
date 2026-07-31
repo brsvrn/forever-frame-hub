@@ -237,7 +237,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
                   void downloadUploads(uploads.filter((upload) => selectedIds.has(upload.id)))
                 }
                 disabled={downloading}
-                className="p-2 text-zinc-300 hover:text-foreground bg-accent/10 rounded-md transition-colors tooltip"
+                className="p-2 text-foreground hover:text-foreground bg-accent/10 rounded-md transition-colors tooltip"
                 title="Seçilenleri indir"
               >
                 {downloading ? (
@@ -248,7 +248,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
               </button>
               <button
                 onClick={handleDelete}
-                className="p-2 text-zinc-300 hover:text-rose-500 bg-accent/10 rounded-md transition-colors"
+                className="p-2 text-foreground hover:text-rose-500 bg-accent/10 rounded-md transition-colors"
                 title="Sil"
               >
                 <Trash2 className="w-4 h-4" />
@@ -288,7 +288,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
             <button
               key={f.id}
               onClick={() => setFilter(f.id as any)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-colors ${filter === f.id ? "bg-accent/10 text-foreground font-medium" : "text-muted-foreground hover:text-zinc-300"}`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-colors ${filter === f.id ? "bg-accent/10 text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
             >
               {f.icon && (
                 <f.icon className={`w-4 h-4 ${f.id === "favorites" ? "text-rose-500" : ""}`} />

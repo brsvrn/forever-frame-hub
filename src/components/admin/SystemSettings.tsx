@@ -50,8 +50,8 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
     <div className="animate-in fade-in duration-500 max-w-3xl">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-2xl font-display text-white mb-1">Sistem Ayarları</h2>
-          <p className="text-sm text-zinc-400">
+          <h2 className="text-2xl font-display text-foreground mb-1">Sistem Ayarları</h2>
+          <p className="text-sm text-muted-foreground">
             Platformun genel işleyişi ve varsayılan limitlerini buradan yapılandırın.
           </p>
         </div>
@@ -67,13 +67,13 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
 
       <div className="space-y-6">
         {/* Güvenlik ve Durum */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <h3 className="text-lg text-white font-medium mb-4">Platform Durumu</h3>
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <h3 className="text-lg text-foreground font-medium mb-4">Platform Durumu</h3>
 
-          <div className="flex items-center justify-between py-4 border-b border-zinc-800/50">
+          <div className="flex items-center justify-between py-4 border-b border-border/50">
             <div>
-              <p className="text-white font-medium">Bakım Modu (Maintenance Mode)</p>
-              <p className="text-sm text-zinc-400 mt-1">
+              <p className="text-foreground font-medium">Bakım Modu (Maintenance Mode)</p>
+              <p className="text-sm text-muted-foreground mt-1">
                 Aktif edilirse siteye ziyaretçiler erişemez, 'Bakımda' sayfası görünür.
               </p>
             </div>
@@ -90,8 +90,8 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
 
           <div className="flex items-center justify-between py-4">
             <div>
-              <p className="text-white font-medium">Yeni Üye Kayıtları (Registrations)</p>
-              <p className="text-sm text-zinc-400 mt-1">
+              <p className="text-foreground font-medium">Yeni Üye Kayıtları (Registrations)</p>
+              <p className="text-sm text-muted-foreground mt-1">
                 Platforma yeni kullanıcıların üye olmasını izin verir.
               </p>
             </div>
@@ -110,21 +110,21 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
         </div>
 
         {/* Limitler ve Varsayılanlar */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <h3 className="text-lg text-white font-medium mb-4">Varsayılan Limitler ve Paket</h3>
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <h3 className="text-lg text-foreground font-medium mb-4">Varsayılan Limitler ve Paket</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm text-white mb-2">Varsayılan (Ücretsiz) Paket</label>
+              <label className="block text-sm text-foreground mb-2">Varsayılan (Ücretsiz) Paket</label>
               <select
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-zinc-300"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                 value={settings.default_package_id || ""}
                 onChange={(e) => setSettings({ ...settings, default_package_id: e.target.value })}
               >
                 <option value="">-- Lütfen Seçin --</option>
                 {packages.map((pkg) => (
                   <option key={pkg.id} value={pkg.id}>
-                    {pkg.name} ({pkg.price} ₺)
+                    {pkg.display_name || pkg.name} ({pkg.price} ₺)
                   </option>
                 ))}
               </select>
@@ -134,12 +134,12 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
             </div>
 
             <div>
-              <label className="block text-sm text-white mb-2">
+              <label className="block text-sm text-foreground mb-2">
                 Maksimum Dosya Yükleme Boyutu (MB)
               </label>
               <input
                 type="number"
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-zinc-300"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                 value={settings.max_upload_size_mb}
                 onChange={(e) =>
                   setSettings({ ...settings, max_upload_size_mb: parseInt(e.target.value) })
@@ -153,14 +153,14 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
         </div>
 
         {/* İletişim */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <h3 className="text-lg text-white font-medium mb-4">İletişim</h3>
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <h3 className="text-lg text-foreground font-medium mb-4">İletişim</h3>
 
           <div>
-            <label className="block text-sm text-white mb-2">Destek E-posta Adresi</label>
+            <label className="block text-sm text-foreground mb-2">Destek E-posta Adresi</label>
             <input
               type="email"
-              className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-zinc-300"
+              className="w-full max-w-md bg-background border border-border rounded-lg px-4 py-2 text-foreground"
               value={settings.support_email}
               onChange={(e) => setSettings({ ...settings, support_email: e.target.value })}
             />

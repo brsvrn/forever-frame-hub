@@ -147,8 +147,8 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
     <div className="animate-in fade-in duration-500">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-2xl font-display text-white mb-1">Tema Yönetimi</h2>
-          <p className="text-sm text-zinc-400">
+          <h2 className="text-2xl font-display text-foreground mb-1">Tema Yönetimi</h2>
+          <p className="text-sm text-muted-foreground">
             Davetiye temalarını ve tasarım konfigürasyonlarını yönetin.
           </p>
         </div>
@@ -169,15 +169,15 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
           {themes.map((theme) => (
             <div
               key={theme.id}
-              className={`bg-zinc-900 border rounded-2xl overflow-hidden ${theme.is_active ? "border-zinc-800" : "border-zinc-800 opacity-70"}`}
+              className={`bg-card border rounded-2xl overflow-hidden ${theme.is_active ? "border-border" : "border-border opacity-70"}`}
             >
               <div
-                className="aspect-video bg-zinc-800 flex items-center justify-center relative bg-cover bg-center"
+                className="aspect-video bg-muted flex items-center justify-center relative bg-cover bg-center"
                 style={{ backgroundImage: `url(${theme.config?.thumbnailUrl})` }}
               >
                 {!theme.is_active && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="bg-zinc-800 text-zinc-300 text-xs px-3 py-1 rounded-full font-bold">
+                    <span className="bg-muted text-foreground text-xs px-3 py-1 rounded-full font-bold">
                       ARŞİVLENDİ
                     </span>
                   </div>
@@ -185,11 +185,11 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
               </div>
               <div className="p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-white font-medium">{theme.name}</h3>
+                  <h3 className="text-foreground font-medium">{theme.name}</h3>
                   <span className="text-xs text-zinc-500 font-mono">{theme.theme_id}</span>
                 </div>
-                <p className="text-sm text-zinc-400 mb-4 h-10 line-clamp-2">{theme.description}</p>
-                <div className="mb-4 text-sm text-zinc-400">
+                <p className="text-sm text-muted-foreground mb-4 h-10 line-clamp-2">{theme.description}</p>
+                <div className="mb-4 text-sm text-muted-foreground">
                   <p className="flex items-center gap-1 text-rose-400 font-medium">
                     <AlertTriangle className="w-4 h-4" /> {theme.usageCount} aktif kullanım
                   </p>
@@ -197,7 +197,7 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleOpenModal(theme)}
-                    className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-lg text-sm transition-colors"
+                    className="flex-1 flex justify-center items-center gap-2 bg-muted hover:bg-zinc-700 text-foreground py-2 rounded-lg text-sm transition-colors"
                   >
                     <Edit2 className="w-4 h-4" /> Düzenle
                   </button>
@@ -225,90 +225,90 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
-            <div className="p-6 border-b border-zinc-800 flex justify-between items-center shrink-0">
-              <h3 className="text-xl font-display text-white">
+          <div className="bg-background border border-border rounded-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
+            <div className="p-6 border-b border-border flex justify-between items-center shrink-0">
+              <h3 className="text-xl font-display text-foreground">
                 {editingTheme ? "Temayı Düzenle" : "Yeni Tema"}
               </h3>
             </div>
 
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
               {/* Ayarlar Paneli */}
-              <div className="w-full md:w-1/2 p-6 overflow-y-auto border-r border-zinc-800 space-y-4">
+              <div className="w-full md:w-1/2 p-6 overflow-y-auto border-r border-border space-y-4">
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">
+                  <label className="block text-sm text-muted-foreground mb-1">
                     Tema ID (Örn: luxury, minimal)
                   </label>
                   <input
                     type="text"
                     disabled={!!editingTheme}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white disabled:opacity-50"
+                    className="w-full bg-card border border-border rounded-lg px-4 py-2 text-foreground disabled:opacity-50"
                     value={formData.theme_id}
                     onChange={(e) => setFormData({ ...formData, theme_id: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Tema Adı</label>
+                  <label className="block text-sm text-muted-foreground mb-1">Tema Adı</label>
                   <input
                     type="text"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Açıklama</label>
+                  <label className="block text-sm text-muted-foreground mb-1">Açıklama</label>
                   <textarea
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                     rows={2}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
 
-                <div className="pt-4 border-t border-zinc-800">
-                  <h4 className="text-white font-medium mb-3">Tasarım (Config)</h4>
+                <div className="pt-4 border-t border-border">
+                  <h4 className="text-foreground font-medium mb-3">Tasarım (Config)</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-zinc-400 mb-1">Ana Renk (Primary)</label>
+                      <label className="block text-sm text-muted-foreground mb-1">Ana Renk (Primary)</label>
                       <div className="flex gap-2">
                         <input
                           type="color"
-                          className="w-10 h-10 rounded bg-zinc-900"
+                          className="w-10 h-10 rounded bg-card"
                           value={config.primaryColor}
                           onChange={(e) => setConfig({ ...config, primaryColor: e.target.value })}
                         />
                         <input
                           type="text"
-                          className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 text-white text-sm"
+                          className="flex-1 bg-card border border-border rounded-lg px-3 text-foreground text-sm"
                           value={config.primaryColor}
                           onChange={(e) => setConfig({ ...config, primaryColor: e.target.value })}
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm text-zinc-400 mb-1">
+                      <label className="block text-sm text-muted-foreground mb-1">
                         Arkaplan (Secondary)
                       </label>
                       <div className="flex gap-2">
                         <input
                           type="color"
-                          className="w-10 h-10 rounded bg-zinc-900"
+                          className="w-10 h-10 rounded bg-card"
                           value={config.secondaryColor}
                           onChange={(e) => setConfig({ ...config, secondaryColor: e.target.value })}
                         />
                         <input
                           type="text"
-                          className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 text-white text-sm"
+                          className="flex-1 bg-card border border-border rounded-lg px-3 text-foreground text-sm"
                           value={config.secondaryColor}
                           onChange={(e) => setConfig({ ...config, secondaryColor: e.target.value })}
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm text-zinc-400 mb-1">Font Ailesi</label>
+                      <label className="block text-sm text-muted-foreground mb-1">Font Ailesi</label>
                       <select
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white text-sm"
+                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground text-sm"
                         value={config.font}
                         onChange={(e) => setConfig({ ...config, font: e.target.value })}
                       >
@@ -320,9 +320,9 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-zinc-400 mb-1">Animasyon Preset</label>
+                      <label className="block text-sm text-muted-foreground mb-1">Animasyon Preset</label>
                       <select
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white text-sm"
+                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground text-sm"
                         value={config.animationPreset}
                         onChange={(e) => setConfig({ ...config, animationPreset: e.target.value })}
                       >
@@ -333,11 +333,11 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-zinc-400 mb-1">
+                      <label className="block text-sm text-muted-foreground mb-1">
                         Kart Kenarı (Radius)
                       </label>
                       <select
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white text-sm"
+                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground text-sm"
                         value={config.cardRadius}
                         onChange={(e) => setConfig({ ...config, cardRadius: e.target.value })}
                       >
@@ -349,9 +349,9 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-zinc-400 mb-1">Gölge (Shadow)</label>
+                      <label className="block text-sm text-muted-foreground mb-1">Gölge (Shadow)</label>
                       <select
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white text-sm"
+                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground text-sm"
                         value={config.shadow}
                         onChange={(e) => setConfig({ ...config, shadow: e.target.value })}
                       >
@@ -362,9 +362,9 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-zinc-400 mb-1">Buton Stili</label>
+                      <label className="block text-sm text-muted-foreground mb-1">Buton Stili</label>
                       <select
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white text-sm"
+                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground text-sm"
                         value={config.buttonVariant}
                         onChange={(e) => setConfig({ ...config, buttonVariant: e.target.value })}
                       >
@@ -375,9 +375,9 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-zinc-400 mb-1">Ayraç Stili</label>
+                      <label className="block text-sm text-muted-foreground mb-1">Ayraç Stili</label>
                       <select
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white text-sm"
+                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground text-sm"
                         value={config.dividerStyle}
                         onChange={(e) => setConfig({ ...config, dividerStyle: e.target.value })}
                       >
@@ -390,25 +390,25 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-zinc-800 space-y-3">
-                  <h4 className="text-white font-medium mb-3">Medya Varlıkları (Assets)</h4>
+                <div className="pt-4 border-t border-border space-y-3">
+                  <h4 className="text-foreground font-medium mb-3">Medya Varlıkları (Assets)</h4>
                   <div>
-                    <label className="block text-sm text-zinc-400 mb-1">
+                    <label className="block text-sm text-muted-foreground mb-1">
                       Thumbnail (Görsel URL)
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white text-sm"
+                      className="w-full bg-card border border-border rounded-lg px-4 py-2 text-foreground text-sm"
                       value={config.thumbnailUrl}
                       onChange={(e) => setConfig({ ...config, thumbnailUrl: e.target.value })}
                       placeholder="https://..."
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-zinc-400 mb-1">Kapak Videosu (URL)</label>
+                    <label className="block text-sm text-muted-foreground mb-1">Kapak Videosu (URL)</label>
                     <input
                       type="text"
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white text-sm"
+                      className="w-full bg-card border border-border rounded-lg px-4 py-2 text-foreground text-sm"
                       value={config.coverVideoUrl}
                       onChange={(e) => setConfig({ ...config, coverVideoUrl: e.target.value })}
                       placeholder="https://..."
@@ -419,12 +419,12 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
 
               {/* Canlı Önizleme Paneli */}
               <div className="w-full md:w-1/2 bg-black flex flex-col p-6 items-center overflow-y-auto">
-                <div className="mb-4 flex items-center gap-2 text-zinc-400 text-sm">
+                <div className="mb-4 flex items-center gap-2 text-muted-foreground text-sm">
                   <Eye className="w-4 h-4" /> Canlı Önizleme
                 </div>
 
                 <div
-                  className="w-full max-w-sm h-[600px] border border-zinc-800 rounded-3xl overflow-hidden relative shadow-2xl transition-all duration-500"
+                  className="w-full max-w-sm h-[600px] border border-border rounded-3xl overflow-hidden relative shadow-2xl transition-all duration-500"
                   style={{
                     backgroundColor: config.secondaryColor,
                     fontFamily: config.font === "Playfair Display" ? "serif" : "sans-serif",
@@ -432,7 +432,7 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                 >
                   {/* Mock Hero */}
                   <div
-                    className="h-2/3 bg-zinc-900 relative flex items-center justify-center flex-col text-center p-6 bg-cover bg-center"
+                    className="h-2/3 bg-card relative flex items-center justify-center flex-col text-center p-6 bg-cover bg-center"
                     style={{ backgroundImage: `url(${config.thumbnailUrl})` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
@@ -440,7 +440,7 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
                       <p className="text-sm mb-2" style={{ color: config.primaryColor }}>
                         BİZ EVLENİYORUZ
                       </p>
-                      <h1 className="text-4xl text-white mb-4">Barış & Minel</h1>
+                      <h1 className="text-4xl text-foreground mb-4">Barış & Minel</h1>
                       <button
                         className="px-6 py-2 rounded-full font-medium"
                         style={{
@@ -455,12 +455,12 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
 
                   {/* Mock Content */}
                   <div className="p-6">
-                    <h2 className="text-xl text-white mb-2">Detaylar</h2>
+                    <h2 className="text-xl text-foreground mb-2">Detaylar</h2>
                     <div
                       className="w-12 h-1 mb-4"
                       style={{ backgroundColor: config.primaryColor }}
                     />
-                    <p className="text-sm text-zinc-400 leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Bu alan seçtiğiniz {config.font} fontu, {config.primaryColor} vurgu rengi ve{" "}
                       {config.secondaryColor} arkaplanı ile nasıl görüneceğini test etmeniz içindir.
                     </p>
@@ -469,10 +469,10 @@ export function ThemeManager({ adminEmail }: { adminEmail: string }) {
               </div>
             </div>
 
-            <div className="p-6 border-t border-zinc-800 flex justify-end gap-3 shrink-0">
+            <div className="p-6 border-t border-border flex justify-end gap-3 shrink-0">
               <button
                 onClick={() => setModalOpen(false)}
-                className="px-4 py-2 rounded-lg text-sm text-zinc-400 hover:text-white"
+                className="px-4 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground"
               >
                 İptal
               </button>

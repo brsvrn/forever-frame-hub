@@ -136,8 +136,8 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
     <div className="animate-in fade-in duration-500">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-2xl font-display text-white mb-1">Paket Yönetimi</h2>
-          <p className="text-sm text-zinc-400">
+          <h2 className="text-2xl font-display text-foreground mb-1">Paket Yönetimi</h2>
+          <p className="text-sm text-muted-foreground">
             Üyelik paketlerini, fiyatlarını ve özelliklerini (Feature Flags) yönetin.
           </p>
         </div>
@@ -158,17 +158,17 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
           {packages.map((pkg) => (
             <div
               key={pkg.id}
-              className={`border rounded-2xl p-6 relative ${pkg.is_active ? "bg-zinc-900 border-gold/30" : "bg-zinc-900/50 border-zinc-800 opacity-70"}`}
+              className={`border rounded-2xl p-6 relative ${pkg.is_active ? "bg-card border-gold/30" : "bg-card/50 border-border opacity-70"}`}
             >
               {!pkg.is_active && (
-                <div className="absolute top-4 right-4 text-xs font-bold bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full">
+                <div className="absolute top-4 right-4 text-xs font-bold bg-muted text-muted-foreground px-3 py-1 rounded-full">
                   ARŞİVLENDİ
                 </div>
               )}
-              <h3 className="text-xl text-white font-display mb-1">{pkg.name}</h3>
-              <div className="text-2xl text-white font-medium mb-4">{pkg.price} ₺</div>
+              <h3 className="text-xl text-foreground font-display mb-1">{pkg.display_name || pkg.name}</h3>
+              <div className="text-2xl text-foreground font-medium mb-4">{pkg.price} ₺</div>
 
-              <div className="mb-4 text-sm text-zinc-400">
+              <div className="mb-4 text-sm text-muted-foreground">
                 <p>Kota: {pkg.storage?.maxGb || 0} GB</p>
                 <p>Fotoğraf Limiti: {pkg.limits?.photoLimit || 0}</p>
                 <p className="flex items-center gap-1 mt-1 text-rose-400 font-medium">
@@ -179,7 +179,7 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
               <div className="flex gap-2 mt-6">
                 <button
                   onClick={() => handleOpenModal(pkg)}
-                  className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white py-2 rounded-lg text-sm transition-colors"
+                  className="flex-1 flex justify-center items-center gap-2 bg-muted hover:bg-zinc-700 text-foreground py-2 rounded-lg text-sm transition-colors"
                 >
                   <Edit2 className="w-4 h-4" /> Düzenle
                 </button>
@@ -206,27 +206,27 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-display text-white mb-6">
+          <div className="bg-background border border-border rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-display text-foreground mb-6">
               {editingPkg ? "Paketi Düzenle" : "Yeni Paket Oluştur"}
             </h3>
 
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm text-zinc-400 mb-1">Paket Adı</label>
+                <label className="block text-sm text-muted-foreground mb-1">Paket Adı</label>
                 <input
                   type="text"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Fiyat (₺)</label>
+                  <label className="block text-sm text-muted-foreground mb-1">Fiyat (₺)</label>
                   <input
                     type="number"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                     value={formData.price}
                     onChange={(e) =>
                       setFormData({ ...formData, price: parseFloat(e.target.value) })
@@ -234,10 +234,10 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Depolama (GB)</label>
+                  <label className="block text-sm text-muted-foreground mb-1">Depolama (GB)</label>
                   <input
                     type="number"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                     value={storage.maxGb}
                     onChange={(e) => setStorage({ ...storage, maxGb: parseInt(e.target.value) })}
                   />
@@ -246,28 +246,28 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Fotoğraf Limiti</label>
+                  <label className="block text-sm text-muted-foreground mb-1">Fotoğraf Limiti</label>
                   <input
                     type="number"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                     value={limits.photoLimit}
                     onChange={(e) => setLimits({ ...limits, photoLimit: parseInt(e.target.value) })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Video Limiti</label>
+                  <label className="block text-sm text-muted-foreground mb-1">Video Limiti</label>
                   <input
                     type="number"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                     value={limits.videoLimit}
                     onChange={(e) => setLimits({ ...limits, videoLimit: parseInt(e.target.value) })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Saklama Süresi (Gün)</label>
+                  <label className="block text-sm text-muted-foreground mb-1">Saklama Süresi (Gün)</label>
                   <input
                     type="number"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-white"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground"
                     value={retention.days}
                     onChange={(e) => setRetention({ ...retention, days: parseInt(e.target.value) })}
                   />
@@ -275,19 +275,19 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
               </div>
 
               <div>
-                <label className="block text-sm text-zinc-400 mb-2">Özellikler (Features)</label>
+                <label className="block text-sm text-muted-foreground mb-2">Özellikler (Features)</label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {Object.keys(features).length > 0
                     ? Object.keys(features).map((key) => (
                         <label
                           key={key}
-                          className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer"
+                          className="flex items-center gap-2 text-sm text-foreground cursor-pointer"
                         >
                           <input
                             type="checkbox"
                             checked={features[key] || false}
                             onChange={(e) => setFeatures({ ...features, [key]: e.target.checked })}
-                            className="rounded bg-zinc-900 border-zinc-700 text-gold focus:ring-gold"
+                            className="rounded bg-card border-zinc-700 text-gold focus:ring-gold"
                           />
                           {key}
                         </label>
@@ -304,13 +304,13 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
                       ].map((key) => (
                         <label
                           key={key}
-                          className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer"
+                          className="flex items-center gap-2 text-sm text-foreground cursor-pointer"
                         >
                           <input
                             type="checkbox"
                             checked={features[key] || false}
                             onChange={(e) => setFeatures({ ...features, [key]: e.target.checked })}
-                            className="rounded bg-zinc-900 border-zinc-700 text-gold focus:ring-gold"
+                            className="rounded bg-card border-zinc-700 text-gold focus:ring-gold"
                           />
                           {key}
                         </label>
@@ -319,10 +319,10 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+            <div className="flex justify-end gap-3 pt-4 border-t border-border">
               <button
                 onClick={() => setModalOpen(false)}
-                className="px-4 py-2 rounded-lg text-sm text-zinc-400 hover:text-white"
+                className="px-4 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground"
               >
                 İptal
               </button>

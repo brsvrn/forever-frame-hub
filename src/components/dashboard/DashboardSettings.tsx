@@ -86,7 +86,7 @@ export function DashboardSettings({ invitation }: { invitation: InvitationRow })
           </div>
           <div className="space-y-4">
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-zinc-300 text-sm">
+              <span className="text-foreground text-sm">
                 Yeni LCV yanıtı geldiğinde anında bildir
               </span>
               <input
@@ -96,7 +96,7 @@ export function DashboardSettings({ invitation }: { invitation: InvitationRow })
               />
             </label>
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="text-zinc-300 text-sm">Günlük LCV özeti gönder</span>
+              <span className="text-foreground text-sm">Günlük LCV özeti gönder</span>
               <input
                 type="checkbox"
                 className="rounded bg-accent/10 border-zinc-700 text-gold focus:ring-gold/20"

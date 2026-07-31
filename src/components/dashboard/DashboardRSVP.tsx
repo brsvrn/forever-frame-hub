@@ -104,7 +104,7 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
         <button
           type="button"
           onClick={downloadCsv}
-          className="flex items-center gap-2 px-4 py-2 bg-card border border-border text-zinc-300 hover:text-foreground rounded-xl transition-colors text-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground hover:text-foreground rounded-xl transition-colors text-sm"
         >
           <Download className="w-4 h-4" />
           CSV Olarak İndir
@@ -163,7 +163,7 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
             <p className="text-muted-foreground">Kayıt bulunamadı.</p>
           </div>
         ) : (
-          <table className="w-full text-left text-sm text-zinc-300">
+          <table className="w-full text-left text-sm text-foreground">
             <thead className="bg-surface text-muted-foreground text-xs uppercase font-medium">
               <tr>
                 <th className="px-6 py-4">Misafir Adı</th>

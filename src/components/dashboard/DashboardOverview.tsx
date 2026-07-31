@@ -61,14 +61,14 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
       value: stats?.photoCount ?? "—",
       detail: stats ? `${stats.videoCount} video da yüklendi` : "Veriler yükleniyor",
       icon: ImageIcon,
-      color: "text-[#b44cff] bg-[#2b1435]",
+      color: "text-foreground bg-accent/10",
     },
     {
       label: "Ziyaretçi Defteri Notu",
       value: stats?.messagesCount ?? "—",
       detail: "Misafirlerden gelen mesajlar",
       icon: MessageSquare,
-      color: "text-[#ff8b35] bg-[#351d10]",
+      color: "text-foreground bg-accent/10",
     },
   ];
 
@@ -86,14 +86,14 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
                 : `Etkinliğinize son ${daysLeft} gün kaldı.`}
           </p>
         </div>
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-white/[0.035] px-4 py-2 text-xs text-zinc-300">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-black/5 px-4 py-2 text-xs text-foreground">
           <Radio className="h-3.5 w-3.5 text-emerald-400" />
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Canlı Veri Akışı
         </div>
       </header>
 
       {error ? (
-        <div className="rounded-2xl border border-[#ee566d]/25 bg-rose/10 p-4 text-sm text-[#ff8da0]">
+        <div className="rounded-2xl border border-[#ee566d]/25 bg-rose/10 p-4 text-sm text-rose-600">
           Panel verileri şu anda alınamadı. Sayfayı yenileyerek tekrar deneyin.
         </div>
       ) : null}
@@ -102,21 +102,21 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
         {topCards.map((card) => (
           <article
             key={card.label}
-            className="rounded-[1.75rem] border border-border bg-[#141515] p-6 shadow-[0_20px_70px_rgba(0,0,0,.18)]"
+            className="rounded-[1.75rem] border border-border bg-card p-6 shadow-[0_20px_70px_rgba(0,0,0,.18)]"
           >
             <div className={`grid h-12 w-12 place-items-center rounded-2xl ${card.color}`}>
               <card.icon className="h-5 w-5" />
             </div>
             <p className="mt-6 font-display text-4xl text-foreground">{card.value}</p>
-            <p className="mt-1 text-sm font-medium text-zinc-200">{card.label}</p>
+            <p className="mt-1 text-sm font-medium text-foreground">{card.label}</p>
             <p className="mt-1 text-xs text-muted-foreground">{card.detail}</p>
           </article>
         ))}
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[1.05fr_1fr_1fr]">
-        <article className="rounded-[1.75rem] border border-border bg-[#141515] p-6">
-          <div className="flex items-center gap-2 text-sm text-zinc-200">
+        <article className="rounded-[1.75rem] border border-border bg-card p-6">
+          <div className="flex items-center gap-2 text-sm text-foreground">
             <Clock3 className="h-4 w-4 text-muted-foreground" /> Son Bildirimler
           </div>
           <div className="mt-5 divide-y divide-white/5">
@@ -134,7 +134,7 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
                   <p className="truncate text-sm font-medium text-foreground">{rsvp.guest_name}</p>
                   <p className="text-xs text-muted-foreground">{statusLabel[rsvp.status] ?? rsvp.status}</p>
                 </div>
-                <span className="text-xs text-zinc-300">{rsvp.party_size ?? 0} kişi</span>
+                <span className="text-xs text-foreground">{rsvp.party_size ?? 0} kişi</span>
               </div>
             ))}
             {stats && stats.recentRsvps.length === 0 ? (
@@ -143,8 +143,8 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
           </div>
         </article>
 
-        <article className="rounded-[1.75rem] border border-border bg-[#141515] p-6">
-          <div className="flex items-center gap-2 text-sm text-zinc-200">
+        <article className="rounded-[1.75rem] border border-border bg-card p-6">
+          <div className="flex items-center gap-2 text-sm text-foreground">
             <ImageIcon className="h-4 w-4 text-muted-foreground" /> Galeriye Eklenenler
           </div>
           <div className="mt-5 grid grid-cols-3 gap-2.5">
@@ -174,9 +174,9 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
           ) : null}
         </article>
 
-        <article className="rounded-[1.75rem] border border-border bg-[#141515] p-6">
+        <article className="rounded-[1.75rem] border border-border bg-card p-6">
           <div>
-            <p className="text-sm text-zinc-200">LCV Dağılımı</p>
+            <p className="text-sm text-foreground">LCV Dağılımı</p>
             <p className="mt-1 text-xs text-muted-foreground">Katılımcı sayısına göre canlı görünüm</p>
           </div>
           <div className="relative mt-2 h-48">

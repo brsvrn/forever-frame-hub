@@ -113,7 +113,7 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
     context.font = `600 12px ${theme.font || "serif"}`;
     drawSpacedText(context, theme.name.toUpperCase(), width / 2, 112, 3.2);
 
-    context.fillStyle = "#ffffff";
+    context.shadowColor = "rgba(0,0,0,0.5)"; context.shadowBlur = 4; context.fillStyle = "#ffffff";
     context.font = `300 48px ${theme.font || "serif"}`;
     context.fillText("Anılarımıza katılın", width / 2, 202);
     context.fillStyle = "rgba(255,255,255,.82)";
@@ -130,7 +130,7 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
     context.fill();
     context.drawImage(qrImage, paperX + 20, paperY + 20, 220, 220);
 
-    context.fillStyle = "#ffffff";
+    context.shadowColor = "rgba(0,0,0,0.5)"; context.shadowBlur = 4; context.fillStyle = "#ffffff";
     context.font = `300 48px ${theme.font || "serif"}`;
     context.fillText(`${partnerOne} & ${partnerTwo}`, width / 2, 684);
     context.fillStyle = "rgba(255,255,255,.68)";
@@ -257,8 +257,8 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
             >
               {theme.name}
             </p>
-            <h1 className="mt-4 text-5xl font-light tracking-wide">Anılarımıza katılın</h1>
-            <p className="mb-4 text-sm uppercase tracking-[0.26em] text-foreground/80">
+            <h1 className="mt-4 text-5xl font-light tracking-wide text-white drop-shadow-md">Anılarımıza katılın</h1>
+            <p className="mb-4 text-sm uppercase tracking-[0.26em] text-white/90 drop-shadow-md">
               Fotoğraf ve videolarınızı yüklemek için okutun
             </p>
             <div
@@ -277,10 +277,10 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
                 bgColor={theme.qr.paper}
               />
             </div>
-            <h2 className="mt-8 text-5xl font-light">
+            <h2 className="mt-8 text-5xl font-light text-white drop-shadow-md">
               {partnerOne} <span className="opacity-55">&</span> {partnerTwo}
             </h2>
-            <p className="mt-6 text-xs tracking-[0.24em] text-foreground/65">#MemoryWedding</p>
+            <p className="mt-6 text-xs tracking-[0.24em] text-white/80 drop-shadow-sm">#MemoryWedding</p>
           </div>
         </div>
       </div>
