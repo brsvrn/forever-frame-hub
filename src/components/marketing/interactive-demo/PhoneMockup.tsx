@@ -63,6 +63,14 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                 className="absolute inset-0 h-full w-full object-cover opacity-20"
                 style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
               />
+              <div className="relative z-10 flex flex-col items-center text-center mb-12">
+                <span className={`text-xs font-semibold tracking-[0.3em] uppercase mb-3 ${theme.textColor} opacity-70`}>
+                  Özel Günümüze
+                </span>
+                <span className={`text-4xl ${theme.font} ${theme.textColor}`}>
+                  Davetlisiniz
+                </span>
+              </div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
