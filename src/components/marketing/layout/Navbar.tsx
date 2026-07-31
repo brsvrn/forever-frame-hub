@@ -51,9 +51,7 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="font-bold text-xl tracking-tight flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-lg flex items-center justify-center font-serif italic">
-            M
-          </div>
+          <img src="/logo.jpg" alt="MemoryWedding Logo" className="w-8 h-8 rounded-lg object-cover" />
           <span>MemoryWedding</span>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">

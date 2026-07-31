@@ -11,9 +11,7 @@ export function Footer() {
               to="/"
               className="font-bold text-2xl text-white tracking-tight flex items-center gap-2"
             >
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-lg flex items-center justify-center font-serif italic text-lg">
-                M
-              </div>
+              <img src="/logo.jpg" alt="MemoryWedding Logo" className="w-8 h-8 rounded-lg object-cover" />
               <span>MemoryWedding</span>
             </Link>
             <p className="text-muted-foreground max-w-sm leading-relaxed text-sm">
@@ -111,9 +109,12 @@ export function Footer() {
             © {new Date().getFullYear()} MemoryWedding. Tüm hakları saklıdır. Hiçbir yerde lorem
             ipsum kullanılmamıştır.
           </p>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-border text-muted-foreground">
-            <ShieldCheck className="w-3.5 h-3.5 text-green-400" />
-            <span>256-bit Güvenli Ödeme Altyapısı</span>
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <img src="/paytr-white.png" alt="PayTR Güvenli Ödeme" className="h-6 object-contain opacity-70 hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-border text-muted-foreground">
+              <ShieldCheck className="w-3.5 h-3.5 text-green-400" />
+              <span>256-bit Güvenli Ödeme Altyapısı</span>
+            </div>
           </div>
         </div>
       </div>
