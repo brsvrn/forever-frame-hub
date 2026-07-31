@@ -154,6 +154,7 @@ export function DashboardPreview() {
                   <div className="hidden sm:flex px-4 py-2 rounded-lg border border-border/50 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm text-sm font-medium items-center gap-2 shadow-sm">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Canlı
                     Veri Akışı
+                    <span className="ml-2 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded border">(Temsili Gösterim)</span>
                   </div>
                 </div>
 

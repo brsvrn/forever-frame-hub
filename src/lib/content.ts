@@ -102,7 +102,7 @@ export const tr = {
     subtitle:
       "Masalardaki QR kart okutulur, tarayıcı açılır ve yükleme başlar. Uygulama yok, üyelik yok, sürtünme yok.",
     points: [
-      "Tek karekod ile sınırsız misafir yüklemesi",
+      "Tek karekod ile misafirlerden yüksek kapasiteli medya yüklemesi",
       "4K video ve orijinal kalite fotoğraf desteği",
       "Moderasyon: yayına almadan önce onaylayın",
       "Etkinlik sonrası tüm albümü ZIP olarak indirin",
@@ -156,9 +156,9 @@ export const tr = {
         note: "tek seferlik",
         desc: "Çiftlerin %70'inin seçimi.",
         features: [
-          "Sınırsız davetiye gönderimi",
+          "Etkinlik bağlantısı üzerinden misafir erişimi",
           "Gelişmiş RSVP ve menü tercihi",
-          "Sınırsız fotoğraf + video",
+          "Yüksek kapasiteli fotoğraf ve video yükleme",
           "Tüm premium temalar",
           "AI albüm seçkisi",
           "Özel alan adı",

@@ -36,7 +36,7 @@ export function PricingCards() {
               </Link>
               <ul className="space-y-4 mt-auto">
                 <PricingFeature text="Özel Tasarım Dijital Davetiye" />
-                <PricingFeature text="Sınırsız Misafir Ekleme" />
+                <PricingFeature text="Etkinlik bağlantısı üzerinden misafir erişimi" />
                 <PricingFeature text="Gelişmiş LCV (RSVP) Takibi" />
                 <PricingFeature text="Davetiye Müzik Ekleme" />
                 <PricingFeature text="Zaman Tüneli ve Hikayemiz" />
@@ -104,6 +104,12 @@ export function PricingCards() {
               </ul>
             </div>
           </FadeIn>
+        </div>
+
+        <div className="max-w-3xl mx-auto mt-12 text-center text-sm text-muted-foreground">
+          <p>
+            * İptal ve iade koşulları için Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi’ni inceleyiniz.
+          </p>
         </div>
       </div>
     </section>

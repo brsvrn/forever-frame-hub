@@ -114,8 +114,7 @@ export function HeroContent() {
                   ))}
                 </div>
                 <span>
-                  <strong className="text-foreground font-semibold">10.000+</strong> mutlu çiftin
-                  tercihi
+                  Yeni nesil dijital düğün deneyimi
                 </span>
               </div>
             </FadeIn>

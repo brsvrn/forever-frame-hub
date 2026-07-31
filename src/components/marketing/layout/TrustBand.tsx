@@ -12,8 +12,7 @@ export function TrustBand() {
             </div>
             <h3 className="font-semibold text-lg">Ödeme Güvencesi</h3>
             <p className="text-sm text-foreground/80 max-w-[250px] mx-auto leading-relaxed">
-              256-bit SSL şifreleme ve global ödeme altyapısı (Stripe/Iyzico) ile kart bilgileriniz
-              %100 güvende.
+              PayTR güvenli ödeme altyapısı entegrasyon aşamasındadır.
             </p>
           </FadeIn>
 

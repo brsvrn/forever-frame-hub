@@ -131,17 +131,12 @@ export function ThemeGalleryContent() {
           </div>
 
           <div className="flex w-full items-center justify-center lg:w-[350px] lg:shrink-0">
-            {activeSection === "gallery" ? (
-              <motion.div
-                layoutId="global-phone"
-                style={{ y }}
-                className="z-30 h-[600px] w-[300px]"
-              >
-                <PhoneMockup />
-              </motion.div>
-            ) : (
-              <div className="h-[600px] w-[300px]" />
-            )}
+            <motion.div
+              style={{ y }}
+              className="z-30 h-[600px] w-[300px]"
+            >
+              <PhoneMockup />
+            </motion.div>
           </div>
         </div>
       </div>

@@ -5,21 +5,21 @@ import { easeSilk } from "@/components/landing/motion-primitives";
 export function SecuritySection() {
   const features = [
     {
-      title: "Uçtan Uca Şifreleme",
+      title: "Erişim Güvenliği",
       description:
-        "Misafirlerinizin yüklediği tüm fotoğraf ve videolar end-to-end şifrelenir. Yalnızca siz görüntüleyebilirsiniz.",
+        "Fotoğraf ve videolar yetkilendirilmiş erişim kurallarıyla korunur.",
       icon: Lock,
     },
     {
-      title: "Privacy First Mimarisi",
+      title: "Etkinlik Gizliliği",
       description:
-        "Platform yöneticileri veya üçüncü şahıslar kesinlikle anılarınıza, galerinize veya misafir listenize erişemez.",
+        "Etkinlik yönetim alanı, yetkilendirilmiş kullanıcı erişimiyle korunur.",
       icon: EyeOff,
     },
     {
-      title: "Güvenli Depolama",
+      title: "Güvenli Veri Aktarımı",
       description:
-        "Verileriniz Enterprise seviyesinde, ISO 27001 sertifikalı bulut sunucularımızda saklanır.",
+        "Veri aktarımı SSL/TLS bağlantısı üzerinden gerçekleştirilir. MemoryWedding, kullanıcı içeriklerini hizmetin sunulması dışında kullanmaz.",
       icon: Server,
     },
   ];

@@ -31,7 +31,7 @@ function IletisimPage() {
                 </li>
                 <li>
                   <strong className="block text-sm text-muted-foreground mb-1">Vergi Bilgisi</strong>
-                  Vergiden muaf
+                  Esnaf Vergi Muafiyeti Belgesi kapsamında faaliyet göstermektedir.
                 </li>
               </ul>
             </div>

@@ -20,7 +20,7 @@ function MesafeliSatisPage() {
             <strong>SATICI:</strong><br/>
             Unvanı: Barış Savrun<br/>
             Adresi: Fethiye mahallesi fen sokak yeşil bursa sitesi c blok no:8 daire:7 Nilüfer/Bursa<br/>
-            Vergi Bilgisi: Vergiden muaf<br/>
+            Vergi Bilgisi: Esnaf Vergi Muafiyeti Belgesi kapsamında faaliyet göstermektedir.<br/>
             Telefon: 0530 381 1155<br/>
             E-posta: brsvrn@gmail.com
           </p>

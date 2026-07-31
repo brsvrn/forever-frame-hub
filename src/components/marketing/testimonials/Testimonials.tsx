@@ -7,7 +7,7 @@ const TESTIMONIALS = [
     role: "Ağustos 2025, İzmir",
     image:
       "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=100&h=100",
-    text: "Matbaaya vereceğimiz paranın yarısına harika bir dijital deneyim satın aldık. Đặc biệt masalardaki QR sistemi sayesinde düğünümüzden elimizde yüzlerce amatör ama çok samimi fotoğraf kaldı. Kesinlikle tavsiye ediyoruz.",
+    text: "Matbaaya vereceğimiz paranın yarısına harika bir dijital deneyim satın aldık. Özellikle masalardaki QR sistemi sayesinde düğünümüzden elimizde yüzlerce amatör ama çok samimi fotoğraf kaldı. Kesinlikle tavsiye ediyoruz.",
   },
   {
     name: "Burcu & Can",
@@ -32,13 +32,12 @@ export function Testimonials() {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <SlideUp>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-              En Mutlu Günlerinde
+              MemoryWedding İle
               <br />
-              Yanlarındaydık
+              Yaşayabileceğiniz Deneyim
             </h2>
             <p className="text-lg text-foreground/80 font-light leading-relaxed">
-              10.000'den fazla çiftin en özel gününü stresten uzak ve unutulmaz kıldık. İşte onların
-              deneyimleri.
+              Çiftlerimizin en özel gününü stresten uzak ve unutulmaz kılmayı hedefliyoruz.
             </p>
           </SlideUp>
         </div>
@@ -67,6 +66,9 @@ export function Testimonials() {
                   <p className="text-xs text-foreground/70 uppercase tracking-wider mt-0.5">
                     {t.role}
                   </p>
+                </div>
+                <div className="ml-auto text-[10px] text-muted-foreground border bg-muted px-2 py-0.5 rounded-full whitespace-nowrap">
+                  (Temsili Yorum)
                 </div>
               </div>
             </FadeIn>

@@ -46,6 +46,9 @@ export function Features() {
                 <div className="text-sm text-foreground/70 uppercase tracking-widest mt-2 font-medium">
                   Katılım Onaylandı
                 </div>
+                <div className="text-[10px] text-muted-foreground mt-2 border bg-muted px-2 py-0.5 rounded-full">
+                  (Temsili Gösterim)
+                </div>
               </div>
             </div>
           </FadeIn>
@@ -118,9 +121,9 @@ export function Features() {
                     ))}
                   </div>
                   <div className="flex flex-col justify-center">
-                    <span className="font-bold text-2xl text-foreground">+850</span>
-                    <span className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold mt-1">
-                      Fotoğraf Yüklendi
+                    <span className="font-bold text-xl text-foreground leading-tight">Düğününüzün<br/>tüm anılarını</span>
+                    <span className="text-xs text-muted-foreground uppercase tracking-[0.1em] font-semibold mt-1">
+                      tek yerde toplayın
                     </span>
                   </div>
                 </div>

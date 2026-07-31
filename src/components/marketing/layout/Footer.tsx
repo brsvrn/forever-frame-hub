@@ -100,7 +100,7 @@ export function Footer() {
           <div className="max-w-md">
             <h5 className="font-semibold text-white mb-2">Firma Bilgileri</h5>
             <p><strong>Unvan:</strong> Barış Savrun</p>
-            <p><strong>Adres:</strong> Fethiye mahallesi fen sokak yeşil bursa sitesi c blok no:8 daire:7 Nilüfer/Bursa</p>
+            <p><strong>Adres:</strong> Bursa / Türkiye</p>
             <p><strong>E-posta:</strong> brsvrn@gmail.com | <strong>Telefon:</strong> 0530 381 1155</p>
           </div>
         </div>
@@ -109,13 +109,6 @@ export function Footer() {
             © {new Date().getFullYear()} MemoryWedding. Tüm hakları saklıdır. Hiçbir yerde lorem
             ipsum kullanılmamıştır.
           </p>
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <img src="/paytr-white.png" alt="PayTR Güvenli Ödeme" className="h-6 object-contain opacity-70 hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-border text-muted-foreground">
-              <ShieldCheck className="w-3.5 h-3.5 text-green-400" />
-              <span>256-bit Güvenli Ödeme Altyapısı</span>
-            </div>
-          </div>
         </div>
       </div>
     </footer>

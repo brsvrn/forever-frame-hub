@@ -122,15 +122,12 @@ export function InteractiveDemoContent() {
 
           {/* Phone Mockup space for desktop & mobile */}
           <div className="flex items-center justify-center w-full lg:w-[350px] shrink-0 relative mt-8 lg:mt-0">
-            {activeSection === "demo" && (
-              <motion.div
-                layoutId="global-phone"
-                style={{ y }}
-                className="w-[300px] h-[600px] z-30"
-              >
-                <PhoneMockup />
-              </motion.div>
-            )}
+            <motion.div
+              style={{ y }}
+              className="w-[300px] h-[600px] z-30"
+            >
+              <PhoneMockup />
+            </motion.div>
           </div>
 
           {/* Mobile Context Controls */}
