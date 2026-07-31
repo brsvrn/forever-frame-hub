@@ -56,8 +56,8 @@ export const initiatePayment = createServerFn({ method: "POST" })
         merchant_id: process.env.PAYTR_MERCHANT_ID,
         merchant_key: process.env.PAYTR_MERCHANT_KEY,
         merchant_salt: process.env.PAYTR_MERCHANT_SALT,
-        merchant_ok_url: `${process.env.VITE_APP_URL || "https://memorywedding.com"}/odeme/basarili`,
-        merchant_fail_url: `${process.env.VITE_APP_URL || "https://memorywedding.com"}/odeme/hata`,
+        merchant_ok_url: `${process.env.VITE_APP_URL || "https://www.memory-wedding.com"}/odeme/basarili`,
+        merchant_fail_url: `${process.env.VITE_APP_URL || "https://www.memory-wedding.com"}/odeme/hata`,
         test_mode: process.env.PAYTR_TEST_MODE || "1",
         debug_on: process.env.PAYTR_TEST_MODE === "0" ? "0" : "1"
       };
