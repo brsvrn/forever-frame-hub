@@ -14,7 +14,7 @@ import {
   Waves,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { cn } from "@/lib/utils";
+import { cn, getPackageDisplayName } from "@/lib/utils";
 import type { BuilderContent } from "@/lib/builder-content";
 import { countdownDays, slugify, type InvitationDraft, type InviteThemeId } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
@@ -120,7 +120,7 @@ export function StepTheme({
                     active ? "border-gold bg-gold/10" : "border-border hover:border-gold/50",
                   )}
                 >
-                  <div className="font-semibold text-lg">{pkg.display_name || pkg.name}</div>
+                  <div className="font-semibold text-lg">{getPackageDisplayName(pkg.name, lang)}</div>
                   <div className="text-gold font-medium mt-1">{pkg.price} ₺</div>
                   <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
                     {pkg.features?.digital_invitation

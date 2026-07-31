@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   RefreshCw,
 } from "lucide-react";
+import { cn, getPackageDisplayName } from "@/lib/utils";
 
 export function PackageManager({ adminEmail }: { adminEmail: string }) {
   const [packages, setPackages] = useState<any[]>([]);
@@ -165,7 +166,7 @@ export function PackageManager({ adminEmail }: { adminEmail: string }) {
                   ARŞİVLENDİ
                 </div>
               )}
-              <h3 className="text-xl text-foreground font-display mb-1">{pkg.display_name || pkg.name}</h3>
+              <h3 className="text-xl text-foreground font-display mb-1">{getPackageDisplayName(pkg.name)}</h3>
               <div className="text-2xl text-foreground font-medium mb-4">{pkg.price} ₺</div>
 
               <div className="mb-4 text-sm text-muted-foreground">
