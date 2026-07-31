@@ -8,6 +8,8 @@ export type PayTRConfig = {
   merchant_fail_url: string;
   test_mode?: string;
   debug_on?: string;
+  no_installment?: string;
+  max_installment?: string;
 };
 
 export type PayTRTokenPayload = {
@@ -32,6 +34,10 @@ export function generatePayTRToken(
     const user_basket_encoded = Buffer.from(JSON.stringify(payload.user_basket)).toString("base64");
     
     // Birlestirilecek string (PayTR HMAC Hash kurallari)
+    const no_installment = config.no_installment || "0";
+    const max_installment = config.max_installment || "12";
+    const currency = payload.currency || "TL";
+    
     const hash_str =
       merchant_id +
       payload.user_ip +
@@ -39,6 +45,9 @@ export function generatePayTRToken(
       payload.email +
       payload.payment_amount.toString() +
       user_basket_encoded +
+      no_installment +
+      max_installment +
+      currency +
       (config.test_mode || "0");
       
     // HMAC-SHA256
