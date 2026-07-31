@@ -64,10 +64,10 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                 style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
               />
               <div className="relative z-10 flex flex-col items-center text-center mb-12">
-                <span className={`text-xs font-semibold tracking-[0.3em] uppercase mb-3 ${theme.textColor} opacity-70`}>
+                <span className={`text-xs font-semibold tracking-[0.3em] uppercase mb-3 opacity-70`} style={{ color: themeConfig.qr.ink }}>
                   Özel Günümüze
                 </span>
-                <span className={`text-4xl ${theme.font} ${theme.textColor}`}>
+                <span className={`text-4xl ${theme.font}`} style={{ color: themeConfig.qr.ink }}>
                   Davetlisiniz
                 </span>
               </div>
@@ -81,7 +81,7 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                   className="absolute top-0 inset-x-0 h-[55%] bg-stone-50 origin-top border-b border-stone-200 z-10 shadow-sm"
                   style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
                 ></div>
-                <span className={`text-4xl z-0 mt-8 ${theme.font} ${theme.textColor}`}>A & E</span>
+                <span className={`text-4xl z-0 mt-8 ${theme.font}`} style={{ color: themeConfig.qr.ink }}>A & E</span>
               </motion.div>
               <p className="relative z-10 mt-12 animate-pulse text-xs font-semibold uppercase tracking-[0.2em] text-stone-600">
                 Zarfı Açmak İçin Dokunun
