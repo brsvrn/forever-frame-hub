@@ -207,7 +207,7 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
           type="button"
           onClick={handleExportPNG}
           disabled={isExporting}
-          className="flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-sm text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-accent/10 px-4 py-2 text-sm text-foreground transition-colors hover:bg-zinc-700 disabled:opacity-50"
         >
           {isExporting ? (
             <Loader2 className="size-4 animate-spin" />
@@ -222,7 +222,7 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
             type="button"
             onClick={() => handleExportPDF(format)}
             disabled={isExporting}
-            className="flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-sm text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-accent/10 px-4 py-2 text-sm text-foreground transition-colors hover:bg-zinc-700 disabled:opacity-50"
           >
             <FileText className="size-4" /> {format.toUpperCase()} PDF
           </button>
@@ -233,7 +233,7 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
         <div
           ref={qrRef}
           data-qr-theme={theme.id}
-          className="relative mx-auto flex flex-col items-center justify-center overflow-hidden p-12 text-center text-white"
+          className="relative mx-auto flex flex-col items-center justify-center overflow-hidden p-12 text-center text-foreground"
           style={{
             width: "595px",
             height: "842px",
@@ -258,7 +258,7 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
               {theme.name}
             </p>
             <h1 className="mt-4 text-5xl font-light tracking-wide">Anılarımıza katılın</h1>
-            <p className="mb-4 text-sm uppercase tracking-[0.26em] text-white/80">
+            <p className="mb-4 text-sm uppercase tracking-[0.26em] text-foreground/80">
               Fotoğraf ve videolarınızı yüklemek için okutun
             </p>
             <div
@@ -280,7 +280,7 @@ export function PrintableQR({ url, partnerOne, partnerTwo, themeConfig }: Printa
             <h2 className="mt-8 text-5xl font-light">
               {partnerOne} <span className="opacity-55">&</span> {partnerTwo}
             </h2>
-            <p className="mt-6 text-xs tracking-[0.24em] text-white/65">#MemoryWedding</p>
+            <p className="mt-6 text-xs tracking-[0.24em] text-foreground/65">#MemoryWedding</p>
           </div>
         </div>
       </div>

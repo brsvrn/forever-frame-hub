@@ -54,7 +54,7 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
       value: stats?.rsvpBreakdown.yes ?? "—",
       detail: `${stats?.totalRsvp ?? 0} LCV yanıtı`,
       icon: Users,
-      color: "text-[#5d78ff] bg-[#18203d]",
+      color: "text-muted-foreground bg-card",
     },
     {
       label: "Yüklenen Fotoğraf",
@@ -77,8 +77,8 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-[#ee566d]">Etkinlik merkezi</p>
-          <h2 className="mt-2 font-display text-3xl text-white">Genel Bakış</h2>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h2 className="mt-2 font-display text-3xl text-foreground">Genel Bakış</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             {daysLeft === null
               ? "Etkinlik tarihi henüz belirlenmedi."
               : daysLeft === 0
@@ -86,14 +86,14 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
                 : `Etkinliğinize son ${daysLeft} gün kaldı.`}
           </p>
         </div>
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs text-zinc-300">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-white/[0.035] px-4 py-2 text-xs text-zinc-300">
           <Radio className="h-3.5 w-3.5 text-emerald-400" />
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Canlı Veri Akışı
         </div>
       </header>
 
       {error ? (
-        <div className="rounded-2xl border border-[#ee566d]/25 bg-[#ee566d]/10 p-4 text-sm text-[#ff8da0]">
+        <div className="rounded-2xl border border-[#ee566d]/25 bg-rose/10 p-4 text-sm text-[#ff8da0]">
           Panel verileri şu anda alınamadı. Sayfayı yenileyerek tekrar deneyin.
         </div>
       ) : null}
@@ -102,22 +102,22 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
         {topCards.map((card) => (
           <article
             key={card.label}
-            className="rounded-[1.75rem] border border-white/10 bg-[#141515] p-6 shadow-[0_20px_70px_rgba(0,0,0,.18)]"
+            className="rounded-[1.75rem] border border-border bg-[#141515] p-6 shadow-[0_20px_70px_rgba(0,0,0,.18)]"
           >
             <div className={`grid h-12 w-12 place-items-center rounded-2xl ${card.color}`}>
               <card.icon className="h-5 w-5" />
             </div>
-            <p className="mt-6 font-display text-4xl text-white">{card.value}</p>
+            <p className="mt-6 font-display text-4xl text-foreground">{card.value}</p>
             <p className="mt-1 text-sm font-medium text-zinc-200">{card.label}</p>
-            <p className="mt-1 text-xs text-zinc-500">{card.detail}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{card.detail}</p>
           </article>
         ))}
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[1.05fr_1fr_1fr]">
-        <article className="rounded-[1.75rem] border border-white/10 bg-[#141515] p-6">
+        <article className="rounded-[1.75rem] border border-border bg-[#141515] p-6">
           <div className="flex items-center gap-2 text-sm text-zinc-200">
-            <Clock3 className="h-4 w-4 text-zinc-500" /> Son Bildirimler
+            <Clock3 className="h-4 w-4 text-muted-foreground" /> Son Bildirimler
           </div>
           <div className="mt-5 divide-y divide-white/5">
             {(stats?.recentRsvps ?? []).map((rsvp) => (
@@ -126,32 +126,32 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
                 className="flex items-center gap-3 py-3.5"
               >
                 <span
-                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${rsvp.status === "yes" ? "bg-emerald-500 text-black" : rsvp.status === "no" ? "bg-[#ee566d] text-white" : "bg-amber-400 text-black"}`}
+                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${rsvp.status === "yes" ? "bg-emerald-500 text-black" : rsvp.status === "no" ? "bg-rose text-foreground" : "bg-amber-400 text-black"}`}
                 >
                   <CheckCircle2 className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">{rsvp.guest_name}</p>
-                  <p className="text-xs text-zinc-500">{statusLabel[rsvp.status] ?? rsvp.status}</p>
+                  <p className="truncate text-sm font-medium text-foreground">{rsvp.guest_name}</p>
+                  <p className="text-xs text-muted-foreground">{statusLabel[rsvp.status] ?? rsvp.status}</p>
                 </div>
                 <span className="text-xs text-zinc-300">{rsvp.party_size ?? 0} kişi</span>
               </div>
             ))}
             {stats && stats.recentRsvps.length === 0 ? (
-              <p className="py-10 text-center text-sm text-zinc-500">Henüz bir LCV yanıtı yok.</p>
+              <p className="py-10 text-center text-sm text-muted-foreground">Henüz bir LCV yanıtı yok.</p>
             ) : null}
           </div>
         </article>
 
-        <article className="rounded-[1.75rem] border border-white/10 bg-[#141515] p-6">
+        <article className="rounded-[1.75rem] border border-border bg-[#141515] p-6">
           <div className="flex items-center gap-2 text-sm text-zinc-200">
-            <ImageIcon className="h-4 w-4 text-zinc-500" /> Galeriye Eklenenler
+            <ImageIcon className="h-4 w-4 text-muted-foreground" /> Galeriye Eklenenler
           </div>
           <div className="mt-5 grid grid-cols-3 gap-2.5">
             {(stats?.recentUploads ?? []).map((upload) => (
               <div
                 key={`${upload.file_url}-${upload.created_at}`}
-                className="aspect-square overflow-hidden rounded-xl bg-zinc-900"
+                className="aspect-square overflow-hidden rounded-xl bg-card"
               >
                 {upload.file_type.startsWith("image/") ? (
                   <img
@@ -160,7 +160,7 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="grid h-full place-items-center text-[10px] text-zinc-500">
+                  <div className="grid h-full place-items-center text-[10px] text-muted-foreground">
                     VİDEO
                   </div>
                 )}
@@ -168,16 +168,16 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
             ))}
           </div>
           {stats && stats.recentUploads.length === 0 ? (
-            <p className="py-10 text-center text-sm text-zinc-500">
+            <p className="py-10 text-center text-sm text-muted-foreground">
               Henüz galeriye medya eklenmedi.
             </p>
           ) : null}
         </article>
 
-        <article className="rounded-[1.75rem] border border-white/10 bg-[#141515] p-6">
+        <article className="rounded-[1.75rem] border border-border bg-[#141515] p-6">
           <div>
             <p className="text-sm text-zinc-200">LCV Dağılımı</p>
-            <p className="mt-1 text-xs text-zinc-500">Katılımcı sayısına göre canlı görünüm</p>
+            <p className="mt-1 text-xs text-muted-foreground">Katılımcı sayısına göre canlı görünüm</p>
           </div>
           <div className="relative mt-2 h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -209,8 +209,8 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
               <div>
-                <p className="font-display text-3xl text-white">{chartTotal}</p>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500">katılımcı</p>
+                <p className="font-display text-3xl text-foreground">{chartTotal}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">katılımcı</p>
               </div>
             </div>
           </div>
@@ -221,8 +221,8 @@ export function DashboardOverview({ invitation }: { invitation: InvitationRow })
                   className="mx-auto block h-1.5 w-6 rounded-full"
                   style={{ backgroundColor: item.color }}
                 />
-                <p className="mt-2 text-lg text-white">{item.value}</p>
-                <p className="text-[10px] text-zinc-500">{item.name}</p>
+                <p className="mt-2 text-lg text-foreground">{item.value}</p>
+                <p className="text-[10px] text-muted-foreground">{item.name}</p>
               </div>
             ))}
           </div>

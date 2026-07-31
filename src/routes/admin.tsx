@@ -39,7 +39,7 @@ function AdminGate() {
 
   if (loading || !user || isAdmin === null) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-zinc-950">
+      <div className="grid min-h-dvh place-items-center bg-background">
         <Loader2 className="size-6 animate-spin text-gold" />
       </div>
     );
@@ -49,10 +49,10 @@ function AdminGate() {
   // Gerçek ortamda burası RLS ve Admin Role tablosu ile korunmalıdır.
   if (!isAdmin) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-zinc-950 text-white text-center">
+      <div className="grid min-h-dvh place-items-center bg-background text-foreground text-center">
         <div>
           <h1 className="text-2xl font-bold mb-2 text-rose-500">Yetkisiz Erişim</h1>
-          <p className="text-zinc-400 mb-6">Bu sayfayı görüntüleme yetkiniz yok.</p>
+          <p className="text-muted-foreground mb-6">Bu sayfayı görüntüleme yetkiniz yok.</p>
           <Link to="/panel" className="text-gold hover:underline">
             Yönetim Paneline Dön
           </Link>
@@ -78,11 +78,11 @@ function AdminDashboard({ email }: { email: string }) {
   ] as const;
 
   return (
-    <div className="min-h-dvh bg-zinc-950 text-zinc-100 font-sans flex flex-col md:flex-row">
-      <aside className="w-full md:w-64 border-r border-zinc-800 bg-zinc-900/50 flex flex-col">
-        <div className="p-6 border-b border-zinc-800">
-          <h1 className="text-xl font-display text-white">Platform Yönetimi</h1>
-          <p className="text-xs text-zinc-500 mt-1">{email}</p>
+    <div className="min-h-dvh bg-background text-foreground font-sans flex flex-col md:flex-row">
+      <aside className="w-full md:w-64 border-r border-border bg-surface flex flex-col">
+        <div className="p-6 border-b border-border">
+          <h1 className="text-xl font-display text-foreground">Platform Yönetimi</h1>
+          <p className="text-xs text-muted-foreground mt-1">{email}</p>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {tabs.map((tab) => (
@@ -92,7 +92,7 @@ function AdminDashboard({ email }: { email: string }) {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${
                 activeTab === tab.id
                   ? "bg-rose-500/20 text-rose-400 font-medium border border-rose-500/30"
-                  : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  : "text-muted-foreground hover:bg-accent/10 hover:text-foreground"
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -100,13 +100,13 @@ function AdminDashboard({ email }: { email: string }) {
             </button>
           ))}
         </nav>
-        <div className="p-4 border-t border-zinc-800">
+        <div className="p-4 border-t border-border">
           <button
             onClick={async () => {
               await signOut();
               navigate({ to: "/" });
             }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors text-sm"
+            className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-xl transition-colors text-sm"
           >
             <LogOut className="w-4 h-4" />
             Çıkış Yap
@@ -144,8 +144,8 @@ function AuditLogs() {
   return (
     <div className="animate-in fade-in duration-500">
       <div className="mb-8">
-        <h2 className="text-2xl font-display text-white mb-1">İşlem Kayıtları</h2>
-        <p className="text-sm text-zinc-400">
+        <h2 className="text-2xl font-display text-foreground mb-1">İşlem Kayıtları</h2>
+        <p className="text-sm text-muted-foreground">
           Yöneticilerin sistem üzerinde yaptığı değişiklikler (Audit Trail).
         </p>
       </div>
@@ -155,9 +155,9 @@ function AuditLogs() {
           <Loader2 className="w-8 h-8 animate-spin text-gold" />
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <table className="w-full text-sm text-left">
-            <thead className="bg-zinc-950/50 text-zinc-400 border-b border-zinc-800">
+            <thead className="bg-background/50 text-muted-foreground border-b border-border">
               <tr>
                 <th className="px-6 py-4 font-medium">Tarih</th>
                 <th className="px-6 py-4 font-medium">Yönetici</th>
@@ -167,12 +167,12 @@ function AuditLogs() {
             </thead>
             <tbody className="divide-y divide-zinc-800/50">
               {logs.map((log) => (
-                <tr key={log.id} className="hover:bg-zinc-800/20 transition-colors">
+                <tr key={log.id} className="hover:bg-accent/10/20 transition-colors">
                   <td className="px-6 py-4 text-zinc-300">
                     {new Date(log.created_at).toLocaleString("tr-TR")}
                   </td>
                   <td className="px-6 py-4 text-zinc-300">{log.admin_email}</td>
-                  <td className="px-6 py-4 text-white">
+                  <td className="px-6 py-4 text-foreground">
                     <span
                       className={`px-2 py-1 rounded text-xs ${
                         log.action === "create"
@@ -185,12 +185,12 @@ function AuditLogs() {
                       {log.action.toUpperCase()}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-zinc-400">{log.target_type}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{log.target_type}</td>
                 </tr>
               ))}
               {logs.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
                     Kayıt bulunamadı.
                   </td>
                 </tr>

@@ -43,7 +43,7 @@ function PremiumDashboardGate() {
 
   if (loading || !user) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-black">
+      <div className="grid min-h-dvh place-items-center bg-background">
         <Loader2 className="size-6 animate-spin text-gold" aria-hidden="true" />
       </div>
     );
@@ -68,7 +68,7 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
 
   if (loading) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-zinc-950 text-white">
+      <div className="grid min-h-dvh place-items-center bg-background text-foreground">
         <Loader2 className="size-8 animate-spin text-gold" />
       </div>
     );
@@ -76,10 +76,10 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
 
   if (!invitation || invitation.user_id !== userId) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-zinc-950 text-white">
+      <div className="grid min-h-dvh place-items-center bg-background text-foreground">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-2">Erişim Engellendi</h2>
-          <p className="text-zinc-400 mb-6">Bu davetiyeyi görüntüleme yetkiniz yok.</p>
+          <p className="text-muted-foreground mb-6">Bu davetiyeyi görüntüleme yetkiniz yok.</p>
           <Link to="/panel" className="text-gold hover:underline">
             Panele Dön
           </Link>
@@ -99,18 +99,18 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
   ] as const;
 
   return (
-    <div className="min-h-dvh bg-[#080909] text-zinc-100 font-sans flex flex-col md:flex-row">
+    <div className="min-h-dvh bg-background text-foreground font-sans flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full border-r border-white/10 bg-[#0b0c0c] md:sticky md:top-0 md:h-dvh md:w-72 md:shrink-0 flex flex-col">
-        <div className="p-7 border-b border-white/10">
+      <aside className="w-full border-r border-border bg-background md:sticky md:top-0 md:h-dvh md:w-72 md:shrink-0 flex flex-col">
+        <div className="p-7 border-b border-border">
           <Link
             to="/panel"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             Tüm Davetiyeler
           </Link>
-          <h1 className="truncate font-display text-2xl italic text-white">
+          <h1 className="truncate font-display text-2xl italic text-foreground">
             {invitation.partner_one} & {invitation.partner_two}
           </h1>
           <a
@@ -123,7 +123,7 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
           </a>
           <a
             href={`/olustur?edit=${encodeURIComponent(invitation.id)}`}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#ee566d]/35 bg-[#ee566d]/10 px-4 py-2.5 text-sm text-[#ff7087] transition-colors hover:bg-[#ee566d]/20"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#ee566d]/35 bg-rose/10 px-4 py-2.5 text-sm text-[#ff7087] transition-colors hover:bg-rose/20"
           >
             <Pencil className="h-4 w-4" /> Davetiyeyi Düzenle
           </a>
@@ -136,8 +136,8 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
               onClick={() => setActiveTab(tab.id as TabType)}
               className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl text-sm transition-all ${
                 activeTab === tab.id
-                  ? "bg-[#ee566d] text-white font-medium shadow-[0_12px_30px_rgba(238,86,109,0.18)]"
-                  : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                  ? "bg-rose text-foreground font-medium shadow-sm"
+                  : "text-muted-foreground hover:bg-accent/10 hover:text-foreground"
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -156,10 +156,10 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
         {activeTab === "analytics" && <DashboardAnalytics invitation={invitation} />}
         {activeTab === "print" && (
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-display font-medium text-white mb-2">
+            <h2 className="text-2xl font-display font-medium text-foreground mb-2">
               Masa Kartı & Baskı
             </h2>
-            <p className="text-zinc-400 text-sm mb-8">
+            <p className="text-muted-foreground text-sm mb-8">
               Etkinliğinizde masalara yerleştirebileceğiniz, misafirlerinizin fotoğraf yüklemesi
               için tasarlanmış QR kodlu masa kartlarınızı indirebilirsiniz.
             </p>

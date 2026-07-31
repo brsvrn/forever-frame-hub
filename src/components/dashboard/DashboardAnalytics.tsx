@@ -44,7 +44,7 @@ export function DashboardAnalytics({ invitation }: { invitation: InvitationRow }
 
   if (!data && !error) {
     return (
-      <div className="flex items-center gap-3 text-zinc-400">
+      <div className="flex items-center gap-3 text-muted-foreground">
         <Loader2 className="size-5 animate-spin" /> İstatistikler yükleniyor…
       </div>
     );
@@ -81,30 +81,30 @@ export function DashboardAnalytics({ invitation }: { invitation: InvitationRow }
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h2 className="mb-2 font-display text-2xl font-medium text-white">İstatistikler</h2>
-        <p className="text-sm text-zinc-400">
+        <h2 className="mb-2 font-display text-2xl font-medium text-foreground">İstatistikler</h2>
+        <p className="text-sm text-muted-foreground">
           LCV ve medya yüklemelerinden hesaplanan gerçek etkinlik verileri.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => (
-          <div key={card.label} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
-            <div className="mb-4 w-fit rounded-lg bg-zinc-800 p-2 text-gold">
+          <div key={card.label} className="rounded-2xl border border-border bg-surface p-5">
+            <div className="mb-4 w-fit rounded-lg bg-accent/10 p-2 text-gold">
               <card.icon className="size-5" />
             </div>
-            <p className="mb-1 text-sm text-zinc-400">{card.label}</p>
-            <h3 className="text-2xl font-semibold text-white">{card.value}</h3>
-            <p className="mt-2 text-xs text-zinc-500">{card.detail}</p>
+            <p className="mb-1 text-sm text-muted-foreground">{card.label}</p>
+            <h3 className="text-2xl font-semibold text-foreground">{card.value}</h3>
+            <p className="mt-2 text-xs text-muted-foreground">{card.detail}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+        <div className="rounded-2xl border border-border bg-surface p-6">
           <div className="mb-6 flex items-center gap-2">
-            <LineChart className="size-5 text-zinc-400" />
-            <h3 className="font-medium text-white">Son 7 Gün Etkileşimi</h3>
+            <LineChart className="size-5 text-muted-foreground" />
+            <h3 className="font-medium text-foreground">Son 7 Gün Etkileşimi</h3>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -151,10 +151,10 @@ export function DashboardAnalytics({ invitation }: { invitation: InvitationRow }
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+        <div className="rounded-2xl border border-border bg-surface p-6">
           <div className="mb-6 flex items-center gap-2">
-            <BarChart2 className="size-5 text-zinc-400" />
-            <h3 className="font-medium text-white">Saatlere Göre Etkileşim</h3>
+            <BarChart2 className="size-5 text-muted-foreground" />
+            <h3 className="font-medium text-foreground">Saatlere Göre Etkileşim</h3>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">

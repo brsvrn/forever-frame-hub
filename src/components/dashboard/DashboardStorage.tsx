@@ -31,7 +31,7 @@ export function DashboardStorage({ invitation }: { invitation: InvitationRow }) 
 
   if (!stats && !error) {
     return (
-      <div className="flex items-center gap-3 text-zinc-400">
+      <div className="flex items-center gap-3 text-muted-foreground">
         <Loader2 className="size-5 animate-spin" /> Depolama verileri yükleniyor…
       </div>
     );
@@ -47,21 +47,21 @@ export function DashboardStorage({ invitation }: { invitation: InvitationRow }) 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h2 className="mb-2 font-display text-2xl font-medium text-white">Depolama</h2>
-        <p className="text-sm text-zinc-400">Yüklenen gerçek dosyalar ve paket kotanız.</p>
+        <h2 className="mb-2 font-display text-2xl font-medium text-foreground">Depolama</h2>
+        <p className="text-sm text-muted-foreground">Yüklenen gerçek dosyalar ve paket kotanız.</p>
       </div>
 
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 lg:p-8">
+      <div className="rounded-2xl border border-border bg-surface p-6 lg:p-8">
         <div className="mb-8 flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
           <div className="flex items-center gap-4">
-            <div className="rounded-2xl bg-zinc-800/50 p-4 text-gold">
+            <div className="rounded-2xl bg-accent/10/50 p-4 text-gold">
               <HardDrive className="size-8" />
             </div>
             <div>
-              <p className="mb-1 text-sm text-zinc-400">Kullanılan Alan · {stats.packageName}</p>
-              <h3 className="text-3xl font-semibold text-white">
+              <p className="mb-1 text-sm text-muted-foreground">Kullanılan Alan · {stats.packageName}</p>
+              <h3 className="text-3xl font-semibold text-foreground">
                 {formatBytes(stats.usedBytes)}{" "}
-                <span className="text-xl font-normal text-zinc-500">
+                <span className="text-xl font-normal text-muted-foreground">
                   / {stats.limitBytes ? formatBytes(stats.limitBytes) : "Kota tanımlanmamış"}
                 </span>
               </h3>
@@ -74,28 +74,28 @@ export function DashboardStorage({ invitation }: { invitation: InvitationRow }) 
           )}
         </div>
 
-        <div className="relative mb-6 h-4 w-full overflow-hidden rounded-full bg-zinc-800">
+        <div className="relative mb-6 h-4 w-full overflow-hidden rounded-full bg-accent/10">
           <div
             className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-gold/80 to-gold transition-all duration-700"
             style={{ width: `${percentage}%` }}
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 border-t border-zinc-800 pt-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 border-t border-border pt-6 md:grid-cols-3">
           <div>
-            <p className="mb-1 text-sm text-zinc-500">Fotoğraf</p>
-            <p className="font-medium text-white">
+            <p className="mb-1 text-sm text-muted-foreground">Fotoğraf</p>
+            <p className="font-medium text-foreground">
               {stats.photoCount} adet ({formatBytes(stats.photoBytes)})
             </p>
           </div>
           <div>
-            <p className="mb-1 text-sm text-zinc-500">Video</p>
-            <p className="font-medium text-white">
+            <p className="mb-1 text-sm text-muted-foreground">Video</p>
+            <p className="font-medium text-foreground">
               {stats.videoCount} adet ({formatBytes(stats.videoBytes)})
             </p>
           </div>
           <div>
-            <p className="mb-1 text-sm text-zinc-500">Kalan Kota</p>
+            <p className="mb-1 text-sm text-muted-foreground">Kalan Kota</p>
             <p className="font-medium text-emerald-400">
               {stats.limitBytes
                 ? `${formatBytes(remaining)} kullanılabilir`
@@ -105,18 +105,18 @@ export function DashboardStorage({ invitation }: { invitation: InvitationRow }) 
         </div>
       </div>
 
-      <div className="flex items-start gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <Clock className="size-6 shrink-0 text-zinc-500" />
+      <div className="flex items-start gap-4 rounded-2xl border border-border bg-surface p-6">
+        <Clock className="size-6 shrink-0 text-muted-foreground" />
         <div>
-          <h4 className="mb-1 font-medium text-white">Otomatik Silinme</h4>
-          <p className="mb-4 text-sm text-zinc-400">
+          <h4 className="mb-1 font-medium text-foreground">Otomatik Silinme</h4>
+          <p className="mb-4 text-sm text-muted-foreground">
             {stats.retentionDays > 0
               ? `${stats.packageName} kapsamında yüklenen medyalar etkinlik tarihinden itibaren ${stats.retentionDays} gün saklanır.`
               : "Bu paket için saklama süresi tanımlanmamış."}
           </p>
           <p className="text-sm">
-            <span className="text-zinc-500">Planlanan silinme tarihi: </span>
-            <span className="font-medium text-white">
+            <span className="text-muted-foreground">Planlanan silinme tarihi: </span>
+            <span className="font-medium text-foreground">
               {stats.deleteDate
                 ? new Date(stats.deleteDate).toLocaleDateString("tr-TR", {
                     day: "numeric",

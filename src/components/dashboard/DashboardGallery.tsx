@@ -221,8 +221,8 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-display font-medium text-white mb-2">Medya Galerisi</h2>
-          <p className="text-zinc-400 text-sm">
+          <h2 className="text-2xl font-display font-medium text-foreground mb-2">Medya Galerisi</h2>
+          <p className="text-muted-foreground text-sm">
             Misafirlerinizin paylaştığı orijinal fotoğraflar ve videolar.
           </p>
         </div>
@@ -237,7 +237,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
                   void downloadUploads(uploads.filter((upload) => selectedIds.has(upload.id)))
                 }
                 disabled={downloading}
-                className="p-2 text-zinc-300 hover:text-white bg-zinc-800 rounded-md transition-colors tooltip"
+                className="p-2 text-zinc-300 hover:text-foreground bg-accent/10 rounded-md transition-colors tooltip"
                 title="Seçilenleri indir"
               >
                 {downloading ? (
@@ -248,7 +248,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
               </button>
               <button
                 onClick={handleDelete}
-                className="p-2 text-zinc-300 hover:text-rose-500 bg-zinc-800 rounded-md transition-colors"
+                className="p-2 text-zinc-300 hover:text-rose-500 bg-accent/10 rounded-md transition-colors"
                 title="Sil"
               >
                 <Trash2 className="w-4 h-4" />
@@ -258,7 +258,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
 
           <button
             onClick={toggleSelectAll}
-            className="p-2.5 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-colors"
+            className="p-2.5 bg-card border border-border text-muted-foreground hover:text-foreground rounded-xl transition-colors"
             title="Tümünü Seç"
           >
             <CheckSquare className="w-5 h-5" />
@@ -269,16 +269,16 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
       {/* Filters & Search */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Misafir adına göre ara..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-gold/50 transition-colors text-white"
+            className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-gold/50 transition-colors text-foreground"
           />
         </div>
-        <div className="flex bg-zinc-900/50 border border-zinc-800 rounded-xl p-1 shrink-0">
+        <div className="flex bg-surface border border-border rounded-xl p-1 shrink-0">
           {[
             { id: "all", label: "Tümü", icon: null },
             { id: "photos", label: "Fotoğraf", icon: ImageIcon },
@@ -288,7 +288,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
             <button
               key={f.id}
               onClick={() => setFilter(f.id as any)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-colors ${filter === f.id ? "bg-zinc-800 text-white font-medium" : "text-zinc-500 hover:text-zinc-300"}`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-colors ${filter === f.id ? "bg-accent/10 text-foreground font-medium" : "text-muted-foreground hover:text-zinc-300"}`}
             >
               {f.icon && (
                 <f.icon className={`w-4 h-4 ${f.id === "favorites" ? "text-rose-500" : ""}`} />
@@ -332,7 +332,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
               <div className="absolute top-3 right-3 flex items-center gap-2">
                 <button
                   onClick={(e) => toggleFavorite(e, upload.id, upload.is_favorite)}
-                  className={`p-1.5 rounded-full backdrop-blur-md transition-colors ${upload.is_favorite ? "bg-rose-500/20 text-rose-500" : "bg-black/40 text-white/70 hover:text-white opacity-0 group-hover:opacity-100"}`}
+                  className={`p-1.5 rounded-full backdrop-blur-md transition-colors ${upload.is_favorite ? "bg-rose-500/20 text-rose-500" : "bg-background/40 text-foreground/70 hover:text-foreground opacity-0 group-hover:opacity-100"}`}
                 >
                   <Heart className="w-4 h-4" fill={upload.is_favorite ? "currentColor" : "none"} />
                 </button>
@@ -340,7 +340,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
 
               {/* Selection Indicator */}
               <div
-                className={`absolute top-3 left-3 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? "bg-gold border-gold text-black" : "border-white/50 bg-black/20 opacity-0 group-hover:opacity-100"}`}
+                className={`absolute top-3 left-3 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? "bg-gold border-gold text-black" : "border-border0 bg-background/20 opacity-0 group-hover:opacity-100"}`}
               >
                 {isSelected && <CheckSquare className="w-3 h-3" />}
               </div>
@@ -348,7 +348,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
               {/* Video Indicator */}
               {isVideo && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white">
+                  <div className="w-12 h-12 rounded-full bg-background/40 backdrop-blur-md flex items-center justify-center text-foreground">
                     <PlayCircle className="w-6 h-6" />
                   </div>
                 </div>
@@ -356,9 +356,9 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
 
               {/* Bottom Info */}
               <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                <p className="text-white text-sm font-medium truncate">{upload.guest_name}</p>
+                <p className="text-foreground text-sm font-medium truncate">{upload.guest_name}</p>
                 <div className="flex items-center justify-between mt-1">
-                  <p className="text-zinc-400 text-xs">
+                  <p className="text-muted-foreground text-xs">
                     {(upload.file_size / (1024 * 1024)).toFixed(1)} MB
                   </p>
                   <button
@@ -380,9 +380,9 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
       </div>
 
       {filteredUploads.length === 0 && (
-        <div className="py-20 text-center border border-dashed border-zinc-800 rounded-2xl">
+        <div className="py-20 text-center border border-dashed border-border rounded-2xl">
           <ImageIcon className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-          <p className="text-zinc-400">Bu filtrelere uygun medya bulunamadı.</p>
+          <p className="text-muted-foreground">Bu filtrelere uygun medya bulunamadı.</p>
         </div>
       )}
     </div>

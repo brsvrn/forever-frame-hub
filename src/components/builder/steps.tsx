@@ -119,7 +119,7 @@ export function StepTheme({
                     active ? "border-gold bg-gold/10" : "border-border hover:border-gold/50",
                   )}
                 >
-                  <div className="font-semibold text-lg">{pkg.name}</div>
+                  <div className="font-semibold text-lg">{pkg.display_name || pkg.name}</div>
                   <div className="text-gold font-medium mt-1">{pkg.price} ₺</div>
                   <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
                     {pkg.features?.digital_invitation
