@@ -4,6 +4,7 @@ import {
   Check,
   Copy,
   Crown,
+  Download,
   Landmark,
   Leaf,
   Link2,
