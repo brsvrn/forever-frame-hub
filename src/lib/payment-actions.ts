@@ -12,7 +12,7 @@ export const initiatePayment = createServerFn({ method: "POST" })
 
       const admin = getServiceSupabase();
       
-      const merchant_oid = `FFH_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const merchant_oid = `FFH${Date.now()}${Math.random().toString(36).substring(2, 7)}`;
       
       // Determine price
       let amount = 0;
