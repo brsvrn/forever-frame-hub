@@ -985,12 +985,14 @@ export function StepPublish({
   lang,
   onEdit,
   isPublished,
+  isPaid,
   onPublishChange,
   saveStatus,
   features,
 }: StepProps & {
   onEdit: () => void;
   isPublished: boolean;
+  isPaid?: boolean;
   onPublishChange: (val: boolean) => void;
   saveStatus: string;
   features: PackageFeatures;
@@ -1061,111 +1063,117 @@ export function StepPublish({
 
       <div className="glass rounded-3xl p-6 sm:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-xl font-medium">
-              {qrOnly && lang === "tr"
-                ? "QR galerisi yayın durumu"
-                : c.successTitle || "Yayın Durumu"}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-medium text-foreground">
+              {!isPaid 
+                ? "Ödeme ve Yayın" 
+                : isPublished
+                  ? c.successTitle || "Yayın Durumu"
+                  : c.successTitle || "Yayın Durumu"}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {isPublished
-                ? qrOnly
-                  ? "QR fotoğraf galeriniz yayında ve yüklemeye açık."
-                  : "Davetiyeniz yayında ve misafirlerinize açık."
-                : qrOnly
-                  ? "QR galeriniz taslak modunda. Henüz yükleme yapılamaz."
-                  : "Davetiyeniz taslak modunda. Henüz kimse göremez."}
+              {!isPaid
+                ? "Yayınlamak için lütfen ödeme adımını tamamlayın."
+                : isPublished
+                  ? qrOnly
+                    ? "QR fotoğraf galeriniz yayında ve yüklemeye açık."
+                    : "Davetiyeniz yayında ve misafirlerinize açık."
+                  : qrOnly
+                    ? "QR galeriniz taslak modunda. Henüz yükleme yapılamaz."
+                    : "Davetiyeniz taslak modunda. Henüz kimse göremez."}
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onPublishChange(!isPublished)}
-            className={cn(
-              "relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-              isPublished ? "bg-gold" : "bg-accent",
-            )}
-            role="switch"
-            aria-checked={isPublished}
-          >
-            <span className="sr-only">Yayın Durumu</span>
-            <span
-              aria-hidden="true"
-              className={cn(
-                "pointer-events-none absolute left-1 h-6 w-6 transform rounded-full bg-background shadow ring-0 transition duration-300 ease-in-out",
-                isPublished ? "translate-x-6" : "translate-x-0",
-              )}
-            />
-          </button>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center border-t border-border pt-6">
-          <div className="min-w-0 space-y-3">
-            <p className="truncate rounded-2xl border border-border bg-accent/20 px-4 py-3 text-sm text-gold">
-              {fullUrl}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={copyLink}
-                disabled={!linkReady}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50 disabled:opacity-40"
-              >
-                {copied ? (
-                  <Check className="size-4 text-gold" aria-hidden="true" />
-                ) : (
-                  <Copy className="size-4" aria-hidden="true" />
-                )}
-                {copied ? c.copied : c.copy}
-              </button>
-              <a
-                href={linkReady ? `https://wa.me/?text=${encodeURIComponent(fullUrl)}` : undefined}
-                target="_blank"
-                rel="noreferrer"
-                className={cn(
-                  "inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm transition-colors",
-                  linkReady ? "hover:bg-accent/50" : "opacity-40 cursor-not-allowed",
-                )}
-              >
-                {c.whatsapp}
-              </a>
-              <button
-                type="button"
-                onClick={downloadQr}
-                disabled={!linkReady}
-                className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50 disabled:opacity-40"
-              >
-                {c.qr}
-              </button>
-            </div>
+          {!isPaid ? (
             <button
               type="button"
-              onClick={onEdit}
-              className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              onClick={() => onPublishChange(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-6 py-2.5 text-sm font-medium text-white transition-all hover:bg-gold/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
             >
-              {c.edit}
+              <Sparkles className="size-4" />
+              Ödeme Yaparak Yayınla
             </button>
-          </div>
-
-          <div
-            className={cn(
-              "mx-auto size-36 shrink-0 rounded-2xl p-3 transition-opacity",
-              linkReady ? "bg-foreground opacity-100" : "bg-foreground/50 opacity-50 blur-sm",
-            )}
-            aria-label="QR"
-          >
-            <QRCodeSVG
-              id="publish-qr-code"
-              value={fullUrl}
-              size={120}
-              level="M"
-              marginSize={1}
-              bgColor="#ffffff"
-              fgColor="#0e1220"
-              className="h-full w-full"
-            />
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onPublishChange(!isPublished)}
+              className={cn(
+                "relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                isPublished ? "bg-gold" : "bg-accent",
+              )}
+              role="switch"
+              aria-checked={isPublished}
+            >
+              <span className="sr-only">Yayın Durumu</span>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "pointer-events-none absolute left-1 h-6 w-6 transform rounded-full bg-background shadow ring-0 transition duration-300 ease-in-out",
+                  isPublished ? "translate-x-6" : "translate-x-0",
+                )}
+              />
+            </button>
+          )}
         </div>
+
+        {isPaid && (
+          <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center border-t border-border pt-6">
+            <div className="min-w-0 space-y-3">
+              <p className="truncate rounded-2xl border border-border bg-accent/20 px-4 py-3 text-sm text-gold">
+                {fullUrl}
+              </p>
+              
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={copyLink}
+                  disabled={!linkReady}
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gold px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gold/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:opacity-50"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="size-4" aria-hidden="true" />
+                      {c.copied}
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="size-4" aria-hidden="true" />
+                      {c.copyBtn}
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadQr}
+                  disabled={!linkReady}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border px-4 py-3 text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:opacity-50"
+                >
+                  <Download className="size-4" aria-hidden="true" />
+                  QR
+                </button>
+              </div>
+            </div>
+            
+            <div 
+              className={cn(
+                "mx-auto w-32 shrink-0 overflow-hidden rounded-2xl border border-border bg-white p-3 shadow-sm transition-opacity",
+                !linkReady && "opacity-50 grayscale"
+              )}
+              aria-label="QR"
+            >
+              <QRCodeSVG
+                id="publish-qr-code"
+                value={fullUrl}
+                size={120}
+                level="M"
+                marginSize={1}
+                bgColor="#ffffff"
+                fgColor="#0e1220"
+                className="h-full w-full"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

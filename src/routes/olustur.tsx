@@ -76,6 +76,7 @@ function BuilderPage() {
   const [packagesLoading, setPackagesLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [isPublished, setIsPublished] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
   const [editingId, setEditingId] = useState<string | undefined>();
   const [loadingExisting, setLoadingExisting] = useState(true);
   const resumedPublish = useRef(false);
@@ -107,6 +108,7 @@ function BuilderPage() {
         setDraft(rowToDraft(row));
         setEditingId(row.id);
         setIsPublished(row.is_published);
+        setIsPaid(row.is_paid || false);
       }
       if (active) setLoadingExisting(false);
     })().catch(() => {
@@ -137,6 +139,21 @@ function BuilderPage() {
 
   useEffect(() => {
     if (!hydrated || packagesLoading || packages.length === 0) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const pkgQuery = params.get("pkg");
+    if (pkgQuery) {
+      const match = packages.find((pkg) => pkg.name === pkgQuery);
+      if (match && match.id !== draft.packageId) {
+        update("packageId", match.id);
+        
+        params.delete("pkg");
+        const query = params.toString();
+        window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+        return;
+      }
+    }
+
     if (!packages.some((pkg) => pkg.id === draft.packageId)) {
       const preferredPackage =
         packages.find(
@@ -154,6 +171,7 @@ function BuilderPage() {
         const {
           data: { session },
         } = await supabase.auth.getSession();
+        
         if (!session) {
           const target = editingId
             ? `/olustur?edit=${encodeURIComponent(editingId)}`
@@ -162,16 +180,26 @@ function BuilderPage() {
           window.location.assign("/giris");
           return;
         }
+
         setSaveStatus("saving");
-        const saved = await saveInvitation(draft, session.user.id, nextPublished, editingId);
+        // Always save as NOT published first if not paid, just draft
+        const saved = await saveInvitation(draft, session.user.id, isPaid ? nextPublished : false, editingId);
         setEditingId(saved.id);
+        
+        if (!isPaid && nextPublished) {
+          // Redirect to checkout
+          window.location.href = `/odeme?invitationId=${saved.id}&packageType=${draft.packageId}`;
+          return;
+        }
+
         setIsPublished(nextPublished);
         setSaveStatus("saved");
-      } catch {
+      } catch (err) {
+        console.error("Save error:", err);
         setSaveStatus("error");
       }
     },
-    [draft, editingId],
+    [draft, editingId, isPaid]
   );
 
   useEffect(() => {
@@ -400,6 +428,7 @@ function BuilderPage() {
                     {...stepProps}
                     onEdit={() => setStepId("texts")}
                     isPublished={isPublished}
+                    isPaid={isPaid}
                     onPublishChange={(value) => void handlePublishChange(value)}
                     saveStatus={saveStatus}
                     features={features}

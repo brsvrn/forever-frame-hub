@@ -25,6 +25,7 @@ import {
   type InvitationRow,
   type RsvpRow,
 } from "@/lib/invitations.api";
+import { setFreeEvent } from "@/lib/payment-actions";
 import { easeSilk } from "@/components/landing/motion-primitives";
 
 const title = "Yönetim Paneli — Davetiyeler ve RSVP | MemoryWedding";
@@ -245,19 +246,51 @@ function InvitationCard({
             <LayoutDashboard className="size-4" aria-hidden="true" />
             Yönet
           </Link>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              await setPublished(row.id, !row.is_published);
-              await onChanged();
-              setBusy(false);
-            }}
-            className="inline-flex min-h-10 items-center rounded-full border border-border px-4 text-sm transition-colors hover:bg-accent/50 disabled:opacity-50"
-          >
-            {row.is_published ? copy.unpublish : copy.publish}
-          </button>
+          {!(row as any).is_paid ? (
+            <div className="flex gap-2">
+              <a
+                href={`/odeme?invitationId=${row.id}&packageType=${(row as any).package_type || 'standard'}`}
+                className="inline-flex min-h-10 items-center gap-2 rounded-full bg-rose px-4 text-sm text-white font-medium transition-transform hover:scale-105 shadow-sm"
+              >
+                Ödeme Yap
+              </a>
+              {isAdmin && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={async () => {
+                    if (confirm("Admin Yetkisi: Bu etkinliği ÜCRETSİZ olarak işaretleyip hemen yayınlamak istiyor musunuz?")) {
+                      setBusy(true);
+                      try {
+                        await setFreeEvent({ data: { invitationId: row.id, email }});
+                        await onChanged();
+                      } catch (err) {
+                        alert("Hata oluştu.");
+                      }
+                      setBusy(false);
+                    }
+                  }}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-full bg-emerald-500 px-4 text-sm text-white font-medium transition-transform hover:scale-105 shadow-sm"
+                >
+                  Ücretsiz Yayınla
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                await setPublished(row.id, !row.is_published);
+                await onChanged();
+                setBusy(false);
+              }}
+              className="inline-flex min-h-10 items-center rounded-full border border-border px-4 text-sm transition-colors hover:bg-accent/50 disabled:opacity-50"
+            >
+              {row.is_published ? copy.unpublish : copy.publish}
+            </button>
+          )}
           <button
             type="button"
             disabled={busy}

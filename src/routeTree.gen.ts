@@ -12,11 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as GirisRouteImport } from './routes/giris'
+import { Route as OdemeRouteImport } from './routes/odeme'
 import { Route as OlusturRouteImport } from './routes/olustur'
 import { Route as PanelRouteImport } from './routes/panel'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as DavetSlugRouteImport } from './routes/davet.$slug'
+import { Route as OdemeBasariliRouteImport } from './routes/odeme.basarili'
+import { Route as OdemeHataRouteImport } from './routes/odeme.hata'
 import { Route as PanelIdRouteImport } from './routes/panel_.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -32,6 +35,11 @@ const AdminRoute = AdminRouteImport.update({
 const GirisRoute = GirisRouteImport.update({
   id: '/giris',
   path: '/giris',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OdemeRoute = OdemeRouteImport.update({
+  id: '/odeme',
+  path: '/odeme',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OlusturRoute = OlusturRouteImport.update({
@@ -59,6 +67,16 @@ const DavetSlugRoute = DavetSlugRouteImport.update({
   path: '/davet/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OdemeBasariliRoute = OdemeBasariliRouteImport.update({
+  id: '/basarili',
+  path: '/basarili',
+  getParentRoute: () => OdemeRoute,
+} as any)
+const OdemeHataRoute = OdemeHataRouteImport.update({
+  id: '/hata',
+  path: '/hata',
+  getParentRoute: () => OdemeRoute,
+} as any)
 const PanelIdRoute = PanelIdRouteImport.update({
   id: '/panel_/$id',
   path: '/panel/$id',
@@ -69,22 +87,28 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
+  '/odeme': typeof OdemeRouteWithChildren
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/odeme/basarili': typeof OdemeBasariliRoute
+  '/odeme/hata': typeof OdemeHataRoute
   '/panel/$id': typeof PanelIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
+  '/odeme': typeof OdemeRouteWithChildren
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/odeme/basarili': typeof OdemeBasariliRoute
+  '/odeme/hata': typeof OdemeHataRoute
   '/panel/$id': typeof PanelIdRoute
 }
 export interface FileRoutesById {
@@ -92,11 +116,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
+  '/odeme': typeof OdemeRouteWithChildren
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/odeme/basarili': typeof OdemeBasariliRoute
+  '/odeme/hata': typeof OdemeHataRoute
   '/panel_/$id': typeof PanelIdRoute
 }
 export interface FileRouteTypes {
@@ -105,33 +132,42 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/giris'
+    | '/odeme'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/odeme/basarili'
+    | '/odeme/hata'
     | '/panel/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/giris'
+    | '/odeme'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/odeme/basarili'
+    | '/odeme/hata'
     | '/panel/$id'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/giris'
+    | '/odeme'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/odeme/basarili'
+    | '/odeme/hata'
     | '/panel_/$id'
   fileRoutesById: FileRoutesById
 }
@@ -139,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   GirisRoute: typeof GirisRoute
+  OdemeRoute: typeof OdemeRouteWithChildren
   OlusturRoute: typeof OlusturRoute
   PanelRoute: typeof PanelRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -168,6 +205,13 @@ declare module '@tanstack/react-router' {
       path: '/giris'
       fullPath: '/giris'
       preLoaderRoute: typeof GirisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/odeme': {
+      id: '/odeme'
+      path: '/odeme'
+      fullPath: '/odeme'
+      preLoaderRoute: typeof OdemeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/olustur': {
@@ -205,6 +249,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DavetSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/odeme/basarili': {
+      id: '/odeme/basarili'
+      path: '/basarili'
+      fullPath: '/odeme/basarili'
+      preLoaderRoute: typeof OdemeBasariliRouteImport
+      parentRoute: typeof OdemeRoute
+    }
+    '/odeme/hata': {
+      id: '/odeme/hata'
+      path: '/hata'
+      fullPath: '/odeme/hata'
+      preLoaderRoute: typeof OdemeHataRouteImport
+      parentRoute: typeof OdemeRoute
+    }
     '/panel_/$id': {
       id: '/panel_/$id'
       path: '/panel/$id'
@@ -215,10 +273,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface OdemeRouteChildren {
+  OdemeBasariliRoute: typeof OdemeBasariliRoute
+  OdemeHataRoute: typeof OdemeHataRoute
+}
+
+const OdemeRouteChildren: OdemeRouteChildren = {
+  OdemeBasariliRoute: OdemeBasariliRoute,
+  OdemeHataRoute: OdemeHataRoute,
+}
+
+const OdemeRouteWithChildren = OdemeRoute._addFileChildren(OdemeRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   GirisRoute: GirisRoute,
+  OdemeRoute: OdemeRouteWithChildren,
   OlusturRoute: OlusturRoute,
   PanelRoute: PanelRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

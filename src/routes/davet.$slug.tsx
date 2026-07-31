@@ -53,7 +53,7 @@ export const Route = createFileRoute("/davet/$slug")({
     }
 
     const invitation = await getPublicInvitation(params.slug);
-    if (!invitation) throw notFound();
+    if (!invitation || !invitation.is_paid) throw notFound();
     return { invitation };
   },
   head: ({ loaderData }) => {
