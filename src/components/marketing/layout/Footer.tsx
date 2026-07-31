@@ -70,31 +70,40 @@ export function Footer() {
             <h4 className="text-white font-semibold mb-6">Kurumsal & Destek</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Misyonumuz
-                </a>
+                <Link to="/iletisim" className="hover:text-white transition-colors">
+                  İletişim
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Fiyatlandırma & Paketler
-                </a>
+                <Link to="/sozlesmeler/mesafeli-satis" className="hover:text-white transition-colors">
+                  Mesafeli Satış Sözleşmesi
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  7/24 Düğün Desteği
-                </a>
+                <Link to="/sozlesmeler/teslimat" className="hover:text-white transition-colors">
+                  Teslimat ve Kargo Koşulları
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link to="/sozlesmeler/iptal-iade" className="hover:text-white transition-colors">
+                  İptal ve İade Koşulları
+                </Link>
+              </li>
+              <li>
+                <Link to="/sozlesmeler/gizlilik" className="hover:text-white transition-colors">
                   Gizlilik Politikası (KVKK)
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  İade Koşulları
-                </a>
+                </Link>
               </li>
             </ul>
+          </div>
+        </div>
+        
+        <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-8 text-sm text-muted-foreground">
+          <div className="max-w-md">
+            <h5 className="font-semibold text-white mb-2">Firma Bilgileri</h5>
+            <p><strong>Unvan:</strong> Barış Savrun</p>
+            <p><strong>Adres:</strong> Fethiye mahallesi fen sokak yeşil bursa sitesi c blok no:8 daire:7 Nilüfer/Bursa</p>
+            <p><strong>E-posta:</strong> brsvrn@gmail.com | <strong>Telefon:</strong> 0530 381 1155</p>
           </div>
         </div>
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
