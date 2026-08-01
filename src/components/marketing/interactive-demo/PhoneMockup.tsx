@@ -111,23 +111,12 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
             >
               <div className="flex-1 overflow-y-auto pb-20 no-scrollbar relative">
                 <div className="h-[280px] bg-stone-200 relative">
-                  {themeConfig.coverVideoUrl ? (
-                    <video
-                      src={themeConfig.coverVideoUrl}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={themeConfig.image}
-                      alt={themeConfig.name}
-                      className="h-full w-full object-cover"
-                      style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
-                    />
-                  )}
+                  <img
+                    src={themeConfig.image}
+                    alt={themeConfig.name}
+                    className="h-full w-full object-cover"
+                    style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
+                  />
                   <div
                     className={`absolute inset-0 ${themeConfig.styles.overlay}`}
                     aria-hidden="true"

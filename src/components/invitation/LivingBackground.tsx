@@ -7,27 +7,16 @@ export function LivingBackground({ theme }: { theme: ThemeConfig }) {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black">
-      {theme.coverVideoUrl ? (
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-          src={theme.coverVideoUrl}
-        />
-      ) : (
-        <motion.div
-          className="absolute -inset-6 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url(${theme.image})`,
-            filter: isLightTheme ? "brightness(1.02) saturate(0.96)" : undefined,
-          }}
-          initial={reduceMotion ? false : { scale: 1.08 }}
-          animate={{ scale: 1.02 }}
-          transition={{ duration: 2.4, ease: "easeOut" }}
-        />
-      )}
+      <motion.div
+        className="absolute -inset-6 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url(${theme.image})`,
+          filter: isLightTheme ? "brightness(1.02) saturate(0.96)" : undefined,
+        }}
+        initial={reduceMotion ? false : { scale: 1.08 }}
+        animate={{ scale: 1.02 }}
+        transition={{ duration: 2.4, ease: "easeOut" }}
+      />
 
       {/* Okunabilirlik katmanları sabittir; parlaklık/kararma animasyonu uygulanmaz. */}
       <div className={`absolute inset-0 ${theme.styles.overlay}`} />
