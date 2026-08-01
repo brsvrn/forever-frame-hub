@@ -1,7 +1,7 @@
 import { FadeIn, SlideUp } from "@/components/motion";
 import { usePhone } from "@/contexts/PhoneContext";
 import { selectableThemes, type ThemeCategory } from "@/lib/theme-engine";
-import { CheckCircle2, Crown, Landmark, Leaf, Waves } from "lucide-react";
+import { CheckCircle2, Crown, Landmark, Leaf, Waves, Clapperboard } from "lucide-react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { PhoneMockup } from "../interactive-demo/PhoneMockup";
@@ -15,6 +15,7 @@ const categories: Array<{
   { id: "nature", label: "Doğa", icon: Leaf },
   { id: "italy", label: "İtalya", icon: Landmark },
   { id: "luxury", label: "Lüks", icon: Crown },
+  { id: "cinematic", label: "Sinematik", icon: Clapperboard },
 ];
 
 export function ThemeGalleryContent() {

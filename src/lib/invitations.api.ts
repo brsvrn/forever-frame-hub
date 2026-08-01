@@ -166,6 +166,12 @@ export async function submitRsvp(input: {
   partySize: number;
   note?: string;
 }) {
+  if (input.invitationId === "demo-id") {
+    // Demo davetiyesinde veritabanına yazmadan başarılı dön
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return;
+  }
+
   const { error } = await supabase.from("rsvps").insert({
     invitation_id: input.invitationId,
     guest_name: input.guestName,

@@ -27,13 +27,15 @@ export type CoastalThemeId =
 export type NatureThemeId = "emerald-forest" | "wildflower-meadow" | "alpine-mist";
 export type ItalianThemeId = "amalfi-lemon-terrace" | "tuscan-golden-hills" | "lake-como-garden";
 export type LuxuryThemeId = "grand-ballroom";
-export type ThemeCategory = "coastal" | "nature" | "italy" | "luxury" | "classic";
+export type CinematicThemeId = "cinematic-flow" | "boho-motion" | "ethereal-light";
+export type ThemeCategory = "coastal" | "nature" | "italy" | "luxury" | "cinematic" | "classic";
 
 export type InviteThemeId =
   | CoastalThemeId
   | NatureThemeId
   | ItalianThemeId
   | LuxuryThemeId
+  | CinematicThemeId
   | "midnight"
   | "blush"
   | "garden"
@@ -548,6 +550,118 @@ export const themes: Record<InviteThemeId, ThemeConfig> = {
       cards: { wrapper: "bg-stone-950/30 backdrop-blur-xl border-[#f4dfb4]/25" },
       gallery: { gridStyle: "portrait" },
       icons: { color: "text-[#f8e8c7]" },
+    },
+  },
+
+  "cinematic-flow": {
+    id: "cinematic-flow",
+    name: "Cinematic Flow",
+    category: "cinematic",
+    tag: { tr: "Sinematik akış", en: "Cinematic flow" },
+    image: themeNoir, // Fallback image while video loads
+    selectable: true,
+    primaryColor: "#FFFFFF",
+    secondaryColor: "#000000",
+    coverVideoUrl: "/videos/cinematic-flow.mp4",
+    font: "Manrope",
+    qr: {
+      accent: "#E5E5E5",
+      ink: "#1A1A1A",
+      paper: "#FAFAFA",
+      overlay: "linear-gradient(180deg, rgba(0,0,0,.3), rgba(0,0,0,.8))",
+      imagePosition: "center",
+    },
+    music: {
+      defaultTrack: "/audio/classical-piano.mp3",
+      title: "Cinematic Strings",
+    },
+    ambientEffect: { type: "none", intensity: "light" },
+    openingAnimation: { duration: 2.0, style: "fade" },
+    styles: {
+      overlay: "bg-black/40",
+      typography: { display: "font-sans font-light", sans: "font-sans" },
+      motion: "ease-out",
+      buttons: {
+        primary: "bg-white text-black hover:bg-white/90",
+        secondary: "bg-white/10 text-white hover:bg-white/20",
+      },
+      cards: { wrapper: "bg-black/50 backdrop-blur-xl border-white/10" },
+      gallery: { gridStyle: "masonry" },
+      icons: { color: "text-white" },
+    },
+  },
+  "boho-motion": {
+    id: "boho-motion",
+    name: "Boho Motion",
+    category: "cinematic",
+    tag: { tr: "Sıcak bohem", en: "Warm boho" },
+    image: themeBlush,
+    selectable: true,
+    primaryColor: "#FAF3E0",
+    secondaryColor: "#5C4A3D",
+    coverVideoUrl: "/videos/boho-motion.mp4",
+    font: "Cormorant Garamond",
+    qr: {
+      accent: "#D4A373",
+      ink: "#5C4A3D",
+      paper: "#FAF3E0",
+      overlay: "linear-gradient(180deg, rgba(92,74,61,.2), rgba(43,34,28,.85))",
+      imagePosition: "center",
+    },
+    music: {
+      defaultTrack: "/audio/acoustic-breeze.mp3",
+      title: "Boho Acoustic",
+    },
+    ambientEffect: { type: "sunGlow", intensity: "medium" },
+    openingAnimation: { duration: 2.0, style: "fade" },
+    styles: {
+      overlay: "bg-[#2B221C]/30",
+      typography: { display: "font-serif", sans: "font-sans" },
+      motion: "ease-out",
+      buttons: {
+        primary: "bg-[#D4A373] text-white hover:bg-[#C29262]",
+        secondary: "bg-white/15 text-white hover:bg-white/25",
+      },
+      cards: { wrapper: "bg-[#2B221C]/50 backdrop-blur-xl border-[#D4A373]/20" },
+      gallery: { gridStyle: "masonry" },
+      icons: { color: "text-[#FAF3E0]" },
+    },
+  },
+  "ethereal-light": {
+    id: "ethereal-light",
+    name: "Ethereal Light",
+    category: "cinematic",
+    tag: { tr: "Zarif aydınlık", en: "Ethereal light" },
+    image: themeGarden,
+    selectable: true,
+    primaryColor: "#FFFFFF",
+    secondaryColor: "#333333",
+    coverVideoUrl: "/videos/ethereal-light.mp4",
+    font: "Playfair Display",
+    qr: {
+      accent: "#B8C5B3",
+      ink: "#222222",
+      paper: "#FFFFFF",
+      overlay: "linear-gradient(180deg, rgba(255,255,255,.1), rgba(0,0,0,.7))",
+      imagePosition: "center",
+    },
+    music: {
+      defaultTrack: "/audio/classical-piano.mp3",
+      title: "Ethereal Piano",
+    },
+    ambientEffect: { type: "bokeh", intensity: "light" },
+    openingAnimation: { duration: 2.0, style: "fade" },
+    styles: {
+      overlay: "bg-black/20",
+      typography: { display: "font-serif", sans: "font-sans" },
+      motion: "ease-out",
+      buttons: {
+        primary: "bg-white/90 text-black hover:bg-white",
+        secondary: "bg-white/20 text-white hover:bg-white/30",
+      },
+      cards: { wrapper: "bg-black/30 backdrop-blur-xl border-white/20" },
+      gallery: { gridStyle: "masonry" },
+      icons: { color: "text-white" },
     },
   },
 
