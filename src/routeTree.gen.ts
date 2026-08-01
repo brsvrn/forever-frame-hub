@@ -13,12 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as GirisRouteImport } from './routes/giris'
 import { Route as IletisimRouteImport } from './routes/iletisim'
-import { Route as OdemeRouteImport } from './routes/odeme'
 import { Route as OlusturRouteImport } from './routes/olustur'
 import { Route as PanelRouteImport } from './routes/panel'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as DavetSlugRouteImport } from './routes/davet.$slug'
+import { Route as OdemeIndexRouteImport } from './routes/odeme.index'
 import { Route as OdemeBasariliRouteImport } from './routes/odeme.basarili'
 import { Route as OdemeHataRouteImport } from './routes/odeme.hata'
 import { Route as PanelIdRouteImport } from './routes/panel_.$id'
@@ -47,11 +47,6 @@ const IletisimRoute = IletisimRouteImport.update({
   path: '/iletisim',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OdemeRoute = OdemeRouteImport.update({
-  id: '/odeme',
-  path: '/odeme',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OlusturRoute = OlusturRouteImport.update({
   id: '/olustur',
   path: '/olustur',
@@ -75,6 +70,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const DavetSlugRoute = DavetSlugRouteImport.update({
   id: '/davet/$slug',
   path: '/davet/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OdemeIndexRoute = OdemeIndexRouteImport.update({
+  id: '/odeme/',
+  path: '/odeme/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OdemeBasariliRoute = OdemeBasariliRouteImport.update({
@@ -119,7 +119,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
-  '/odeme': typeof OdemeRouteWithChildren
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -132,13 +131,13 @@ export interface FileRoutesByFullPath {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
+  '/odeme/': typeof OdemeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
-  '/odeme': typeof OdemeRouteWithChildren
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -151,6 +150,7 @@ export interface FileRoutesByTo {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
+  '/odeme': typeof OdemeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -158,7 +158,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
-  '/odeme': typeof OdemeRouteWithChildren
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -171,6 +170,7 @@ export interface FileRoutesById {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
+  '/odeme/': typeof OdemeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -179,7 +179,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/giris'
     | '/iletisim'
-    | '/odeme'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
@@ -192,13 +191,13 @@ export interface FileRouteTypes {
     | '/sozlesmeler/iptal-iade'
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
+    | '/odeme/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/giris'
     | '/iletisim'
-    | '/odeme'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
@@ -211,13 +210,13 @@ export interface FileRouteTypes {
     | '/sozlesmeler/iptal-iade'
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
+    | '/odeme'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/giris'
     | '/iletisim'
-    | '/odeme'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
@@ -230,6 +229,7 @@ export interface FileRouteTypes {
     | '/sozlesmeler/iptal-iade'
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
+    | '/odeme/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -237,7 +237,6 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   GirisRoute: typeof GirisRoute
   IletisimRoute: typeof IletisimRoute
-  OdemeRoute: typeof OdemeRouteWithChildren
   OlusturRoute: typeof OlusturRoute
   PanelRoute: typeof PanelRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -248,6 +247,7 @@ export interface RootRouteChildren {
   SozlesmelerIptalIadeRoute: typeof SozlesmelerIptalIadeRoute
   SozlesmelerMesafeliSatisRoute: typeof SozlesmelerMesafeliSatisRoute
   SozlesmelerTeslimatRoute: typeof SozlesmelerTeslimatRoute
+  OdemeIndexRoute: typeof OdemeIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -278,13 +278,6 @@ declare module '@tanstack/react-router' {
       path: '/iletisim'
       fullPath: '/iletisim'
       preLoaderRoute: typeof IletisimRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/odeme': {
-      id: '/odeme'
-      path: '/odeme'
-      fullPath: '/odeme'
-      preLoaderRoute: typeof OdemeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/olustur': {
@@ -320,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/davet/$slug'
       fullPath: '/davet/$slug'
       preLoaderRoute: typeof DavetSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/odeme/': {
+      id: '/odeme/'
+      path: '/odeme'
+      fullPath: '/odeme/'
+      preLoaderRoute: typeof OdemeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/odeme/basarili': {
@@ -374,24 +374,11 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface OdemeRouteChildren {
-  OdemeBasariliRoute: typeof OdemeBasariliRoute
-  OdemeHataRoute: typeof OdemeHataRoute
-}
-
-const OdemeRouteChildren: OdemeRouteChildren = {
-  OdemeBasariliRoute: OdemeBasariliRoute,
-  OdemeHataRoute: OdemeHataRoute,
-}
-
-const OdemeRouteWithChildren = OdemeRoute._addFileChildren(OdemeRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   GirisRoute: GirisRoute,
   IletisimRoute: IletisimRoute,
-  OdemeRoute: OdemeRouteWithChildren,
   OlusturRoute: OlusturRoute,
   PanelRoute: PanelRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -402,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   SozlesmelerIptalIadeRoute: SozlesmelerIptalIadeRoute,
   SozlesmelerMesafeliSatisRoute: SozlesmelerMesafeliSatisRoute,
   SozlesmelerTeslimatRoute: SozlesmelerTeslimatRoute,
+  OdemeIndexRoute: OdemeIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

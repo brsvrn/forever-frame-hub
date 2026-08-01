@@ -59,7 +59,7 @@ export function StepTheme({
   const [themes, setThemes] = useState<any[]>([]);
   const [themesLoading, setThemesLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<
-    "all" | "coastal" | "nature" | "italy" | "luxury"
+    "all" | "coastal" | "nature" | "italy" | "luxury" | "cinematic"
   >("all");
 
   useEffect(() => {

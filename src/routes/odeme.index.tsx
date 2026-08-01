@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { initiatePayment } from "@/lib/payment-actions";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/odeme")({
+export const Route = createFileRoute("/odeme/")({
   component: PaymentRoute,
 });
 
