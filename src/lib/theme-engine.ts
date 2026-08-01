@@ -563,7 +563,6 @@ export const themes: Record<InviteThemeId, ThemeConfig> = {
     selectable: true,
     primaryColor: "#FFFFFF",
     secondaryColor: "#000000",
-    coverVideoUrl: "/videos/cinematic-flow.mp4",
     font: "Manrope",
     qr: {
       accent: "#E5E5E5",
