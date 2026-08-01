@@ -16,6 +16,7 @@ import tuscanGoldenHills from "@/assets/theme-tuscan-golden-hills.png";
 import lakeComoGarden from "@/assets/theme-lake-como-garden.png";
 import grandBallroom from "@/assets/theme-grand-ballroom.png";
 import themeBohoChic from "@/assets/theme-boho-chic.jpg";
+import themeEtherealLight from "@/assets/theme-ethereal-light.jpg";
 
 export type CoastalThemeId =
   | "turquoise-cove"
@@ -632,7 +633,7 @@ export const themes: Record<InviteThemeId, ThemeConfig> = {
     name: "Ethereal Light",
     category: "cinematic",
     tag: { tr: "Zarif aydınlık", en: "Ethereal light" },
-    image: themeGarden,
+    image: themeEtherealLight,
     selectable: true,
     primaryColor: "#FFFFFF",
     secondaryColor: "#333333",
