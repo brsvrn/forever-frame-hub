@@ -12,6 +12,7 @@ import {
   Smartphone,
   Sparkles,
   Waves,
+  Clapperboard,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn, getPackageDisplayName } from "@/lib/utils";
@@ -77,6 +78,7 @@ export function StepTheme({
 
   const categories = [
     { id: "all" as const, tr: "Tümü", en: "All", icon: Sparkles },
+    { id: "cinematic" as const, tr: "Sinematik", en: "Cinematic", icon: Clapperboard },
     { id: "coastal" as const, tr: "Deniz", en: "Coastal", icon: Waves },
     { id: "nature" as const, tr: "Doğa", en: "Nature", icon: Leaf },
     { id: "italy" as const, tr: "İtalya", en: "Italy", icon: Landmark },

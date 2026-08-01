@@ -195,6 +195,7 @@ function DemoThemeSwitcher({
   onReplay: () => void;
 }) {
   const categories: Array<{ id: Exclude<ThemeCategory, "classic">; label: string }> = [
+    { id: "cinematic", label: lang === "tr" ? "Sinematik temalar" : "Cinematic themes" },
     { id: "coastal", label: lang === "tr" ? "Deniz temaları" : "Coastal themes" },
     { id: "nature", label: lang === "tr" ? "Doğa temaları" : "Nature themes" },
     { id: "italy", label: lang === "tr" ? "İtalya temaları" : "Italian themes" },
