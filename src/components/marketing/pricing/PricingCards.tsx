@@ -36,11 +36,9 @@ export function PricingCards() {
               </Link>
               <ul className="space-y-4 mt-auto">
                 <PricingFeature text="Özel Tasarım Dijital Davetiye" />
-                <PricingFeature text="Etkinlik bağlantısı üzerinden misafir erişimi" />
+                <PricingFeature text="1 Yıl Davetiye Aktifliği" />
                 <PricingFeature text="Gelişmiş LCV (RSVP) Takibi" />
                 <PricingFeature text="Davetiye Müzik Ekleme" />
-                <PricingFeature text="Zaman Tüneli ve Hikayemiz" />
-                <PricingFeature text="Dijital Anı Defteri" />
                 <PricingFeature text="Masa Düzeni QR Yok" missing />
               </ul>
             </div>
@@ -66,7 +64,7 @@ export function PricingCards() {
                 <PricingFeature text="Masalar İçin Tasarımlı QR Kartlar" />
                 <PricingFeature text="Canlı Fotoğraf ve Video Galerisi" />
                 <PricingFeature text="Konukların Fotoğraf Yüklemesi" />
-                <PricingFeature text="Anında Etkileşim Duvarı" />
+                <PricingFeature text="2 Ay Galeri Saklama Süresi" />
                 <PricingFeature text="Galeri Yönetim Paneli" />
                 <PricingFeature text="Dijital Davetiye ve LCV Yok" missing />
               </ul>
@@ -99,8 +97,8 @@ export function PricingCards() {
               <ul className="space-y-4 mt-auto">
                 <PricingFeature text="Dijital Davetiye'deki Her Şey" dark />
                 <PricingFeature text="QR Paketi'ndeki Her Şey" dark />
-                <PricingFeature text="Yüksek Öncelikli Destek" dark />
-                <PricingFeature text="Daha Fazla Galeri Kapasitesi" dark />
+                <PricingFeature text="Fotoğraf ve Videoları Toplu İndirme" dark />
+                <PricingFeature text="Teknik Destek Güvencesi" dark />
               </ul>
             </div>
           </FadeIn>
@@ -108,7 +106,7 @@ export function PricingCards() {
 
         <div className="max-w-3xl mx-auto mt-12 text-center text-sm text-muted-foreground">
           <p>
-            * İptal ve iade koşulları için Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi’ni inceleyiniz.
+            * İptal ve iade koşulları için Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi’ni inceleyiniz. Fotoğraf ve videolar paket kapsamında belirtilen süre boyunca korunur.
           </p>
         </div>
       </div>

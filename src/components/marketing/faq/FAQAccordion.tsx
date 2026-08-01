@@ -12,8 +12,8 @@ const FAQS = [
     a: "Hayır, kesinlikle gerekmiyor. Misafirleriniz masalardaki QR kodu okuttuklarında doğrudan telefonlarının tarayıcısından (Safari, Chrome vb.) saniyeler içinde fotoğraf yükleyebilirler.",
   },
   {
-    q: "Davetiye linkim ne kadar süre aktif kalacak?",
-    a: "Premium pakette davetiye linkiniz ve canlı galeriniz düğün tarihinizden itibaren 1 tam yıl boyunca aktif kalır. Bu süreçte tüm fotoğraflarınızı orijinal kalitesinde indirebilirsiniz.",
+    q: "Davetiye linkim ve fotoğraf galerim ne kadar süre aktif kalacak?",
+    a: "Dijital davetiye linkiniz etkinlik tarihinden itibaren 1 yıl boyunca aktif kalır. QR üzerinden fotoğraf yükleme 5 gün açık kalır. Fotoğraf ve videolar etkinlik tarihinden itibaren 2 ay boyunca saklanır ve bu süre içinde etkinlik sahibi tarafından toplu olarak indirilebilir.",
   },
   {
     q: "Satın aldıktan sonra tema değiştirebilir miyim?",
@@ -21,7 +21,7 @@ const FAQS = [
   },
   {
     q: "Yurtdışından gelecek misafirlerim için dil desteği var mı?",
-    a: "Evet. Davetiyeniz misafirinizin telefon dilini otomatik algılar (Türkçe, İngilizce, Almanca vb.) ve menüleri, RSVP formlarını o dilde gösterir.",
+    a: "Evet, sistemimizde Türkçe ve İngilizce arayüz desteği bulunmaktadır. Menüler ve form alanları seçilen dilde görüntülenir.",
   },
 ];
 

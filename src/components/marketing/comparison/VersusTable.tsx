@@ -3,7 +3,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 
 export function VersusTable() {
   const features = [
-    { name: "Davetiye Maliyeti", old: "Yüksek (Baskı + Dağıtım)", new: "Sıfır Ekstra Maliyet" },
+    { name: "Davetiye Maliyeti", old: "Yüksek (Baskı + Dağıtım)", new: "Baskı ve dağıtım maliyeti yok" },
     { name: "LCV Toplama", old: "Tek tek arayarak, WhatsApp", new: "Tek tıkla, anında panelde" },
     {
       name: "Fotoğraf Toplama",

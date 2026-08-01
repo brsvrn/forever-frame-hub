@@ -31,10 +31,9 @@ export function TrustBand() {
             <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
               <HeadphonesIcon className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg">7/24 Düğün Desteği</h3>
+            <h3 className="font-semibold text-lg">Teknik Destek</h3>
             <p className="text-sm text-foreground/80 max-w-[250px] mx-auto leading-relaxed">
-              Düğün günü stresi yok. İhtiyaç duyduğunuz her an teknik ekibimiz WhatsApp veya e-posta
-              üzerinden yanınızda.
+              Düğün süreciniz boyunca WhatsApp ve e-posta üzerinden teknik destek.
             </p>
           </FadeIn>
         </div>

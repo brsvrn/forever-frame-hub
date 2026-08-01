@@ -24,8 +24,8 @@ export function PremiumCTA() {
 
         <SlideUp delay={0.2}>
           <p className="text-lg md:text-xl text-muted-foreground font-light mb-12 max-w-2xl mx-auto leading-relaxed">
-            Hemen ücretsiz üye olun, temanızı seçin ve misafirlerinizi bu benzersiz deneyime davet
-            edin. Kredi kartı gerekmez.
+            Hemen temanızı seçin ve misafirlerinizi bu benzersiz deneyime davet
+            edin.
           </p>
         </SlideUp>
 
@@ -46,7 +46,7 @@ export function PremiumCTA() {
             </Button>
           </MagneticButton>
           <p className="mt-6 text-sm text-muted-foreground font-medium tracking-wide">
-            Anında kurulum • 7/24 Destek • Memnuniyet Garantisi
+            Hızlı kurulum • Teknik destek • Güvenli dijital deneyim
           </p>
         </SlideUp>
       </div>

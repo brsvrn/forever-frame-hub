@@ -106,8 +106,7 @@ export function Footer() {
         </div>
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
           <p>
-            © {new Date().getFullYear()} MemoryWedding. Tüm hakları saklıdır. Hiçbir yerde lorem
-            ipsum kullanılmamıştır.
+            © {new Date().getFullYear()} MemoryWedding. Tüm hakları saklıdır.
           </p>
         </div>
       </div>

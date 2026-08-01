@@ -835,8 +835,8 @@ export function StepPreview({
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {lang === "tr"
-                ? "Premium paketinizde davetiyeye ek olarak bu QR kartı da oluşturulur."
-                : "Your Premium package also creates this QR card alongside the invitation."}
+                ? "2'si Bir Arada paketinizde davetiyeye ek olarak bu QR kartı da oluşturulur."
+                : "Your 2-in-1 package also creates this QR card alongside the invitation."}
             </p>
           </div>
           <div className="mx-auto max-w-[22rem]">

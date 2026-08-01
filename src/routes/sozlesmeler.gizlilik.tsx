@@ -47,7 +47,12 @@ function GizlilikPage() {
             Kişisel verileriniz, KVKK'nın 8. ve 9. maddelerinde belirtilen şartlara uygun olarak, yasal yükümlülüklerin yerine getirilmesi amacıyla yetkili kamu kurum ve kuruluşlarıyla veya hizmetin sunulması için gerekli olan iş ortaklarımızla (örneğin sunucu barındırma altyapıları, ödeme sağlayıcılar) paylaşılabilir. Üçüncü taraflara reklam veya pazarlama amacıyla satılmaz.
           </p>
 
-          <h3 className="text-xl font-semibold text-foreground mt-8 mb-4">4. Haklarınız</h3>
+          <h3 className="text-xl font-semibold text-foreground mt-8 mb-4">4. Verilerin Saklanma Süresi</h3>
+          <p>
+            Etkinlik bilgileri, kullanıcı hesap verileri ve yüklenen medya içerikleri, satın alınan pakette belirtilen hizmet süresi boyunca saklanır. Hizmet süresi sonunda veriler, yasal yükümlülükler saklı kalmak kaydıyla silinir, yok edilir veya anonim hâle getirilir. Hizmet süresi sona ermeden önce fotoğraf ve videoların indirilmesi etkinlik sahibinin sorumluluğundadır.
+          </p>
+
+          <h3 className="text-xl font-semibold text-foreground mt-8 mb-4">5. Haklarınız</h3>
           <p>
             KVKK'nın 11. maddesi gereğince, kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme, işlenme amacını öğrenme, eksik/yanlış işlenmişse düzeltilmesini isteme ve silinmesini/yok edilmesini talep etme haklarına sahipsiniz. Haklarınızı kullanmak için brsvrn@gmail.com adresinden bizimle iletişime geçebilirsiniz.
           </p>

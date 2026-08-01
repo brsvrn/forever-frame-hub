@@ -78,9 +78,9 @@ const OdemeIndexRoute = OdemeIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const OdemeBasariliRoute = OdemeBasariliRouteImport.update({
-  id: '/basarili',
-  path: '/basarili',
-  getParentRoute: () => OdemeRoute,
+  id: '/odeme/basarili',
+  path: '/odeme/basarili',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const OdemeHataRoute = OdemeHataRouteImport.update({
   id: '/hata',
@@ -242,6 +242,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   DavetSlugRoute: typeof DavetSlugRoute
+  OdemeBasariliRoute: typeof OdemeBasariliRoute
   PanelIdRoute: typeof PanelIdRoute
   SozlesmelerGizlilikRoute: typeof SozlesmelerGizlilikRoute
   SozlesmelerIptalIadeRoute: typeof SozlesmelerIptalIadeRoute
@@ -324,10 +325,10 @@ declare module '@tanstack/react-router' {
     }
     '/odeme/basarili': {
       id: '/odeme/basarili'
-      path: '/basarili'
+      path: '/odeme/basarili'
       fullPath: '/odeme/basarili'
       preLoaderRoute: typeof OdemeBasariliRouteImport
-      parentRoute: typeof OdemeRoute
+      parentRoute: typeof rootRouteImport
     }
     '/odeme/hata': {
       id: '/odeme/hata'
@@ -384,6 +385,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   DavetSlugRoute: DavetSlugRoute,
+  OdemeBasariliRoute: OdemeBasariliRoute,
   PanelIdRoute: PanelIdRoute,
   SozlesmelerGizlilikRoute: SozlesmelerGizlilikRoute,
   SozlesmelerIptalIadeRoute: SozlesmelerIptalIadeRoute,
