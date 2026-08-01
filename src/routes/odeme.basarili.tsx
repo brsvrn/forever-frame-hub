@@ -10,7 +10,7 @@ function SuccessRoute() {
   useEffect(() => {
     // If we are in an iframe, break out to the parent window
     if (window !== window.top) {
-      window.top!.location.href = "/dashboard";
+      window.top!.location.href = "/panel";
     }
   }, []);
 
