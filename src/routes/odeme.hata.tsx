@@ -33,9 +33,9 @@ function ErrorRoute() {
         >
           Tekrar Dene
         </Link>
-        <Link 
-          to="/dashboard"
-          className="px-6 py-3 border border-border rounded-full hover:bg-accent transition-colors font-medium"
+        <Link
+          to="/panel"
+          className="inline-flex min-h-12 items-center justify-center rounded-full border-2 border-border px-8 text-sm font-medium transition-colors hover:bg-muted"
         >
           Kontrol Paneline Git
         </Link>

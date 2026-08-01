@@ -108,7 +108,7 @@ function BuilderPage() {
         setDraft(rowToDraft(row));
         setEditingId(row.id);
         setIsPublished(row.is_published);
-        setIsPaid(row.is_paid || false);
+        setIsPaid((row as any).is_paid || false);
       }
       if (active) setLoadingExisting(false);
     })().catch(() => {

@@ -21,9 +21,9 @@ function SuccessRoute() {
       </div>
       <h1 className="text-3xl font-bold mb-2">Ödeme Başarılı!</h1>
       <p className="text-muted-foreground mb-8">Davetiyeniz başarıyla yayınlandı. Kontrol paneline yönlendiriliyorsunuz...</p>
-      <Link 
-        to="/dashboard"
-        className="px-6 py-3 bg-foreground text-background rounded-full hover:bg-foreground/90 transition-colors font-medium"
+      <Link
+        to="/panel"
+        className="inline-flex min-h-12 items-center justify-center rounded-full bg-emerald-500 px-8 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
       >
         Kontrol Paneline Git
       </Link>

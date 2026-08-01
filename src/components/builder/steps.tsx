@@ -1134,7 +1134,7 @@ export function StepPublish({
                   ) : (
                     <>
                       <Copy className="size-4" aria-hidden="true" />
-                      {c.copyBtn}
+                      {c.copy}
                     </>
                   )}
                 </button>

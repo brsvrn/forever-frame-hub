@@ -254,27 +254,6 @@ function InvitationCard({
               >
                 Ödeme Yap
               </a>
-              {isAdmin && (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={async () => {
-                    if (confirm("Admin Yetkisi: Bu etkinliği ÜCRETSİZ olarak işaretleyip hemen yayınlamak istiyor musunuz?")) {
-                      setBusy(true);
-                      try {
-                        await setFreeEvent({ data: { invitationId: row.id, email }});
-                        await onChanged();
-                      } catch (err) {
-                        alert("Hata oluştu.");
-                      }
-                      setBusy(false);
-                    }
-                  }}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-full bg-emerald-500 px-4 text-sm text-white font-medium transition-transform hover:scale-105 shadow-sm"
-                >
-                  Ücretsiz Yayınla
-                </button>
-              )}
             </div>
           ) : (
             <button

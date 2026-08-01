@@ -143,20 +143,6 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
           link.click();
           link.remove();
           completed++;
-        } else if (result.blob) {
-          // Fallback logic
-          const path = upload.file_path || storage.getFilePath("memorywedding-uploads", upload.file_url);
-          const fallbackExtension = upload.file_type.startsWith("video/") ? "mp4" : "jpg";
-          const fileName = path.split("/").pop() || `memory-${upload.id}.${fallbackExtension}`;
-          const objectUrl = URL.createObjectURL(result.blob);
-          const link = document.createElement("a");
-          link.href = objectUrl;
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          URL.revokeObjectURL(objectUrl);
-          completed++;
         } else if (result.error) {
           console.error("Download failed for item:", upload.id, result.error);
           lastError = result.error.message;
