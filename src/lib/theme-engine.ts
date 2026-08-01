@@ -15,6 +15,7 @@ import amalfiLemonTerrace from "@/assets/theme-amalfi-lemon-terrace.png";
 import tuscanGoldenHills from "@/assets/theme-tuscan-golden-hills.png";
 import lakeComoGarden from "@/assets/theme-lake-como-garden.png";
 import grandBallroom from "@/assets/theme-grand-ballroom.png";
+import themeBohoChic from "@/assets/theme-boho-chic.jpg";
 
 export type CoastalThemeId =
   | "turquoise-cove"
@@ -595,7 +596,7 @@ export const themes: Record<InviteThemeId, ThemeConfig> = {
     name: "Boho Motion",
     category: "cinematic",
     tag: { tr: "Sıcak bohem", en: "Warm boho" },
-    image: themeBlush,
+    image: themeBohoChic,
     selectable: true,
     primaryColor: "#FAF3E0",
     secondaryColor: "#5C4A3D",
