@@ -57,12 +57,23 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
               className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden p-6"
               style={{ backgroundColor: themeConfig.qr.paper }}
             >
-              <img
-                src={themeConfig.image}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover opacity-20"
-                style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
-              />
+              {themeConfig.coverVideoUrl ? (
+                <video
+                  src={themeConfig.coverVideoUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 h-full w-full object-cover opacity-20"
+                />
+              ) : (
+                <img
+                  src={themeConfig.image}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover opacity-20"
+                  style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
+                />
+              )}
               <div className="relative z-10 flex flex-col items-center text-center mb-12">
                 <span className={`text-xs font-semibold tracking-[0.3em] uppercase mb-3 opacity-70`} style={{ color: themeConfig.qr.ink }}>
                   Özel Günümüze
@@ -100,12 +111,23 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
             >
               <div className="flex-1 overflow-y-auto pb-20 no-scrollbar relative">
                 <div className="h-[280px] bg-stone-200 relative">
-                  <img
-                    src={themeConfig.image}
-                    alt={themeConfig.name}
-                    className="h-full w-full object-cover"
-                    style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
-                  />
+                  {themeConfig.coverVideoUrl ? (
+                    <video
+                      src={themeConfig.coverVideoUrl}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={themeConfig.image}
+                      alt={themeConfig.name}
+                      className="h-full w-full object-cover"
+                      style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
+                    />
+                  )}
                   <div
                     className={`absolute inset-0 ${themeConfig.styles.overlay}`}
                     aria-hidden="true"
