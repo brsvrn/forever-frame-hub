@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { generatePayTRToken, PayTRConfig, PayTRTokenPayload } from "./paytr";
 import { getServiceSupabase } from "./supabase-admin";
 
 export const initiatePayment = createServerFn({ method: "POST" })
-  .validator((data: { invitationId: string; packageType: string; priceOverride?: number; userId: string; email: string; userName: string }) => data)
+  .validator((data: { invitationId: string; packageType: string; priceOverride?: number; userId: string; email: string; userName: string; timestamp?: number }) => data)
   .handler(async ({ data }) => {
     try {
       if (!process.env.PAYTR_MERCHANT_ID || !process.env.PAYTR_MERCHANT_KEY || !process.env.PAYTR_MERCHANT_SALT) {
@@ -12,8 +13,15 @@ export const initiatePayment = createServerFn({ method: "POST" })
 
       const admin = getServiceSupabase();
       
-      const merchant_oid = `FFH${Date.now()}${Math.random().toString(36).substring(2, 7)}`;
+      const merchant_oid = `FFH${Date.now()}${crypto.randomUUID().replace(/-/g, "").substring(0, 8)}`;
       
+      const request = getRequest();
+      const forwardedFor = request.headers.get("x-forwarded-for");
+      let userIp = forwardedFor?.split(",")[0]?.trim() || request.headers.get("x-real-ip");
+      if (!userIp) {
+        console.error("PayTR Error: Could not determine user IP.");
+        throw new Error("Güvenlik nedeniyle IP adresiniz alınamadı.");
+      }
       // Determine price
       let amount = 0;
       let basketName = "";
@@ -43,9 +51,9 @@ export const initiatePayment = createServerFn({ method: "POST" })
         email: data.email,
         payment_amount: amount,
         user_name: data.userName || "Değerli Müşterimiz",
-        user_address: "Dijital Hizmet, Bursa", // User requested Bursa
+        user_address: "Dijital Hizmet, Bursa",
         user_phone: "05555555555",
-        user_ip: "127.0.0.1", // In production, we should get real IP from request headers (x-forwarded-for)
+        user_ip: userIp,
         user_basket: [
           [basketName, (amount / 100).toString(), 1]
         ],
@@ -119,6 +127,13 @@ export const initiatePayment = createServerFn({ method: "POST" })
         
         return { success: true, token: result.token, merchant_oid };
       } else {
+        console.error("PayTR token error", {
+          reason: result.reason,
+          merchantOid: merchant_oid,
+          userIp: userIp,
+          status: result.status,
+          timestamp: new Date().toISOString()
+        });
         throw new Error(`PayTR Hatası: ${result.reason}`);
       }
     } catch (error) {

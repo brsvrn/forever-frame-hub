@@ -41,7 +41,8 @@ function PaymentRoute() {
             priceOverride,
             userId: session.user.id,
             email: session.user.email || "musteri@ornek.com",
-            userName: session.user.user_metadata?.full_name || "Değerli Müşterimiz"
+            userName: session.user.user_metadata?.full_name || "Değerli Müşterimiz",
+            timestamp: Date.now()
           }
         });
 
@@ -61,9 +62,29 @@ function PaymentRoute() {
     startPayment();
   }, []);
 
+  useEffect(() => {
+    if (token && !error && !loading) {
+      const scriptId = "paytr-iframe-resizer";
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        script.id = scriptId;
+        script.src = "https://www.paytr.com/js/iframeResizer.min.js?v2";
+        script.async = true;
+        script.onload = () => {
+          if (window.iFrameResize) {
+            window.iFrameResize({}, "#paytriframe");
+          }
+        };
+        document.body.appendChild(script);
+      } else if (window.iFrameResize) {
+        window.iFrameResize({}, "#paytriframe");
+      }
+    }
+  }, [token, error, loading]);
+
   return (
-    <div className="min-h-screen bg-background pt-24 pb-12 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-3xl glass p-8 rounded-3xl min-h-[600px] flex flex-col justify-center relative overflow-hidden">
+    <div className="min-h-dvh overflow-y-auto overflow-x-hidden bg-background pt-24 pb-12 flex flex-col items-center justify-start p-4" style={{ WebkitOverflowScrolling: "touch" }}>
+      <div className="w-full max-w-3xl glass p-3 sm:p-8 rounded-3xl min-h-[900px] flex flex-col justify-start relative">
         {loading && (
           <div className="flex flex-col items-center justify-center h-full space-y-4">
             <div className="size-10 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
@@ -95,7 +116,7 @@ function PaymentRoute() {
             id="paytriframe"
             frameBorder="0"
             scrolling="no"
-            style={{ width: "100%", height: "600px" }}
+            className="block w-full min-h-[900px] border-0"
             title="Güvenli Ödeme"
           ></iframe>
         )}
