@@ -71,13 +71,13 @@ function PaymentRoute() {
         script.src = "https://www.paytr.com/js/iframeResizer.min.js?v2";
         script.async = true;
         script.onload = () => {
-          if (window.iFrameResize) {
-            window.iFrameResize({}, "#paytriframe");
+          if ((window as any).iFrameResize) {
+            (window as any).iFrameResize({}, "#paytriframe");
           }
         };
         document.body.appendChild(script);
-      } else if (window.iFrameResize) {
-        window.iFrameResize({}, "#paytriframe");
+      } else if ((window as any).iFrameResize) {
+        (window as any).iFrameResize({}, "#paytriframe");
       }
     }
   }, [token, error, loading]);
