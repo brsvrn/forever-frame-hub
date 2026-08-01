@@ -23,25 +23,37 @@ export const initiatePayment = createServerFn({ method: "POST" })
         throw new Error("Güvenlik nedeniyle IP adresiniz alınamadı.");
       }
       // Determine price
-      let amount = 0;
-      let basketName = "";
+      let amount = 50000;
+      let basketName = "Memory Wedding Dijital Davetiye";
       
-      switch (data.packageType) {
-        case "digital_only":
-          amount = 50000;
-          basketName = "Memory Wedding Dijital Davetiye";
-          break;
-        case "qr_only":
-          amount = 75000;
-          basketName = "Memory Wedding QR Masa Kartı Paketi";
-          break;
-        case "full":
-          amount = 100000;
-          basketName = "Memory Wedding 2'si 1 Arada (Tam Paket)";
-          break;
-        default:
-          amount = 50000;
-          basketName = "Memory Wedding Dijital Davetiye";
+      try {
+        const supabaseAdmin = getServiceSupabase();
+        const { data: pkg } = await supabaseAdmin.from("packages").select("name, price").eq("id", data.packageType).maybeSingle();
+        
+        if (pkg && pkg.price) {
+          amount = pkg.price * 100;
+          basketName = pkg.name;
+        } else {
+          switch (data.packageType) {
+            case "digital_only":
+              amount = 50000;
+              basketName = "Memory Wedding Dijital Davetiye";
+              break;
+            case "qr_only":
+              amount = 75000;
+              basketName = "Memory Wedding QR Masa Kartı Paketi";
+              break;
+            case "full":
+              amount = 100000;
+              basketName = "Memory Wedding 2'si 1 Arada (Tam Paket)";
+              break;
+            default:
+              amount = 50000;
+              basketName = "Memory Wedding Dijital Davetiye";
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch package price", err);
       }
       
       if (data.priceOverride) amount = data.priceOverride; // For 1 TL testing
