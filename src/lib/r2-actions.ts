@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { DeleteObjectsCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectsCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { z } from "zod";
 
@@ -15,19 +15,6 @@ const updateInput = z.object({
   isFavorite: z.boolean().optional(),
   status: z.enum(["pending", "active", "approved", "hidden", "rejected"]).optional(),
 });
-
-function getS3Client() {
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const accessKeyId = process.env.CLOUDFLARE_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.CLOUDFLARE_SECRET_ACCESS_KEY;
-  if (!accountId || !accessKeyId || !secretAccessKey)
-    throw new Error("Depolama yapılandırması eksik.");
-  return new S3Client({
-    region: "auto",
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-    credentials: { accessKeyId, secretAccessKey },
-  });
-}
 
 function requestOrThrow() {
   const request = getRequest();
@@ -49,14 +36,15 @@ export const getR2DownloadUrl = createServerFn({ method: "POST" })
     if (!upload) throw new Error("Dosya bulunamadı.");
     const { requireEventPermission } = await import("./event-access.server");
     await requireEventPermission(request, upload.invitation_id, "download_media");
-    const bucket = process.env.CLOUDFLARE_R2_UPLOAD_BUCKET || "memorywedding-uploads";
+    const { getR2Bucket, getR2Client } = await import("./r2.server");
+    const bucket = getR2Bucket();
     const extension = upload.file_type.split("/").pop()?.replace("jpeg", "jpg") || "bin";
     const command = new GetObjectCommand({
       Bucket: bucket,
       Key: upload.file_path,
       ResponseContentDisposition: `attachment; filename="memorywedding-${upload.id}.${extension}"`,
     });
-    return { url: await getSignedUrl(getS3Client(), command, { expiresIn: 900 }) };
+    return { url: await getSignedUrl(getR2Client(), command, { expiresIn: 900 }) };
   });
 
 export const getGuestUploadViewUrl = createServerFn({ method: "GET" })
@@ -87,14 +75,15 @@ export const getGuestUploadViewUrl = createServerFn({ method: "GET" })
       const { requireEventPermission } = await import("./event-access.server");
       await requireEventPermission(request, upload.invitation_id, "view_event");
     }
-    const bucket = process.env.CLOUDFLARE_R2_UPLOAD_BUCKET || "memorywedding-uploads";
+    const { getR2Bucket, getR2Client } = await import("./r2.server");
+    const bucket = getR2Bucket();
     const command = new GetObjectCommand({
       Bucket: bucket,
       Key: upload.file_path,
       ResponseContentType: upload.file_type,
       ResponseContentDisposition: "inline",
     });
-    return { url: await getSignedUrl(getS3Client(), command, { expiresIn: 900 }) };
+    return { url: await getSignedUrl(getR2Client(), command, { expiresIn: 900 }) };
   });
 
 export const deleteGuestUploads = createServerFn({ method: "POST" })
@@ -115,8 +104,9 @@ export const deleteGuestUploads = createServerFn({ method: "POST" })
     if (!uploads || uploads.length !== new Set(data.uploadIds).size) {
       throw new Error("Silinecek medya listesi güncel değil.");
     }
-    const bucket = process.env.CLOUDFLARE_R2_UPLOAD_BUCKET || "memorywedding-uploads";
-    const storageResult = await getS3Client().send(
+    const { getR2Bucket, getR2Client } = await import("./r2.server");
+    const bucket = getR2Bucket();
+    const storageResult = await getR2Client().send(
       new DeleteObjectsCommand({
         Bucket: bucket,
         Delete: { Objects: uploads.map((upload) => ({ Key: upload.file_path })), Quiet: true },

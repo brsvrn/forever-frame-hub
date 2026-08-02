@@ -17,17 +17,21 @@ export function PremiumAudioPlayer({
   musicUrl,
   customTitle, // Opsiyonel manuel başlık
   hideUI = false, // UI'ı gizlemek için prop
+  volume = 0.65,
 }: {
   theme: ThemeConfig;
   autoPlay?: boolean;
   musicUrl?: string;
   customTitle?: string;
   hideUI?: boolean;
+  volume?: number;
 }) {
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(false);
   const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const resumeAfterVoiceRef = useRef(false);
 
   useEffect(() => {
     if (autoPlay) {
@@ -36,6 +40,7 @@ export function PremiumAudioPlayer({
   }, [autoPlay]);
 
   const videoId = extractYouTubeId(musicUrl);
+  const directAudioUrl = musicUrl && !videoId ? musicUrl : null;
 
   const sendCommand = (command: string, args: any[] = []) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -69,8 +74,10 @@ export function PremiumAudioPlayer({
   useEffect(() => {
     if (isPlaying) {
       sendCommand("playVideo");
+      void audioRef.current?.play().catch(() => setIsPlaying(false));
     } else {
       sendCommand("pauseVideo");
+      audioRef.current?.pause();
     }
   }, [isPlaying]);
 
@@ -80,20 +87,47 @@ export function PremiumAudioPlayer({
     } else {
       sendCommand("unMute");
     }
+    if (audioRef.current) audioRef.current.muted = isMuted;
   }, [isMuted]);
 
-  if (!videoId) return null;
+  useEffect(() => {
+    const safeVolume = Math.max(0, Math.min(1, volume));
+    sendCommand("setVolume", [Math.round(safeVolume * 100)]);
+    if (audioRef.current) audioRef.current.volume = safeVolume;
+  }, [volume]);
+
+  useEffect(() => {
+    const voiceStarted = () => {
+      resumeAfterVoiceRef.current = isPlaying;
+      setIsPlaying(false);
+    };
+    const voiceEnded = () => {
+      if (resumeAfterVoiceRef.current) setIsPlaying(true);
+      resumeAfterVoiceRef.current = false;
+    };
+    window.addEventListener("memorywedding:voice-start", voiceStarted);
+    window.addEventListener("memorywedding:voice-end", voiceEnded);
+    return () => {
+      window.removeEventListener("memorywedding:voice-start", voiceStarted);
+      window.removeEventListener("memorywedding:voice-end", voiceEnded);
+    };
+  }, [isPlaying]);
+
+  if (!videoId && !directAudioUrl) return null;
 
   return (
     <div className="fixed bottom-6 left-6 z-40">
       {/* Hidden YouTube Iframe */}
-      <iframe
-        ref={iframeRef}
-        src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=${autoPlay ? 1 : 0}&loop=1&playlist=${videoId}&controls=0`}
-        className="hidden"
-        allow="autoplay; encrypted-media"
-        title="Audio Player"
-      />
+      {videoId ? (
+        <iframe
+          ref={iframeRef}
+          src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=${autoPlay ? 1 : 0}&loop=1&playlist=${videoId}&controls=0`}
+          className="hidden"
+          allow="autoplay; encrypted-media"
+          title="Audio Player"
+        />
+      ) : null}
+      {directAudioUrl ? <audio ref={audioRef} src={directAudioUrl} loop preload="none" /> : null}
 
       {!hideUI && (
         <motion.div

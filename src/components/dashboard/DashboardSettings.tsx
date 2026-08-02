@@ -36,12 +36,15 @@ type Question = {
 const featureLabels: Array<[keyof FeatureSettings, string]> = [
   ["opening_enabled", "Açılış animasyonu"],
   ["music_enabled", "Arka plan müziği"],
+  ["audio_greeting_enabled", "Sesli karşılama"],
   ["story_enabled", "Çiftin hikâyesi"],
   ["schedule_enabled", "Etkinlik programı"],
   ["rsvp_enabled", "LCV formu"],
   ["memory_box_enabled", "Anı Duvarı"],
   ["qr_upload_enabled", "QR ile anı yükleme"],
   ["calendar_enabled", "Takvime ekleme"],
+  ["gift_enabled", "IBAN ve dijital hediye"],
+  ["share_enabled", "Sosyal paylaşım kartı"],
 ];
 
 const rsvpLabels: Array<[keyof RsvpSettings, string]> = [

@@ -31,6 +31,7 @@ import { Route as SozlesmelerTeslimatRouteImport } from './routes/sozlesmeler.te
 import { Route as ApiAdminMaintenanceBypassRouteImport } from './routes/api.admin.maintenance-bypass'
 import { Route as ApiAdminSystemSettingsRouteImport } from './routes/api.admin.system-settings'
 import { Route as ApiCalendarScheduleIdRouteImport } from './routes/api.calendar.$scheduleId'
+import { Route as DSlugTokenRouteImport } from './routes/d.$slug.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -144,6 +145,11 @@ const ApiCalendarScheduleIdRoute = ApiCalendarScheduleIdRouteImport.update({
   path: '/api/calendar/$scheduleId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DSlugTokenRoute = DSlugTokenRouteImport.update({
+  id: '/d/$slug/$token',
+  path: '/d/$slug/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/d/$slug/$token': typeof DSlugTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/d/$slug/$token': typeof DSlugTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/d/$slug/$token': typeof DSlugTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/d/$slug/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/d/$slug/$token'
   id:
     | '__root__'
     | '/'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/d/$slug/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -316,6 +328,7 @@ export interface RootRouteChildren {
   ApiAdminMaintenanceBypassRoute: typeof ApiAdminMaintenanceBypassRoute
   ApiAdminSystemSettingsRoute: typeof ApiAdminSystemSettingsRoute
   ApiCalendarScheduleIdRoute: typeof ApiCalendarScheduleIdRoute
+  DSlugTokenRoute: typeof DSlugTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -474,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCalendarScheduleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/d/$slug/$token': {
+      id: '/d/$slug/$token'
+      path: '/d/$slug/$token'
+      fullPath: '/d/$slug/$token'
+      preLoaderRoute: typeof DSlugTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -500,6 +520,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminMaintenanceBypassRoute: ApiAdminMaintenanceBypassRoute,
   ApiAdminSystemSettingsRoute: ApiAdminSystemSettingsRoute,
   ApiCalendarScheduleIdRoute: ApiCalendarScheduleIdRoute,
+  DSlugTokenRoute: DSlugTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -20,6 +20,9 @@ import { EventProgramTimeline } from "@/components/invitation/EventProgramTimeli
 import { PremiumRSVP } from "@/components/invitation/PremiumRSVP";
 import { PremiumQRExperience } from "@/components/invitation/PremiumQRExperience";
 import { MemoryWall } from "@/components/invitation/MemoryWall";
+import { VoiceGreeting } from "@/components/invitation/VoiceGreeting";
+import { GiftSection } from "@/components/invitation/GiftSection";
+import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
 import {
   resolveTheme,
   selectableThemes,
@@ -58,16 +61,18 @@ export const Route = createFileRoute("/davet/$slug")({
         } as unknown as InvitationRow,
         schedules: [],
         eventFeatures: null,
+        advanced: null,
       };
     }
 
     const invitation = await getPublicInvitation(params.slug);
     if (!invitation || !(invitation as any).is_paid) throw notFound();
-    const [schedules, eventFeatures] = await Promise.all([
+    const [schedules, eventFeatures, advanced] = await Promise.all([
       getPublicSchedules(invitation.id),
       getPublicFeatureSettings(invitation.id),
+      getPublicAdvancedEvent({ data: { invitationId: invitation.id } }),
     ]);
-    return { invitation, schedules, eventFeatures };
+    return { invitation, schedules, eventFeatures, advanced };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -80,22 +85,35 @@ export const Route = createFileRoute("/davet/$slug")({
     }
 
     const inv = loaderData.invitation;
+    const share =
+      loaderData.eventFeatures?.share_enabled === false ? null : loaderData.advanced?.share;
     const names = [inv.partner_one, inv.partner_two].filter(Boolean).join(" & ") || "Davetiye";
-    const pageTitle = `${names} — ${inv.headline || "Davetiye"} | MemoryWedding`;
+    const pageTitle =
+      share?.share_title?.trim() || `${names} — ${inv.headline || "Davetiye"} | MemoryWedding`;
     const pageDesc =
-      inv.message?.slice(0, 155) || `${names} sizi özel günlerinde aralarında görmek istiyor.`;
+      share?.share_description?.trim() ||
+      inv.message?.slice(0, 155) ||
+      `${names} sizi özel günlerinde aralarında görmek istiyor.`;
+    const siteOrigin = import.meta.env.VITE_SITE_URL || "https://www.memory-wedding.com";
+    const pageUrl = `${siteOrigin}/davet/${inv.slug}`;
+    const themeImage = share?.use_theme_image === false ? null : resolveTheme(inv.theme).image;
+    const rawShareImage = share?.cover_image_url || inv.cover_photo || themeImage;
+    const shareImage = rawShareImage ? new URL(rawShareImage, siteOrigin).toString() : null;
     const meta = [
       { title: pageTitle },
       { name: "description", content: pageDesc },
       { property: "og:title", content: pageTitle },
       { property: "og:description", content: pageDesc },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: pageUrl },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: pageTitle },
+      { name: "twitter:description", content: pageDesc },
     ];
 
-    if (inv.cover_photo) {
-      meta.push({ property: "og:image", content: inv.cover_photo });
-      meta.push({ name: "twitter:image", content: inv.cover_photo });
+    if (shareImage) {
+      meta.push({ property: "og:image", content: shareImage });
+      meta.push({ name: "twitter:image", content: shareImage });
     }
 
     return { meta };
@@ -117,7 +135,7 @@ export const Route = createFileRoute("/davet/$slug")({
 });
 
 function PremiumInvitePage() {
-  const { invitation, schedules, eventFeatures } = Route.useLoaderData();
+  const { invitation, schedules, eventFeatures, advanced } = Route.useLoaderData();
   const { lang } = useI18n();
   const draft = rowToDraft(invitation as InvitationRow);
   const isDemo = invitation.slug === "demo";
@@ -168,6 +186,15 @@ function PremiumInvitePage() {
             {features.digital_invitation !== false ? (
               <>
                 <HeroExperience draft={draft} theme={theme} lang={lang} />
+                {eventFeatures?.audio_greeting_enabled !== false && advanced?.audio?.url ? (
+                  <VoiceGreeting
+                    theme={theme}
+                    url={advanced.audio.url}
+                    title={advanced.audio.title}
+                    description={advanced.audio.description}
+                    alternativeText={advanced.audio.alternative_text}
+                  />
+                ) : null}
                 {eventFeatures?.story_enabled !== false ? (
                   <StoryTimeline draft={draft} theme={theme} />
                 ) : null}
@@ -197,6 +224,9 @@ function PremiumInvitePage() {
                 ) : null}
               </>
             ) : null}
+            {eventFeatures?.gift_enabled !== false && advanced?.gift ? (
+              <GiftSection settings={advanced.gift} />
+            ) : null}
           </main>
         </div>
       )}
@@ -206,7 +236,13 @@ function PremiumInvitePage() {
           theme={theme}
           autoPlay={hasOpened || !openingEnabled || features.digital_invitation === false}
           hideUI={!hasOpened && openingEnabled}
-          musicUrl={draft.musicUrl}
+          musicUrl={
+            advanced?.music
+              ? advanced.music.url || undefined
+              : advanced?.legacyMusicUrl || draft.musicUrl
+          }
+          customTitle={advanced?.music?.title || undefined}
+          volume={advanced?.music?.volume == null ? 0.65 : Number(advanced.music.volume)}
         />
       ) : null}
     </div>

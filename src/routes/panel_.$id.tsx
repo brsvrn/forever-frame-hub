@@ -17,6 +17,7 @@ import {
   Pencil,
   CalendarDays,
   UserRoundCog,
+  AudioLines,
 } from "lucide-react";
 
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
@@ -27,6 +28,7 @@ import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
 import { DashboardTeam } from "@/components/dashboard/DashboardTeam";
+import { DashboardExperience } from "@/components/dashboard/DashboardExperience";
 import { PrintableQR } from "@/components/dashboard/PrintableQR";
 import { resolveTheme } from "@/lib/theme-engine";
 
@@ -67,6 +69,7 @@ type TabType =
   | "analytics"
   | "print"
   | "team"
+  | "experience"
   | "settings";
 
 function PremiumDashboard({ invitationId }: { invitationId: string }) {
@@ -87,6 +90,7 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
           "analytics",
           "print",
           "team",
+          "experience",
           "settings",
         ].includes(tab)
       ) {
@@ -146,6 +150,12 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
       : []),
     ...(roleHasPermission(role, "manage_team")
       ? [{ id: "team" as const, label: "Ekip ve Yetkililer", icon: UserRoundCog }]
+      : []),
+    ...(roleHasPermission(role, "edit_audio") ||
+    roleHasPermission(role, "edit_share") ||
+    roleHasPermission(role, "manage_payment") ||
+    roleHasPermission(role, "edit_rsvp")
+      ? [{ id: "experience" as const, label: "Müzik ve Paylaşım", icon: AudioLines }]
       : []),
     ...(roleHasPermission(role, "edit_content")
       ? [{ id: "settings" as const, label: "Ayarlar", icon: Settings }]
@@ -229,6 +239,7 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
           </div>
         )}
         {activeTab === "team" && <DashboardTeam invitation={invitation} />}
+        {activeTab === "experience" && <DashboardExperience invitation={invitation} role={role} />}
         {activeTab === "settings" && <DashboardSettings invitation={invitation} />}
       </main>
     </div>
