@@ -12,7 +12,7 @@ export function TrustBand() {
             </div>
             <h3 className="font-semibold text-lg">Ödeme Güvencesi</h3>
             <p className="text-sm text-foreground/80 max-w-[250px] mx-auto leading-relaxed">
-              PayTR güvenli ödeme altyapısı entegrasyon aşamasındadır.
+              Ödemeler PayTR altyapısı üzerinden güvenli şekilde gerçekleştirilir. Kart bilgileriniz MemoryWedding tarafından görüntülenmez veya saklanmaz.
             </p>
           </FadeIn>
 
