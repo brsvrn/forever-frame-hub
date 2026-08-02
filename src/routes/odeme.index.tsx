@@ -1,7 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { initiatePayment } from "@/lib/payment-actions";
 import { supabase } from "@/integrations/supabase/client";
+
+declare global {
+  interface Window {
+    iFrameResize?: (options: Record<string, never>, selector: string) => void;
+  }
+}
 
 export const Route = createFileRoute("/odeme/")({
   component: PaymentRoute,
@@ -11,6 +17,7 @@ function PaymentRoute() {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const idempotencyKey = useRef(crypto.randomUUID());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,7 +26,6 @@ function PaymentRoute() {
         const params = new URLSearchParams(window.location.search);
         const invitationId = params.get("invitationId");
         const packageType = params.get("packageType");
-        const priceOverride = params.get("test") === "1" ? 100 : undefined; // 1 TL for testing if test=1
 
         if (!invitationId || !packageType) {
           setError("Gerekli parametreler eksik. Lütfen paket seçimine dönün.");
@@ -37,12 +43,7 @@ function PaymentRoute() {
         const res = await initiatePayment({
           data: {
             invitationId,
-            packageType,
-            priceOverride,
-            userId: session.user.id,
-            email: session.user.email || "musteri@ornek.com",
-            userName: session.user.user_metadata?.full_name || "Değerli Müşterimiz",
-            timestamp: Date.now()
+            idempotencyKey: idempotencyKey.current,
           }
         });
 
@@ -71,14 +72,10 @@ function PaymentRoute() {
         script.src = "https://www.paytr.com/js/iframeResizer.min.js?v2";
         script.async = true;
         script.onload = () => {
-          if ((window as any).iFrameResize) {
-            (window as any).iFrameResize({}, "#paytriframe");
-          }
+          window.iFrameResize?.({}, "#paytriframe");
         };
         document.body.appendChild(script);
-      } else if ((window as any).iFrameResize) {
-        (window as any).iFrameResize({}, "#paytriframe");
-      }
+      } else window.iFrameResize?.({}, "#paytriframe");
     }
   }, [token, error, loading]);
 

@@ -1,0 +1,76 @@
+import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+import type { EventPermission } from "./event-permissions";
+
+export class EventAccessError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+  }
+}
+
+function getSupabaseEnvironment() {
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) throw new EventAccessError("Yapılandırma eksik.", 500);
+  return { url, key };
+}
+
+function readBearerToken(request: Request) {
+  const authorization = request.headers.get("authorization") ?? "";
+  if (!authorization.startsWith("Bearer ")) {
+    throw new EventAccessError("Oturum gerekli.", 401);
+  }
+  const token = authorization.slice("Bearer ".length).trim();
+  if (!token) throw new EventAccessError("Oturum gerekli.", 401);
+  return token;
+}
+
+function assertMutationOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  const requestOrigin = new URL(request.url).origin;
+  if (
+    !origin ||
+    origin !== requestOrigin ||
+    request.headers.get("sec-fetch-site") === "cross-site"
+  ) {
+    throw new EventAccessError("İstek doğrulanamadı.", 403);
+  }
+}
+
+export async function requireEventPermission(
+  request: Request,
+  invitationId: string,
+  permission: EventPermission,
+  options: { mutation?: boolean } = {},
+): Promise<{ supabase: SupabaseClient<Database>; user: User; token: string }> {
+  if (options.mutation) assertMutationOrigin(request);
+  const token = readBearerToken(request);
+  const { url, key } = getSupabaseEnvironment();
+  const supabase = createClient<Database>(url, key, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+  });
+
+  const { data: userData, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !userData.user) throw new EventAccessError("Oturum geçersiz.", 401);
+
+  const { data: allowed, error: permissionError } = await supabase.rpc("has_event_permission", {
+    _invitation_id: invitationId,
+    _permission: permission,
+    _user_id: userData.user.id,
+  });
+  if (permissionError) throw new EventAccessError("Yetki doğrulanamadı.", 500);
+  if (allowed !== true) throw new EventAccessError("Bu işlem için yetkiniz yok.", 403);
+  return { supabase, user: userData.user, token };
+}
+
+export function eventAccessErrorResponse(error: unknown) {
+  if (error instanceof EventAccessError) {
+    return Response.json({ error: error.message }, { status: error.status });
+  }
+  console.error("[Event access] Unexpected failure", error);
+  return Response.json({ error: "İşlem tamamlanamadı." }, { status: 500 });
+}

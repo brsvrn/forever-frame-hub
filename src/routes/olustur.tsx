@@ -28,9 +28,11 @@ import {
   type PublicPackage,
 } from "@/lib/invitations.api";
 import { setAuthReturnTo } from "@/lib/auth-helpers";
+import { progressForStep, type BuilderStepId } from "@/lib/builder-schema";
+import { saveBuilderProgress } from "@/lib/builder-progress.functions";
 
-type BuilderStepId = "theme" | "texts" | "details" | "premium" | "preview" | "publish";
-const builderStepIds: BuilderStepId[] = [
+type LegacyBuilderStepId = "theme" | "texts" | "details" | "premium" | "preview" | "publish";
+const builderStepIds: LegacyBuilderStepId[] = [
   "theme",
   "texts",
   "details",
@@ -38,6 +40,15 @@ const builderStepIds: BuilderStepId[] = [
   "preview",
   "publish",
 ];
+
+const foundationStepByLegacyStep: Record<LegacyBuilderStepId, BuilderStepId> = {
+  theme: "theme",
+  texts: "basic-info",
+  details: "events-locations",
+  premium: "music-audio",
+  preview: "full-preview",
+  publish: "publish",
+};
 
 const title = "Davetiye Oluştur — Tema, Metin, Tarih ve Yayınlama | MemoryWedding";
 const description =
@@ -71,7 +82,7 @@ function BuilderPage() {
   const { lang, setLang } = useI18n();
   const copy = builderContent[lang];
   const { draft, setDraft, update, reset, fillSample, hydrated } = useInvitationDraft();
-  const [stepId, setStepId] = useState<BuilderStepId>("theme");
+  const [stepId, setStepId] = useState<LegacyBuilderStepId>("theme");
   const [packages, setPackages] = useState<PublicPackage[]>([]);
   const [packagesLoading, setPackagesLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -79,6 +90,8 @@ function BuilderPage() {
   const [isPaid, setIsPaid] = useState(false);
   const [editingId, setEditingId] = useState<string | undefined>();
   const [loadingExisting, setLoadingExisting] = useState(true);
+  const progressVersion = useRef<number | undefined>(undefined);
+  const activeStepIds = useRef<LegacyBuilderStepId[]>(builderStepIds);
   const resumedPublish = useRef(false);
 
   useEffect(() => {
@@ -225,6 +238,28 @@ function BuilderPage() {
           setSaveStatus("saving");
           const saved = await saveInvitation(draft, session.user.id, isPublished, editingId);
           setEditingId(saved.id);
+          const currentIndex = Math.max(0, activeStepIds.current.indexOf(stepId));
+          const foundationStep = foundationStepByLegacyStep[stepId];
+          try {
+            const progress = await saveBuilderProgress({
+              data: {
+                invitationId: saved.id,
+                currentStep: foundationStep,
+                completedSteps: activeStepIds.current
+                  .slice(0, currentIndex)
+                  .map((activeStepId) => foundationStepByLegacyStep[activeStepId]),
+                missingFields: [],
+                draftPayload: draft,
+                progressPercent: progressForStep(foundationStep),
+                expectedVersion: progressVersion.current,
+              },
+            });
+            progressVersion.current = progress.version;
+          } catch (progressError) {
+            // The invitation remains safely saved if the additive foundation
+            // migration has not been applied to an environment yet.
+            console.warn("Builder progress could not be synchronized", progressError);
+          }
           setSaveStatus("saved");
         }
       } catch (err) {
@@ -232,7 +267,7 @@ function BuilderPage() {
       }
     }, 2000);
     return () => clearTimeout(timeout);
-  }, [draft, editingId, hydrated, isPublished, loadingExisting]);
+  }, [draft, editingId, hydrated, isPublished, loadingExisting, stepId]);
 
   const selectedPackage = packages.find((pkg) => pkg.id === draft.packageId);
   const features: PackageFeatures = selectedPackage?.features ?? {
@@ -283,6 +318,7 @@ function BuilderPage() {
 
     return localized.filter((step) => step.id !== "premium" || hasPremiumContent);
   }, [copy.steps, hasPremiumContent, lang, qrOnly]);
+  activeStepIds.current = steps.map((step) => step.id);
 
   useEffect(() => {
     if (!steps.some((step) => step.id === stepId)) setStepId(steps[0].id);

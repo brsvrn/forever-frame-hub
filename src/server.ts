@@ -99,15 +99,22 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
     if (status === "success") {
       const { data: transaction } = await admin
         .from("transactions")
-        .select("invitation_id, package_type")
+        .select("invitation_id, package_type, status")
         .eq("merchant_oid", merchant_oid)
         .maybeSingle();
 
       if (transaction) {
+        if (transaction.status === "success") {
+          return new Response("OK", {
+            status: 200,
+            headers: { "Content-Type": "text/plain" },
+          });
+        }
         await admin
           .from("transactions")
-          .update({ status: "success" })
-          .eq("merchant_oid", merchant_oid);
+          .update({ status: "success", updated_at: new Date().toISOString() })
+          .eq("merchant_oid", merchant_oid)
+          .eq("status", "pending");
 
         await admin
           .from("invitations")
@@ -122,8 +129,13 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
     } else {
       await admin
         .from("transactions")
-        .update({ status: "failed" })
-        .eq("merchant_oid", merchant_oid);
+        .update({
+          status: "failed",
+          updated_at: new Date().toISOString(),
+          idempotency_key: null,
+        })
+        .eq("merchant_oid", merchant_oid)
+        .eq("status", "pending");
     }
 
     return new Response("OK", {

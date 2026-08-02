@@ -22,6 +22,8 @@ export type Database = {
           headline: string;
           id: string;
           is_published: boolean;
+          is_paid: boolean;
+          lifecycle_status: Database["public"]["Enums"]["event_lifecycle_status"];
           message: string;
           cover_photo: string | null;
           custom_sections: Json | null;
@@ -30,16 +32,20 @@ export type Database = {
           music_url: string | null;
           our_story: Json | null;
           package_id: string | null;
+          package_type: string;
+          primary_schedule_id: string | null;
           partner_one: string;
           partner_two: string;
           published_at: string | null;
           rsvp_label: string;
           slug: string;
           storage_used: number;
+          schema_version: number;
           theme: string;
           updated_at: string;
           user_id: string;
           venue: string;
+          version: number;
         };
         Insert: {
           address?: string;
@@ -54,6 +60,8 @@ export type Database = {
           headline?: string;
           id?: string;
           is_published?: boolean;
+          is_paid?: boolean;
+          lifecycle_status?: Database["public"]["Enums"]["event_lifecycle_status"];
           message?: string;
           cover_photo?: string | null;
           custom_sections?: Json | null;
@@ -62,16 +70,20 @@ export type Database = {
           music_url?: string | null;
           our_story?: Json | null;
           package_id?: string | null;
+          package_type?: string;
+          primary_schedule_id?: string | null;
           partner_one?: string;
           partner_two?: string;
           published_at?: string | null;
           rsvp_label?: string;
           slug: string;
           storage_used?: number;
+          schema_version?: number;
           theme?: string;
           updated_at?: string;
           user_id: string;
           venue?: string;
+          version?: number;
         };
         Update: {
           address?: string;
@@ -86,6 +98,8 @@ export type Database = {
           headline?: string;
           id?: string;
           is_published?: boolean;
+          is_paid?: boolean;
+          lifecycle_status?: Database["public"]["Enums"]["event_lifecycle_status"];
           message?: string;
           cover_photo?: string | null;
           custom_sections?: Json | null;
@@ -94,16 +108,20 @@ export type Database = {
           music_url?: string | null;
           our_story?: Json | null;
           package_id?: string | null;
+          package_type?: string;
+          primary_schedule_id?: string | null;
           partner_one?: string;
           partner_two?: string;
           published_at?: string | null;
           rsvp_label?: string;
           slug?: string;
           storage_used?: number;
+          schema_version?: number;
           theme?: string;
           updated_at?: string;
           user_id?: string;
           venue?: string;
+          version?: number;
         };
         Relationships: [];
       };
@@ -394,6 +412,282 @@ export type Database = {
         };
         Relationships: [];
       };
+      event_members: {
+        Row: {
+          id: string;
+          invitation_id: string;
+          user_id: string;
+          role: Database["public"]["Enums"]["event_member_role"];
+          extra_permissions: Json;
+          invited_by: string | null;
+          joined_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          invitation_id: string;
+          user_id: string;
+          role: Database["public"]["Enums"]["event_member_role"];
+          extra_permissions?: Json;
+          invited_by?: string | null;
+          joined_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          invitation_id?: string;
+          user_id?: string;
+          role?: Database["public"]["Enums"]["event_member_role"];
+          extra_permissions?: Json;
+          invited_by?: string | null;
+          joined_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      event_member_invitations: {
+        Row: {
+          id: string;
+          invitation_id: string;
+          invited_email: string;
+          invited_name: string | null;
+          role: Database["public"]["Enums"]["event_member_role"];
+          extra_permissions: Json;
+          message: string | null;
+          token_hash: string;
+          expires_at: string;
+          accepted_at: string | null;
+          accepted_by: string | null;
+          revoked_at: string | null;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          invitation_id: string;
+          invited_email: string;
+          invited_name?: string | null;
+          role: Database["public"]["Enums"]["event_member_role"];
+          extra_permissions?: Json;
+          message?: string | null;
+          token_hash: string;
+          expires_at: string;
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          revoked_at?: string | null;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          invitation_id?: string;
+          invited_email?: string;
+          invited_name?: string | null;
+          role?: Database["public"]["Enums"]["event_member_role"];
+          extra_permissions?: Json;
+          message?: string | null;
+          token_hash?: string;
+          expires_at?: string;
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          revoked_at?: string | null;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      event_activity_logs: {
+        Row: {
+          id: string;
+          invitation_id: string;
+          actor_user_id: string | null;
+          action: string;
+          target_type: string;
+          target_id: string | null;
+          changed_fields: Json;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          invitation_id: string;
+          actor_user_id?: string | null;
+          action: string;
+          target_type: string;
+          target_id?: string | null;
+          changed_fields?: Json;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          invitation_id?: string;
+          actor_user_id?: string | null;
+          action?: string;
+          target_type?: string;
+          target_id?: string | null;
+          changed_fields?: Json;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      event_builder_progress: {
+        Row: {
+          invitation_id: string;
+          current_step: string;
+          completed_steps: string[];
+          missing_fields: Json;
+          draft_payload: Json;
+          progress_percent: number;
+          version: number;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          invitation_id: string;
+          current_step?: string;
+          completed_steps?: string[];
+          missing_fields?: Json;
+          draft_payload?: Json;
+          progress_percent?: number;
+          version?: number;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          invitation_id?: string;
+          current_step?: string;
+          completed_steps?: string[];
+          missing_fields?: Json;
+          draft_payload?: Json;
+          progress_percent?: number;
+          version?: number;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      event_schedules: {
+        Row: {
+          id: string;
+          invitation_id: string;
+          event_type: string;
+          title: string;
+          event_date: string | null;
+          starts_at: string | null;
+          ends_at: string | null;
+          venue_name: string;
+          address: string;
+          google_maps_url: string | null;
+          apple_maps_url: string | null;
+          yandex_maps_url: string | null;
+          description: string | null;
+          dress_code: string | null;
+          parking_info: string | null;
+          valet_info: string | null;
+          transport_info: string | null;
+          is_visible: boolean;
+          is_primary: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          invitation_id: string;
+          event_type?: string;
+          title?: string;
+          event_date?: string | null;
+          starts_at?: string | null;
+          ends_at?: string | null;
+          venue_name?: string;
+          address?: string;
+          google_maps_url?: string | null;
+          apple_maps_url?: string | null;
+          yandex_maps_url?: string | null;
+          description?: string | null;
+          dress_code?: string | null;
+          parking_info?: string | null;
+          valet_info?: string | null;
+          transport_info?: string | null;
+          is_visible?: boolean;
+          is_primary?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          invitation_id?: string;
+          event_type?: string;
+          title?: string;
+          event_date?: string | null;
+          starts_at?: string | null;
+          ends_at?: string | null;
+          venue_name?: string;
+          address?: string;
+          google_maps_url?: string | null;
+          apple_maps_url?: string | null;
+          yandex_maps_url?: string | null;
+          description?: string | null;
+          dress_code?: string | null;
+          parking_info?: string | null;
+          valet_info?: string | null;
+          transport_info?: string | null;
+          is_visible?: boolean;
+          is_primary?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      transactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          invitation_id: string | null;
+          amount: number;
+          status: string;
+          merchant_oid: string;
+          package_type: string;
+          idempotency_key: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          invitation_id?: string | null;
+          amount: number;
+          status?: string;
+          merchant_oid: string;
+          package_type: string;
+          idempotency_key?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          invitation_id?: string | null;
+          amount?: number;
+          status?: string;
+          merchant_oid?: string;
+          package_type?: string;
+          idempotency_key?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -495,9 +789,31 @@ export type Database = {
         };
         Returns: boolean;
       };
+      has_event_permission: {
+        Args: {
+          _invitation_id: string;
+          _permission: string;
+          _user_id: string;
+        };
+        Returns: boolean;
+      };
+      is_event_member: {
+        Args: {
+          _invitation_id: string;
+          _user_id: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       app_role: "admin" | "user";
+      event_lifecycle_status: "draft" | "ready" | "published" | "expired" | "archived";
+      event_member_role:
+        | "owner"
+        | "co_manager"
+        | "content_manager"
+        | "gallery_manager"
+        | "viewer";
       event_type: "wedding" | "engagement" | "henna" | "birthday" | "other";
       rsvp_status: "yes" | "no" | "maybe";
     };

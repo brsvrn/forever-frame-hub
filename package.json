@@ -8,6 +8,7 @@
     "build": "vite build --configLoader native",
     "build:dev": "vite build --mode development --configLoader native",
     "preview": "vite preview",
+    "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint && npm run build",
     "lint": "eslint .",
@@ -95,6 +96,7 @@
     "sharp": "^0.35.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^8.0.16"
+    "vite": "^8.0.16",
+    "vitest": "^4.1.10"
   }
 }
