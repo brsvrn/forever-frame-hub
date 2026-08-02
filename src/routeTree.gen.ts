@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BakimRouteImport } from './routes/bakim'
 import { Route as GirisRouteImport } from './routes/giris'
 import { Route as OlusturRouteImport } from './routes/olustur'
 import { Route as PanelRouteImport } from './routes/panel'
@@ -18,6 +19,8 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as DavetSlugRouteImport } from './routes/davet.$slug'
 import { Route as PanelIdRouteImport } from './routes/panel_.$id'
+import { Route as ApiAdminMaintenanceBypassRouteImport } from './routes/api.admin.maintenance-bypass'
+import { Route as ApiAdminSystemSettingsRouteImport } from './routes/api.admin.system-settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -27,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BakimRoute = BakimRouteImport.update({
+  id: '/bakim',
+  path: '/bakim',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GirisRoute = GirisRouteImport.update({
@@ -64,10 +72,22 @@ const PanelIdRoute = PanelIdRouteImport.update({
   path: '/panel/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminMaintenanceBypassRoute =
+  ApiAdminMaintenanceBypassRouteImport.update({
+    id: '/api/admin/maintenance-bypass',
+    path: '/api/admin/maintenance-bypass',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminSystemSettingsRoute = ApiAdminSystemSettingsRouteImport.update({
+  id: '/api/admin/system-settings',
+  path: '/api/admin/system-settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bakim': typeof BakimRoute
   '/giris': typeof GirisRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
@@ -75,10 +95,13 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
   '/panel/$id': typeof PanelIdRoute
+  '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bakim': typeof BakimRoute
   '/giris': typeof GirisRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
@@ -86,11 +109,14 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
   '/panel/$id': typeof PanelIdRoute
+  '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bakim': typeof BakimRoute
   '/giris': typeof GirisRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
@@ -98,12 +124,15 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
   '/panel_/$id': typeof PanelIdRoute
+  '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
+    | '/bakim'
     | '/giris'
     | '/olustur'
     | '/panel'
@@ -111,10 +140,13 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/davet/$slug'
     | '/panel/$id'
+    | '/api/admin/maintenance-bypass'
+    | '/api/admin/system-settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/bakim'
     | '/giris'
     | '/olustur'
     | '/panel'
@@ -122,10 +154,13 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/davet/$slug'
     | '/panel/$id'
+    | '/api/admin/maintenance-bypass'
+    | '/api/admin/system-settings'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/bakim'
     | '/giris'
     | '/olustur'
     | '/panel'
@@ -133,11 +168,14 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/davet/$slug'
     | '/panel_/$id'
+    | '/api/admin/maintenance-bypass'
+    | '/api/admin/system-settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  BakimRoute: typeof BakimRoute
   GirisRoute: typeof GirisRoute
   OlusturRoute: typeof OlusturRoute
   PanelRoute: typeof PanelRoute
@@ -145,6 +183,8 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   DavetSlugRoute: typeof DavetSlugRoute
   PanelIdRoute: typeof PanelIdRoute
+  ApiAdminMaintenanceBypassRoute: typeof ApiAdminMaintenanceBypassRoute
+  ApiAdminSystemSettingsRoute: typeof ApiAdminSystemSettingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -161,6 +201,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bakim': {
+      id: '/bakim'
+      path: '/bakim'
+      fullPath: '/bakim'
+      preLoaderRoute: typeof BakimRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/giris': {
@@ -212,12 +259,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanelIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/maintenance-bypass': {
+      id: '/api/admin/maintenance-bypass'
+      path: '/api/admin/maintenance-bypass'
+      fullPath: '/api/admin/maintenance-bypass'
+      preLoaderRoute: typeof ApiAdminMaintenanceBypassRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/system-settings': {
+      id: '/api/admin/system-settings'
+      path: '/api/admin/system-settings'
+      fullPath: '/api/admin/system-settings'
+      preLoaderRoute: typeof ApiAdminSystemSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  BakimRoute: BakimRoute,
   GirisRoute: GirisRoute,
   OlusturRoute: OlusturRoute,
   PanelRoute: PanelRoute,
@@ -225,6 +287,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   DavetSlugRoute: DavetSlugRoute,
   PanelIdRoute: PanelIdRoute,
+  ApiAdminMaintenanceBypassRoute: ApiAdminMaintenanceBypassRoute,
+  ApiAdminSystemSettingsRoute: ApiAdminSystemSettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

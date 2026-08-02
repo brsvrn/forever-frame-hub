@@ -303,8 +303,20 @@ export type Database = {
       };
       system_settings: {
         Row: {
+          allow_admin_access: boolean;
           id: string;
           maintenance_mode: boolean;
+          maintenance_title: string | null;
+          maintenance_message: string | null;
+          maintenance_started_at: string | null;
+          maintenance_updated_at: string;
+          maintenance_updated_by: string | null;
+          estimated_return_at: string | null;
+          maintenance_contact_email: string | null;
+          maintenance_whatsapp_url: string | null;
+          maintenance_instagram_url: string | null;
+          show_whatsapp: boolean;
+          show_instagram: boolean;
           allow_new_registrations: boolean;
           default_package_id: string | null;
           max_upload_size_mb: number;
@@ -313,8 +325,20 @@ export type Database = {
           updated_by: string | null;
         };
         Insert: {
+          allow_admin_access?: boolean;
           id?: string;
           maintenance_mode?: boolean;
+          maintenance_title?: string | null;
+          maintenance_message?: string | null;
+          maintenance_started_at?: string | null;
+          maintenance_updated_at?: string;
+          maintenance_updated_by?: string | null;
+          estimated_return_at?: string | null;
+          maintenance_contact_email?: string | null;
+          maintenance_whatsapp_url?: string | null;
+          maintenance_instagram_url?: string | null;
+          show_whatsapp?: boolean;
+          show_instagram?: boolean;
           allow_new_registrations?: boolean;
           default_package_id?: string | null;
           max_upload_size_mb?: number;
@@ -323,8 +347,20 @@ export type Database = {
           updated_by?: string | null;
         };
         Update: {
+          allow_admin_access?: boolean;
           id?: string;
           maintenance_mode?: boolean;
+          maintenance_title?: string | null;
+          maintenance_message?: string | null;
+          maintenance_started_at?: string | null;
+          maintenance_updated_at?: string;
+          maintenance_updated_by?: string | null;
+          estimated_return_at?: string | null;
+          maintenance_contact_email?: string | null;
+          maintenance_whatsapp_url?: string | null;
+          maintenance_instagram_url?: string | null;
+          show_whatsapp?: boolean;
+          show_instagram?: boolean;
           allow_new_registrations?: boolean;
           default_package_id?: string | null;
           max_upload_size_mb?: number;

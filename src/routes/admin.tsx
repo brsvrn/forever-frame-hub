@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { Loader2, Palette, Package, HardDrive, Settings, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { clearAdminMaintenanceBypass, enableAdminMaintenanceBypass } from "@/lib/maintenance-admin";
 
 export const Route = createFileRoute("/admin")({
   component: () => (
@@ -36,6 +37,10 @@ function AdminGate() {
       cancelled = true;
     };
   }, [user]);
+
+  useEffect(() => {
+    if (isAdmin === true) void enableAdminMaintenanceBypass().catch(console.error);
+  }, [isAdmin]);
 
   if (loading || !user || isAdmin === null) {
     return (
@@ -103,6 +108,7 @@ function AdminDashboard({ email }: { email: string }) {
         <div className="p-4 border-t border-zinc-800">
           <button
             onClick={async () => {
+              await clearAdminMaintenanceBypass();
               await signOut();
               navigate({ to: "/" });
             }}
