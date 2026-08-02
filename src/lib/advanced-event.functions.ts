@@ -60,6 +60,36 @@ const sectionConfig = {
   },
 } as const;
 
+async function syncFeatureToggle(
+  admin: ReturnType<(typeof import("./supabase-admin"))["getServiceSupabase"]>,
+  invitationId: string,
+  section: keyof typeof sectionConfig,
+  enabled: boolean,
+) {
+  const column = {
+    share: "share_enabled",
+    audio: "audio_greeting_enabled",
+    music: "music_enabled",
+    gift: "gift_enabled",
+  }[section];
+  const { data: current, error: readError } = await admin
+    .from("event_feature_settings")
+    .select("version")
+    .eq("invitation_id", invitationId)
+    .maybeSingle();
+  if (readError || !current) throw new Error("Özellik durumu güncellenemedi.");
+  const { error } = await admin
+    .from("event_feature_settings")
+    .update({
+      [column]: enabled,
+      version: Number(current.version) + 1,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("invitation_id", invitationId)
+    .eq("version", current.version);
+  if (error) throw new Error("Özellik durumu güncellenemedi.");
+}
+
 export const getAdvancedEventSettings = createServerFn({ method: "GET" })
   .validator((input: unknown) => invitationInput.parse(input))
   .handler(async ({ data }) => {
@@ -134,6 +164,12 @@ export const saveAdvancedEventSection = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error("Ayarlar kaydedilemedi.");
     if (!saved) throw new Error("Ayarlar başka bir oturumda değiştirildi. Sayfayı yenileyin.");
+    await syncFeatureToggle(
+      admin,
+      data.invitationId,
+      data.content.section,
+      data.content.section === "share" ? true : Boolean(saved.is_enabled),
+    );
     const { writeEventAudit } = await import("./event-audit.server");
     await writeEventAudit({
       invitationId: data.invitationId,
@@ -241,6 +277,12 @@ export const completeEventAudioUpload = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error("Ses ayarı kaydedilemedi.");
+    await syncFeatureToggle(
+      admin,
+      data.invitationId,
+      data.kind === "greeting" ? "audio" : "music",
+      true,
+    );
     if (current?.object_key && current.object_key !== data.objectKey) {
       await getR2Client()
         .send(new DeleteObjectCommand({ Bucket: bucket, Key: current.object_key }))

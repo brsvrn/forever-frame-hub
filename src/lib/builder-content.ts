@@ -44,8 +44,8 @@ const tr = {
     family: "Aile Bilgileri",
   },
   premium: {
-    title: "Premium İçerikler",
-    desc: "Müzik, çift hikayesi ve etkinlik programı ekleyin.",
+    title: "Hikâye ve Kapak",
+    desc: "Kapak görselini ve çift hikâyesini hazırlayın. Müzik ve ses bir sonraki güvenli adımda yönetilir.",
     music: "YouTube Müzik Linki",
     musicPh: "Örn: https://youtube.com/watch?v=...",
     cover: "Kapak Fotoğrafı URL",
@@ -163,8 +163,8 @@ const en: BuilderContent = {
     family: "Family Info",
   },
   premium: {
-    title: "Premium Content",
-    desc: "Add music, your story, and event timeline.",
+    title: "Story and Cover",
+    desc: "Prepare your cover image and story. Music and voice are managed securely in the next step.",
     music: "YouTube Music Link",
     musicPh: "e.g. https://youtube.com/watch?v=...",
     cover: "Cover Photo URL",

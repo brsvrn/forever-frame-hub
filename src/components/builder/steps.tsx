@@ -955,16 +955,6 @@ export function StepPremium({ draft, update, copy, lang }: StepProps) {
     <div className="space-y-8">
       <StepHeader title={c.title} desc={c.desc} />
       <div className="grid gap-5">
-        <Field label={c.music}>
-          {(id) => (
-            <TextInput
-              id={id}
-              value={draft.musicUrl}
-              placeholder={c.musicPh}
-              onChange={(e) => update("musicUrl", e.target.value)}
-            />
-          )}
-        </Field>
         <Field label={c.cover}>
           {(id) => (
             <TextInput

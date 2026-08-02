@@ -32,13 +32,19 @@ import { progressForStep, type BuilderStepId } from "@/lib/builder-schema";
 import { saveBuilderProgress } from "@/lib/builder-progress.functions";
 import { saveCoreEventSection } from "@/lib/core-content.functions";
 import { syncPrimaryScheduleFromLegacy } from "@/lib/event-schedules.functions";
+import { DashboardExperience } from "@/components/dashboard/DashboardExperience";
+import type { InvitationRow } from "@/lib/invitations.api";
 
-type LegacyBuilderStepId = "theme" | "texts" | "details" | "premium" | "preview" | "publish";
+type LegacyBuilderStepId =
+  "theme" | "texts" | "details" | "premium" | "music" | "share" | "extras" | "preview" | "publish";
 const builderStepIds: LegacyBuilderStepId[] = [
   "theme",
   "texts",
   "details",
   "premium",
+  "music",
+  "share",
+  "extras",
   "preview",
   "publish",
 ];
@@ -47,7 +53,10 @@ const foundationStepByLegacyStep: Record<LegacyBuilderStepId, BuilderStepId> = {
   theme: "theme",
   texts: "basic-info",
   details: "events-locations",
-  premium: "music-audio",
+  premium: "invitation-text",
+  music: "music-audio",
+  share: "share",
+  extras: "extras",
   preview: "full-preview",
   publish: "publish",
 };
@@ -80,6 +89,42 @@ function BuilderRoute() {
   );
 }
 
+function AdvancedSettingsGate({
+  lang,
+  returnStep,
+}: {
+  lang: "tr" | "en";
+  returnStep: "music" | "share" | "extras";
+}) {
+  const signIn = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("step", returnStep);
+    setAuthReturnTo(`${window.location.pathname}?${params.toString()}`);
+    window.location.assign("/giris");
+  };
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-6">
+      <h2 className="text-2xl font-display">
+        {lang === "tr"
+          ? "Bu ayarları etkinliğinize bağlayın"
+          : "Connect these settings to your event"}
+      </h2>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">
+        {lang === "tr"
+          ? "Müzik, ses, paylaşım ve hediye bilgileri güvenli biçimde etkinlik kaydında tutulur. Bu alanları düzenlemek için giriş yapın; mevcut taslağınız kaybolmaz."
+          : "Music, voice, sharing and gift settings are stored securely on the event. Sign in to edit them; your current draft will be preserved."}
+      </p>
+      <button
+        type="button"
+        onClick={signIn}
+        className="mt-5 min-h-11 rounded-full bg-gradient-to-r from-rose to-gold px-6 text-sm font-semibold text-background"
+      >
+        {lang === "tr" ? "Giriş yap ve devam et" : "Sign in and continue"}
+      </button>
+    </div>
+  );
+}
+
 function BuilderPage() {
   const { lang, setLang } = useI18n();
   const copy = builderContent[lang];
@@ -91,6 +136,7 @@ function BuilderPage() {
   const [isPublished, setIsPublished] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [editingId, setEditingId] = useState<string | undefined>();
+  const [savedInvitation, setSavedInvitation] = useState<InvitationRow | null>(null);
   const [loadingExisting, setLoadingExisting] = useState(true);
   const progressVersion = useRef<number | undefined>(undefined);
   const activeStepIds = useRef<LegacyBuilderStepId[]>(builderStepIds);
@@ -167,6 +213,10 @@ function BuilderPage() {
     const params = new URLSearchParams(window.location.search);
     const editId = params.get("edit");
     if (params.get("resume") === "publish") setStepId("publish");
+    const requestedStep = params.get("step");
+    if (requestedStep && builderStepIds.includes(requestedStep as LegacyBuilderStepId)) {
+      setStepId(requestedStep as LegacyBuilderStepId);
+    }
 
     if (!editId) {
       setLoadingExisting(false);
@@ -188,6 +238,7 @@ function BuilderPage() {
       if (active && row?.user_id === session.user.id) {
         setDraft(rowToDraft(row));
         setEditingId(row.id);
+        setSavedInvitation(row);
         setIsPublished(row.is_published);
         setIsPaid((row as any).is_paid || false);
       }
@@ -275,6 +326,7 @@ function BuilderPage() {
           editingId,
         );
         setEditingId(saved.id);
+        setSavedInvitation(saved);
         try {
           await syncCoreSections(saved.id);
         } catch (coreError) {
@@ -320,6 +372,7 @@ function BuilderPage() {
           setSaveStatus("saving");
           const saved = await saveInvitation(draft, session.user.id, isPublished, editingId);
           setEditingId(saved.id);
+          setSavedInvitation(saved);
           try {
             await syncCoreSections(saved.id);
           } catch (coreError) {
@@ -368,10 +421,32 @@ function BuilderPage() {
   const hasQrGallery = features.qr_gallery === true;
   const hasPremiumContent = Boolean(features.music || features.timeline || features.story);
   const steps = useMemo(() => {
-    const localized = copy.steps.map((step, index) => ({
-      ...step,
-      id: builderStepIds[index],
-    }));
+    const source = copy.steps;
+    const advanced =
+      lang === "tr"
+        ? {
+            premium: { label: "Hikâye ve Kapak", desc: "Kapak görseli ve çiftin hikâyesi" },
+            music: { label: "Müzik ve Ses", desc: "Güvenli ses yükleme ve karşılama" },
+            share: { label: "Paylaşım", desc: "WhatsApp ve sosyal medya kartı" },
+            extras: { label: "Ek Özellikler", desc: "İsteğe bağlı IBAN ve hediye alanı" },
+          }
+        : {
+            premium: { label: "Story & Cover", desc: "Cover image and your story" },
+            music: { label: "Music & Voice", desc: "Secure audio upload and greeting" },
+            share: { label: "Sharing", desc: "WhatsApp and social sharing card" },
+            extras: { label: "Extras", desc: "Optional IBAN and gift section" },
+          };
+    const localized = [
+      { ...source[0], id: "theme" as const },
+      { ...source[1], id: "texts" as const },
+      { ...source[2], id: "details" as const },
+      { id: "premium" as const, ...advanced.premium },
+      { id: "music" as const, ...advanced.music },
+      { id: "share" as const, ...advanced.share },
+      { id: "extras" as const, ...advanced.extras },
+      { ...source[4], id: "preview" as const },
+      { ...source[5], id: "publish" as const },
+    ];
 
     if (qrOnly) {
       return localized
@@ -403,8 +478,12 @@ function BuilderPage() {
         });
     }
 
-    return localized.filter((step) => step.id !== "premium" || hasPremiumContent);
-  }, [copy.steps, hasPremiumContent, lang, qrOnly]);
+    return localized.filter(
+      (step) =>
+        (step.id !== "premium" || hasPremiumContent) &&
+        (step.id !== "music" || features.music !== false),
+    );
+  }, [copy.steps, features.music, hasPremiumContent, lang, qrOnly]);
   activeStepIds.current = steps.map((step) => step.id);
 
   useEffect(() => {
@@ -545,6 +624,59 @@ function BuilderPage() {
                 ) : null}
                 {stepId === "details" ? <StepDetails {...stepProps} /> : null}
                 {stepId === "premium" ? <StepPremium {...stepProps} /> : null}
+                {stepId === "music" ? (
+                  savedInvitation ? (
+                    <DashboardExperience
+                      invitation={savedInvitation}
+                      role="owner"
+                      visibleSections={["audio", "music"]}
+                      title={
+                        lang === "tr" ? "Müzik ve Sesli Karşılama" : "Music and Voice Greeting"
+                      }
+                      description={
+                        lang === "tr"
+                          ? "Telefonunuzdan kısa bir karşılama kaydedin veya lisanslı ses dosyanızı yükleyin."
+                          : "Record a short greeting from your phone or upload your licensed audio file."
+                      }
+                    />
+                  ) : (
+                    <AdvancedSettingsGate lang={lang} returnStep="music" />
+                  )
+                ) : null}
+                {stepId === "share" ? (
+                  savedInvitation ? (
+                    <DashboardExperience
+                      invitation={savedInvitation}
+                      role="owner"
+                      visibleSections={["share"]}
+                      title={lang === "tr" ? "Paylaşım Görünümü" : "Sharing Preview"}
+                      description={
+                        lang === "tr"
+                          ? "Davetiyeniz WhatsApp ve sosyal platformlarda paylaşılırken görünecek içeriği hazırlayın."
+                          : "Prepare how your invitation appears when shared on WhatsApp and social platforms."
+                      }
+                    />
+                  ) : (
+                    <AdvancedSettingsGate lang={lang} returnStep="share" />
+                  )
+                ) : null}
+                {stepId === "extras" ? (
+                  savedInvitation ? (
+                    <DashboardExperience
+                      invitation={savedInvitation}
+                      role="owner"
+                      visibleSections={["gift"]}
+                      title={lang === "tr" ? "Ek Özellikler" : "Extra Features"}
+                      description={
+                        lang === "tr"
+                          ? "İsteğe bağlı dijital hediye alanını güvenli biçimde yapılandırın. Bu bölüm varsayılan olarak kapalıdır."
+                          : "Configure the optional digital gift section securely. It is disabled by default."
+                      }
+                    />
+                  ) : (
+                    <AdvancedSettingsGate lang={lang} returnStep="extras" />
+                  )
+                ) : null}
                 {stepId === "preview" ? <StepPreview {...stepProps} features={features} /> : null}
                 {stepId === "publish" ? (
                   <StepPublish

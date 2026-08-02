@@ -25,6 +25,7 @@ import {
 } from "@/lib/advanced-event-schema";
 
 type Kind = "greeting" | "music";
+export type DashboardExperienceSection = "share" | "audio" | "music" | "gift" | "guest-links";
 type AudioMime = "audio/mpeg" | "audio/mp4" | "audio/aac" | "audio/wav" | "audio/webm";
 type GuestLinkSummary = {
   id: string;
@@ -76,9 +77,15 @@ function audioDuration(file: File) {
 export function DashboardExperience({
   invitation,
   role,
+  visibleSections,
+  title = "Müzik, Ses ve Paylaşım",
+  description = "Davetiyenin ses deneyimini, sosyal paylaşım kartını ve ek özelliklerini yönetin.",
 }: {
   invitation: InvitationRow;
   role: EventRole;
+  visibleSections?: DashboardExperienceSection[];
+  title?: string;
+  description?: string;
 }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -103,6 +110,8 @@ export function DashboardExperience({
   const canAudio = roleHasPermission(role, "edit_audio");
   const canGift = roleHasPermission(role, "manage_payment");
   const canGuestLinks = roleHasPermission(role, "edit_rsvp");
+  const shows = (section: DashboardExperienceSection) =>
+    !visibleSections || visibleSections.includes(section);
 
   const load = useCallback(async () => {
     const data = await getAdvancedEventSettings({ data: { invitationId: invitation.id } });
@@ -227,13 +236,11 @@ export function DashboardExperience({
   return (
     <div className="max-w-5xl space-y-6">
       <div>
-        <h2 className="text-2xl font-display">Müzik, Ses ve Paylaşım</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Davetiyenin ses deneyimini, sosyal paylaşım kartını ve ek özelliklerini yönetin.
-        </p>
+        <h2 className="text-2xl font-display">{title}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       </div>
 
-      {canShare ? (
+      {canShare && shows("share") ? (
         <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
           <h3 className="flex items-center gap-2 font-medium">
             <Share2 className="size-5 text-gold" /> WhatsApp ve Sosyal Paylaşım
@@ -330,7 +337,7 @@ export function DashboardExperience({
         </section>
       ) : null}
 
-      {canAudio ? (
+      {canAudio && shows("audio") ? (
         <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
           <h3 className="flex items-center gap-2 font-medium">
             <Mic className="size-5 text-gold" /> Sesli Karşılama
@@ -407,7 +414,7 @@ export function DashboardExperience({
         </section>
       ) : null}
 
-      {canAudio ? (
+      {canAudio && shows("music") ? (
         <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
           <h3 className="flex items-center gap-2 font-medium">
             <Music className="size-5 text-gold" /> Arka Plan Müziği
@@ -475,7 +482,7 @@ export function DashboardExperience({
         </section>
       ) : null}
 
-      {canGift ? (
+      {canGift && shows("gift") ? (
         <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
           <h3 className="font-medium">İsteğe Bağlı IBAN ve Dijital Hediye</h3>
           <label className="mt-4 flex min-h-11 items-center gap-3 text-sm">
@@ -522,7 +529,7 @@ export function DashboardExperience({
         </section>
       ) : null}
 
-      {canGuestLinks ? (
+      {canGuestLinks && shows("guest-links") ? (
         <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
           <h3 className="flex items-center gap-2 font-medium">
             <Link2 className="size-5 text-gold" /> Kişisel Davetli Bağlantıları
