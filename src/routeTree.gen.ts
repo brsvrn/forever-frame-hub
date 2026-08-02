@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BakimRouteImport } from './routes/bakim'
 import { Route as GirisRouteImport } from './routes/giris'
 import { Route as IletisimRouteImport } from './routes/iletisim'
 import { Route as OlusturRouteImport } from './routes/olustur'
@@ -26,6 +27,8 @@ import { Route as SozlesmelerGizlilikRouteImport } from './routes/sozlesmeler.gi
 import { Route as SozlesmelerIptalIadeRouteImport } from './routes/sozlesmeler.iptal-iade'
 import { Route as SozlesmelerMesafeliSatisRouteImport } from './routes/sozlesmeler.mesafeli-satis'
 import { Route as SozlesmelerTeslimatRouteImport } from './routes/sozlesmeler.teslimat'
+import { Route as ApiAdminMaintenanceBypassRouteImport } from './routes/api.admin.maintenance-bypass'
+import { Route as ApiAdminSystemSettingsRouteImport } from './routes/api.admin.system-settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,6 +38,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BakimRoute = BakimRouteImport.update({
+  id: '/bakim',
+  path: '/bakim',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GirisRoute = GirisRouteImport.update({
@@ -83,9 +91,9 @@ const OdemeBasariliRoute = OdemeBasariliRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const OdemeHataRoute = OdemeHataRouteImport.update({
-  id: '/hata',
-  path: '/hata',
-  getParentRoute: () => OdemeRoute,
+  id: '/odeme/hata',
+  path: '/odeme/hata',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PanelIdRoute = PanelIdRouteImport.update({
   id: '/panel_/$id',
@@ -113,10 +121,22 @@ const SozlesmelerTeslimatRoute = SozlesmelerTeslimatRouteImport.update({
   path: '/sozlesmeler/teslimat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminMaintenanceBypassRoute =
+  ApiAdminMaintenanceBypassRouteImport.update({
+    id: '/api/admin/maintenance-bypass',
+    path: '/api/admin/maintenance-bypass',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminSystemSettingsRoute = ApiAdminSystemSettingsRouteImport.update({
+  id: '/api/admin/system-settings',
+  path: '/api/admin/system-settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bakim': typeof BakimRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
   '/olustur': typeof OlusturRoute
@@ -132,10 +152,13 @@ export interface FileRoutesByFullPath {
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
   '/odeme/': typeof OdemeIndexRoute
+  '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bakim': typeof BakimRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
   '/olustur': typeof OlusturRoute
@@ -151,11 +174,14 @@ export interface FileRoutesByTo {
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
   '/odeme': typeof OdemeIndexRoute
+  '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bakim': typeof BakimRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
   '/olustur': typeof OlusturRoute
@@ -171,12 +197,15 @@ export interface FileRoutesById {
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
   '/odeme/': typeof OdemeIndexRoute
+  '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
+    | '/bakim'
     | '/giris'
     | '/iletisim'
     | '/olustur'
@@ -192,10 +221,13 @@ export interface FileRouteTypes {
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
     | '/odeme/'
+    | '/api/admin/maintenance-bypass'
+    | '/api/admin/system-settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/bakim'
     | '/giris'
     | '/iletisim'
     | '/olustur'
@@ -211,10 +243,13 @@ export interface FileRouteTypes {
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
     | '/odeme'
+    | '/api/admin/maintenance-bypass'
+    | '/api/admin/system-settings'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/bakim'
     | '/giris'
     | '/iletisim'
     | '/olustur'
@@ -230,11 +265,14 @@ export interface FileRouteTypes {
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
     | '/odeme/'
+    | '/api/admin/maintenance-bypass'
+    | '/api/admin/system-settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  BakimRoute: typeof BakimRoute
   GirisRoute: typeof GirisRoute
   IletisimRoute: typeof IletisimRoute
   OlusturRoute: typeof OlusturRoute
@@ -243,12 +281,15 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   DavetSlugRoute: typeof DavetSlugRoute
   OdemeBasariliRoute: typeof OdemeBasariliRoute
+  OdemeHataRoute: typeof OdemeHataRoute
   PanelIdRoute: typeof PanelIdRoute
   SozlesmelerGizlilikRoute: typeof SozlesmelerGizlilikRoute
   SozlesmelerIptalIadeRoute: typeof SozlesmelerIptalIadeRoute
   SozlesmelerMesafeliSatisRoute: typeof SozlesmelerMesafeliSatisRoute
   SozlesmelerTeslimatRoute: typeof SozlesmelerTeslimatRoute
   OdemeIndexRoute: typeof OdemeIndexRoute
+  ApiAdminMaintenanceBypassRoute: typeof ApiAdminMaintenanceBypassRoute
+  ApiAdminSystemSettingsRoute: typeof ApiAdminSystemSettingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -265,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bakim': {
+      id: '/bakim'
+      path: '/bakim'
+      fullPath: '/bakim'
+      preLoaderRoute: typeof BakimRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/giris': {
@@ -332,10 +380,10 @@ declare module '@tanstack/react-router' {
     }
     '/odeme/hata': {
       id: '/odeme/hata'
-      path: '/hata'
+      path: '/odeme/hata'
       fullPath: '/odeme/hata'
       preLoaderRoute: typeof OdemeHataRouteImport
-      parentRoute: typeof OdemeRoute
+      parentRoute: typeof rootRouteImport
     }
     '/panel_/$id': {
       id: '/panel_/$id'
@@ -372,12 +420,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SozlesmelerTeslimatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/maintenance-bypass': {
+      id: '/api/admin/maintenance-bypass'
+      path: '/api/admin/maintenance-bypass'
+      fullPath: '/api/admin/maintenance-bypass'
+      preLoaderRoute: typeof ApiAdminMaintenanceBypassRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/system-settings': {
+      id: '/api/admin/system-settings'
+      path: '/api/admin/system-settings'
+      fullPath: '/api/admin/system-settings'
+      preLoaderRoute: typeof ApiAdminSystemSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  BakimRoute: BakimRoute,
   GirisRoute: GirisRoute,
   IletisimRoute: IletisimRoute,
   OlusturRoute: OlusturRoute,
@@ -386,12 +449,15 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   DavetSlugRoute: DavetSlugRoute,
   OdemeBasariliRoute: OdemeBasariliRoute,
+  OdemeHataRoute: OdemeHataRoute,
   PanelIdRoute: PanelIdRoute,
   SozlesmelerGizlilikRoute: SozlesmelerGizlilikRoute,
   SozlesmelerIptalIadeRoute: SozlesmelerIptalIadeRoute,
   SozlesmelerMesafeliSatisRoute: SozlesmelerMesafeliSatisRoute,
   SozlesmelerTeslimatRoute: SozlesmelerTeslimatRoute,
   OdemeIndexRoute: OdemeIndexRoute,
+  ApiAdminMaintenanceBypassRoute: ApiAdminMaintenanceBypassRoute,
+  ApiAdminSystemSettingsRoute: ApiAdminSystemSettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

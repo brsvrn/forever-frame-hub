@@ -6,11 +6,8 @@ import {
   useRouter,
   HeadContent,
   Scripts,
-  useLocation,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getSystemSettings } from "@/lib/admin.api";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -128,42 +125,12 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-function MaintenanceWrapper({ children }: { children: ReactNode }) {
-  const location = useLocation();
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ["systemSettings"],
-    queryFn: getSystemSettings,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-  const isMaintenance = settings?.maintenance_mode;
-  const isAdminRoute = location.pathname.startsWith("/admin") || location.pathname.startsWith("/panel");
-
-  if (isMaintenance && !isAdminRoute) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[#0E1220] px-4 text-center text-white">
-        <div className="mx-auto max-w-md">
-          <h1 className="mb-4 font-serif text-4xl text-[#EAB308]">Bakımdayız</h1>
-          <p className="text-zinc-400">
-            Şu anda sistemlerimizde bir bakım çalışması yürütüyoruz. 
-            Kısa bir süre sonra tekrar yayında olacağız. Anlayışınız için teşekkür ederiz.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <MaintenanceWrapper>
-        <Outlet />
-      </MaintenanceWrapper>
+      <Outlet />
       <Toaster />
     </QueryClientProvider>
   );
