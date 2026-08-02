@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { easeSilk } from "@/components/landing/motion-primitives";
 
@@ -12,19 +13,29 @@ export function Stepper({
   current: number;
   onSelect: (index: number) => void;
 }) {
+  const activeItem = useRef<HTMLLIElement | null>(null);
+
+  useEffect(() => {
+    activeItem.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [current]);
+
   return (
     <ol className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {steps.map((step, index) => {
         const done = index < current;
         const active = index === current;
         return (
-          <li key={step.id} className="shrink-0 snap-start md:min-w-0 md:flex-1">
+          <li
+            key={step.id}
+            ref={active ? activeItem : undefined}
+            className="w-[10rem] shrink-0 snap-start"
+          >
             <button
               type="button"
               onClick={() => onSelect(index)}
               aria-current={active ? "step" : undefined}
               className={cn(
-                "relative w-full min-w-[8.5rem] rounded-2xl border px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "relative w-full rounded-2xl border px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 active ? "border-gold/50 bg-accent/50" : "border-border hover:bg-accent/30",
               )}
             >

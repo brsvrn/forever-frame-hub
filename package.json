@@ -8,7 +8,7 @@
     "build": "vite build --configLoader native",
     "build:dev": "vite build --mode development --configLoader native",
     "preview": "vite preview",
-    "test": "vitest run --config vitest.config.ts",
+    "test": "vitest run --config vitest.config.ts --configLoader native --pool threads",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint && npm run build",
     "lint": "eslint .",

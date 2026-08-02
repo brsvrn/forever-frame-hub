@@ -41,6 +41,7 @@ type PackageStepProps = StepProps & {
   packages: PublicPackage[];
   packagesLoading: boolean;
   features: PackageFeatures;
+  mode?: "all" | "package-event" | "theme";
 };
 
 export function StepHeader({ title, desc }: { title: string; desc: string }) {
@@ -60,6 +61,7 @@ export function StepTheme({
   packages,
   packagesLoading,
   features,
+  mode = "all",
 }: PackageStepProps) {
   const [themes, setThemes] = useState<any[]>([]);
   const [themesLoading, setThemesLoading] = useState(true);
@@ -94,22 +96,30 @@ export function StepTheme({
     <div className="space-y-8">
       <StepHeader
         title={
-          hasInvitation
-            ? copy.theme.title
-            : lang === "tr"
-              ? "QR galerinizi oluşturun"
-              : "Create your QR gallery"
+          mode === "package-event"
+            ? lang === "tr"
+              ? "Paket ve Etkinlik Türü"
+              : "Package and Event Type"
+            : hasInvitation
+              ? copy.theme.title
+              : lang === "tr"
+                ? "QR galerinizi oluşturun"
+                : "Create your QR gallery"
         }
         desc={
-          hasInvitation
-            ? copy.theme.desc
-            : lang === "tr"
-              ? "Paketinizi ve QR kartınızda kullanılacak sahil temasını seçin."
-              : "Choose your package and the coastal theme used on your QR card."
+          mode === "package-event"
+            ? lang === "tr"
+              ? "Paketinizi ve davetiyenin hazırlanacağı etkinlik türünü seçin."
+              : "Choose your package and the event type for this invitation."
+            : hasInvitation
+              ? copy.theme.desc
+              : lang === "tr"
+                ? "Paketinizi ve QR kartınızda kullanılacak sahil temasını seçin."
+                : "Choose your package and the coastal theme used on your QR card."
         }
       />
 
-      {!packagesLoading && packages.length > 0 && (
+      {mode !== "theme" && !packagesLoading && packages.length > 0 && (
         <div className="mb-10">
           <h3 className="text-xl font-medium mb-4">
             {lang === "tr" ? "Paket Seçimi" : "Package Selection"}
@@ -145,185 +155,194 @@ export function StepTheme({
         </div>
       )}
 
-      {!hasInvitation ? (
-        <div className="rounded-3xl border border-gold/30 bg-gold/10 p-5 text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">
-            {lang === "tr" ? "Yalnızca QR Fotoğraf Galerisi" : "QR Photo Gallery only"}
-          </p>
-          <p className="mt-1">
+      {mode !== "theme" &&
+        (!hasInvitation ? (
+          <div className="rounded-3xl border border-gold/30 bg-gold/10 p-5 text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">
+              {lang === "tr" ? "Yalnızca QR Fotoğraf Galerisi" : "QR Photo Gallery only"}
+            </p>
+            <p className="mt-1">
+              {lang === "tr"
+                ? "QR kartınız için aşağıdan bir tasarım seçin. Sonraki adımda yalnız etkinlikte görünecek isimleri gireceksiniz."
+                : "Choose a design for your QR card below. Next, you will only enter the names shown for the event."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-1">
+            <Field label={lang === "tr" ? "Etkinlik Türü" : "Event Type"} className="sm:col-span-1">
+              {(id) => (
+                <select
+                  id={id}
+                  value={draft.category}
+                  onChange={(e) => update("category", e.target.value as any)}
+                  className="field-base min-h-11 w-full bg-transparent"
+                >
+                  <option className="bg-background text-foreground" value="wedding">
+                    {lang === "tr" ? "Düğün" : "Wedding"}
+                  </option>
+                  <option className="bg-background text-foreground" value="engagement">
+                    {lang === "tr" ? "Nişan" : "Engagement"}
+                  </option>
+                  <option className="bg-background text-foreground" value="henna">
+                    {lang === "tr" ? "Kına" : "Henna"}
+                  </option>
+                  <option className="bg-background text-foreground" value="birthday">
+                    {lang === "tr" ? "Doğum Günü" : "Birthday"}
+                  </option>
+                  <option className="bg-background text-foreground" value="other">
+                    {lang === "tr" ? "Diğer" : "Other"}
+                  </option>
+                </select>
+              )}
+            </Field>
+          </div>
+        ))}
+
+      {mode !== "package-event" ? (
+        <div>
+          <h3 className="text-xl font-medium">
+            {hasInvitation
+              ? lang === "tr"
+                ? "Tema Tasarımı"
+                : "Theme design"
+              : lang === "tr"
+                ? "QR Kart Tasarımı"
+                : "QR card design"}
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground">
             {lang === "tr"
-              ? "QR kartınız için aşağıdan bir tasarım seçin. Sonraki adımda yalnız etkinlikte görünecek isimleri gireceksiniz."
-              : "Choose a design for your QR card below. Next, you will only enter the names shown for the event."}
+              ? "Temalar görsel dünyalarına göre kategorilere ayrılmıştır."
+              : "Themes are grouped by their visual world."}
           </p>
-        </div>
-      ) : (
-        <div className="grid gap-5 sm:grid-cols-1">
-          <Field label={lang === "tr" ? "Etkinlik Türü" : "Event Type"} className="sm:col-span-1">
-            {(id) => (
-              <select
-                id={id}
-                value={draft.category}
-                onChange={(e) => update("category", e.target.value as any)}
-                className="field-base min-h-11 w-full bg-transparent"
-              >
-                <option className="bg-background text-foreground" value="wedding">
-                  {lang === "tr" ? "Düğün" : "Wedding"}
-                </option>
-                <option className="bg-background text-foreground" value="engagement">
-                  {lang === "tr" ? "Nişan" : "Engagement"}
-                </option>
-                <option className="bg-background text-foreground" value="henna">
-                  {lang === "tr" ? "Kına" : "Henna"}
-                </option>
-                <option className="bg-background text-foreground" value="birthday">
-                  {lang === "tr" ? "Doğum Günü" : "Birthday"}
-                </option>
-                <option className="bg-background text-foreground" value="other">
-                  {lang === "tr" ? "Diğer" : "Other"}
-                </option>
-              </select>
-            )}
-          </Field>
-        </div>
-      )}
 
-      <div>
-        <h3 className="text-xl font-medium">
-          {hasInvitation
-            ? lang === "tr"
-              ? "Tema Tasarımı"
-              : "Theme design"
-            : lang === "tr"
-              ? "QR Kart Tasarımı"
-              : "QR card design"}
-        </h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {lang === "tr"
-            ? "Temalar görsel dünyalarına göre kategorilere ayrılmıştır."
-            : "Themes are grouped by their visual world."}
-        </p>
-
-        <div
-          className="mt-5 flex flex-wrap gap-2"
-          role="tablist"
-          aria-label={lang === "tr" ? "Tema kategorileri" : "Theme categories"}
-        >
-          {categories.map((category) => {
-            const active = selectedCategory === category.id;
-            const Icon = category.icon;
-            return (
-              <button
-                key={category.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setSelectedCategory(category.id)}
-                className={cn(
-                  "inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-sm transition-all",
-                  active
-                    ? "border-gold bg-gold/12 text-foreground shadow-[0_0_24px_rgba(226,191,122,.12)]"
-                    : "border-border text-muted-foreground hover:border-gold/40 hover:text-foreground",
-                )}
-              >
-                <Icon className="size-4" aria-hidden="true" />
-                {lang === "tr" ? category.tr : category.en}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {themesLoading ? (
-            <div className="col-span-full py-10 text-center text-sm text-zinc-400">
-              Temalar yükleniyor...
-            </div>
-          ) : filteredThemes.length === 0 ? (
-            <div className="col-span-full py-10 text-center text-sm text-zinc-400">
-              Bu tarza uygun tema bulunamadı.
-            </div>
-          ) : (
-            filteredThemes.map((theme) => {
-              const active = draft.theme === theme.theme_id;
+          <div
+            className="mt-5 flex flex-wrap gap-2"
+            role="tablist"
+            aria-label={lang === "tr" ? "Tema kategorileri" : "Theme categories"}
+          >
+            {categories.map((category) => {
+              const active = selectedCategory === category.id;
+              const Icon = category.icon;
               return (
                 <button
-                  key={theme.id}
+                  key={category.id}
                   type="button"
-                  onClick={() => update("theme", theme.theme_id as InviteThemeId)}
-                  aria-pressed={active}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setSelectedCategory(category.id)}
                   className={cn(
-                    "group relative overflow-hidden rounded-3xl border text-left transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    active ? "border-gold shadow-glow" : "border-border hover:border-gold/40",
+                    "inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-sm transition-all",
+                    active
+                      ? "border-gold bg-gold/12 text-foreground shadow-[0_0_24px_rgba(226,191,122,.12)]"
+                      : "border-border text-muted-foreground hover:border-gold/40 hover:text-foreground",
                   )}
                 >
-                  <img
-                    src={
-                      theme.config.thumbnailUrl ||
-                      "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=60"
-                    }
-                    alt={theme.name}
-                    loading="lazy"
-                    className="aspect-[3/4] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
-                  />
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"
-                  />
-                  <span className="absolute inset-x-0 bottom-0 p-4">
-                    <span className="block text-[0.62rem] uppercase tracking-[0.22em] text-gold">
-                      {theme.config.category === "luxury"
-                        ? lang === "tr"
-                          ? "Lüks"
-                          : "Luxury"
-                        : theme.config.category === "nature"
-                          ? lang === "tr"
-                            ? "Doğa"
-                            : "Nature"
-                          : theme.config.category === "italy"
-                            ? lang === "tr"
-                              ? "İtalya"
-                              : "Italy"
-                            : lang === "tr"
-                              ? "Deniz"
-                              : "Coastal"}
-                    </span>
-                    <span className="mt-1 block truncate font-display text-xl">{theme.name}</span>
-                  </span>
-                  <AnimatePresence>
-                    {active ? (
-                      <motion.span
-                        initial={{ scale: 0.6, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.6, opacity: 0 }}
-                        transition={{ duration: 0.35, ease: easeSilk }}
-                        className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-gradient-to-r from-rose to-gold text-background"
-                      >
-                        <Check className="size-4" aria-hidden="true" />
-                        <span className="sr-only">{copy.theme.selected}</span>
-                      </motion.span>
-                    ) : null}
-                  </AnimatePresence>
+                  <Icon className="size-4" aria-hidden="true" />
+                  {lang === "tr" ? category.tr : category.en}
                 </button>
               );
-            })
-          )}
+            })}
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {themesLoading ? (
+              <div className="col-span-full py-10 text-center text-sm text-zinc-400">
+                Temalar yükleniyor...
+              </div>
+            ) : filteredThemes.length === 0 ? (
+              <div className="col-span-full py-10 text-center text-sm text-zinc-400">
+                Bu tarza uygun tema bulunamadı.
+              </div>
+            ) : (
+              filteredThemes.map((theme) => {
+                const active = draft.theme === theme.theme_id;
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    onClick={() => update("theme", theme.theme_id as InviteThemeId)}
+                    aria-pressed={active}
+                    className={cn(
+                      "group relative overflow-hidden rounded-3xl border text-left transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      active ? "border-gold shadow-glow" : "border-border hover:border-gold/40",
+                    )}
+                  >
+                    <img
+                      src={
+                        theme.config.thumbnailUrl ||
+                        "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=60"
+                      }
+                      alt={theme.name}
+                      loading="lazy"
+                      className="aspect-[3/4] w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"
+                    />
+                    <span className="absolute inset-x-0 bottom-0 p-4">
+                      <span className="block text-[0.62rem] uppercase tracking-[0.22em] text-gold">
+                        {theme.config.category === "luxury"
+                          ? lang === "tr"
+                            ? "Lüks"
+                            : "Luxury"
+                          : theme.config.category === "nature"
+                            ? lang === "tr"
+                              ? "Doğa"
+                              : "Nature"
+                            : theme.config.category === "italy"
+                              ? lang === "tr"
+                                ? "İtalya"
+                                : "Italy"
+                              : lang === "tr"
+                                ? "Deniz"
+                                : "Coastal"}
+                      </span>
+                      <span className="mt-1 block truncate font-display text-xl">{theme.name}</span>
+                    </span>
+                    <AnimatePresence>
+                      {active ? (
+                        <motion.span
+                          initial={{ scale: 0.6, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.6, opacity: 0 }}
+                          transition={{ duration: 0.35, ease: easeSilk }}
+                          className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-gradient-to-r from-rose to-gold text-background"
+                        >
+                          <Check className="size-4" aria-hidden="true" />
+                          <span className="sr-only">{copy.theme.selected}</span>
+                        </motion.span>
+                      ) : null}
+                    </AnimatePresence>
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
 
-export function StepTexts({ draft, update, copy, lang }: StepProps) {
+export function StepTexts({
+  draft,
+  update,
+  copy,
+  lang,
+  mode = "all",
+}: StepProps & { mode?: "all" | "basic" | "family" | "invitation" }) {
   const c = copy.texts;
   const [textTemplates, setTextTemplates] = useState<
     Array<{ id: string; category: string; title: string; body: string }>
   >([]);
 
   useEffect(() => {
-    if (lang !== "tr") return;
+    if (lang !== "tr" || (mode !== "all" && mode !== "invitation")) return;
     void getInvitationTextTemplates()
       .then(setTextTemplates)
       .catch(() => setTextTemplates([]));
-  }, [lang]);
+  }, [lang, mode]);
 
   const isBirthday = draft.category === "birthday";
   const isOther = draft.category === "other";
@@ -368,8 +387,31 @@ export function StepTexts({ draft, update, copy, lang }: StepProps) {
 
   return (
     <div className="space-y-8">
-      <StepHeader title={c.title} desc={c.desc} />
-      {textTemplates.length > 0 ? (
+      <StepHeader
+        title={
+          mode === "family"
+            ? lang === "tr"
+              ? "Aile Bilgileri"
+              : "Family Details"
+            : mode === "invitation"
+              ? lang === "tr"
+                ? "Davet Metni"
+                : "Invitation Wording"
+              : c.title
+        }
+        desc={
+          mode === "family"
+            ? lang === "tr"
+              ? "Anne, baba ve aile bilgilerini isteğe bağlı olarak ekleyin."
+              : "Optionally add parents and family details."
+            : mode === "invitation"
+              ? lang === "tr"
+                ? "Hazır bir metin seçin veya davet mesajınızı kendiniz yazın."
+                : "Choose a template or write your own invitation message."
+              : c.desc
+        }
+      />
+      {(mode === "all" || mode === "invitation") && textTemplates.length > 0 ? (
         <section>
           <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Hazır davet metinleri
@@ -392,70 +434,88 @@ export function StepTexts({ draft, update, copy, lang }: StepProps) {
         </section>
       ) : null}
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label={partnerOneLabel} className={showPartnerTwo ? "" : "sm:col-span-2"}>
-          {(id) => (
-            <TextInput
-              id={id}
-              value={draft.partnerOne}
-              maxLength={24}
-              placeholder={isBirthday ? (lang === "tr" ? "Can" : "Alex") : "Elif"}
-              onChange={(e) => update("partnerOne", e.target.value)}
-            />
-          )}
-        </Field>
-        {showPartnerTwo && (
-          <Field label={partnerTwoLabel}>
-            {(id) => (
-              <TextInput
-                id={id}
-                value={draft.partnerTwo}
-                maxLength={24}
-                placeholder={isOther ? "" : "Kaan"}
-                onChange={(e) => update("partnerTwo", e.target.value)}
-              />
-            )}
-          </Field>
-        )}
-        <Field label={c.headline} className="sm:col-span-2">
-          {(id) => (
-            <TextInput
-              id={id}
-              value={draft.headline}
-              maxLength={40}
-              placeholder={c.headlinePh}
-              onChange={(e) => update("headline", e.target.value)}
-            />
-          )}
-        </Field>
-        <Field
-          label={c.message}
-          hint={`${draft.message?.length || 0}/280 ${c.counter}`}
-          className="sm:col-span-2"
-        >
-          {(id) => (
-            <TextArea
-              id={id}
-              rows={5}
-              maxLength={280}
-              value={draft.message || ""}
-              placeholder={c.messagePh}
-              onChange={(e) => update("message", e.target.value)}
-            />
-          )}
-        </Field>
-        <Field label={c.rsvpLabel} className="sm:col-span-2">
-          {(id) => (
-            <TextInput
-              id={id}
-              value={draft.rsvpLabel}
-              maxLength={24}
-              placeholder={c.rsvpPh}
-              onChange={(e) => update("rsvpLabel", e.target.value)}
-            />
-          )}
-        </Field>
+        {mode === "all" || mode === "basic" ? (
+          <>
+            <Field label={partnerOneLabel} className={showPartnerTwo ? "" : "sm:col-span-2"}>
+              {(id) => (
+                <TextInput
+                  id={id}
+                  value={draft.partnerOne}
+                  maxLength={24}
+                  placeholder={isBirthday ? (lang === "tr" ? "Can" : "Alex") : "Elif"}
+                  onChange={(e) => update("partnerOne", e.target.value)}
+                />
+              )}
+            </Field>
+            {showPartnerTwo ? (
+              <Field label={partnerTwoLabel}>
+                {(id) => (
+                  <TextInput
+                    id={id}
+                    value={draft.partnerTwo}
+                    maxLength={24}
+                    placeholder={isOther ? "" : "Kaan"}
+                    onChange={(e) => update("partnerTwo", e.target.value)}
+                  />
+                )}
+              </Field>
+            ) : null}
+            <Field label={c.headline} className="sm:col-span-2">
+              {(id) => (
+                <TextInput
+                  id={id}
+                  value={draft.headline}
+                  maxLength={40}
+                  placeholder={c.headlinePh}
+                  onChange={(e) => update("headline", e.target.value)}
+                />
+              )}
+            </Field>
+            <Field label={copy.premium.cover} className="sm:col-span-2">
+              {(id) => (
+                <TextInput
+                  id={id}
+                  value={draft.coverPhoto}
+                  placeholder="https://..."
+                  onChange={(e) => update("coverPhoto", e.target.value)}
+                />
+              )}
+            </Field>
+          </>
+        ) : null}
+        {mode === "all" || mode === "invitation" ? (
+          <>
+            <Field
+              label={c.message}
+              hint={`${draft.message?.length || 0}/280 ${c.counter}`}
+              className="sm:col-span-2"
+            >
+              {(id) => (
+                <TextArea
+                  id={id}
+                  rows={5}
+                  maxLength={280}
+                  value={draft.message || ""}
+                  placeholder={c.messagePh}
+                  onChange={(e) => update("message", e.target.value)}
+                />
+              )}
+            </Field>
+            <Field label={c.rsvpLabel} className="sm:col-span-2">
+              {(id) => (
+                <TextInput
+                  id={id}
+                  value={draft.rsvpLabel}
+                  maxLength={24}
+                  placeholder={c.rsvpPh}
+                  onChange={(e) => update("rsvpLabel", e.target.value)}
+                />
+              )}
+            </Field>
+          </>
+        ) : null}
 
-        {showFamilyInfo && (
+        {(mode === "all" || mode === "family") && showFamilyInfo ? (
           <div className="sm:col-span-2 mt-6">
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               {familyTitle}
@@ -529,7 +589,14 @@ export function StepTexts({ draft, update, copy, lang }: StepProps) {
               </div>
             </div>
           </div>
-        )}
+        ) : null}
+        {mode === "family" && !showFamilyInfo ? (
+          <p className="sm:col-span-2 rounded-2xl border border-border p-5 text-sm text-muted-foreground">
+            {lang === "tr"
+              ? "Bu etkinlik türünde aile bölümü kullanılmıyor. Bu adımı atlayabilirsiniz."
+              : "The family section is not used for this event type. You can skip this step."}
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -955,17 +1022,6 @@ export function StepPremium({ draft, update, copy, lang }: StepProps) {
     <div className="space-y-8">
       <StepHeader title={c.title} desc={c.desc} />
       <div className="grid gap-5">
-        <Field label={c.cover}>
-          {(id) => (
-            <TextInput
-              id={id}
-              value={draft.coverPhoto}
-              placeholder="https://..."
-              onChange={(e) => update("coverPhoto", e.target.value)}
-            />
-          )}
-        </Field>
-
         <div className="mt-6 border-t border-border pt-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">

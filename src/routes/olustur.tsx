@@ -28,38 +28,22 @@ import {
   type PublicPackage,
 } from "@/lib/invitations.api";
 import { setAuthReturnTo } from "@/lib/auth-helpers";
-import { progressForStep, type BuilderStepId } from "@/lib/builder-schema";
+import {
+  builderSteps,
+  isBuilderStepId,
+  progressForStep,
+  type BuilderStepId,
+} from "@/lib/builder-schema";
 import { saveBuilderProgress } from "@/lib/builder-progress.functions";
 import { saveCoreEventSection } from "@/lib/core-content.functions";
 import { syncPrimaryScheduleFromLegacy } from "@/lib/event-schedules.functions";
 import { DashboardExperience } from "@/components/dashboard/DashboardExperience";
+import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
+import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
+import { DashboardTeam } from "@/components/dashboard/DashboardTeam";
 import type { InvitationRow } from "@/lib/invitations.api";
 
-type LegacyBuilderStepId =
-  "theme" | "texts" | "details" | "premium" | "music" | "share" | "extras" | "preview" | "publish";
-const builderStepIds: LegacyBuilderStepId[] = [
-  "theme",
-  "texts",
-  "details",
-  "premium",
-  "music",
-  "share",
-  "extras",
-  "preview",
-  "publish",
-];
-
-const foundationStepByLegacyStep: Record<LegacyBuilderStepId, BuilderStepId> = {
-  theme: "theme",
-  texts: "basic-info",
-  details: "events-locations",
-  premium: "invitation-text",
-  music: "music-audio",
-  share: "share",
-  extras: "extras",
-  preview: "full-preview",
-  publish: "publish",
-};
+const builderStepIds = builderSteps.map((step) => step.id);
 
 const title = "Davetiye Oluştur — Tema, Metin, Tarih ve Yayınlama | MemoryWedding";
 const description =
@@ -94,7 +78,7 @@ function AdvancedSettingsGate({
   returnStep,
 }: {
   lang: "tr" | "en";
-  returnStep: "music" | "share" | "extras";
+  returnStep: BuilderStepId;
 }) {
   const signIn = () => {
     const params = new URLSearchParams(window.location.search);
@@ -111,8 +95,8 @@ function AdvancedSettingsGate({
       </h2>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
         {lang === "tr"
-          ? "Müzik, ses, paylaşım ve hediye bilgileri güvenli biçimde etkinlik kaydında tutulur. Bu alanları düzenlemek için giriş yapın; mevcut taslağınız kaybolmaz."
-          : "Music, voice, sharing and gift settings are stored securely on the event. Sign in to edit them; your current draft will be preserved."}
+          ? "Bu gelişmiş ayarlar güvenli biçimde etkinlik kaydında tutulur. Düzenlemek için giriş yapın; mevcut taslağınız kaybolmaz."
+          : "These advanced settings are stored securely on the event. Sign in to edit them; your current draft will be preserved."}
       </p>
       <button
         type="button"
@@ -125,11 +109,53 @@ function AdvancedSettingsGate({
   );
 }
 
+function BuilderQrStep({
+  draft,
+  lang,
+  invitationId,
+}: {
+  draft: ReturnType<typeof useInvitationDraft>["draft"];
+  lang: "tr" | "en";
+  invitationId?: string;
+}) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-light sm:text-4xl">
+          {lang === "tr" ? "QR Ayarları" : "QR Settings"}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {lang === "tr"
+            ? "Seçtiğiniz temayla oluşacak gerçek QR kartını kontrol edin. Baskı ölçüleri ve indirme seçenekleri yönetim panelindeki QR Studio'da korunur."
+            : "Review the real QR card generated with your theme. Print sizes and downloads remain available in QR Studio."}
+        </p>
+      </div>
+      <div className="mx-auto max-w-sm">
+        <QrGalleryPreview draft={draft} lang={lang} />
+      </div>
+      {invitationId ? (
+        <a
+          href={`/panel/${invitationId}?tab=print`}
+          className="inline-flex min-h-11 items-center justify-center rounded-full border border-gold/40 px-5 text-sm text-gold"
+        >
+          {lang === "tr" ? "QR Studio'yu aç" : "Open QR Studio"}
+        </a>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          {lang === "tr"
+            ? "İndirme seçenekleri giriş yaptıktan ve taslak kaydedildikten sonra açılır."
+            : "Download options unlock after signing in and saving the draft."}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function BuilderPage() {
   const { lang, setLang } = useI18n();
   const copy = builderContent[lang];
   const { draft, setDraft, update, reset, fillSample, hydrated } = useInvitationDraft();
-  const [stepId, setStepId] = useState<LegacyBuilderStepId>("theme");
+  const [stepId, setStepId] = useState<BuilderStepId>("package-event");
   const [packages, setPackages] = useState<PublicPackage[]>([]);
   const [packagesLoading, setPackagesLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -139,7 +165,7 @@ function BuilderPage() {
   const [savedInvitation, setSavedInvitation] = useState<InvitationRow | null>(null);
   const [loadingExisting, setLoadingExisting] = useState(true);
   const progressVersion = useRef<number | undefined>(undefined);
-  const activeStepIds = useRef<LegacyBuilderStepId[]>(builderStepIds);
+  const activeStepIds = useRef<BuilderStepId[]>(builderStepIds);
   const resumedPublish = useRef(false);
 
   const syncCoreSections = useCallback(
@@ -214,8 +240,8 @@ function BuilderPage() {
     const editId = params.get("edit");
     if (params.get("resume") === "publish") setStepId("publish");
     const requestedStep = params.get("step");
-    if (requestedStep && builderStepIds.includes(requestedStep as LegacyBuilderStepId)) {
-      setStepId(requestedStep as LegacyBuilderStepId);
+    if (requestedStep && isBuilderStepId(requestedStep)) {
+      setStepId(requestedStep);
     }
 
     if (!editId) {
@@ -379,18 +405,15 @@ function BuilderPage() {
             console.warn("Core invitation sections could not be synchronized", coreError);
           }
           const currentIndex = Math.max(0, activeStepIds.current.indexOf(stepId));
-          const foundationStep = foundationStepByLegacyStep[stepId];
           try {
             const progress = await saveBuilderProgress({
               data: {
                 invitationId: saved.id,
-                currentStep: foundationStep,
-                completedSteps: activeStepIds.current
-                  .slice(0, currentIndex)
-                  .map((activeStepId) => foundationStepByLegacyStep[activeStepId]),
+                currentStep: stepId,
+                completedSteps: activeStepIds.current.slice(0, currentIndex),
                 missingFields: [],
                 draftPayload: draft,
-                progressPercent: progressForStep(foundationStep),
+                progressPercent: progressForStep(stepId),
                 expectedVersion: progressVersion.current,
               },
             });
@@ -419,71 +442,89 @@ function BuilderPage() {
   };
   const qrOnly = features.digital_invitation === false;
   const hasQrGallery = features.qr_gallery === true;
-  const hasPremiumContent = Boolean(features.music || features.timeline || features.story);
   const steps = useMemo(() => {
-    const source = copy.steps;
-    const advanced =
-      lang === "tr"
-        ? {
-            premium: { label: "Hikâye ve Kapak", desc: "Kapak görseli ve çiftin hikâyesi" },
-            music: { label: "Müzik ve Ses", desc: "Güvenli ses yükleme ve karşılama" },
-            share: { label: "Paylaşım", desc: "WhatsApp ve sosyal medya kartı" },
-            extras: { label: "Ek Özellikler", desc: "İsteğe bağlı IBAN ve hediye alanı" },
-          }
-        : {
-            premium: { label: "Story & Cover", desc: "Cover image and your story" },
-            music: { label: "Music & Voice", desc: "Secure audio upload and greeting" },
-            share: { label: "Sharing", desc: "WhatsApp and social sharing card" },
-            extras: { label: "Extras", desc: "Optional IBAN and gift section" },
-          };
-    const localized = [
-      { ...source[0], id: "theme" as const },
-      { ...source[1], id: "texts" as const },
-      { ...source[2], id: "details" as const },
-      { id: "premium" as const, ...advanced.premium },
-      { id: "music" as const, ...advanced.music },
-      { id: "share" as const, ...advanced.share },
-      { id: "extras" as const, ...advanced.extras },
-      { ...source[4], id: "preview" as const },
-      { ...source[5], id: "publish" as const },
-    ];
+    const english: Record<BuilderStepId, { label: string; desc: string }> = {
+      "package-event": { label: "Package & Event", desc: "Choose package and event type" },
+      theme: { label: "Theme", desc: "Choose your visual language" },
+      "basic-info": { label: "Basic Info", desc: "Names, title and cover" },
+      family: { label: "Family", desc: "Optional family details" },
+      "events-locations": { label: "Events & Venues", desc: "Dates, times and locations" },
+      "invitation-text": { label: "Invitation Text", desc: "Choose or write your message" },
+      "music-audio": { label: "Music & Voice", desc: "Audio and voice greeting" },
+      "gallery-memory": { label: "Gallery & Memories", desc: "Guest upload preferences" },
+      "rsvp-guests": { label: "RSVP & Guests", desc: "Attendance form and questions" },
+      qr: { label: "QR Settings", desc: "Preview your QR card" },
+      share: { label: "Sharing", desc: "WhatsApp and social card" },
+      extras: { label: "Extras", desc: "Modules, story and gift area" },
+      team: { label: "Team", desc: "Invite event managers" },
+      "full-preview": { label: "Full Preview", desc: "Review the invitation" },
+      publish: { label: "Publish", desc: "Link, sharing and QR" },
+    };
+    const descriptions: Record<BuilderStepId, string> = {
+      "package-event": "Paket ve etkinlik türü",
+      theme: "Görsel dilinizi seçin",
+      "basic-info": "İsimler, başlık ve kapak",
+      family: "İsteğe bağlı aile bilgileri",
+      "events-locations": "Tarih, saat ve konumlar",
+      "invitation-text": "Hazır metin veya kendi mesajınız",
+      "music-audio": "Müzik ve sesli karşılama",
+      "gallery-memory": "Misafir yükleme tercihleri",
+      "rsvp-guests": "Katılım formu ve sorular",
+      qr: "QR kartınızı önizleyin",
+      share: "WhatsApp ve sosyal medya kartı",
+      extras: "Modüller, hikâye ve hediye alanı",
+      team: "Etkinlik yöneticilerini davet edin",
+      "full-preview": "Davetiyenin son kontrolü",
+      publish: "Bağlantı, paylaşım ve QR",
+    };
+    const localized = builderSteps.map((step) => ({
+      id: step.id,
+      label: lang === "tr" ? step.label : english[step.id].label,
+      desc: lang === "tr" ? descriptions[step.id] : english[step.id].desc,
+    }));
 
     if (qrOnly) {
       return localized
-        .filter((step) => ["theme", "texts", "preview", "publish"].includes(step.id))
+        .filter((step) =>
+          ["package-event", "theme", "basic-info", "gallery-memory", "qr", "publish"].includes(
+            step.id,
+          ),
+        )
         .map((step) => {
-          if (step.id === "theme")
+          if (step.id === "package-event")
             return {
               ...step,
-              label: lang === "tr" ? "Paket & Tasarım" : "Package & design",
-              desc: lang === "tr" ? "QR kartınızı tasarlayın" : "Design your QR card",
+              label: lang === "tr" ? "Paket" : "Package",
+              desc: lang === "tr" ? "QR paketinizi seçin" : "Choose your QR package",
             };
-          if (step.id === "texts")
+          if (step.id === "basic-info")
             return {
               ...step,
               label: lang === "tr" ? "Bilgiler" : "Details",
               desc: lang === "tr" ? "Etkinlik isimleri" : "Event names",
             };
-          if (step.id === "preview")
+          if (step.id === "qr")
             return {
               ...step,
               label: lang === "tr" ? "QR Önizleme" : "QR Preview",
               desc: lang === "tr" ? "QR kartını kontrol edin" : "Review the QR card",
             };
-          return {
-            ...step,
-            label: lang === "tr" ? "Oluştur" : "Create",
-            desc: lang === "tr" ? "QR kodunu yayınlayın" : "Publish the QR code",
-          };
+          if (step.id === "publish")
+            return {
+              ...step,
+              label: lang === "tr" ? "Oluştur" : "Create",
+              desc: lang === "tr" ? "QR kodunu yayınlayın" : "Publish the QR code",
+            };
+          return step;
         });
     }
 
     return localized.filter(
       (step) =>
-        (step.id !== "premium" || hasPremiumContent) &&
-        (step.id !== "music" || features.music !== false),
+        (step.id !== "music-audio" || features.music !== false) &&
+        (step.id !== "gallery-memory" || hasQrGallery),
     );
-  }, [copy.steps, features.music, hasPremiumContent, lang, qrOnly]);
+  }, [features.music, hasQrGallery, lang, qrOnly]);
   activeStepIds.current = steps.map((step) => step.id);
 
   useEffect(() => {
@@ -564,8 +605,8 @@ function BuilderPage() {
           <p className="mt-3 text-sm text-muted-foreground sm:text-base">
             {qrOnly
               ? lang === "tr"
-                ? "Dört kısa adımda QR fotoğraf galerinizi oluşturun. Gereksiz davetiye alanları gösterilmez."
-                : "Create your QR photo gallery in four short steps. Unneeded invitation fields stay hidden."
+                ? "Altı kısa adımda QR fotoğraf galerinizi oluşturun. Gereksiz davetiye alanları gösterilmez."
+                : "Create your QR photo gallery in six short steps. Unneeded invitation fields stay hidden."
               : copy.subtitle}
           </p>
         </div>
@@ -607,24 +648,48 @@ function BuilderPage() {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.45, ease: easeSilk }}
               >
+                {stepId === "package-event" ? (
+                  <StepTheme
+                    {...stepProps}
+                    packages={packages}
+                    packagesLoading={packagesLoading}
+                    features={features}
+                    mode="package-event"
+                  />
+                ) : null}
                 {stepId === "theme" ? (
                   <StepTheme
                     {...stepProps}
                     packages={packages}
                     packagesLoading={packagesLoading}
                     features={features}
+                    mode="theme"
                   />
                 ) : null}
-                {stepId === "texts" ? (
+                {stepId === "basic-info" ? (
                   qrOnly ? (
                     <StepQrDetails {...stepProps} />
                   ) : (
-                    <StepTexts {...stepProps} />
+                    <StepTexts {...stepProps} mode="basic" />
                   )
                 ) : null}
-                {stepId === "details" ? <StepDetails {...stepProps} /> : null}
-                {stepId === "premium" ? <StepPremium {...stepProps} /> : null}
-                {stepId === "music" ? (
+                {stepId === "family" ? <StepTexts {...stepProps} mode="family" /> : null}
+                {stepId === "events-locations" ? (
+                  <div className="space-y-10">
+                    <StepDetails {...stepProps} />
+                    {savedInvitation ? (
+                      <div className="border-t border-border pt-8">
+                        <DashboardSchedule invitation={savedInvitation} />
+                      </div>
+                    ) : (
+                      <AdvancedSettingsGate lang={lang} returnStep="events-locations" />
+                    )}
+                  </div>
+                ) : null}
+                {stepId === "invitation-text" ? (
+                  <StepTexts {...stepProps} mode="invitation" />
+                ) : null}
+                {stepId === "music-audio" ? (
                   savedInvitation ? (
                     <DashboardExperience
                       invitation={savedInvitation}
@@ -640,8 +705,45 @@ function BuilderPage() {
                       }
                     />
                   ) : (
-                    <AdvancedSettingsGate lang={lang} returnStep="music" />
+                    <AdvancedSettingsGate lang={lang} returnStep="music-audio" />
                   )
+                ) : null}
+                {stepId === "gallery-memory" ? (
+                  savedInvitation ? (
+                    <DashboardSettings
+                      invitation={savedInvitation}
+                      visibleSections={["memory"]}
+                      title={lang === "tr" ? "Galeri ve Anı Kutusu" : "Gallery and Memory Box"}
+                      description={
+                        lang === "tr"
+                          ? "Misafirlerin bırakabileceği fotoğraf, video ve not seçeneklerini yönetin."
+                          : "Manage the photos, videos and notes guests may submit."
+                      }
+                      showBuilderLink={false}
+                    />
+                  ) : (
+                    <AdvancedSettingsGate lang={lang} returnStep="gallery-memory" />
+                  )
+                ) : null}
+                {stepId === "rsvp-guests" ? (
+                  savedInvitation ? (
+                    <DashboardSettings
+                      invitation={savedInvitation}
+                      visibleSections={["rsvp"]}
+                      title={lang === "tr" ? "LCV ve Misafir Ayarları" : "RSVP and Guest Settings"}
+                      description={
+                        lang === "tr"
+                          ? "Katılım formunu, toplanacak bilgileri ve özel soruları belirleyin."
+                          : "Configure attendance, collected details and custom questions."
+                      }
+                      showBuilderLink={false}
+                    />
+                  ) : (
+                    <AdvancedSettingsGate lang={lang} returnStep="rsvp-guests" />
+                  )
+                ) : null}
+                {stepId === "qr" ? (
+                  <BuilderQrStep draft={draft} lang={lang} invitationId={editingId} />
                 ) : null}
                 {stepId === "share" ? (
                   savedInvitation ? (
@@ -662,26 +764,53 @@ function BuilderPage() {
                 ) : null}
                 {stepId === "extras" ? (
                   savedInvitation ? (
-                    <DashboardExperience
-                      invitation={savedInvitation}
-                      role="owner"
-                      visibleSections={["gift"]}
-                      title={lang === "tr" ? "Ek Özellikler" : "Extra Features"}
-                      description={
-                        lang === "tr"
-                          ? "İsteğe bağlı dijital hediye alanını güvenli biçimde yapılandırın. Bu bölüm varsayılan olarak kapalıdır."
-                          : "Configure the optional digital gift section securely. It is disabled by default."
-                      }
-                    />
+                    <div className="space-y-10">
+                      <DashboardSettings
+                        invitation={savedInvitation}
+                        visibleSections={["modules"]}
+                        title={lang === "tr" ? "Ek Özellikler" : "Extra Features"}
+                        description={
+                          lang === "tr"
+                            ? "Davetiyede kullanılacak modülleri açın veya kapatın."
+                            : "Enable or disable the modules used by the invitation."
+                        }
+                        showBuilderLink={false}
+                      />
+                      <div className="border-t border-border pt-8">
+                        <StepPremium {...stepProps} />
+                      </div>
+                      <div className="border-t border-border pt-8">
+                        <DashboardExperience
+                          invitation={savedInvitation}
+                          role="owner"
+                          visibleSections={["gift"]}
+                          title={lang === "tr" ? "IBAN ve Dijital Hediye" : "IBAN and Digital Gift"}
+                          description={
+                            lang === "tr"
+                              ? "İsteğe bağlı hediye alanını güvenli biçimde yapılandırın. Bu bölüm varsayılan olarak kapalıdır."
+                              : "Configure the optional gift section securely. It is disabled by default."
+                          }
+                        />
+                      </div>
+                    </div>
                   ) : (
                     <AdvancedSettingsGate lang={lang} returnStep="extras" />
                   )
                 ) : null}
-                {stepId === "preview" ? <StepPreview {...stepProps} features={features} /> : null}
+                {stepId === "team" ? (
+                  savedInvitation ? (
+                    <DashboardTeam invitation={savedInvitation} />
+                  ) : (
+                    <AdvancedSettingsGate lang={lang} returnStep="team" />
+                  )
+                ) : null}
+                {stepId === "full-preview" ? (
+                  <StepPreview {...stepProps} features={features} />
+                ) : null}
                 {stepId === "publish" ? (
                   <StepPublish
                     {...stepProps}
-                    onEdit={() => setStepId("texts")}
+                    onEdit={() => setStepId("basic-info")}
                     isPublished={isPublished}
                     isPaid={isPaid}
                     onPublishChange={(value) => void handlePublishChange(value)}

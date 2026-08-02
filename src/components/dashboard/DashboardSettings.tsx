@@ -92,7 +92,21 @@ function Toggle({
   );
 }
 
-export function DashboardSettings({ invitation }: { invitation: InvitationRow }) {
+export type DashboardSettingsSection = "modules" | "memory" | "rsvp";
+
+export function DashboardSettings({
+  invitation,
+  visibleSections,
+  title = "Etkinlik Ayarları",
+  description = "Davetiyede görünen bölümleri, Anı Kutusu ve LCV tercihlerini yönetin.",
+  showBuilderLink = true,
+}: {
+  invitation: InvitationRow;
+  visibleSections?: DashboardSettingsSection[];
+  title?: string;
+  description?: string;
+  showBuilderLink?: boolean;
+}) {
   const [features, setFeatures] = useState<FeatureSettings | null>(null);
   const [memory, setMemory] = useState<MemorySettings | null>(null);
   const [rsvp, setRsvp] = useState<RsvpSettings | null>(null);
@@ -106,6 +120,9 @@ export function DashboardSettings({ invitation }: { invitation: InvitationRow })
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [featureDirty, setFeatureDirty] = useState<Set<keyof FeatureSettings>>(new Set());
+  const shows = (section: DashboardSettingsSection) =>
+    !visibleSections || visibleSections.includes(section);
 
   useEffect(() => {
     let active = true;
@@ -133,34 +150,45 @@ export function DashboardSettings({ invitation }: { invitation: InvitationRow })
     if (!features || !memory || !rsvp || saving) return;
     setSaving(true);
     try {
-      const [savedFeatures, savedMemory, savedRsvp] = await Promise.all([
-        saveCoreEventSection({
+      const nextVersions = { ...versions };
+      if (shows("modules") && featureDirty.size > 0) {
+        const latest = await getCoreEventContent({ data: { invitationId: invitation.id } });
+        const merged = featureSettingsSchema.parse(latest.features);
+        featureDirty.forEach((key) => {
+          merged[key] = features[key];
+        });
+        const savedFeatures = await saveCoreEventSection({
           data: {
             invitationId: invitation.id,
-            expectedVersion: versions.features,
-            content: { section: "features", values: features },
+            expectedVersion: Number(latest.features.version),
+            content: { section: "features", values: merged },
           },
-        }),
-        saveCoreEventSection({
+        });
+        setFeatures(featureSettingsSchema.parse(savedFeatures));
+        setFeatureDirty(new Set());
+        nextVersions.features = Number(savedFeatures.version);
+      }
+      if (shows("memory")) {
+        const savedMemory = await saveCoreEventSection({
           data: {
             invitationId: invitation.id,
             expectedVersion: versions.memory,
             content: { section: "memory", values: memory },
           },
-        }),
-        saveCoreEventSection({
+        });
+        nextVersions.memory = Number(savedMemory.version);
+      }
+      if (shows("rsvp")) {
+        const savedRsvp = await saveCoreEventSection({
           data: {
             invitationId: invitation.id,
             expectedVersion: versions.rsvp,
             content: { section: "rsvp", values: rsvp },
           },
-        }),
-      ]);
-      setVersions({
-        features: Number(savedFeatures.version),
-        memory: Number(savedMemory.version),
-        rsvp: Number(savedRsvp.version),
-      });
+        });
+        nextVersions.rsvp = Number(savedRsvp.version);
+      }
+      setVersions(nextVersions);
       toast.success("Etkinlik ayarları kaydedildi.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Ayarlar kaydedilemedi.");
@@ -222,253 +250,272 @@ export function DashboardSettings({ invitation }: { invitation: InvitationRow })
     <div className="max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-2xl font-display font-medium">Etkinlik Ayarları</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Davetiyede görünen bölümleri, Anı Kutusu ve LCV tercihlerini yönetin.
-          </p>
+          <h2 className="text-2xl font-display font-medium">{title}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{description}</p>
         </div>
-        <Link
-          to="/olustur"
-          search={{ edit: invitation.id } as never}
-          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border px-5 text-sm hover:bg-accent"
-        >
-          Davetiyeyi Düzenle
-        </Link>
+        {showBuilderLink ? (
+          <Link
+            to="/olustur"
+            search={{ edit: invitation.id } as never}
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border px-5 text-sm hover:bg-accent"
+          >
+            Davetiyeyi Düzenle
+          </Link>
+        ) : null}
       </div>
 
-      <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
-        <h3 className="mb-4 flex items-center gap-2 font-medium">
-          <Settings2 className="size-5 text-gold" /> Modüller
-        </h3>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {featureLabels.map(([key, label]) => (
-            <Toggle
-              key={key}
-              label={label}
-              checked={Boolean(features[key])}
-              onChange={(checked) => setFeatures((current) => ({ ...current!, [key]: checked }))}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
-        <h3 className="font-medium">Anı Kutusu</h3>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Varsayılan olarak içerikler onay bekler ve yalnızca onaylandıktan sonra görünür.
-        </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Toggle
-            label="Fotoğraf yükleme"
-            checked={memory.photo_enabled}
-            onChange={(value) => setMemory({ ...memory, photo_enabled: value })}
-          />
-          <Toggle
-            label="Video yükleme"
-            checked={memory.video_enabled}
-            onChange={(value) => setMemory({ ...memory, video_enabled: value })}
-          />
-          <Toggle
-            label="Yazılı not"
-            checked={memory.text_note_enabled}
-            onChange={(value) => setMemory({ ...memory, text_note_enabled: value })}
-          />
-          <Toggle
-            label="Misafir adı zorunlu"
-            checked={memory.guest_name_required}
-            onChange={(value) => setMemory({ ...memory, guest_name_required: value })}
-          />
-          <Toggle
-            label="Onay sonrası yayınla"
-            checked={memory.moderation_required}
-            onChange={(value) => setMemory({ ...memory, moderation_required: value })}
-          />
-          <label className="space-y-2 text-sm">
-            <span>Galeri görünürlüğü</span>
-            <select
-              value={memory.gallery_visibility}
-              onChange={(event) =>
-                setMemory({
-                  ...memory,
-                  gallery_visibility: event.target.value as MemorySettings["gallery_visibility"],
-                })
-              }
-              className="field-base min-h-11 w-full bg-background"
-            >
-              <option value="public_after_approval">Onaylananlar herkese açık</option>
-              <option value="private">Yalnızca yöneticiler</option>
-            </select>
-          </label>
-          <label className="space-y-2 text-sm">
-            <span>Yükleme başlangıcı</span>
-            <input
-              type="datetime-local"
-              value={toLocalDateTime(memory.upload_starts_at)}
-              onChange={(event) =>
-                setMemory({ ...memory, upload_starts_at: toIso(event.target.value) })
-              }
-              className="field-base min-h-11 w-full"
-            />
-          </label>
-          <label className="space-y-2 text-sm">
-            <span>Yükleme bitişi</span>
-            <input
-              type="datetime-local"
-              value={toLocalDateTime(memory.upload_ends_at)}
-              onChange={(event) =>
-                setMemory({ ...memory, upload_ends_at: toIso(event.target.value) })
-              }
-              className="field-base min-h-11 w-full"
-            />
-          </label>
-          <label className="space-y-2 text-sm">
-            <span>Fotoğraf sınırı (MB)</span>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={memory.max_image_size_mb}
-              onChange={(event) =>
-                setMemory({ ...memory, max_image_size_mb: Number(event.target.value) })
-              }
-              className="field-base min-h-11 w-full"
-            />
-          </label>
-          <label className="space-y-2 text-sm">
-            <span>Video sınırı (MB)</span>
-            <input
-              type="number"
-              min={1}
-              max={500}
-              value={memory.max_video_size_mb}
-              onChange={(event) =>
-                setMemory({ ...memory, max_video_size_mb: Number(event.target.value) })
-              }
-              className="field-base min-h-11 w-full"
-            />
-          </label>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
-        <h3 className="font-medium">LCV ve Misafir Bilgileri</h3>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Toggle
-            label="LCV açık"
-            checked={rsvp.is_enabled}
-            onChange={(value) => setRsvp({ ...rsvp, is_enabled: value })}
-          />
-          {rsvpLabels.map(([key, label]) => (
-            <Toggle
-              key={key}
-              label={label}
-              checked={Boolean(rsvp[key])}
-              onChange={(checked) => setRsvp((current) => ({ ...current!, [key]: checked }))}
-            />
-          ))}
-          <label className="space-y-2 text-sm sm:col-span-2">
-            <span>Yanıt son tarihi</span>
-            <input
-              type="datetime-local"
-              value={toLocalDateTime(rsvp.response_deadline)}
-              onChange={(event) =>
-                setRsvp({ ...rsvp, response_deadline: toIso(event.target.value) })
-              }
-              className="field-base min-h-11 w-full"
-            />
-          </label>
-        </div>
-        <div className="mt-6 border-t border-border pt-5">
-          <h4 className="text-sm font-medium">Özel Sorular</h4>
-          <div className="mt-3 space-y-2">
-            {questions.map((question) => (
-              <div
-                key={question.id}
-                className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border px-4 text-sm"
-              >
-                <span>
-                  {question.label}
-                  {question.is_required ? " *" : ""}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => void removeQuestion(question.id)}
-                  aria-label="Soruyu sil"
-                  className="grid size-10 place-items-center rounded-lg text-rose hover:bg-rose/10"
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </div>
+      {shows("modules") ? (
+        <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
+          <h3 className="mb-4 flex items-center gap-2 font-medium">
+            <Settings2 className="size-5 text-gold" /> Modüller
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {featureLabels.map(([key, label]) => (
+              <Toggle
+                key={key}
+                label={label}
+                checked={Boolean(features[key])}
+                onChange={(checked) => {
+                  setFeatures((current) => ({ ...current!, [key]: checked }));
+                  setFeatureDirty((current) => new Set(current).add(key));
+                }}
+              />
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {shows("memory") ? (
+        <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
+          <h3 className="font-medium">Anı Kutusu</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Varsayılan olarak içerikler onay bekler ve yalnızca onaylandıktan sonra görünür.
+          </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <label className="space-y-2 text-sm sm:col-span-2">
-              <span>Soru</span>
-              <input
-                value={newQuestion.label}
+            <Toggle
+              label="Fotoğraf yükleme"
+              checked={memory.photo_enabled}
+              onChange={(value) => setMemory({ ...memory, photo_enabled: value })}
+            />
+            <Toggle
+              label="Video yükleme"
+              checked={memory.video_enabled}
+              onChange={(value) => setMemory({ ...memory, video_enabled: value })}
+            />
+            <Toggle
+              label="Yazılı not"
+              checked={memory.text_note_enabled}
+              onChange={(value) => setMemory({ ...memory, text_note_enabled: value })}
+            />
+            <Toggle
+              label="Misafir adı zorunlu"
+              checked={memory.guest_name_required}
+              onChange={(value) => setMemory({ ...memory, guest_name_required: value })}
+            />
+            <Toggle
+              label="Onay sonrası yayınla"
+              checked={memory.moderation_required}
+              onChange={(value) => setMemory({ ...memory, moderation_required: value })}
+            />
+            <label className="space-y-2 text-sm">
+              <span>Galeri görünürlüğü</span>
+              <select
+                value={memory.gallery_visibility}
                 onChange={(event) =>
-                  setNewQuestion((current) => ({ ...current, label: event.target.value }))
+                  setMemory({
+                    ...memory,
+                    gallery_visibility: event.target.value as MemorySettings["gallery_visibility"],
+                  })
+                }
+                className="field-base min-h-11 w-full bg-background"
+              >
+                <option value="public_after_approval">Onaylananlar herkese açık</option>
+                <option value="private">Yalnızca yöneticiler</option>
+              </select>
+            </label>
+            <label className="space-y-2 text-sm">
+              <span>Yükleme başlangıcı</span>
+              <input
+                type="datetime-local"
+                value={toLocalDateTime(memory.upload_starts_at)}
+                onChange={(event) =>
+                  setMemory({ ...memory, upload_starts_at: toIso(event.target.value) })
                 }
                 className="field-base min-h-11 w-full"
               />
             </label>
             <label className="space-y-2 text-sm">
-              <span>Soru türü</span>
-              <select
-                value={newQuestion.question_type}
-                onChange={(event) =>
-                  setNewQuestion((current) => ({
-                    ...current,
-                    question_type: event.target.value as Question["question_type"],
-                  }))
-                }
-                className="field-base min-h-11 w-full bg-background"
-              >
-                <option value="short_text">Kısa metin</option>
-                <option value="long_text">Uzun metin</option>
-                <option value="yes_no">Evet / Hayır</option>
-                <option value="single_choice">Tek seçim</option>
-                <option value="multiple_choice">Çoklu seçim</option>
-                <option value="number">Sayı</option>
-                <option value="date">Tarih</option>
-                <option value="meal_preference">Yemek tercihi</option>
-                <option value="transport_need">Servis ihtiyacı</option>
-              </select>
-            </label>
-            <label className="flex min-h-11 items-center gap-3 text-sm">
+              <span>Yükleme bitişi</span>
               <input
-                type="checkbox"
-                checked={newQuestion.is_required}
+                type="datetime-local"
+                value={toLocalDateTime(memory.upload_ends_at)}
                 onChange={(event) =>
-                  setNewQuestion((current) => ({ ...current, is_required: event.target.checked }))
+                  setMemory({ ...memory, upload_ends_at: toIso(event.target.value) })
                 }
-              />{" "}
-              Zorunlu soru
+                className="field-base min-h-11 w-full"
+              />
             </label>
-            {["single_choice", "multiple_choice", "meal_preference"].includes(
-              newQuestion.question_type,
-            ) ? (
+            <label className="space-y-2 text-sm">
+              <span>Fotoğraf sınırı (MB)</span>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                value={memory.max_image_size_mb}
+                onChange={(event) =>
+                  setMemory({ ...memory, max_image_size_mb: Number(event.target.value) })
+                }
+                className="field-base min-h-11 w-full"
+              />
+            </label>
+            <label className="space-y-2 text-sm">
+              <span>Video sınırı (MB)</span>
+              <input
+                type="number"
+                min={1}
+                max={500}
+                value={memory.max_video_size_mb}
+                onChange={(event) =>
+                  setMemory({ ...memory, max_video_size_mb: Number(event.target.value) })
+                }
+                className="field-base min-h-11 w-full"
+              />
+            </label>
+            <label className="space-y-2 text-sm sm:col-span-2">
+              <span>Yükleme sonrası teşekkür mesajı</span>
+              <textarea
+                value={memory.thank_you_message}
+                onChange={(event) =>
+                  setMemory({ ...memory, thank_you_message: event.target.value })
+                }
+                className="field-base min-h-24 w-full resize-y"
+              />
+            </label>
+          </div>
+        </section>
+      ) : null}
+
+      {shows("rsvp") ? (
+        <section className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
+          <h3 className="font-medium">LCV ve Misafir Bilgileri</h3>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Toggle
+              label="LCV açık"
+              checked={rsvp.is_enabled}
+              onChange={(value) => setRsvp({ ...rsvp, is_enabled: value })}
+            />
+            {rsvpLabels.map(([key, label]) => (
+              <Toggle
+                key={key}
+                label={label}
+                checked={Boolean(rsvp[key])}
+                onChange={(checked) => setRsvp((current) => ({ ...current!, [key]: checked }))}
+              />
+            ))}
+            <label className="space-y-2 text-sm sm:col-span-2">
+              <span>Yanıt son tarihi</span>
+              <input
+                type="datetime-local"
+                value={toLocalDateTime(rsvp.response_deadline)}
+                onChange={(event) =>
+                  setRsvp({ ...rsvp, response_deadline: toIso(event.target.value) })
+                }
+                className="field-base min-h-11 w-full"
+              />
+            </label>
+          </div>
+          <div className="mt-6 border-t border-border pt-5">
+            <h4 className="text-sm font-medium">Özel Sorular</h4>
+            <div className="mt-3 space-y-2">
+              {questions.map((question) => (
+                <div
+                  key={question.id}
+                  className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border px-4 text-sm"
+                >
+                  <span>
+                    {question.label}
+                    {question.is_required ? " *" : ""}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void removeQuestion(question.id)}
+                    aria-label="Soruyu sil"
+                    className="grid size-10 place-items-center rounded-lg text-rose hover:bg-rose/10"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <label className="space-y-2 text-sm sm:col-span-2">
-                <span>Seçenekler (her satıra bir seçenek)</span>
-                <textarea
-                  value={newQuestion.options}
+                <span>Soru</span>
+                <input
+                  value={newQuestion.label}
                   onChange={(event) =>
-                    setNewQuestion((current) => ({ ...current, options: event.target.value }))
+                    setNewQuestion((current) => ({ ...current, label: event.target.value }))
                   }
-                  className="field-base min-h-28 w-full resize-y"
+                  className="field-base min-h-11 w-full"
                 />
               </label>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => void addQuestion()}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gold/40 px-5 text-sm text-gold sm:col-span-2"
-            >
-              <Plus className="size-4" /> Soru Ekle
-            </button>
+              <label className="space-y-2 text-sm">
+                <span>Soru türü</span>
+                <select
+                  value={newQuestion.question_type}
+                  onChange={(event) =>
+                    setNewQuestion((current) => ({
+                      ...current,
+                      question_type: event.target.value as Question["question_type"],
+                    }))
+                  }
+                  className="field-base min-h-11 w-full bg-background"
+                >
+                  <option value="short_text">Kısa metin</option>
+                  <option value="long_text">Uzun metin</option>
+                  <option value="yes_no">Evet / Hayır</option>
+                  <option value="single_choice">Tek seçim</option>
+                  <option value="multiple_choice">Çoklu seçim</option>
+                  <option value="number">Sayı</option>
+                  <option value="date">Tarih</option>
+                  <option value="meal_preference">Yemek tercihi</option>
+                  <option value="transport_need">Servis ihtiyacı</option>
+                </select>
+              </label>
+              <label className="flex min-h-11 items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  checked={newQuestion.is_required}
+                  onChange={(event) =>
+                    setNewQuestion((current) => ({ ...current, is_required: event.target.checked }))
+                  }
+                />{" "}
+                Zorunlu soru
+              </label>
+              {["single_choice", "multiple_choice", "meal_preference"].includes(
+                newQuestion.question_type,
+              ) ? (
+                <label className="space-y-2 text-sm sm:col-span-2">
+                  <span>Seçenekler (her satıra bir seçenek)</span>
+                  <textarea
+                    value={newQuestion.options}
+                    onChange={(event) =>
+                      setNewQuestion((current) => ({ ...current, options: event.target.value }))
+                    }
+                    className="field-base min-h-28 w-full resize-y"
+                  />
+                </label>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => void addQuestion()}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gold/40 px-5 text-sm text-gold sm:col-span-2"
+              >
+                <Plus className="size-4" /> Soru Ekle
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <div className="sticky bottom-4 flex justify-end">
         <button
