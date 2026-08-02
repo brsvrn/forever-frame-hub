@@ -79,6 +79,7 @@ export function isMaintenanceBypassPath(pathname: string) {
     "/admin",
     "/api/admin/system-settings",
     "/api/admin/maintenance-bypass",
+    "/api/paytr-webhook",
     "/api/paytr",
     "/api/webhooks",
     "/webhooks",
