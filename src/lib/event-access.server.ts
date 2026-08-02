@@ -40,10 +40,8 @@ function assertMutationOrigin(request: Request) {
   }
 }
 
-export async function requireEventPermission(
+export async function requireAuthenticatedUser(
   request: Request,
-  invitationId: string,
-  permission: EventPermission,
   options: { mutation?: boolean } = {},
 ): Promise<{ supabase: SupabaseClient<Database>; user: User; token: string }> {
   if (options.mutation) assertMutationOrigin(request);
@@ -56,15 +54,25 @@ export async function requireEventPermission(
 
   const { data: userData, error: userError } = await supabase.auth.getUser(token);
   if (userError || !userData.user) throw new EventAccessError("Oturum geçersiz.", 401);
+  return { supabase, user: userData.user, token };
+}
+
+export async function requireEventPermission(
+  request: Request,
+  invitationId: string,
+  permission: EventPermission,
+  options: { mutation?: boolean } = {},
+): Promise<{ supabase: SupabaseClient<Database>; user: User; token: string }> {
+  const { supabase, user, token } = await requireAuthenticatedUser(request, options);
 
   const { data: allowed, error: permissionError } = await supabase.rpc("has_event_permission", {
     _invitation_id: invitationId,
     _permission: permission,
-    _user_id: userData.user.id,
+    _user_id: user.id,
   });
   if (permissionError) throw new EventAccessError("Yetki doğrulanamadı.", 500);
   if (allowed !== true) throw new EventAccessError("Bu işlem için yetkiniz yok.", 403);
-  return { supabase, user: userData.user, token };
+  return { supabase, user, token };
 }
 
 export function eventAccessErrorResponse(error: unknown) {

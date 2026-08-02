@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "@/lib/auth";
-import { getInvitationById, type InvitationRow } from "@/lib/invitations.api";
+import type { InvitationRow } from "@/lib/invitations.api";
+import { getEventDashboardAccess } from "@/lib/event-team.functions";
+import { roleHasPermission, type EventRole } from "@/lib/event-permissions";
 import {
   Loader2,
   ArrowLeft,
@@ -14,6 +16,7 @@ import {
   QrCode,
   Pencil,
   CalendarDays,
+  UserRoundCog,
 } from "lucide-react";
 
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
@@ -23,6 +26,7 @@ import { DashboardRSVP } from "@/components/dashboard/DashboardRSVP";
 import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
+import { DashboardTeam } from "@/components/dashboard/DashboardTeam";
 import { PrintableQR } from "@/components/dashboard/PrintableQR";
 import { resolveTheme } from "@/lib/theme-engine";
 
@@ -51,14 +55,23 @@ function PremiumDashboardGate() {
     );
   }
 
-  return <PremiumDashboard userId={user.id} invitationId={id} />;
+  return <PremiumDashboard invitationId={id} />;
 }
 
 type TabType =
-  "overview" | "schedule" | "storage" | "gallery" | "rsvp" | "analytics" | "print" | "settings";
+  | "overview"
+  | "schedule"
+  | "storage"
+  | "gallery"
+  | "rsvp"
+  | "analytics"
+  | "print"
+  | "team"
+  | "settings";
 
-function PremiumDashboard({ userId, invitationId }: { userId: string; invitationId: string }) {
+function PremiumDashboard({ invitationId }: { invitationId: string }) {
   const [invitation, setInvitation] = useState<InvitationRow | null>(null);
+  const [role, setRole] = useState<EventRole | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -73,6 +86,7 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
           "rsvp",
           "analytics",
           "print",
+          "team",
           "settings",
         ].includes(tab)
       ) {
@@ -84,10 +98,12 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getInvitationById(invitationId).then((data) => {
-      setInvitation(data);
-      setLoading(false);
-    });
+    getEventDashboardAccess({ data: { invitationId } })
+      .then((data) => {
+        setInvitation(data.invitation);
+        setRole(data.membership.role);
+      })
+      .finally(() => setLoading(false));
   }, [invitationId]);
 
   if (loading) {
@@ -98,7 +114,7 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
     );
   }
 
-  if (!invitation || invitation.user_id !== userId) {
+  if (!invitation || !role) {
     return (
       <div className="grid min-h-dvh place-items-center bg-background text-foreground">
         <div className="text-center">
@@ -114,13 +130,26 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
 
   const tabs = [
     { id: "overview", label: "Genel Bakış", icon: LayoutDashboard },
-    { id: "schedule", label: "Etkinlik Programı", icon: CalendarDays },
-    { id: "gallery", label: "Medya Galerisi", icon: ImageIcon },
-    { id: "rsvp", label: "Misafirler", icon: Users },
+    ...(roleHasPermission(role, "edit_schedule")
+      ? [{ id: "schedule" as const, label: "Etkinlik Programı", icon: CalendarDays }]
+      : []),
+    ...(roleHasPermission(role, "manage_gallery")
+      ? [{ id: "gallery" as const, label: "Medya Galerisi", icon: ImageIcon }]
+      : []),
+    ...(roleHasPermission(role, "view_rsvp")
+      ? [{ id: "rsvp" as const, label: "Misafirler", icon: Users }]
+      : []),
     { id: "storage", label: "Depolama", icon: Database },
     { id: "analytics", label: "İstatistikler", icon: BarChart3 },
-    { id: "print", label: "QR & Baskı", icon: QrCode },
-    { id: "settings", label: "Ayarlar", icon: Settings },
+    ...(roleHasPermission(role, "download_media")
+      ? [{ id: "print" as const, label: "QR & Baskı", icon: QrCode }]
+      : []),
+    ...(roleHasPermission(role, "manage_team")
+      ? [{ id: "team" as const, label: "Ekip ve Yetkililer", icon: UserRoundCog }]
+      : []),
+    ...(roleHasPermission(role, "edit_content")
+      ? [{ id: "settings" as const, label: "Ayarlar", icon: Settings }]
+      : []),
   ] as const;
 
   return (
@@ -146,12 +175,14 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
           >
             memorywedding.com/davet/{invitation.slug}
           </a>
-          <a
-            href={`/olustur?edit=${encodeURIComponent(invitation.id)}`}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#ee566d]/35 bg-rose/10 px-4 py-2.5 text-sm text-[#ff7087] transition-colors hover:bg-rose/20"
-          >
-            <Pencil className="h-4 w-4" /> Davetiyeyi Düzenle
-          </a>
+          {roleHasPermission(role, "edit_content") ? (
+            <a
+              href={`/olustur?edit=${encodeURIComponent(invitation.id)}`}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#ee566d]/35 bg-rose/10 px-4 py-2.5 text-sm text-[#ff7087] transition-colors hover:bg-rose/20"
+            >
+              <Pencil className="h-4 w-4" /> Davetiyeyi Düzenle
+            </a>
+          ) : null}
         </div>
 
         <nav className="flex-1 p-5 space-y-1.5">
@@ -197,6 +228,7 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
             />
           </div>
         )}
+        {activeTab === "team" && <DashboardTeam invitation={invitation} />}
         {activeTab === "settings" && <DashboardSettings invitation={invitation} />}
       </main>
     </div>

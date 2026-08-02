@@ -914,6 +914,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      accept_event_member_invitation: {
+        Args: { _token_hash: string };
+        Returns: string;
+      };
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"];

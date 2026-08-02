@@ -19,6 +19,7 @@ import { Route as PanelRouteImport } from './routes/panel'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as DavetSlugRouteImport } from './routes/davet.$slug'
+import { Route as EkipDavetiTokenRouteImport } from './routes/ekip-daveti.$token'
 import { Route as OdemeIndexRouteImport } from './routes/odeme.index'
 import { Route as OdemeBasariliRouteImport } from './routes/odeme.basarili'
 import { Route as OdemeHataRouteImport } from './routes/odeme.hata'
@@ -79,6 +80,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const DavetSlugRoute = DavetSlugRouteImport.update({
   id: '/davet/$slug',
   path: '/davet/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EkipDavetiTokenRoute = EkipDavetiTokenRouteImport.update({
+  id: '/ekip-daveti/$token',
+  path: '/ekip-daveti/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OdemeIndexRoute = OdemeIndexRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/ekip-daveti/$token': typeof EkipDavetiTokenRoute
   '/odeme/basarili': typeof OdemeBasariliRoute
   '/odeme/hata': typeof OdemeHataRoute
   '/panel/$id': typeof PanelIdRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/ekip-daveti/$token': typeof EkipDavetiTokenRoute
   '/odeme/basarili': typeof OdemeBasariliRoute
   '/odeme/hata': typeof OdemeHataRoute
   '/panel/$id': typeof PanelIdRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/davet/$slug': typeof DavetSlugRoute
+  '/ekip-daveti/$token': typeof EkipDavetiTokenRoute
   '/odeme/basarili': typeof OdemeBasariliRoute
   '/odeme/hata': typeof OdemeHataRoute
   '/panel_/$id': typeof PanelIdRoute
@@ -222,6 +231,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/ekip-daveti/$token'
     | '/odeme/basarili'
     | '/odeme/hata'
     | '/panel/$id'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/ekip-daveti/$token'
     | '/odeme/basarili'
     | '/odeme/hata'
     | '/panel/$id'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/auth/callback'
     | '/davet/$slug'
+    | '/ekip-daveti/$token'
     | '/odeme/basarili'
     | '/odeme/hata'
     | '/panel_/$id'
@@ -292,6 +304,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   DavetSlugRoute: typeof DavetSlugRoute
+  EkipDavetiTokenRoute: typeof EkipDavetiTokenRoute
   OdemeBasariliRoute: typeof OdemeBasariliRoute
   OdemeHataRoute: typeof OdemeHataRoute
   PanelIdRoute: typeof PanelIdRoute
@@ -375,6 +388,13 @@ declare module '@tanstack/react-router' {
       path: '/davet/$slug'
       fullPath: '/davet/$slug'
       preLoaderRoute: typeof DavetSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ekip-daveti/$token': {
+      id: '/ekip-daveti/$token'
+      path: '/ekip-daveti/$token'
+      fullPath: '/ekip-daveti/$token'
+      preLoaderRoute: typeof EkipDavetiTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/odeme/': {
@@ -468,6 +488,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   DavetSlugRoute: DavetSlugRoute,
+  EkipDavetiTokenRoute: EkipDavetiTokenRoute,
   OdemeBasariliRoute: OdemeBasariliRoute,
   OdemeHataRoute: OdemeHataRoute,
   PanelIdRoute: PanelIdRoute,

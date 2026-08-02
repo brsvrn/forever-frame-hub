@@ -17,15 +17,13 @@ import { appContent } from "@/lib/app-content";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { formatInviteDate } from "@/lib/invitation";
+import type { InvitationRow } from "@/lib/invitations.api";
 import {
-  deleteInvitation,
-  listMyInvitations,
-  listRsvps,
-  setPublished,
-  type InvitationRow,
-  type RsvpRow,
-} from "@/lib/invitations.api";
-import { setFreeEvent } from "@/lib/payment-actions";
+  deleteManagedEvent,
+  listAccessibleEvents,
+  setEventPublished,
+} from "@/lib/event-team.functions";
+import { roleHasPermission, type EventRole } from "@/lib/event-permissions";
 import { easeSilk } from "@/components/landing/motion-primitives";
 
 const title = "Yönetim Paneli — Davetiyeler ve RSVP | MemoryWedding";
@@ -68,21 +66,21 @@ function DashboardGate() {
       </div>
     );
   }
-  return <Dashboard userId={user.id} email={user.email ?? ""} />;
+  return <Dashboard email={user.email ?? ""} />;
 }
 
-function Dashboard({ userId, email }: { userId: string; email: string }) {
+function Dashboard({ email }: { email: string }) {
   const { lang } = useI18n();
   const c = appContent[lang].dash;
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
-  const [rows, setRows] = useState<InvitationRow[] | null>(null);
+  const [rows, setRows] = useState<{ invitation: InvitationRow; role: EventRole }[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setRows(await listMyInvitations(userId));
-  }, [userId]);
+    setRows(await listAccessibleEvents());
+  }, []);
 
   useEffect(() => {
     void load();
@@ -152,10 +150,11 @@ function Dashboard({ userId, email }: { userId: string; email: string }) {
               </Link>
             </div>
           ) : (
-            rows.map((row, index) => (
+            rows.map(({ invitation: row, role }, index) => (
               <InvitationCard
                 key={row.id}
                 row={row}
+                role={role}
                 index={index}
                 copy={c}
                 lang={lang}
@@ -173,6 +172,7 @@ function Dashboard({ userId, email }: { userId: string; email: string }) {
 
 function InvitationCard({
   row,
+  role,
   index,
   copy,
   lang,
@@ -181,6 +181,7 @@ function InvitationCard({
   onChanged,
 }: {
   row: InvitationRow;
+  role: EventRole;
   index: number;
   copy: (typeof appContent)["tr"]["dash"];
   lang: "tr" | "en";
@@ -223,13 +224,15 @@ function InvitationCard({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <a
-            href={`/olustur?edit=${encodeURIComponent(row.id)}`}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-rose/40 px-4 text-sm text-rose transition-colors hover:bg-rose/10"
-          >
-            <Pencil className="size-4" aria-hidden="true" />
-            Düzenle
-          </a>
+          {roleHasPermission(role, "edit_content") ? (
+            <a
+              href={`/olustur?edit=${encodeURIComponent(row.id)}`}
+              className="inline-flex min-h-10 items-center gap-2 rounded-full border border-rose/40 px-4 text-sm text-rose transition-colors hover:bg-rose/10"
+            >
+              <Pencil className="size-4" aria-hidden="true" />
+              Düzenle
+            </a>
+          ) : null}
           <Link
             to="/davet/$slug"
             params={{ slug: row.slug }}
@@ -246,22 +249,24 @@ function InvitationCard({
             <LayoutDashboard className="size-4" aria-hidden="true" />
             Yönet
           </Link>
-          {!(row as any).is_paid ? (
+          {!row.is_paid && role === "owner" ? (
             <div className="flex gap-2">
               <a
-                href={`/odeme?invitationId=${row.id}&packageType=${(row as any).package_type || 'standard'}`}
+                href={`/odeme?invitationId=${row.id}&packageType=${row.package_type || "standard"}`}
                 className="inline-flex min-h-10 items-center gap-2 rounded-full bg-rose px-4 text-sm text-white font-medium transition-transform hover:scale-105 shadow-sm"
               >
                 Ödeme Yap
               </a>
             </div>
-          ) : (
+          ) : row.is_paid && roleHasPermission(role, "publish_event") ? (
             <button
               type="button"
               disabled={busy}
               onClick={async () => {
                 setBusy(true);
-                await setPublished(row.id, !row.is_published);
+                await setEventPublished({
+                  data: { invitationId: row.id, isPublished: !row.is_published },
+                });
                 await onChanged();
                 setBusy(false);
               }}
@@ -269,21 +274,23 @@ function InvitationCard({
             >
               {row.is_published ? copy.unpublish : copy.publish}
             </button>
-          )}
-          <button
-            type="button"
-            disabled={busy}
-            onClick={async () => {
-              if (!window.confirm(copy.deleteConfirm)) return;
-              setBusy(true);
-              await deleteInvitation(row.id);
-              await onChanged();
-            }}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border px-4 text-sm text-muted-foreground transition-colors hover:text-rose disabled:opacity-50"
-          >
-            <Trash2 className="size-4" aria-hidden="true" />
-            <span className="sr-only sm:not-sr-only">{copy.delete}</span>
-          </button>
+          ) : null}
+          {roleHasPermission(role, "delete_event") ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                if (!window.confirm(copy.deleteConfirm)) return;
+                setBusy(true);
+                await deleteManagedEvent({ data: { invitationId: row.id } });
+                await onChanged();
+              }}
+              className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border px-4 text-sm text-muted-foreground transition-colors hover:text-rose disabled:opacity-50"
+            >
+              <Trash2 className="size-4" aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only">{copy.delete}</span>
+            </button>
+          ) : null}
         </div>
       </div>
     </motion.article>
