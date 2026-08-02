@@ -256,7 +256,8 @@ BEGIN
   RETURN CASE member_role
     WHEN 'co_manager' THEN _permission = ANY (ARRAY[
       'view_event', 'edit_content', 'edit_schedule', 'edit_theme', 'view_rsvp',
-      'manage_gallery', 'download_media', 'edit_audio', 'edit_share', 'publish_event'
+      'edit_rsvp', 'manage_gallery', 'download_media', 'edit_audio', 'edit_share',
+      'publish_event'
     ])
     WHEN 'content_manager' THEN _permission = ANY (ARRAY[
       'view_event', 'edit_content', 'edit_schedule', 'edit_theme', 'view_rsvp',
@@ -319,6 +320,7 @@ DROP POLICY IF EXISTS event_activity_logs_read ON public.event_activity_logs;
 DROP POLICY IF EXISTS event_builder_progress_member_read ON public.event_builder_progress;
 DROP POLICY IF EXISTS event_builder_progress_editor_write ON public.event_builder_progress;
 DROP POLICY IF EXISTS event_schedules_public_read ON public.event_schedules;
+DROP POLICY IF EXISTS event_schedules_member_read ON public.event_schedules;
 DROP POLICY IF EXISTS event_schedules_editor_write ON public.event_schedules;
 
 CREATE POLICY event_members_read ON public.event_members FOR SELECT TO authenticated
@@ -330,7 +332,15 @@ USING (public.has_event_permission(invitation_id, auth.uid(), 'view_audit'));
 CREATE POLICY event_builder_progress_member_read ON public.event_builder_progress FOR SELECT TO authenticated
 USING (public.is_event_member(invitation_id, auth.uid()));
 
-CREATE POLICY event_schedules_public_read ON public.event_schedules FOR SELECT TO anon, authenticated
+CREATE POLICY event_schedules_public_read ON public.event_schedules FOR SELECT TO anon
+USING (
+  is_visible AND EXISTS (
+    SELECT 1 FROM public.invitations i
+    WHERE i.id = invitation_id AND i.is_published
+  )
+);
+
+CREATE POLICY event_schedules_member_read ON public.event_schedules FOR SELECT TO authenticated
 USING (
   is_visible AND EXISTS (
     SELECT 1 FROM public.invitations i

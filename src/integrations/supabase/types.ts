@@ -593,9 +593,11 @@ export type Database = {
           parking_info: string | null;
           valet_info: string | null;
           transport_info: string | null;
+          timezone: string;
           is_visible: boolean;
           is_primary: boolean;
           sort_order: number;
+          version: number;
           created_at: string;
           updated_at: string;
         };
@@ -617,9 +619,11 @@ export type Database = {
           parking_info?: string | null;
           valet_info?: string | null;
           transport_info?: string | null;
+          timezone?: string;
           is_visible?: boolean;
           is_primary?: boolean;
           sort_order?: number;
+          version?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -641,8 +645,118 @@ export type Database = {
           parking_info?: string | null;
           valet_info?: string | null;
           transport_info?: string | null;
+          timezone?: string;
           is_visible?: boolean;
           is_primary?: boolean;
+          sort_order?: number;
+          version?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      event_feature_settings: {
+        Row: {
+          invitation_id: string;
+          opening_enabled: boolean;
+          music_enabled: boolean;
+          audio_greeting_enabled: boolean;
+          story_enabled: boolean;
+          family_enabled: boolean;
+          gallery_enabled: boolean;
+          schedule_enabled: boolean;
+          countdown_enabled: boolean;
+          map_enabled: boolean;
+          rsvp_enabled: boolean;
+          memory_box_enabled: boolean;
+          qr_upload_enabled: boolean;
+          gift_enabled: boolean;
+          wishes_enabled: boolean;
+          reactions_enabled: boolean;
+          share_enabled: boolean;
+          calendar_enabled: boolean;
+          version: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          invitation_id: string;
+          opening_enabled?: boolean;
+          music_enabled?: boolean;
+          audio_greeting_enabled?: boolean;
+          story_enabled?: boolean;
+          family_enabled?: boolean;
+          gallery_enabled?: boolean;
+          schedule_enabled?: boolean;
+          countdown_enabled?: boolean;
+          map_enabled?: boolean;
+          rsvp_enabled?: boolean;
+          memory_box_enabled?: boolean;
+          qr_upload_enabled?: boolean;
+          gift_enabled?: boolean;
+          wishes_enabled?: boolean;
+          reactions_enabled?: boolean;
+          share_enabled?: boolean;
+          calendar_enabled?: boolean;
+          version?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          invitation_id?: string;
+          opening_enabled?: boolean;
+          music_enabled?: boolean;
+          audio_greeting_enabled?: boolean;
+          story_enabled?: boolean;
+          family_enabled?: boolean;
+          gallery_enabled?: boolean;
+          schedule_enabled?: boolean;
+          countdown_enabled?: boolean;
+          map_enabled?: boolean;
+          rsvp_enabled?: boolean;
+          memory_box_enabled?: boolean;
+          qr_upload_enabled?: boolean;
+          gift_enabled?: boolean;
+          wishes_enabled?: boolean;
+          reactions_enabled?: boolean;
+          share_enabled?: boolean;
+          calendar_enabled?: boolean;
+          version?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      invitation_text_templates: {
+        Row: {
+          id: string;
+          category: string;
+          locale: string;
+          title: string;
+          body: string;
+          is_active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          category: string;
+          locale?: string;
+          title: string;
+          body: string;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: string;
+          locale?: string;
+          title?: string;
+          body?: string;
+          is_active?: boolean;
           sort_order?: number;
           created_at?: string;
           updated_at?: string;
@@ -714,37 +828,55 @@ export type Database = {
       };
       rsvps: {
         Row: {
+          adult_count: number;
+          allergy_info: string | null;
+          child_count: number;
           created_at: string;
           guest_email: string | null;
           guest_name: string;
           guest_phone: string | null;
           id: string;
           invitation_id: string;
+          meal_preference: string | null;
           note: string | null;
           party_size: number;
+          special_note: string | null;
           status: Database["public"]["Enums"]["rsvp_status"];
+          transport_required: boolean | null;
         };
         Insert: {
+          adult_count?: number;
+          allergy_info?: string | null;
+          child_count?: number;
           created_at?: string;
           guest_email?: string | null;
           guest_name: string;
           guest_phone?: string | null;
           id?: string;
           invitation_id: string;
+          meal_preference?: string | null;
           note?: string | null;
           party_size?: number;
+          special_note?: string | null;
           status?: Database["public"]["Enums"]["rsvp_status"];
+          transport_required?: boolean | null;
         };
         Update: {
+          adult_count?: number;
+          allergy_info?: string | null;
+          child_count?: number;
           created_at?: string;
           guest_email?: string | null;
           guest_name?: string;
           guest_phone?: string | null;
           id?: string;
           invitation_id?: string;
+          meal_preference?: string | null;
           note?: string | null;
           party_size?: number;
+          special_note?: string | null;
           status?: Database["public"]["Enums"]["rsvp_status"];
+          transport_required?: boolean | null;
         };
         Relationships: [
           {
@@ -808,12 +940,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user";
       event_lifecycle_status: "draft" | "ready" | "published" | "expired" | "archived";
-      event_member_role:
-        | "owner"
-        | "co_manager"
-        | "content_manager"
-        | "gallery_manager"
-        | "viewer";
+      event_member_role: "owner" | "co_manager" | "content_manager" | "gallery_manager" | "viewer";
       event_type: "wedding" | "engagement" | "henna" | "birthday" | "other";
       rsvp_status: "yes" | "no" | "maybe";
     };

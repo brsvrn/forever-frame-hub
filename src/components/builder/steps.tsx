@@ -19,7 +19,12 @@ import { cn, getPackageDisplayName } from "@/lib/utils";
 import type { BuilderContent } from "@/lib/builder-content";
 import { countdownDays, slugify, type InvitationDraft, type InviteThemeId } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
-import { getPublicThemes, type PackageFeatures, type PublicPackage } from "@/lib/invitations.api";
+import {
+  getInvitationTextTemplates,
+  getPublicThemes,
+  type PackageFeatures,
+  type PublicPackage,
+} from "@/lib/invitations.api";
 import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
 import { QrGalleryPreview } from "./QrGalleryPreview";
@@ -122,7 +127,9 @@ export function StepTheme({
                     active ? "border-gold bg-gold/10" : "border-border hover:border-gold/50",
                   )}
                 >
-                  <div className="font-semibold text-lg">{getPackageDisplayName(pkg.name, lang)}</div>
+                  <div className="font-semibold text-lg">
+                    {getPackageDisplayName(pkg.name, lang)}
+                  </div>
                   <div className="text-gold font-medium mt-1">{pkg.price} ₺</div>
                   <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
                     {pkg.features?.digital_invitation
@@ -307,35 +314,83 @@ export function StepTheme({
 
 export function StepTexts({ draft, update, copy, lang }: StepProps) {
   const c = copy.texts;
-  
+  const [textTemplates, setTextTemplates] = useState<
+    Array<{ id: string; category: string; title: string; body: string }>
+  >([]);
+
+  useEffect(() => {
+    if (lang !== "tr") return;
+    void getInvitationTextTemplates()
+      .then(setTextTemplates)
+      .catch(() => setTextTemplates([]));
+  }, [lang]);
+
   const isBirthday = draft.category === "birthday";
   const isOther = draft.category === "other";
   const isHenna = draft.category === "henna";
 
-  const partnerOneLabel = isBirthday 
-    ? (lang === "tr" ? "Doğum Günü Çocuğu Adı" : "Birthday Person's Name")
-    : isHenna 
-      ? (lang === "tr" ? "Gelin Adı" : "Bride's Name")
+  const partnerOneLabel = isBirthday
+    ? lang === "tr"
+      ? "Doğum Günü Çocuğu Adı"
+      : "Birthday Person's Name"
+    : isHenna
+      ? lang === "tr"
+        ? "Gelin Adı"
+        : "Bride's Name"
       : isOther
-        ? (lang === "tr" ? "İsim" : "First Name")
-        : (lang === "tr" ? "1. Kişi (Örn: Gelin)" : "Partner 1 (e.g., Bride)");
+        ? lang === "tr"
+          ? "İsim"
+          : "First Name"
+        : lang === "tr"
+          ? "1. Kişi (Örn: Gelin)"
+          : "Partner 1 (e.g., Bride)";
 
-  const partnerTwoLabel = isHenna 
-    ? (lang === "tr" ? "Damat Adı (İsteğe bağlı)" : "Groom's Name (Optional)")
-    : isOther 
-      ? (lang === "tr" ? "İkinci isim (İsteğe bağlı)" : "Second Name (Optional)")
-      : (lang === "tr" ? "2. Kişi (Örn: Damat)" : "Partner 2 (e.g., Groom)");
+  const partnerTwoLabel = isHenna
+    ? lang === "tr"
+      ? "Damat Adı (İsteğe bağlı)"
+      : "Groom's Name (Optional)"
+    : isOther
+      ? lang === "tr"
+        ? "İkinci isim (İsteğe bağlı)"
+        : "Second Name (Optional)"
+      : lang === "tr"
+        ? "2. Kişi (Örn: Damat)"
+        : "Partner 2 (e.g., Groom)";
 
   const showPartnerTwo = !isBirthday;
   const showFamilyInfo = !isBirthday && !isOther;
 
-  const familyTitle = isHenna 
-    ? (lang === "tr" ? `${c.family} (İsteğe bağlı)` : `${c.family} (Optional)`)
+  const familyTitle = isHenna
+    ? lang === "tr"
+      ? `${c.family} (İsteğe bağlı)`
+      : `${c.family} (Optional)`
     : c.family;
 
   return (
     <div className="space-y-8">
       <StepHeader title={c.title} desc={c.desc} />
+      {textTemplates.length > 0 ? (
+        <section>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Hazır davet metinleri
+          </h3>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {textTemplates.map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                onClick={() => update("message", template.body)}
+                className="min-h-24 rounded-2xl border border-border p-4 text-left transition-colors hover:border-gold/50 hover:bg-gold/5"
+              >
+                <span className="block text-sm font-medium">{template.title}</span>
+                <span className="mt-2 line-clamp-2 block text-xs leading-relaxed text-muted-foreground">
+                  {template.body}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label={partnerOneLabel} className={showPartnerTwo ? "" : "sm:col-span-2"}>
           {(id) => (
@@ -486,19 +541,33 @@ export function StepQrDetails({ draft, update, lang }: StepProps) {
   const isHenna = draft.category === "henna";
   const showPartnerTwo = !isBirthday;
 
-  const partnerOneLabel = isBirthday 
-    ? (lang === "tr" ? "Doğum Günü Çocuğu Adı" : "Birthday Person's Name")
-    : isHenna 
-      ? (lang === "tr" ? "Gelin Adı" : "Bride's Name")
+  const partnerOneLabel = isBirthday
+    ? lang === "tr"
+      ? "Doğum Günü Çocuğu Adı"
+      : "Birthday Person's Name"
+    : isHenna
+      ? lang === "tr"
+        ? "Gelin Adı"
+        : "Bride's Name"
       : isOther
-        ? (lang === "tr" ? "İsim" : "First Name")
-        : (lang === "tr" ? "İsim" : "First name");
+        ? lang === "tr"
+          ? "İsim"
+          : "First Name"
+        : lang === "tr"
+          ? "İsim"
+          : "First name";
 
-  const partnerTwoLabel = isHenna 
-    ? (lang === "tr" ? "Damat Adı (İsteğe bağlı)" : "Groom's Name (Optional)")
-    : isOther 
-      ? (lang === "tr" ? "İkinci isim (İsteğe bağlı)" : "Second Name (Optional)")
-      : (lang === "tr" ? "İkinci isim (isteğe bağlı)" : "Second name (optional)");
+  const partnerTwoLabel = isHenna
+    ? lang === "tr"
+      ? "Damat Adı (İsteğe bağlı)"
+      : "Groom's Name (Optional)"
+    : isOther
+      ? lang === "tr"
+        ? "İkinci isim (İsteğe bağlı)"
+        : "Second Name (Optional)"
+      : lang === "tr"
+        ? "İkinci isim (isteğe bağlı)"
+        : "Second name (optional)";
 
   return (
     <div className="space-y-8">
@@ -517,7 +586,9 @@ export function StepQrDetails({ draft, update, lang }: StepProps) {
               id={id}
               value={draft.partnerOne}
               maxLength={24}
-              placeholder={isBirthday ? (lang === "tr" ? "Can" : "Alex") : (lang === "tr" ? "Minel" : "Alex")}
+              placeholder={
+                isBirthday ? (lang === "tr" ? "Can" : "Alex") : lang === "tr" ? "Minel" : "Alex"
+              }
               onChange={(event) => update("partnerOne", event.target.value)}
             />
           )}
@@ -529,7 +600,7 @@ export function StepQrDetails({ draft, update, lang }: StepProps) {
                 id={id}
                 value={draft.partnerTwo}
                 maxLength={24}
-                placeholder={isOther ? "" : (lang === "tr" ? "Barış" : "Taylor")}
+                placeholder={isOther ? "" : lang === "tr" ? "Barış" : "Taylor"}
                 onChange={(event) => update("partnerTwo", event.target.value)}
               />
             )}
@@ -1063,8 +1134,8 @@ export function StepPublish({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-medium text-foreground">
-              {!isPaid 
-                ? "Ödeme ve Yayın" 
+              {!isPaid
+                ? "Ödeme ve Yayın"
                 : isPublished
                   ? c.successTitle || "Yayın Durumu"
                   : c.successTitle || "Yayın Durumu"}
@@ -1120,7 +1191,7 @@ export function StepPublish({
               <p className="truncate rounded-2xl border border-border bg-accent/20 px-4 py-3 text-sm text-gold">
                 {fullUrl}
               </p>
-              
+
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -1151,11 +1222,11 @@ export function StepPublish({
                 </button>
               </div>
             </div>
-            
-            <div 
+
+            <div
               className={cn(
                 "mx-auto w-32 shrink-0 overflow-hidden rounded-2xl border border-border bg-white p-3 shadow-sm transition-opacity",
-                !linkReady && "opacity-50 grayscale"
+                !linkReady && "opacity-50 grayscale",
               )}
               aria-label="QR"
             >

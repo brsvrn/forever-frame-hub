@@ -30,6 +30,8 @@ import {
 import { setAuthReturnTo } from "@/lib/auth-helpers";
 import { progressForStep, type BuilderStepId } from "@/lib/builder-schema";
 import { saveBuilderProgress } from "@/lib/builder-progress.functions";
+import { saveCoreEventSection } from "@/lib/core-content.functions";
+import { syncPrimaryScheduleFromLegacy } from "@/lib/event-schedules.functions";
 
 type LegacyBuilderStepId = "theme" | "texts" | "details" | "premium" | "preview" | "publish";
 const builderStepIds: LegacyBuilderStepId[] = [
@@ -94,6 +96,72 @@ function BuilderPage() {
   const activeStepIds = useRef<LegacyBuilderStepId[]>(builderStepIds);
   const resumedPublish = useRef(false);
 
+  const syncCoreSections = useCallback(
+    async (invitationId: string) => {
+      const bride = draft.familyInfo?.bride;
+      const groom = draft.familyInfo?.groom;
+      const familyValues = [
+        bride?.mother,
+        bride?.father,
+        bride?.familyName,
+        groom?.mother,
+        groom?.father,
+        groom?.familyName,
+      ];
+      await Promise.all([
+        saveCoreEventSection({
+          data: {
+            invitationId,
+            content: {
+              section: "family",
+              values: {
+                bride_mother: bride?.mother?.trim() || null,
+                bride_father: bride?.father?.trim() || null,
+                bride_family_name: bride?.familyName?.trim() || null,
+                groom_mother: groom?.mother?.trim() || null,
+                groom_father: groom?.father?.trim() || null,
+                groom_family_name: groom?.familyName?.trim() || null,
+                family_message: null,
+                family_photo_key: null,
+                is_enabled: familyValues.some((value) => Boolean(value?.trim())),
+              },
+            },
+          },
+        }),
+        saveCoreEventSection({
+          data: {
+            invitationId,
+            content: {
+              section: "invitation",
+              values: {
+                headline: draft.headline.trim(),
+                welcome_message: draft.message?.trim() || "",
+                invitation_text: draft.message?.trim() || "",
+                selected_template_id: null,
+              },
+            },
+          },
+        }),
+        syncPrimaryScheduleFromLegacy({
+          data: {
+            invitationId,
+            event_type: draft.category,
+            title: draft.headline.trim(),
+            event_date: draft.date || null,
+            starts_at: /^([01]\d|2[0-3]):[0-5]\d$/.test(draft.time || "") ? draft.time : null,
+            venue_name: draft.venue.trim(),
+            address: [draft.address, draft.city]
+              .map((value) => value?.trim())
+              .filter(Boolean)
+              .join(", "),
+            google_maps_url: draft.mapUrl?.trim() || null,
+          },
+        }),
+      ]);
+    },
+    [draft],
+  );
+
   useEffect(() => {
     let active = true;
     const params = new URLSearchParams(window.location.search);
@@ -152,17 +220,21 @@ function BuilderPage() {
 
   useEffect(() => {
     if (!hydrated || packagesLoading || packages.length === 0) return;
-    
+
     const params = new URLSearchParams(window.location.search);
     const pkgQuery = params.get("pkg");
     if (pkgQuery) {
       const match = packages.find((pkg) => pkg.name === pkgQuery);
       if (match && match.id !== draft.packageId) {
         update("packageId", match.id);
-        
+
         params.delete("pkg");
         const query = params.toString();
-        window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+        window.history.replaceState(
+          {},
+          "",
+          `${window.location.pathname}${query ? `?${query}` : ""}`,
+        );
         return;
       }
     }
@@ -184,7 +256,7 @@ function BuilderPage() {
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        
+
         if (!session) {
           const target = editingId
             ? `/olustur?edit=${encodeURIComponent(editingId)}`
@@ -196,9 +268,19 @@ function BuilderPage() {
 
         setSaveStatus("saving");
         // Always save as NOT published first if not paid, just draft
-        const saved = await saveInvitation(draft, session.user.id, isPaid ? nextPublished : false, editingId);
+        const saved = await saveInvitation(
+          draft,
+          session.user.id,
+          isPaid ? nextPublished : false,
+          editingId,
+        );
         setEditingId(saved.id);
-        
+        try {
+          await syncCoreSections(saved.id);
+        } catch (coreError) {
+          console.warn("Core invitation sections could not be synchronized", coreError);
+        }
+
         if (!isPaid && nextPublished) {
           // Redirect to checkout
           window.location.href = `/odeme?invitationId=${saved.id}&packageType=${draft.packageId}`;
@@ -212,7 +294,7 @@ function BuilderPage() {
         setSaveStatus("error");
       }
     },
-    [draft, editingId, isPaid]
+    [draft, editingId, isPaid, syncCoreSections],
   );
 
   useEffect(() => {
@@ -238,6 +320,11 @@ function BuilderPage() {
           setSaveStatus("saving");
           const saved = await saveInvitation(draft, session.user.id, isPublished, editingId);
           setEditingId(saved.id);
+          try {
+            await syncCoreSections(saved.id);
+          } catch (coreError) {
+            console.warn("Core invitation sections could not be synchronized", coreError);
+          }
           const currentIndex = Math.max(0, activeStepIds.current.indexOf(stepId));
           const foundationStep = foundationStepByLegacyStep[stepId];
           try {
@@ -267,7 +354,7 @@ function BuilderPage() {
       }
     }, 2000);
     return () => clearTimeout(timeout);
-  }, [draft, editingId, hydrated, isPublished, loadingExisting, stepId]);
+  }, [draft, editingId, hydrated, isPublished, loadingExisting, stepId, syncCoreSections]);
 
   const selectedPackage = packages.find((pkg) => pkg.id === draft.packageId);
   const features: PackageFeatures = selectedPackage?.features ?? {

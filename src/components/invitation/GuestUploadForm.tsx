@@ -2,9 +2,7 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Upload, X, CheckCircle, FileVideo, FileImage } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
-import { storage } from "@/lib/storage-adapter";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { finalizeGuestUpload, requestGuestUploadUrl } from "@/lib/guest-memory.functions";
 
 interface GuestUploadFormProps {
   theme: ThemeConfig;
@@ -14,6 +12,14 @@ interface GuestUploadFormProps {
 
 const MAX_FILES_PER_UPLOAD = 20;
 const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+type AllowedMimeType =
+  | "image/jpeg"
+  | "image/png"
+  | "image/webp"
+  | "image/gif"
+  | "video/mp4"
+  | "video/webm"
+  | "video/quicktime";
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -32,6 +38,7 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,72 +75,42 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
       setErrorMessage("");
 
       for (const file of files) {
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const path = `${invitationId}/${crypto.randomUUID()}-${safeName}`;
-        const { url, error } = await storage.uploadFile("memorywedding-uploads", path, file);
-
-        if (error) {
-          console.error("Storage Error:", error);
-          setErrorMessage(
-            `Dosya yüklenemedi: ${error.message || "depolama yetkisi kontrol edilemedi"}.`,
+        try {
+          const upload = await requestGuestUploadUrl({
+            data: {
+              invitationId,
+              originalName: file.name,
+              contentType: file.type as AllowedMimeType,
+              fileSize: file.size,
+            },
+          });
+          const response = await fetch(upload.url, {
+            method: "PUT",
+            body: file,
+            headers: { "Content-Type": file.type },
+          });
+          if (!response.ok) throw new Error("Dosya depolamaya aktarılamadı.");
+          const finalized = await finalizeGuestUpload({
+            data: {
+              invitationId,
+              objectKey: upload.objectKey,
+              contentType: file.type as AllowedMimeType,
+              fileSize: file.size,
+              guestName: guestName.trim() || null,
+              note: note.trim() || null,
+            },
+          });
+          completed += 1;
+          setSuccessMessage(
+            finalized.pendingModeration
+              ? `${finalized.thankYouMessage} İçeriğiniz onaylandıktan sonra anı duvarında görünecek.`
+              : finalized.thankYouMessage,
           );
-          continue;
-        }
-
-        if (url) {
-          // 2. Save metadata to database (only existing columns)
-          const uploadRecord = {
-            invitation_id: invitationId,
-            guest_name: guestName || "İsimsiz Misafir",
-            note: note || null,
-            file_url: url,
-            file_path: path,
-            file_type: file.type,
-            file_size: file.size,
-            status: "active",
-          };
-          let { error: dbError } = await supabase.from("guest_uploads").insert(uploadRecord);
-
-          // Older installations do not have file_path yet. Keep uploads working
-          // and let gallery deletion derive the path from file_url in that case.
-          if (dbError?.message.includes("file_path")) {
-            const legacyRecord = {
-              invitation_id: uploadRecord.invitation_id,
-              guest_name: uploadRecord.guest_name,
-              note: uploadRecord.note,
-              file_url: uploadRecord.file_url,
-              file_type: uploadRecord.file_type,
-              file_size: uploadRecord.file_size,
-              status: uploadRecord.status,
-            };
-            const legacyInsert = await supabase
-              .from("guest_uploads")
-              .insert(legacyRecord as unknown as typeof uploadRecord);
-            dbError = legacyInsert.error;
-
-            if (dbError?.message.includes("note")) {
-              const minimalLegacyRecord = {
-                invitation_id: uploadRecord.invitation_id,
-                guest_name: uploadRecord.guest_name,
-                file_url: uploadRecord.file_url,
-                file_type: uploadRecord.file_type,
-                file_size: uploadRecord.file_size,
-                status: uploadRecord.status,
-              };
-              const minimalInsert = await supabase
-                .from("guest_uploads")
-                .insert(minimalLegacyRecord as unknown as typeof uploadRecord);
-              dbError = minimalInsert.error;
-            }
-          }
-
-          if (dbError) {
-            console.error("DB Insert Error:", dbError);
-            await storage.deleteFile("memorywedding-uploads", path);
-            setErrorMessage(`Veritabanı hatası: ${dbError.message}`);
-          } else {
-            completed++;
-          }
+        } catch (fileError) {
+          console.error("Guest upload failed:", fileError);
+          setErrorMessage(
+            fileError instanceof Error ? fileError.message : `${file.name} yüklenemedi.`,
+          );
         }
 
         setProgress(Math.round((completed / files.length) * 100));
@@ -151,6 +128,7 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
           setNote("");
           setProgress(0);
           setErrorMessage("");
+          setSuccessMessage("");
         }, 3000);
       }
     } catch (err: any) {
@@ -313,8 +291,7 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
                   <CheckCircle className="w-16 h-16 text-emerald-400" />
                   <h4 className="text-xl font-medium">Harika!</h4>
                   <p className="text-center text-white/70 text-sm">
-                    Anılarınız başarıyla kaydedildi. Hiçbir kalite kaybı yaşanmadan çifte
-                    ulaştırılacak.
+                    {successMessage || "Anılarınız başarıyla kaydedildi."}
                   </p>
                 </motion.div>
               )}

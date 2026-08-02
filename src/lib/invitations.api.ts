@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { emptyDraft, slugify, type InvitationDraft, type InviteThemeId } from "./invitation";
 import { selectableThemes } from "./theme-engine";
-import { storage } from "./storage-adapter";
+import { getGuestUploadViewUrl } from "./r2-actions";
 
 export type InvitationRow = Tables<"invitations">;
 export type RsvpRow = Tables<"rsvps">;
@@ -194,6 +194,38 @@ export async function listRsvps(invitationId: string) {
   return data;
 }
 
+export async function getPublicSchedules(invitationId: string) {
+  const { data, error } = await supabase
+    .from("event_schedules")
+    .select("*")
+    .eq("invitation_id", invitationId)
+    .eq("is_visible", true)
+    .order("sort_order");
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function getPublicFeatureSettings(invitationId: string) {
+  const { data, error } = await supabase
+    .from("event_feature_settings")
+    .select("*")
+    .eq("invitation_id", invitationId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function getInvitationTextTemplates() {
+  const { data, error } = await supabase
+    .from("invitation_text_templates")
+    .select("*")
+    .eq("is_active", true)
+    .eq("locale", "tr")
+    .order("sort_order");
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getPublicThemes() {
   return selectableThemes.map((t, idx) => ({
     id: String(idx + 1),
@@ -262,7 +294,7 @@ export async function getDashboardStats(invitationId: string) {
   try {
     const { data: uploads, error: uploadsError } = await supabase
       .from("guest_uploads")
-      .select("file_type, file_size, file_url, guest_name, created_at")
+      .select("id, file_type, file_size, file_url, guest_name, created_at")
       .eq("invitation_id", invitationId)
       .order("created_at", { ascending: false });
 
@@ -273,7 +305,7 @@ export async function getDashboardStats(invitationId: string) {
       recentUploads = await Promise.all(
         uploads.slice(0, 6).map(async (upload) => ({
           ...upload,
-          file_url: await storage.getViewUrl("guest-uploads", upload.file_url),
+          file_url: (await getGuestUploadViewUrl({ data: { uploadId: upload.id } })).url,
         })),
       );
     }

@@ -13,6 +13,7 @@ import {
   Settings,
   QrCode,
   Pencil,
+  CalendarDays,
 } from "lucide-react";
 
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
@@ -21,6 +22,7 @@ import { DashboardGallery } from "@/components/dashboard/DashboardGallery";
 import { DashboardRSVP } from "@/components/dashboard/DashboardRSVP";
 import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
+import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
 import { PrintableQR } from "@/components/dashboard/PrintableQR";
 import { resolveTheme } from "@/lib/theme-engine";
 
@@ -52,7 +54,8 @@ function PremiumDashboardGate() {
   return <PremiumDashboard userId={user.id} invitationId={id} />;
 }
 
-type TabType = "overview" | "storage" | "gallery" | "rsvp" | "analytics" | "print" | "settings";
+type TabType =
+  "overview" | "schedule" | "storage" | "gallery" | "rsvp" | "analytics" | "print" | "settings";
 
 function PremiumDashboard({ userId, invitationId }: { userId: string; invitationId: string }) {
   const [invitation, setInvitation] = useState<InvitationRow | null>(null);
@@ -60,7 +63,19 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get("tab") as TabType;
-      if (tab && ["overview", "storage", "gallery", "rsvp", "analytics", "print", "settings"].includes(tab)) {
+      if (
+        tab &&
+        [
+          "overview",
+          "schedule",
+          "storage",
+          "gallery",
+          "rsvp",
+          "analytics",
+          "print",
+          "settings",
+        ].includes(tab)
+      ) {
         return tab;
       }
     }
@@ -99,6 +114,7 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
 
   const tabs = [
     { id: "overview", label: "Genel Bakış", icon: LayoutDashboard },
+    { id: "schedule", label: "Etkinlik Programı", icon: CalendarDays },
     { id: "gallery", label: "Medya Galerisi", icon: ImageIcon },
     { id: "rsvp", label: "Misafirler", icon: Users },
     { id: "storage", label: "Depolama", icon: Database },
@@ -159,6 +175,7 @@ function PremiumDashboard({ userId, invitationId }: { userId: string; invitation
       {/* Main Content */}
       <main className="min-w-0 flex-1 overflow-y-auto p-5 sm:p-8 xl:p-12">
         {activeTab === "overview" && <DashboardOverview invitation={invitation} />}
+        {activeTab === "schedule" && <DashboardSchedule invitation={invitation} />}
         {activeTab === "gallery" && <DashboardGallery invitation={invitation} />}
         {activeTab === "rsvp" && <DashboardRSVP invitation={invitation} />}
         {activeTab === "storage" && <DashboardStorage invitation={invitation} />}

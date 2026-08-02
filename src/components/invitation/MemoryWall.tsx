@@ -9,7 +9,7 @@ import themeEmerald from "@/assets/theme-emerald-forest.png";
 import themeComo from "@/assets/theme-lake-como-garden.png";
 import { supabase } from "@/integrations/supabase/client";
 import type { ThemeConfig } from "@/lib/theme-engine";
-import { storage } from "@/lib/storage-adapter";
+import { getGuestUploadViewUrl } from "@/lib/r2-actions";
 
 type MemoryPhoto = {
   id: string;
@@ -100,7 +100,7 @@ export function MemoryWall({
       const photosWithAccess = await Promise.all(
         activePhotos.map(async (photo) => ({
           ...photo,
-          file_url: await storage.getViewUrl("memorywedding-uploads", photo.file_url),
+          file_url: (await getGuestUploadViewUrl({ data: { uploadId: photo.id } })).url,
         })),
       );
       setPhotos(photosWithAccess);

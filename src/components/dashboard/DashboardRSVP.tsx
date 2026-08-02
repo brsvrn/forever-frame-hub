@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
 import { Download, Search, CheckCircle2, XCircle, HelpCircle, UserCheck } from "lucide-react";
-import { listRsvps, type InvitationRow, type RsvpRow } from "@/lib/invitations.api";
+import type { InvitationRow, RsvpRow } from "@/lib/invitations.api";
+import { getRsvpResults, type RsvpResults } from "@/lib/rsvp.functions";
 
 export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
   const [rsvps, setRsvps] = useState<RsvpRow[] | null>(null);
+  const [details, setDetails] = useState<RsvpResults | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "yes" | "no" | "maybe">("all");
 
   useEffect(() => {
-    listRsvps(invitation.id).then(setRsvps);
+    getRsvpResults({ data: { invitationId: invitation.id } }).then((result) => {
+      setDetails(result);
+      setRsvps(result.rsvps as RsvpRow[]);
+    });
   }, [invitation.id]);
 
   if (!rsvps) {
@@ -31,24 +36,67 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
     .filter((r) => r.status === "maybe")
     .reduce((sum, r) => sum + r.party_size, 0);
 
+  const questionLabels = new Map(
+    details?.questions.map((question) => [question.id, question.label]),
+  );
+  const scheduleLabels = new Map(
+    details?.schedules.map((schedule) => [schedule.id, schedule.title]),
+  );
+  const detailText = (rsvpId: string) => {
+    const eventNames = (details?.selections ?? [])
+      .filter((selection) => selection.rsvp_id === rsvpId && selection.attending === true)
+      .map((selection) => scheduleLabels.get(String(selection.schedule_id)))
+      .filter(Boolean);
+    const answerText = (details?.answers ?? [])
+      .filter((answer) => answer.rsvp_id === rsvpId)
+      .map(
+        (answer) =>
+          `${questionLabels.get(String(answer.question_id)) || "Soru"}: ${Array.isArray(answer.answer) ? answer.answer.join(" / ") : String(answer.answer ?? "")}`,
+      );
+    return { events: eventNames.join(" / "), answers: answerText.join(" | ") };
+  };
+
   const downloadCsv = () => {
     const escapeCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
     const labels = { yes: "Katılıyor", no: "Katılamıyor", maybe: "Belirsiz" } as const;
-    const rows = rsvps.map((rsvp) =>
-      [
+    const rows = rsvps.map((rsvp) => {
+      const extra = detailText(rsvp.id);
+      return [
         rsvp.guest_name,
         labels[rsvp.status],
         rsvp.party_size,
+        rsvp.adult_count,
+        rsvp.child_count,
         rsvp.guest_email,
         rsvp.guest_phone,
+        rsvp.meal_preference,
+        rsvp.allergy_info,
+        rsvp.transport_required ? "Evet" : "Hayır",
+        extra.events,
+        extra.answers,
         rsvp.note,
         new Date(rsvp.created_at).toLocaleString("tr-TR"),
       ]
         .map(escapeCell)
-        .join(","),
-    );
+        .join(",");
+    });
     const csv = [
-      ["Misafir Adı", "Durum", "Kişi Sayısı", "E-posta", "Telefon", "Not", "Tarih"]
+      [
+        "Misafir Adı",
+        "Durum",
+        "Kişi Sayısı",
+        "Yetişkin",
+        "Çocuk",
+        "E-posta",
+        "Telefon",
+        "Yemek",
+        "Alerji",
+        "Ulaşım",
+        "Katılacağı Etkinlikler",
+        "Özel Soru Yanıtları",
+        "Not",
+        "Tarih",
+      ]
         .map(escapeCell)
         .join(","),
       ...rows,
@@ -183,9 +231,24 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
                       <StatusLabel status={rsvp.status} />
                     </div>
                   </td>
-                  <td className="px-6 py-4">{rsvp.party_size} Kişi</td>
-                  <td className="px-6 py-4 hidden md:table-cell text-muted-foreground max-w-xs truncate">
-                    {rsvp.note || "-"}
+                  <td className="px-6 py-4">
+                    {rsvp.party_size} Kişi
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {rsvp.adult_count} yetişkin · {rsvp.child_count} çocuk
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 hidden md:table-cell text-muted-foreground max-w-sm">
+                    <span className="line-clamp-2">{rsvp.note || "-"}</span>
+                    {detailText(rsvp.id).events ? (
+                      <span className="mt-1 block text-xs text-gold">
+                        {detailText(rsvp.id).events}
+                      </span>
+                    ) : null}
+                    {detailText(rsvp.id).answers ? (
+                      <span className="mt-1 block text-xs line-clamp-2">
+                        {detailText(rsvp.id).answers}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-6 py-4 hidden lg:table-cell text-muted-foreground">
                     {new Date(rsvp.created_at).toLocaleDateString("tr-TR", {

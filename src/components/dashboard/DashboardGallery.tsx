@@ -13,7 +13,12 @@ import {
 } from "lucide-react";
 import type { InvitationRow } from "@/lib/invitations.api";
 import { supabase } from "@/integrations/supabase/client";
-import { storage } from "@/lib/storage-adapter";
+import {
+  deleteGuestUploads,
+  getGuestUploadViewUrl,
+  getR2DownloadUrl,
+  updateGuestUpload,
+} from "@/lib/r2-actions";
 import { toast } from "sonner";
 
 export interface GuestUpload {
@@ -24,6 +29,7 @@ export interface GuestUpload {
   file_type: string;
   file_size: number;
   is_favorite: boolean;
+  status: string | null;
   created_at: string;
 }
 
@@ -39,7 +45,9 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
     async function fetchUploads() {
       const { data, error } = await supabase
         .from("guest_uploads")
-        .select("*")
+        .select(
+          "id,guest_name,file_url,file_type,file_size,is_favorite,created_at,status,note,invitation_id",
+        )
         .eq("invitation_id", invitation.id)
         .order("created_at", { ascending: false });
 
@@ -47,7 +55,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
         const accessibleUploads = await Promise.all(
           (data as GuestUpload[]).map(async (upload) => ({
             ...upload,
-            file_url: await storage.getViewUrl("memorywedding-uploads", upload.file_url),
+            file_url: (await getGuestUploadViewUrl({ data: { uploadId: upload.id } })).url,
           })),
         );
         setUploads(accessibleUploads);
@@ -72,7 +80,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
           const newUpload = payload.new as GuestUpload;
           const accessibleUpload = {
             ...newUpload,
-            file_url: await storage.getViewUrl("memorywedding-uploads", newUpload.file_url),
+            file_url: (await getGuestUploadViewUrl({ data: { uploadId: newUpload.id } })).url,
           };
           setUploads((prev) => [accessibleUpload, ...prev]);
         },
@@ -93,28 +101,11 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
     if (!confirmDelete) return;
 
     const idsToDelete = Array.from(selectedIds);
-    const uploadsToDelete = uploads.filter((u) => idsToDelete.includes(u.id));
-
-    // 1. Delete from database
-    const { error: dbError } = await supabase.from("guest_uploads").delete().in("id", idsToDelete);
-
-    if (dbError) {
-      toast.error("Medya silinirken hata oluştu: " + dbError.message);
+    try {
+      await deleteGuestUploads({ data: { invitationId: invitation.id, uploadIds: idsToDelete } });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Medya silinemedi.");
       return;
-    }
-
-    // 2. Delete from storage
-    for (const upload of uploadsToDelete) {
-      if (upload.file_url) {
-        try {
-          const path = upload.file_path || storage.getFilePath("memorywedding-uploads", upload.file_url);
-          if (path) {
-            await storage.deleteFile("memorywedding-uploads", path);
-          }
-        } catch (err) {
-          console.error("Storage delete error", err);
-        }
-      }
     }
 
     setUploads((prev) => prev.filter((u) => !selectedIds.has(u.id)));
@@ -128,13 +119,9 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
     let completed = 0;
 
     try {
-      let lastError = "";
       for (const upload of items) {
-        const result = await storage.downloadFile(
-          "memorywedding-uploads",
-          upload.file_path || upload.file_url,
-        );
-        
+        const result = await getR2DownloadUrl({ data: { uploadId: upload.id } });
+
         if (result.url) {
           // Direct download via presigned URL with Content-Disposition
           const link = document.createElement("a");
@@ -143,16 +130,13 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
           link.click();
           link.remove();
           completed++;
-        } else if (result.error) {
-          console.error("Download failed for item:", upload.id, result.error);
-          lastError = result.error.message;
         }
       }
 
       if (completed === items.length) toast.success(`${completed} medya indirildi`);
       else if (completed > 0)
-        toast.warning(`${completed} medya indirildi, bazı dosyalar alınamadı. Hata: ${lastError}`);
-      else toast.error(`Dosyalar indirilemedi. Hata detay: ${lastError || "Depo okuma yetkisini kontrol edin."}`);
+        toast.warning(`${completed} medya indirildi, bazı dosyalar alınamadı.`);
+      else toast.error("Dosyalar indirilemedi. Depo okuma yetkisini kontrol edin.");
     } finally {
       setDownloading(false);
     }
@@ -161,17 +145,34 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
   const toggleFavorite = async (e: React.MouseEvent, id: string, currentStatus: boolean) => {
     e.stopPropagation(); // Kart seçimi tetiklenmesin
 
-    const { error } = await supabase
-      .from("guest_uploads")
-      .update({ is_favorite: !currentStatus })
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Favori durumu güncellenemedi: " + error.message);
-    } else {
+    try {
+      await updateGuestUpload({
+        data: { invitationId: invitation.id, uploadId: id, isFavorite: !currentStatus },
+      });
       setUploads((prev) =>
         prev.map((u) => (u.id === id ? { ...u, is_favorite: !currentStatus } : u)),
       );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Favori durumu güncellenemedi.");
+    }
+  };
+
+  const moderateUpload = async (
+    event: React.MouseEvent,
+    id: string,
+    status: "approved" | "rejected",
+  ) => {
+    event.stopPropagation();
+    try {
+      await updateGuestUpload({
+        data: { invitationId: invitation.id, uploadId: id, status },
+      });
+      setUploads((current) =>
+        current.map((upload) => (upload.id === id ? { ...upload, status } : upload)),
+      );
+      toast.success(status === "approved" ? "Medya onaylandı." : "Medya reddedildi.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Moderasyon işlemi tamamlanamadı.");
     }
   };
 
@@ -324,9 +325,16 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
                 </button>
               </div>
 
+              {upload.status === "pending" ? (
+                <div className="absolute left-3 top-3 rounded-full bg-amber-400 px-2.5 py-1 text-[0.65rem] font-semibold text-black">
+                  Onay bekliyor
+                </div>
+              ) : null}
+
               {/* Selection Indicator */}
               <div
                 className={`absolute top-3 left-3 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? "bg-gold border-gold text-black" : "border-border0 bg-background/20 opacity-0 group-hover:opacity-100"}`}
+                style={upload.status === "pending" ? { top: "3.25rem" } : undefined}
               >
                 {isSelected && <CheckSquare className="w-3 h-3" />}
               </div>
@@ -359,6 +367,24 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
                     İndir
                   </button>
                 </div>
+                {upload.status === "pending" ? (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={(event) => void moderateUpload(event, upload.id, "approved")}
+                      className="rounded-lg bg-emerald-500 px-2 py-2 text-xs font-medium text-white"
+                    >
+                      Onayla
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) => void moderateUpload(event, upload.id, "rejected")}
+                      className="rounded-lg bg-rose-500 px-2 py-2 text-xs font-medium text-white"
+                    >
+                      Reddet
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
           );

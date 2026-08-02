@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { House, Palette, RotateCcw } from "lucide-react";
-import { getPublicInvitation, rowToDraft, type InvitationRow } from "@/lib/invitations.api";
+import {
+  getPublicInvitation,
+  getPublicFeatureSettings,
+  getPublicSchedules,
+  rowToDraft,
+  type InvitationRow,
+} from "@/lib/invitations.api";
 import { useI18n, I18nProvider } from "@/lib/i18n";
 import { InvitationIntro } from "@/components/invitation/InvitationIntro";
 import { LivingBackground } from "@/components/invitation/LivingBackground";
@@ -9,6 +15,7 @@ import { PremiumAudioPlayer } from "@/components/invitation/PremiumAudioPlayer";
 import { HeroExperience } from "@/components/invitation/HeroExperience";
 import { StoryTimeline } from "@/components/invitation/StoryTimeline";
 import { EventDetails } from "@/components/invitation/EventDetails";
+import { MultiEventDetails } from "@/components/invitation/MultiEventDetails";
 import { EventProgramTimeline } from "@/components/invitation/EventProgramTimeline";
 import { PremiumRSVP } from "@/components/invitation/PremiumRSVP";
 import { PremiumQRExperience } from "@/components/invitation/PremiumQRExperience";
@@ -49,12 +56,18 @@ export const Route = createFileRoute("/davet/$slug")({
           created_at: new Date().toISOString(),
           user_id: "demo",
         } as unknown as InvitationRow,
+        schedules: [],
+        eventFeatures: null,
       };
     }
 
     const invitation = await getPublicInvitation(params.slug);
     if (!invitation || !(invitation as any).is_paid) throw notFound();
-    return { invitation };
+    const [schedules, eventFeatures] = await Promise.all([
+      getPublicSchedules(invitation.id),
+      getPublicFeatureSettings(invitation.id),
+    ]);
+    return { invitation, schedules, eventFeatures };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -104,7 +117,7 @@ export const Route = createFileRoute("/davet/$slug")({
 });
 
 function PremiumInvitePage() {
-  const { invitation } = Route.useLoaderData();
+  const { invitation, schedules, eventFeatures } = Route.useLoaderData();
   const { lang } = useI18n();
   const draft = rowToDraft(invitation as InvitationRow);
   const isDemo = invitation.slug === "demo";
@@ -118,6 +131,7 @@ function PremiumInvitePage() {
     music: true,
   };
   const [hasOpened, setHasOpened] = useState(false);
+  const openingEnabled = eventFeatures?.opening_enabled !== false;
 
   return (
     <div
@@ -136,7 +150,7 @@ function PremiumInvitePage() {
         />
       ) : null}
 
-      {!hasOpened && features.digital_invitation !== false ? (
+      {!hasOpened && features.digital_invitation !== false && openingEnabled ? (
         <InvitationIntro
           key={theme.id}
           theme={theme}
@@ -146,7 +160,7 @@ function PremiumInvitePage() {
         />
       ) : null}
 
-      {(hasOpened || features.digital_invitation === false) && (
+      {(hasOpened || !openingEnabled || features.digital_invitation === false) && (
         <div key={`invite-${theme.id}`}>
           <LivingBackground theme={theme} />
 
@@ -154,28 +168,44 @@ function PremiumInvitePage() {
             {features.digital_invitation !== false ? (
               <>
                 <HeroExperience draft={draft} theme={theme} lang={lang} />
-                <StoryTimeline draft={draft} theme={theme} />
-                <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
-                <EventDetails draft={draft} theme={theme} lang={lang} />
-                <PremiumRSVP theme={theme} invitationId={invitation.id} />
+                {eventFeatures?.story_enabled !== false ? (
+                  <StoryTimeline draft={draft} theme={theme} />
+                ) : null}
+                {eventFeatures?.schedule_enabled !== false ? (
+                  <>
+                    <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
+                    {schedules.length > 0 ? (
+                      <MultiEventDetails schedules={schedules} theme={theme} lang={lang} />
+                    ) : (
+                      <EventDetails draft={draft} theme={theme} lang={lang} />
+                    )}
+                  </>
+                ) : null}
+                {eventFeatures?.rsvp_enabled !== false ? (
+                  <PremiumRSVP theme={theme} invitationId={invitation.id} />
+                ) : null}
               </>
             ) : null}
 
             {features.qr_gallery !== false ? (
               <>
-                <MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} />
-                <PremiumQRExperience theme={theme} invitationId={invitation.id} />
+                {eventFeatures?.memory_box_enabled !== false ? (
+                  <MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} />
+                ) : null}
+                {eventFeatures?.qr_upload_enabled !== false ? (
+                  <PremiumQRExperience theme={theme} invitationId={invitation.id} />
+                ) : null}
               </>
             ) : null}
           </main>
         </div>
       )}
 
-      {features.music !== false ? (
+      {features.music !== false && eventFeatures?.music_enabled !== false ? (
         <PremiumAudioPlayer
           theme={theme}
-          autoPlay={hasOpened || features.digital_invitation === false}
-          hideUI={!hasOpened}
+          autoPlay={hasOpened || !openingEnabled || features.digital_invitation === false}
+          hideUI={!hasOpened && openingEnabled}
           musicUrl={draft.musicUrl}
         />
       ) : null}
