@@ -52,10 +52,10 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
-`2c4fbb1` commit’i itibarıyla:
+`393ab74` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
-- `npm test`: **13 test dosyası / 43 test başarılı**
+- `npm test`: **14 test dosyası / 44 test başarılı**
 - `npm run build`: başarılı
 - Bilinen build uyarısı: bazı istemci chunkları 500 kB üzerinde. Bu bir sonraki performans fazında code splitting ile ele alınmalıdır.
 
@@ -63,6 +63,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `393ab74` | SEO uyumlu tema kataloğu, tema detayları, canlı demo ve builder bağlantısı |
 | `2c4fbb1` | Tekli/çoklu etkinlikler için Google, Outlook, Apple ve `.ics` takvim akışı |
 | `4239f2c` | Gelişmiş LCV doğrulaması, rapor kartları ve Excel/PDF/CSV çıktıları |
 | `29593ba` | Güvenli, markalı 1200×630 Open Graph/WhatsApp görsel üretimi |
@@ -307,9 +308,17 @@ Eksik:
 
 ### 7.1 Tema altyapısının kalan kısmı
 
-- Her tema için `/temalar/:slug` tanıtım sayfası.
-- Uzun/kısa açıklama, özellikler, renk paleti, ekran görüntüleri, benzer temalar ve SSS.
-- Tema bazlı SEO ve gerçek OG görseli.
+Var:
+
+- Tüm seçilebilir temalar için `/temalar/:slug` tanıtım sayfası ve `/temalar` kataloğu.
+- Kategori, açıklama, renk paleti, desteklenen özellikler ve telefon görünümü.
+- Tema bazlı title/description/Open Graph metadata, canonical URL ve sitemap kayıtları.
+- Canlı demoyu seçilen temayla açma ve builder'a tema seçimini taşıma.
+
+Eksik:
+
+- Tema bazlı ayrıntılı ekran görüntüsü galerileri, benzer temalar ve SSS.
+- Tema tanımlarında editoryal uzun açıklama ve etkinlik türleri.
 - `supportedSections`, `imageSlots`, `galleryStyles`, `openingAnimations` alanlarının veri modeline tam taşınması.
 - Pasif temanın yeni müşteriden gizlenip eski etkinlikte çalışmaya devam etmesi.
 - Tema yönetiminin statik `theme-engine` ve Supabase kayıtları arasında tek kaynak stratejisi.
@@ -361,7 +370,7 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P0 — Önce mevcut son işi doğrula
 
-1. `feature/platform-foundation` ve `main` dallarının `2c4fbb1` veya daha yeni committe olduğunu doğrula.
+1. `feature/platform-foundation` ve `main` dallarının `393ab74` veya daha yeni committe olduğunu doğrula.
 2. Vercel dağıtımının başarılı olduğunu kontrol et.
 3. Admin bakım bypass ile `/olustur` adım 7'yi aç.
 4. Üç katalog parçasını ayrı ayrı önizle ve kaydet.
@@ -373,9 +382,9 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 Kişisel davetli bağlantısını LCV yanıtıyla ilişkilendir, yanıt vermeyenler listesini ve özel soru toplu raporlarını aynı ortak servis üzerinden tamamla. Mevcut koşullu formu ve dışa aktarmaları yeniden yazma.
 
-### P2 — Tema sayfaları ve tema schema
+### P2 — Tema schema'yı tamamla
 
-Tema tanıtım rotaları, SEO, desteklenen modüller, görsel slotlar ve tema bazlı açılış/galeri seçenekleri.
+Mevcut tema tanıtım rotalarını yeniden yazmadan desteklenen modüller, görsel slotlar, etkinlik türleri ve tema bazlı açılış/galeri seçeneklerini ortak schema'ya ekle.
 
 ### P2 — Kontrollü gelişmiş editör
 
@@ -437,6 +446,7 @@ PayTR değişkenlerini mevcut canlı ayarlardan isim/değer değiştirmeden koru
 | LCV formu ve sunucu işlemleri | `src/components/invitation/PremiumRSVP.tsx` ve `src/lib/rsvp.functions.ts` |
 | LCV paneli ve dışa aktarma | `src/components/dashboard/DashboardRSVP.tsx` ve `src/lib/rsvp-export.ts` |
 | Takvim bağlantıları ve `.ics` | `src/components/invitation/CalendarLinks.tsx`, `src/lib/calendar.ts` ve `src/routes/api.calendar.$scheduleId.ts` |
+| Tema katalog/detay içeriği | `src/routes/temalar.index.tsx`, `src/routes/temalar.$slug.tsx` ve `src/lib/theme-pages.ts` |
 | Etkinlik izinleri | `src/lib/event-permissions.ts` ve `src/lib/event-access.server.ts` |
 | Ekip yönetimi | `src/lib/event-team.functions.ts` |
 | Çoklu program | `src/lib/event-schedules.functions.ts` |
