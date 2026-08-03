@@ -52,10 +52,10 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
-`29593ba` commit’i itibarıyla:
+`4239f2c` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
-- `npm test`: **12 test dosyası / 37 test başarılı**
+- `npm test`: **13 test dosyası / 41 test başarılı**
 - `npm run build`: başarılı
 - Bilinen build uyarısı: bazı istemci chunkları 500 kB üzerinde. Bu bir sonraki performans fazında code splitting ile ele alınmalıdır.
 
@@ -63,6 +63,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `4239f2c` | Gelişmiş LCV doğrulaması, rapor kartları ve Excel/PDF/CSV çıktıları |
 | `29593ba` | Güvenli, markalı 1200×630 Open Graph/WhatsApp görsel üretimi |
 | `db61921` | Lisanslı hazır müzik kataloğu ve YouTube kaynakları |
 | `daeaf60` | Paylaşım görseli üzerinde çift isimleri |
@@ -228,16 +229,18 @@ Var:
 
 - Mevcut LCV akışı.
 - Gelişmiş ayar ve özel soru tabloları.
-- Temel panel göstergeleri.
+- Katılım durumuna göre koşullu misafir alanları.
+- Etkinlik bazlı katılım seçimi ve sunucu doğrulaması.
+- Kısa/uzun metin, evet-hayır, tek/çoklu seçim, sayı, tarih, yemek ve servis soru türleri.
+- Yetişkin, çocuk, ulaşım, yemek ve etkinlik bazlı panel raporları.
+- Güvenli Excel SpreadsheetML, PDF ve CSV dışa aktarma.
 
 Eksik veya canlı uçtan uca doğrulanmadı:
 
-- Katılıyorum/katılamıyorum koşullu alanlarının tamamı.
-- Etkinlik bazlı seçimlerin tam yönetim ekranı.
-- Tüm özel soru türleri.
 - Yanıt vermeyenler listesi.
-- Excel ve PDF dışa aktarma.
-- Yemek, çocuk, servis ve özel soru raporları.
+- Özel soru yanıtlarının toplu/aggregate raporu.
+- Kişisel davetli bağlantısı ile verilen LCV yanıtının bağlantı kaydına otomatik işlenmesi.
+- Form, rapor ve Excel/PDF çıktılarının canlı ve fiziksel mobil cihaz testi.
 
 ### 6.3 Anı Kutusu
 
@@ -345,7 +348,7 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P0 — Önce mevcut son işi doğrula
 
-1. `feature/platform-foundation` ve `main` dallarının `29593ba` veya daha yeni committe olduğunu doğrula.
+1. `feature/platform-foundation` ve `main` dallarının `4239f2c` veya daha yeni committe olduğunu doğrula.
 2. Vercel dağıtımının başarılı olduğunu kontrol et.
 3. Admin bakım bypass ile `/olustur` adım 7'yi aç.
 4. Üç katalog parçasını ayrı ayrı önizle ve kaydet.
@@ -355,7 +358,7 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P1 — Gelişmiş LCV'yi tamamla
 
-Özel sorular, etkinlik bazlı katılım, koşullu alanlar, raporlar ve dışa aktarmayı aynı ortak servis üzerinden tamamla.
+Kişisel davetli bağlantısını LCV yanıtıyla ilişkilendir, yanıt vermeyenler listesini ve özel soru toplu raporlarını aynı ortak servis üzerinden tamamla. Mevcut koşullu formu ve dışa aktarmaları yeniden yazma.
 
 ### P1 — Takvim sistemi
 
@@ -422,6 +425,8 @@ PayTR değişkenlerini mevcut canlı ayarlardan isim/değer değiştirmeden koru
 | Davetiye müzik oynatıcı | `src/components/invitation/PremiumAudioPlayer.tsx` |
 | Paylaşım görsel endpoint'i | `src/routes/api.share-image.$slug.ts` |
 | Paylaşım görsel güvenliği/şablonu | `src/lib/share-image.ts` |
+| LCV formu ve sunucu işlemleri | `src/components/invitation/PremiumRSVP.tsx` ve `src/lib/rsvp.functions.ts` |
+| LCV paneli ve dışa aktarma | `src/components/dashboard/DashboardRSVP.tsx` ve `src/lib/rsvp-export.ts` |
 | Etkinlik izinleri | `src/lib/event-permissions.ts` ve `src/lib/event-access.server.ts` |
 | Ekip yönetimi | `src/lib/event-team.functions.ts` |
 | Çoklu program | `src/lib/event-schedules.functions.ts` |
