@@ -31,6 +31,7 @@ import { Route as SozlesmelerTeslimatRouteImport } from './routes/sozlesmeler.te
 import { Route as ApiAdminMaintenanceBypassRouteImport } from './routes/api.admin.maintenance-bypass'
 import { Route as ApiAdminSystemSettingsRouteImport } from './routes/api.admin.system-settings'
 import { Route as ApiCalendarScheduleIdRouteImport } from './routes/api.calendar.$scheduleId'
+import { Route as ApiShareImageSlugRouteImport } from './routes/api.share-image.$slug'
 import { Route as DSlugTokenRouteImport } from './routes/d.$slug.$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -145,6 +146,11 @@ const ApiCalendarScheduleIdRoute = ApiCalendarScheduleIdRouteImport.update({
   path: '/api/calendar/$scheduleId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiShareImageSlugRoute = ApiShareImageSlugRouteImport.update({
+  id: '/api/share-image/$slug',
+  path: '/api/share-image/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DSlugTokenRoute = DSlugTokenRouteImport.update({
   id: '/d/$slug/$token',
   path: '/d/$slug/$token',
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
 }
 export interface FileRoutesByTo {
@@ -199,6 +206,7 @@ export interface FileRoutesByTo {
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
 }
 export interface FileRoutesById {
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
 }
 export interface FileRouteTypes {
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/api/share-image/$slug'
     | '/d/$slug/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/api/share-image/$slug'
     | '/d/$slug/$token'
   id:
     | '__root__'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/api/share-image/$slug'
     | '/d/$slug/$token'
   fileRoutesById: FileRoutesById
 }
@@ -328,6 +340,7 @@ export interface RootRouteChildren {
   ApiAdminMaintenanceBypassRoute: typeof ApiAdminMaintenanceBypassRoute
   ApiAdminSystemSettingsRoute: typeof ApiAdminSystemSettingsRoute
   ApiCalendarScheduleIdRoute: typeof ApiCalendarScheduleIdRoute
+  ApiShareImageSlugRoute: typeof ApiShareImageSlugRoute
   DSlugTokenRoute: typeof DSlugTokenRoute
 }
 
@@ -487,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCalendarScheduleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/share-image/$slug': {
+      id: '/api/share-image/$slug'
+      path: '/api/share-image/$slug'
+      fullPath: '/api/share-image/$slug'
+      preLoaderRoute: typeof ApiShareImageSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/d/$slug/$token': {
       id: '/d/$slug/$token'
       path: '/d/$slug/$token'
@@ -520,6 +540,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminMaintenanceBypassRoute: ApiAdminMaintenanceBypassRoute,
   ApiAdminSystemSettingsRoute: ApiAdminSystemSettingsRoute,
   ApiCalendarScheduleIdRoute: ApiCalendarScheduleIdRoute,
+  ApiShareImageSlugRoute: ApiShareImageSlugRoute,
   DSlugTokenRoute: DSlugTokenRoute,
 }
 export const routeTree = rootRouteImport

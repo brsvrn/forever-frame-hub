@@ -96,9 +96,10 @@ export const Route = createFileRoute("/davet/$slug")({
       `${names} sizi özel günlerinde aralarında görmek istiyor.`;
     const siteOrigin = import.meta.env.VITE_SITE_URL || "https://www.memory-wedding.com";
     const pageUrl = `${siteOrigin}/davet/${inv.slug}`;
-    const themeImage = share?.use_theme_image === false ? null : resolveTheme(inv.theme).image;
-    const rawShareImage = share?.cover_image_url || inv.cover_photo || themeImage;
-    const shareImage = rawShareImage ? new URL(rawShareImage, siteOrigin).toString() : null;
+    const shareImageVersion = encodeURIComponent(
+      String(share?.version || share?.updated_at || inv.updated_at || inv.theme || "1"),
+    );
+    const shareImage = `${siteOrigin}/api/share-image/${encodeURIComponent(inv.slug)}?v=${shareImageVersion}`;
     const meta = [
       { title: pageTitle },
       { name: "description", content: pageDesc },
@@ -111,10 +112,12 @@ export const Route = createFileRoute("/davet/$slug")({
       { name: "twitter:description", content: pageDesc },
     ];
 
-    if (shareImage) {
-      meta.push({ property: "og:image", content: shareImage });
-      meta.push({ name: "twitter:image", content: shareImage });
-    }
+    meta.push({ property: "og:image", content: shareImage });
+    meta.push({ property: "og:image:width", content: "1200" });
+    meta.push({ property: "og:image:height", content: "630" });
+    meta.push({ property: "og:image:type", content: "image/png" });
+    meta.push({ property: "og:image:alt", content: `${names} davetiyesi` });
+    meta.push({ name: "twitter:image", content: shareImage });
 
     return { meta };
   },
