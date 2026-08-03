@@ -52,10 +52,10 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
-`7201d43` commit’i itibarıyla:
+`ce35bf4` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
-- `npm test`: **16 test dosyası / 49 test başarılı**
+- `npm test`: **17 test dosyası / 51 test başarılı**
 - `npm run build`: başarılı
 - Bilinen build uyarısı: bazı istemci chunkları 500 kB üzerinde. Bu bir sonraki performans fazında code splitting ile ele alınmalıdır.
 
@@ -63,6 +63,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `ce35bf4` | `GTM-KSV2TJVL` Google Tag Manager kurulumu; normal, bakım ve hata HTML yolları |
 | `7201d43` | Tema etkinlik türleri, modüller, görsel slotlar, açılışlar ve galeri stilleri için ortak yetenek şeması |
 | `c144284` | Özel LCV sorularının panel, Excel ve PDF toplu sonuç raporları |
 | `2c05a96` | Kişisel davetli bağlantılarının LCV formu, kota/etkinlik doğrulaması ve yanıt bekleyenler paneliyle bağlanması |
@@ -360,6 +361,8 @@ Tam serbest Canva benzeri editör yapılmamalıdır.
 
 ### 7.5 Analitik olaylar
 
+Google Tag Manager `GTM-KSV2TJVL` kök uygulama HTML'ine, bakım sayfasına ve sunucu hata sayfasına eklenmiştir. Bakım sayfası CSP'si gerekli Google Tag Manager/Analytics kaynaklarına izin verir. Konteynerin Google tarafında yayınlanması ve canlı Tag Assistant doğrulaması yine gereklidir.
+
 Ana dokümanda listelenen builder, tema, ekip, paylaşım, ses, LCV, QR, kişisel bağlantı, anı ve editör olaylarının tamamı ortak analitik servise bağlanmalıdır.
 
 Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya token gönderilmemelidir.
@@ -377,7 +380,7 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P0 — Önce mevcut son işi doğrula
 
-1. `feature/platform-foundation` ve `main` dallarının `7201d43` veya daha yeni committe olduğunu doğrula.
+1. `feature/platform-foundation` ve `main` dallarının `ce35bf4` veya daha yeni committe olduğunu doğrula.
 2. Vercel dağıtımının başarılı olduğunu kontrol et.
 3. Admin bakım bypass ile `/olustur` adım 7'yi aç.
 4. Üç katalog parçasını ayrı ayrı önizle ve kaydet.
