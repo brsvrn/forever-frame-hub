@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { z } from "zod";
 import { House, Palette, RotateCcw } from "lucide-react";
@@ -158,7 +158,23 @@ function PremiumInvitePage() {
     music: true,
   };
   const [hasOpened, setHasOpened] = useState(false);
+  const [personalGuestToken, setPersonalGuestToken] = useState<string | undefined>();
   const openingEnabled = eventFeatures?.opening_enabled !== false;
+
+  useEffect(() => {
+    const receivePersonalGuest = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.source !== window.parent) return;
+      if (
+        event.data?.type === "mw-personal-guest" &&
+        typeof event.data.token === "string" &&
+        /^[a-f0-9]{64}$/.test(event.data.token)
+      ) {
+        setPersonalGuestToken(event.data.token);
+      }
+    };
+    window.addEventListener("message", receivePersonalGuest);
+    return () => window.removeEventListener("message", receivePersonalGuest);
+  }, []);
 
   return (
     <div
@@ -228,7 +244,11 @@ function PremiumInvitePage() {
                   </>
                 ) : null}
                 {eventFeatures?.rsvp_enabled !== false ? (
-                  <PremiumRSVP theme={theme} invitationId={invitation.id} />
+                  <PremiumRSVP
+                    theme={theme}
+                    invitationId={invitation.id}
+                    guestToken={personalGuestToken}
+                  />
                 ) : null}
               </>
             ) : null}

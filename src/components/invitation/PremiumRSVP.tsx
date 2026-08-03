@@ -12,7 +12,15 @@ function questionOptions(value: unknown) {
     : [];
 }
 
-export function PremiumRSVP({ theme, invitationId }: { theme: ThemeConfig; invitationId: string }) {
+export function PremiumRSVP({
+  theme,
+  invitationId,
+  guestToken,
+}: {
+  theme: ThemeConfig;
+  invitationId: string;
+  guestToken?: string;
+}) {
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<"yes" | "no" | "maybe" | null>(null);
   const [name, setName] = useState("");
@@ -32,10 +40,21 @@ export function PremiumRSVP({ theme, invitationId }: { theme: ThemeConfig; invit
 
   useEffect(() => {
     if (invitationId === "demo-id") return;
-    void getPublicRsvpForm({ data: { invitationId } })
-      .then(setForm)
+    void getPublicRsvpForm({ data: { invitationId, guestToken } })
+      .then((loaded) => {
+        setForm(loaded);
+        if (loaded.personalGuest) {
+          setName(loaded.personalGuest.name);
+          setEmail(loaded.personalGuest.email || "");
+          setPhone(loaded.personalGuest.phone || "");
+          setPartySize(Math.max(1, loaded.personalGuest.invitedPartySize));
+          setScheduleSelections(
+            Object.fromEntries(loaded.personalGuest.scheduleIds.map((id: string) => [id, true])),
+          );
+        }
+      })
       .catch(() => setError("LCV ayarları yüklenemedi."));
-  }, [invitationId]);
+  }, [guestToken, invitationId]);
 
   const handleSubmit = async () => {
     if (!name.trim() || !status) {
@@ -72,6 +91,7 @@ export function PremiumRSVP({ theme, invitationId }: { theme: ThemeConfig; invit
               status === "no"
                 ? []
                 : Object.entries(answers).map(([questionId, answer]) => ({ questionId, answer })),
+            guestToken,
           },
         });
       }

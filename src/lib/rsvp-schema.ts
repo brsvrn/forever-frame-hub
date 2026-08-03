@@ -23,6 +23,7 @@ export const advancedRsvpSubmissionSchema = z.object({
     .default([]),
   answers: z.array(rsvpAnswerSchema).max(100).default([]),
   website: z.string().max(0).optional(),
+  guestToken: z.string().length(64).optional(),
 });
 
 export type AdvancedRsvpSubmission = z.infer<typeof advancedRsvpSubmissionSchema>;

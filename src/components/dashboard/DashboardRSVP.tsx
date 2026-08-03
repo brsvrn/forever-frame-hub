@@ -258,7 +258,7 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-center justify-center text-center">
           <p className="text-muted-foreground text-sm mb-1">Toplam Yanıt</p>
           <p className="text-2xl font-semibold text-foreground">{rsvps.length}</p>
@@ -274,6 +274,10 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
         <div className="bg-surface border border-amber-900/30 rounded-xl p-4 flex flex-col items-center justify-center text-center">
           <p className="text-amber-500/70 text-sm mb-1">Belirsiz</p>
           <p className="text-2xl font-semibold text-amber-400">{totalMaybe}</p>
+        </div>
+        <div className="bg-surface border border-sky-900/30 rounded-xl p-4 flex flex-col items-center justify-center text-center">
+          <p className="text-sky-500/70 text-sm mb-1">Yanıt Beklenen</p>
+          <p className="text-2xl font-semibold text-sky-400">{details?.pendingGuestLinks.length || 0}</p>
         </div>
       </div>
 
@@ -326,6 +330,42 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
           </div>
         </section>
       </div>
+
+      {details?.pendingGuestLinks.length ? (
+        <section className="rounded-2xl border border-sky-900/30 bg-card/30 p-5 sm:p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h3 className="font-display text-2xl">Yanıt Vermeyen Davetliler</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Kişisel bağlantı gönderilmiş ancak henüz LCV yanıtı alınmamış davetliler.
+              </p>
+            </div>
+            <span className="rounded-full bg-sky-500/10 px-3 py-1 text-sm text-sky-400">
+              {details.pendingGuestLinks.length} kişi
+            </span>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {details.pendingGuestLinks.map((guest) => (
+              <article key={guest.id} className="rounded-xl border border-border bg-surface p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-foreground">{guest.guest_name}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {guest.guest_email || guest.guest_phone || "İletişim bilgisi yok"}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{guest.invited_party_size} kişi</span>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {guest.view_count > 0
+                    ? `Bağlantı ${guest.view_count} kez açıldı`
+                    : "Bağlantı henüz açılmadı"}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">

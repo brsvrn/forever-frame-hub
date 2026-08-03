@@ -15,6 +15,7 @@ import {
   prepareAudioUploadSchema,
 } from "./advanced-event-schema";
 import { getMusicLibraryTrack, youtubeWatchUrl } from "./music-library";
+import { createOpaqueToken, hashOpaqueToken } from "./token.server";
 
 const invitationInput = z.object({ invitationId: z.string().uuid() });
 const saveInput = invitationInput.extend({
@@ -33,21 +34,6 @@ function requestOrThrow() {
   const request = getRequest();
   if (!request) throw new Error("İstek bilgisi bulunamadı.");
   return request;
-}
-
-function bytesToHex(bytes: Uint8Array) {
-  return Array.from(bytes, (item) => item.toString(16).padStart(2, "0")).join("");
-}
-
-async function hashToken(token: string) {
-  return bytesToHex(
-    new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token))),
-  );
-}
-
-function createToken() {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return bytesToHex(bytes);
 }
 
 const sectionConfig = {
@@ -442,8 +428,8 @@ export const createEventGuestLink = createServerFn({ method: "POST" })
     const { user } = await requireEventPermission(request, data.invitationId, "edit_rsvp", {
       mutation: true,
     });
-    const token = createToken();
-    const tokenHash = await hashToken(token);
+    const token = createOpaqueToken();
+    const tokenHash = await hashOpaqueToken(token);
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
     const { data: invitation } = await admin
@@ -489,7 +475,7 @@ export const resolvePersonalGuestLink = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-    const tokenHash = await hashToken(data.token);
+    const tokenHash = await hashOpaqueToken(data.token);
     const { data: link, error } = await admin
       .from("event_guest_links")
       .select(

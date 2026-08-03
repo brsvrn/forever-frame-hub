@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
+import { useRef } from "react";
 import { resolvePersonalGuestLink } from "@/lib/advanced-event.functions";
 
 export const Route = createFileRoute("/d/$slug/$token")({
@@ -31,11 +32,21 @@ export const Route = createFileRoute("/d/$slug/$token")({
 
 function PersonalInvitation() {
   const guest = Route.useLoaderData();
+  const { token } = Route.useParams();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const sendGuestToken = () => {
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: "mw-personal-guest", token },
+      window.location.origin,
+    );
+  };
   return (
     <div className="relative h-dvh overflow-hidden bg-slate-950">
       <iframe
+        ref={iframeRef}
         title={`${guest.guestName} için davetiye`}
         src={`/davet/${guest.invitationSlug}`}
+        onLoad={sendGuestToken}
         className="h-full w-full border-0"
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center bg-gradient-to-b from-black/85 via-black/35 to-transparent px-5 pb-16 pt-[max(1.25rem,env(safe-area-inset-top))] text-center text-white">

@@ -8,7 +8,10 @@ import {
 } from "./rsvp-schema";
 import type { Json } from "@/integrations/supabase/types";
 
-const publicFormInput = z.object({ invitationId: z.string().uuid() });
+const publicFormInput = z.object({
+  invitationId: z.string().uuid(),
+  guestToken: z.string().length(64).optional(),
+});
 
 export type RsvpResults = {
   rsvps: Array<{
@@ -32,6 +35,15 @@ export type RsvpResults = {
   answers: Array<{ rsvp_id: string; question_id: string; answer: Json }>;
   questions: Array<{ id: string; label: string }>;
   schedules: Array<{ id: string; title: string }>;
+  pendingGuestLinks: Array<{
+    id: string;
+    guest_name: string;
+    guest_email: string | null;
+    guest_phone: string | null;
+    invited_party_size: number;
+    last_opened_at: string | null;
+    view_count: number;
+  }>;
 };
 
 export const getRsvpResults = createServerFn({ method: "GET" })
@@ -43,7 +55,7 @@ export const getRsvpResults = createServerFn({ method: "GET" })
     await requireEventPermission(request, data.invitationId, "view_rsvp");
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-    const [{ data: rsvps }, { data: questions }, { data: schedules }] = await Promise.all([
+    const [{ data: rsvps }, { data: questions }, { data: schedules }, { data: pendingLinks }] = await Promise.all([
       admin
         .from("rsvps")
         .select("*")
@@ -54,6 +66,14 @@ export const getRsvpResults = createServerFn({ method: "GET" })
         .select("id,label")
         .eq("invitation_id", data.invitationId),
       admin.from("event_schedules").select("id,title").eq("invitation_id", data.invitationId),
+      admin
+        .from("event_guest_links")
+        .select("id,guest_name,guest_email,guest_phone,invited_party_size,last_opened_at,view_count")
+        .eq("invitation_id", data.invitationId)
+        .is("rsvp_status", null)
+        .is("revoked_at", null)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+        .order("created_at", { ascending: false }),
     ]);
     const rsvpIds = (rsvps ?? []).map((row) => row.id);
     let selections: RsvpResults["selections"] = [];
@@ -80,6 +100,7 @@ export const getRsvpResults = createServerFn({ method: "GET" })
       answers,
       questions: (questions ?? []) as RsvpResults["questions"],
       schedules: (schedules ?? []) as RsvpResults["schedules"],
+      pendingGuestLinks: (pendingLinks ?? []) as RsvpResults["pendingGuestLinks"],
     } satisfies RsvpResults;
   });
 
@@ -121,7 +142,31 @@ export const getPublicRsvpForm = createServerFn({ method: "GET" })
     if (!invitation?.is_published || !invitation.is_paid || settings?.is_enabled === false) {
       throw new Error("LCV formu kullanıma açık değil.");
     }
-    return { settings, questions: questions ?? [], schedules: schedules ?? [] };
+    let personalGuest = null;
+    if (data.guestToken) {
+      const { hashOpaqueToken } = await import("./token.server");
+      const tokenHash = await hashOpaqueToken(data.guestToken);
+      const { data: link } = await admin
+        .from("event_guest_links")
+        .select("id,guest_name,guest_email,guest_phone,invited_party_size,schedule_ids,expires_at,revoked_at,rsvp_status")
+        .eq("invitation_id", data.invitationId)
+        .eq("token_hash", tokenHash)
+        .maybeSingle();
+      if (link && !link.revoked_at && !link.rsvp_status && (!link.expires_at || new Date(link.expires_at) > new Date())) {
+        personalGuest = {
+          id: link.id,
+          name: link.guest_name,
+          email: link.guest_email,
+          phone: link.guest_phone,
+          invitedPartySize: link.invited_party_size,
+          scheduleIds: link.schedule_ids,
+        };
+      }
+    }
+    const visibleSchedules = personalGuest?.scheduleIds?.length
+      ? (schedules ?? []).filter((schedule) => personalGuest.scheduleIds.includes(schedule.id))
+      : schedules ?? [];
+    return { settings, questions: questions ?? [], schedules: visibleSchedules, personalGuest };
   });
 
 export const submitAdvancedRsvp = createServerFn({ method: "POST" })
@@ -167,6 +212,26 @@ export const submitAdvancedRsvp = createServerFn({ method: "POST" })
     if (data.status !== "no" && settings?.collect_email && !data.guestEmail)
       throw new Error("E-posta adresi zorunludur.");
 
+    let personalLink: {
+      id: string;
+      invited_party_size: number;
+      schedule_ids: string[];
+    } | null = null;
+    if (data.guestToken) {
+      const { hashOpaqueToken } = await import("./token.server");
+      const tokenHash = await hashOpaqueToken(data.guestToken);
+      const { data: link } = await admin
+        .from("event_guest_links")
+        .select("id,invited_party_size,schedule_ids,expires_at,revoked_at,rsvp_status")
+        .eq("invitation_id", data.invitationId)
+        .eq("token_hash", tokenHash)
+        .maybeSingle();
+      if (!link || link.revoked_at || link.rsvp_status || (link.expires_at && new Date(link.expires_at) <= new Date())) {
+        throw new Error("Kişisel davet bağlantısı artık kullanılamıyor.");
+      }
+      personalLink = link;
+    }
+
     const answers = new Map(data.answers.map((item) => [item.questionId, item.answer]));
     for (const question of questions ?? []) {
       if (data.status !== "no" && !validateQuestionAnswer(question, answers.get(question.id))) {
@@ -193,6 +258,15 @@ export const submitAdvancedRsvp = createServerFn({ method: "POST" })
     const adultCount = data.status === "no" ? 0 : data.adultCount;
     const childCount = data.status === "no" ? 0 : data.childCount;
     const partySize = Math.max(adultCount + childCount, 1);
+    if (personalLink && partySize > personalLink.invited_party_size) {
+      throw new Error(`Bu davet en fazla ${personalLink.invited_party_size} kişi içindir.`);
+    }
+    if (personalLink?.schedule_ids.length) {
+      const invitedSchedules = new Set(personalLink.schedule_ids);
+      if (data.scheduleSelections.some((selection) => !invitedSchedules.has(selection.scheduleId))) {
+        throw new Error("Bu bağlantıya açık olmayan bir etkinlik seçildi.");
+      }
+    }
     const { data: rsvp, error } = await admin
       .from("rsvps")
       .insert({
@@ -247,6 +321,19 @@ export const submitAdvancedRsvp = createServerFn({ method: "POST" })
     if (results.some((result) => result.error)) {
       await admin.from("rsvps").delete().eq("id", rsvp.id);
       throw new Error("LCV ayrıntıları kaydedilemedi.");
+    }
+    if (personalLink) {
+      const { data: updatedLink, error: linkError } = await admin
+        .from("event_guest_links")
+        .update({ rsvp_status: data.status })
+        .eq("id", personalLink.id)
+        .is("rsvp_status", null)
+        .select("id")
+        .maybeSingle();
+      if (linkError || !updatedLink) {
+        await admin.from("rsvps").delete().eq("id", rsvp.id);
+        throw new Error("Kişisel LCV durumu güncellenemedi.");
+      }
     }
     return { success: true };
   });
