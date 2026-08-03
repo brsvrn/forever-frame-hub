@@ -26,36 +26,36 @@ export function HeroExperience({
   const daysLeft = getDaysLeft(draft.date);
 
   return (
-    <section className="relative min-h-dvh flex flex-col items-center justify-center p-6 text-center snap-start">
+    <section className="relative flex min-h-dvh flex-col items-center justify-center px-5 py-24 text-center snap-start sm:px-8 sm:py-28">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, delay: 0.35, ease: easeSilk }}
-        className="relative z-10 max-w-3xl"
+        className="relative z-10 w-full max-w-3xl"
       >
-        <p className="text-xs uppercase tracking-[0.4em] mb-6 text-white/70">
+        <p className="mb-5 break-words text-[0.65rem] uppercase tracking-[0.28em] text-white/70 sm:mb-6 sm:text-xs sm:tracking-[0.4em]">
           {draft.headline || "Evleniyoruz"}
         </p>
 
         <h2
-          className={`text-6xl sm:text-8xl md:text-9xl text-white leading-tight ${theme.styles.typography.display}`}
+          className={`break-words text-[clamp(2.75rem,15vw,7rem)] leading-[0.94] text-white ${theme.styles.typography.display}`}
         >
           {draft.partnerOne || "…"}
-          <span className="block text-4xl sm:text-6xl opacity-70 my-2">&</span>
+          <span className="my-2 block text-[0.55em] opacity-70">&</span>
           {draft.partnerTwo || "…"}
         </h2>
 
-        <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 text-white/90">
-          <div className="flex items-center gap-2">
+        <div className="mt-8 flex flex-col items-center justify-center gap-4 text-white/90 sm:mt-12 sm:flex-row sm:gap-6">
+          <div className="flex min-w-0 items-center justify-center gap-2">
             <Calendar className="w-4 h-4 opacity-70" />
-            <span className="text-sm tracking-widest uppercase">
+            <span className="break-words text-xs uppercase tracking-[0.14em] sm:text-sm sm:tracking-widest">
               {dateLabel || "Tarih Belirlenmedi"}
             </span>
           </div>
           <div className="hidden sm:block w-1 h-1 rounded-full bg-white/30" />
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center justify-center gap-2">
             <MapPin className="w-4 h-4 opacity-70" />
-            <span className="text-sm tracking-widest uppercase">
+            <span className="break-words text-xs uppercase tracking-[0.14em] sm:text-sm sm:tracking-widest">
               {draft.city || "Mekan Belirlenmedi"}
             </span>
           </div>
@@ -63,7 +63,7 @@ export function HeroExperience({
 
         {/* Aile Bilgileri */}
         {draft.familyInfo && (
-          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-8 text-white/70 text-sm">
+          <div className="mt-8 flex flex-col items-center justify-center gap-5 text-sm text-white/70 sm:mt-12 sm:flex-row sm:gap-8">
             {draft.familyInfo.bride &&
               (draft.familyInfo.bride.mother || draft.familyInfo.bride.father) && (
                 <div className="text-center">
@@ -95,7 +95,7 @@ export function HeroExperience({
 
         {/* Geri Sayım */}
         {daysLeft !== null && (
-          <div className="mt-12 inline-block rounded-full border border-white/20 bg-white/5 px-6 py-2 backdrop-blur-sm">
+          <div className="mt-8 inline-block rounded-full border border-white/20 bg-white/5 px-6 py-2 backdrop-blur-sm sm:mt-12">
             <p className="text-sm font-medium text-white">
               {daysLeft} {lang === "tr" ? "Gün Kaldı" : "Days Left"}
             </p>
@@ -107,7 +107,7 @@ export function HeroExperience({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 0.8 }}
-        className="absolute bottom-12 flex flex-col items-center gap-2 text-white/50"
+        className="pointer-events-none absolute bottom-5 hidden flex-col items-center gap-1 text-white/50 sm:flex lg:bottom-8"
       >
         <span className="text-[10px] uppercase tracking-widest">Aşağı Kaydır</span>
         <motion.div

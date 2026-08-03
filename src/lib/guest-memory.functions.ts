@@ -78,12 +78,15 @@ async function sha256(value: string) {
 async function loadUploadPolicy(invitationId: string) {
   const { getServiceSupabase } = await import("./supabase-admin");
   const admin = getServiceSupabase();
-  const [{ data: invitation }, { data: features }, { data: memory }] = await Promise.all([
-    admin
-      .from("invitations")
-      .select("id,is_published,is_paid")
-      .eq("id", invitationId)
-      .maybeSingle(),
+  const { data: invitation } = await admin
+    .from("invitations")
+    .select("id,is_published,is_paid")
+    .eq("id", invitationId)
+    .maybeSingle();
+  if (!invitation) throw new Error("Davetiye bulunamadı.");
+  const { ensureCoreEventSettings } = await import("./event-settings.server");
+  await ensureCoreEventSettings(admin, invitationId);
+  const [{ data: features }, { data: memory }] = await Promise.all([
     admin
       .from("event_feature_settings")
       .select("memory_box_enabled,qr_upload_enabled")

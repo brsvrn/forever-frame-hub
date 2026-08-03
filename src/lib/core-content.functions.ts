@@ -31,6 +31,8 @@ export const getCoreEventContent = createServerFn({ method: "GET" })
     await requireEventPermission(requestOrThrow(), data.invitationId, "view_event");
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
+    const { ensureCoreEventSettings } = await import("./event-settings.server");
+    await ensureCoreEventSettings(admin, data.invitationId);
     const [family, invitation, features, memory, rsvp, schedules, questions, templates] =
       await Promise.all([
         admin
@@ -109,6 +111,8 @@ export const saveCoreEventSection = createServerFn({ method: "POST" })
     });
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
+    const { ensureCoreEventSettings } = await import("./event-settings.server");
+    await ensureCoreEventSettings(admin, data.invitationId);
     const { data: current, error: readError } = await admin
       .from(config.table)
       .select("*")

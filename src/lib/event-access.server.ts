@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import type { EventPermission } from "./event-permissions";
+import { readServerAccessTokenCookie } from "./auth-cookie";
 
 export class EventAccessError extends Error {
   constructor(
@@ -20,10 +21,10 @@ function getSupabaseEnvironment() {
 
 function readBearerToken(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
-  if (!authorization.startsWith("Bearer ")) {
-    throw new EventAccessError("Oturum gerekli.", 401);
-  }
-  const token = authorization.slice("Bearer ".length).trim();
+  const headerToken = authorization.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length).trim()
+    : "";
+  const token = headerToken || readServerAccessTokenCookie(request) || "";
   if (!token) throw new EventAccessError("Oturum gerekli.", 401);
   return token;
 }
@@ -64,6 +65,15 @@ export async function requireEventPermission(
   options: { mutation?: boolean } = {},
 ): Promise<{ supabase: SupabaseClient<Database>; user: User; token: string }> {
   const { supabase, user, token } = await requireAuthenticatedUser(request, options);
+
+  const { getServiceSupabase } = await import("./supabase-admin");
+  const { data: invitation, error: invitationError } = await getServiceSupabase()
+    .from("invitations")
+    .select("user_id")
+    .eq("id", invitationId)
+    .maybeSingle();
+  if (invitationError) throw new EventAccessError("Yetki doğrulanamadı.", 500);
+  if (invitation?.user_id === user.id) return { supabase, user, token };
 
   const { data: allowed, error: permissionError } = await supabase.rpc("has_event_permission", {
     _invitation_id: invitationId,

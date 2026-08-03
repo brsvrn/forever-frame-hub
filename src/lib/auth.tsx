@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { syncServerAccessTokenCookie } from "./auth-cookie";
 
 type AuthValue = {
   session: Session | null;
@@ -18,11 +19,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, next) => {
+      syncServerAccessTokenCookie(next);
       setSession(next);
       setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: current }) => {
+      syncServerAccessTokenCookie(current.session);
       setSession(current.session);
       setLoading(false);
     });
@@ -37,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       signOut: async () => {
         await supabase.auth.signOut();
+        syncServerAccessTokenCookie(null);
       },
     }),
     [session, loading],

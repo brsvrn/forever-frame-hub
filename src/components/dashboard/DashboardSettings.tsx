@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Loader2, Plus, Save, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -119,16 +119,17 @@ export function DashboardSettings({
     is_required: false,
   });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [featureDirty, setFeatureDirty] = useState<Set<keyof FeatureSettings>>(new Set());
   const shows = (section: DashboardSettingsSection) =>
     !visibleSections || visibleSections.includes(section);
 
-  useEffect(() => {
-    let active = true;
-    void getCoreEventContent({ data: { invitationId: invitation.id } })
-      .then((content) => {
-        if (!active) return;
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const content = await getCoreEventContent({ data: { invitationId: invitation.id } });
         setFeatures(featureSettingsSchema.parse(content.features));
         setMemory(memorySettingsSchema.parse(content.memory));
         setRsvp(rsvpSettingsSchema.parse(content.rsvp));
@@ -138,13 +139,19 @@ export function DashboardSettings({
           rsvp: Number(content.rsvp.version),
         });
         setQuestions(content.questions as Question[]);
-      })
-      .catch(() => toast.error("Etkinlik ayarları yüklenemedi."))
-      .finally(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Etkinlik ayarları yüklenemedi.";
+      setLoadError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   }, [invitation.id]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const save = async () => {
     if (!features || !memory || !rsvp || saving) return;
@@ -243,7 +250,20 @@ export function DashboardSettings({
     );
   }
   if (!features || !memory || !rsvp) {
-    return <p className="text-sm text-muted-foreground">Etkinlik ayarları kullanılamıyor.</p>;
+    return (
+      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          {loadError || "Etkinlik ayarları kullanılamıyor."}
+        </p>
+        <button
+          type="button"
+          onClick={() => void load()}
+          className="mt-4 min-h-11 rounded-xl border border-border px-5 text-sm hover:bg-accent"
+        >
+          Tekrar dene
+        </button>
+      </div>
+    );
   }
 
   return (

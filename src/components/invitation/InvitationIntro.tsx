@@ -107,7 +107,7 @@ export function InvitationIntro({
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_5%,rgba(0,0,0,.34)_100%)]" />
       </div>
 
-      <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-6 text-center">
+      <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-5 py-20 text-center sm:px-8">
         <AnimatePresence>
           {showNames ? (
             <motion.p
@@ -128,7 +128,7 @@ export function InvitationIntro({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: nameFadeDuration, ease: easeSilk }}
-              className="flex flex-col items-center"
+              className="flex w-full flex-col items-center"
             >
               {theme.category === "luxury" ? (
                 <motion.div
@@ -142,7 +142,7 @@ export function InvitationIntro({
                 />
               ) : null}
               <h1
-                className={`max-w-4xl text-5xl font-light leading-none sm:text-7xl md:text-8xl ${theme.styles.typography.display}`}
+                className={`max-w-[min(64rem,92vw)] break-words text-3xl font-light leading-[1.05] sm:text-5xl md:text-7xl lg:text-8xl ${theme.styles.typography.display}`}
                 style={{
                   textShadow:
                     theme.category === "luxury"
@@ -159,7 +159,7 @@ export function InvitationIntro({
                   duration: nameFadeDuration,
                   ease: easeSilk,
                 }}
-                className="my-8 h-px w-24 origin-center"
+                className="my-6 h-px w-24 origin-center sm:my-8"
                 style={{ backgroundColor: theme.qr.accent }}
               />
             </motion.div>
@@ -175,7 +175,7 @@ export function InvitationIntro({
               type="button"
               data-testid="open-invitation"
               onClick={onComplete}
-              className="group relative z-20 inline-flex min-h-14 touch-manipulation items-center gap-4 rounded-full border border-white/35 bg-black/40 px-7 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-2xl backdrop-blur-xl transition duration-200 hover:scale-[1.03] hover:bg-white hover:text-slate-950 active:scale-95"
+              className="group relative z-20 inline-flex min-h-14 max-w-[calc(100vw-2rem)] touch-manipulation items-center gap-3 rounded-full border border-white/35 bg-black/40 px-5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white shadow-2xl backdrop-blur-xl transition duration-200 hover:scale-[1.03] hover:bg-white hover:text-slate-950 active:scale-95 sm:gap-4 sm:px-7 sm:text-xs sm:tracking-[0.2em]"
             >
               <span className="grid size-9 place-items-center rounded-full bg-white text-slate-950">
                 <Play className="ml-0.5 size-3.5" fill="currentColor" aria-hidden="true" />

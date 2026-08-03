@@ -6,13 +6,13 @@ export function StoryTimeline({ draft, theme }: { draft: InvitationDraft; theme:
   if (!draft.ourStory || draft.ourStory.length === 0) return null;
 
   return (
-    <section className="relative py-32 px-6 flex flex-col items-center snap-center">
+    <section className="relative flex flex-col items-center px-5 py-24 snap-center sm:px-6 sm:py-32">
       <div className="max-w-2xl w-full">
         <h3 className={`text-3xl text-center text-white mb-16 ${theme.styles.typography.display}`}>
           Hikayemiz
         </h3>
 
-        <div className="space-y-12 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/20 before:to-transparent">
+        <div className="relative space-y-10 before:absolute before:inset-y-0 before:left-4 before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/20 before:to-transparent md:space-y-12 md:before:left-1/2 md:before:-translate-x-px">
           {draft.ourStory.map((story, i) => (
             <motion.div
               key={i}
@@ -20,14 +20,14 @@ export function StoryTimeline({ draft, theme }: { draft: InvitationDraft; theme:
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: i * 0.08 }}
-              className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
+              className="group relative flex items-start gap-4 md:items-center md:justify-normal md:gap-0 md:odd:flex-row-reverse"
             >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-black/50 backdrop-blur-md text-white/90 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 text-xs font-semibold">
+              <div className="z-10 flex min-h-9 min-w-9 max-w-28 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/55 px-2 py-1 text-center text-[0.65rem] font-semibold leading-tight text-white/90 backdrop-blur-md md:order-1 md:max-w-32 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
                 {story.date}
               </div>
 
               <div
-                className={`w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ${theme.styles.cards.wrapper} p-6 rounded-2xl`}
+                className={`min-w-0 flex-1 md:w-[calc(50%-3rem)] md:flex-none ${theme.styles.cards.wrapper} rounded-2xl p-5 sm:p-6`}
               >
                 <h4
                   className={`font-medium mb-2 ${theme.id === "garden" || theme.id === "blush" ? "text-slate-900" : "text-white"}`}
