@@ -24,6 +24,12 @@ import {
   type MusicSettings,
   type ShareSettings,
 } from "@/lib/advanced-event-schema";
+import {
+  extractYouTubeVideoId,
+  getMusicLibraryTrack,
+  musicLibrary,
+  youtubeWatchUrl,
+} from "@/lib/music-library";
 
 type Kind = "greeting" | "music";
 export type DashboardExperienceSection = "share" | "audio" | "music" | "gift" | "guest-links";
@@ -94,6 +100,7 @@ export function DashboardExperience({
   const [share, setShare] = useState<ShareSettings | null>(null);
   const [audio, setAudio] = useState<AudioSettings | null>(null);
   const [music, setMusic] = useState<MusicSettings | null>(null);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [gift, setGift] = useState<GiftSettings | null>(null);
   const [versions, setVersions] = useState({ share: 1, audio: 1, music: 1, gift: 1 });
   const [guestLinks, setGuestLinks] = useState<GuestLinkSummary[]>([]);
@@ -119,12 +126,18 @@ export function DashboardExperience({
     invitation.cover_photo ||
     (share?.use_theme_image ? resolveTheme(invitation.theme).image : "");
   const coupleNames = [invitation.partner_one, invitation.partner_two].filter(Boolean).join(" & ");
+  const selectedLibraryTrack =
+    music?.source_type === "library" ? getMusicLibraryTrack(music.track_id) : null;
 
   const load = useCallback(async () => {
     const data = await getAdvancedEventSettings({ data: { invitationId: invitation.id } });
     setShare(shareSettingsSchema.parse(data.share || {}));
     setAudio(audioSettingsSchema.parse(data.audio || {}));
-    setMusic(musicSettingsSchema.parse(data.music || {}));
+    const parsedMusic = musicSettingsSchema.parse(data.music || {});
+    setMusic(parsedMusic);
+    setYoutubeUrl(
+      parsedMusic.source_type === "legacy" ? youtubeWatchUrl(parsedMusic.track_id) || "" : "",
+    );
     setGift(giftSettingsSchema.parse(data.gift || {}));
     setVersions({
       share: Number(data.share?.version || 1),
@@ -157,13 +170,29 @@ export function DashboardExperience({
 
   const saveSection = async (section: "share" | "audio" | "music" | "gift") => {
     if (!share || !audio || !music || !gift || saving) return;
+    let musicToSave = music;
+    if (section === "music" && youtubeUrl.trim()) {
+      const videoId = extractYouTubeVideoId(youtubeUrl);
+      if (!videoId) {
+        toast.error("Geçerli bir YouTube video bağlantısı girin.");
+        return;
+      }
+      musicToSave = {
+        ...music,
+        source_type: "legacy",
+        track_id: videoId,
+        license_name: null,
+        license_url: null,
+      };
+      setMusic(musicToSave);
+    }
     const content =
       section === "share"
         ? ({ section, values: share } as const)
         : section === "audio"
           ? ({ section, values: audio } as const)
           : section === "music"
-            ? ({ section, values: music } as const)
+            ? ({ section, values: musicToSave } as const)
             : ({ section, values: gift } as const);
     setSaving(section);
     try {
@@ -497,18 +526,106 @@ export function DashboardExperience({
               />
             </Field>
           </div>
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-background/60 p-4">
+              <Field label="Hazır ücretsiz müzikler">
+                <select
+                  value={music.source_type === "library" ? music.track_id || "" : ""}
+                  onChange={(event) => {
+                    const track = getMusicLibraryTrack(event.target.value);
+                    setYoutubeUrl("");
+                    setMusic(
+                      track
+                        ? {
+                            ...music,
+                            source_type: "library",
+                            track_id: track.id,
+                            title: track.title,
+                            license_name: track.attribution,
+                            license_url: track.licenseUrl,
+                          }
+                        : {
+                            ...music,
+                            source_type: "none",
+                            track_id: null,
+                            title: null,
+                            license_name: null,
+                            license_url: null,
+                          },
+                    );
+                  }}
+                  className="field-base min-h-11 w-full"
+                >
+                  <option value="">Müzik seçin</option>
+                  {musicLibrary.map((track) => (
+                    <option key={track.id} value={track.id}>
+                      {track.title} · {track.mood}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {selectedLibraryTrack ? (
+                <div className="mt-4 space-y-3">
+                  <audio
+                    controls
+                    preload="none"
+                    src={selectedLibraryTrack.streamUrl}
+                    className="h-10 w-full"
+                  />
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {selectedLibraryTrack.attribution}.{" "}
+                    <a
+                      href={selectedLibraryTrack.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-gold underline"
+                    >
+                      Parça ve lisans bilgisi
+                    </a>
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="rounded-2xl border border-border bg-background/60 p-4">
+              <Field label="YouTube bağlantısı">
+                <Input
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={youtubeUrl}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    const videoId = extractYouTubeVideoId(value);
+                    setYoutubeUrl(value);
+                    if (!value.trim()) {
+                      setMusic({
+                        ...music,
+                        source_type: "none",
+                        track_id: null,
+                        title: null,
+                        license_name: null,
+                        license_url: null,
+                      });
+                    } else if (videoId) {
+                      setMusic({
+                        ...music,
+                        source_type: "legacy",
+                        track_id: videoId,
+                        title: null,
+                        license_name: null,
+                        license_url: null,
+                      });
+                    }
+                  }}
+                />
+              </Field>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                YouTube bağlantıları YouTube'un kendi oynatıcısıyla ve misafirin oynatma işlemiyle
+                çalışır. Video erişime kapatılırsa müzik de kullanılamaz.
+              </p>
+            </div>
+          </div>
           <div className="mt-5 flex flex-wrap gap-3">
-            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border px-4 text-sm">
-              <Upload className="size-4" /> Lisanslı müzik yükle
-              <input
-                type="file"
-                accept="audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/webm"
-                className="sr-only"
-                onChange={(e) =>
-                  e.target.files?.[0] && void uploadAudio("music", e.target.files[0])
-                }
-              />
-            </label>
             <button
               onClick={() => void saveSection("music")}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-gold px-4 text-sm text-background"
@@ -527,8 +644,8 @@ export function DashboardExperience({
             </button>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Yalnızca kullanım hakkına sahip olduğunuz veya lisanslı ses dosyalarını yükleyin. Yeni
-            YouTube bağlantıları arka plan müziği olarak kabul edilmez.
+            Hazır parçalar Creative Commons Attribution 4.0 lisansıyla sunulur. YouTube seçeneğinde
+            bağlantısını eklediğiniz içeriği kullanma sorumluluğu size aittir.
           </p>
         </section>
       ) : null}

@@ -14,6 +14,7 @@ import {
   guestLinkInputSchema,
   prepareAudioUploadSchema,
 } from "./advanced-event-schema";
+import { getMusicLibraryTrack, youtubeWatchUrl } from "./music-library";
 
 const invitationInput = z.object({ invitationId: z.string().uuid() });
 const saveInput = invitationInput.extend({
@@ -400,6 +401,17 @@ export const getPublicAdvancedEvent = createServerFn({ method: "GET" })
             { expiresIn: 3600 },
           )
         : null;
+    const resolveMusicUrl = async () => {
+      const settings = music.data;
+      if (!settings?.is_enabled) return null;
+      if (settings.source_type === "library") {
+        return getMusicLibraryTrack(settings.track_id)?.streamUrl ?? null;
+      }
+      if (settings.source_type === "legacy" && settings.track_id) {
+        return youtubeWatchUrl(settings.track_id);
+      }
+      return sign(settings.object_key, settings.mime_type);
+    };
     return {
       share: share.data,
       audio: audio.data
@@ -413,9 +425,7 @@ export const getPublicAdvancedEvent = createServerFn({ method: "GET" })
       music: music.data
         ? {
             ...music.data,
-            url: music.data.is_enabled
-              ? await sign(music.data.object_key, music.data.mime_type)
-              : null,
+            url: await resolveMusicUrl(),
           }
         : null,
       gift: gift.data?.is_enabled ? gift.data : null,

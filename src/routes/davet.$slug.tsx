@@ -243,6 +243,8 @@ function PremiumInvitePage() {
           }
           customTitle={advanced?.music?.title || undefined}
           volume={advanced?.music?.volume == null ? 0.65 : Number(advanced.music.volume)}
+          licenseName={advanced?.music?.license_name || undefined}
+          licenseUrl={advanced?.music?.license_url || undefined}
         />
       ) : null}
     </div>

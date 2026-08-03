@@ -2,14 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, Music } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
-
-function extractYouTubeId(url: string | undefined): string | null {
-  if (!url) return null;
-  const match = url.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/,
-  );
-  return match ? match[1] : null;
-}
+import { extractYouTubeVideoId } from "@/lib/music-library";
 
 export function PremiumAudioPlayer({
   theme,
@@ -18,6 +11,8 @@ export function PremiumAudioPlayer({
   customTitle, // Opsiyonel manuel başlık
   hideUI = false, // UI'ı gizlemek için prop
   volume = 0.65,
+  licenseName,
+  licenseUrl,
 }: {
   theme: ThemeConfig;
   autoPlay?: boolean;
@@ -25,8 +20,12 @@ export function PremiumAudioPlayer({
   customTitle?: string;
   hideUI?: boolean;
   volume?: number;
+  licenseName?: string;
+  licenseUrl?: string;
 }) {
-  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const videoId = extractYouTubeVideoId(musicUrl);
+  const directAudioUrl = musicUrl && !videoId ? musicUrl : null;
+  const [isPlaying, setIsPlaying] = useState(autoPlay && !videoId);
   const [isMuted, setIsMuted] = useState(false);
   const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -34,13 +33,11 @@ export function PremiumAudioPlayer({
   const resumeAfterVoiceRef = useRef(false);
 
   useEffect(() => {
-    if (autoPlay) {
+    if (autoPlay && !videoId) {
       setIsPlaying(true);
     }
-  }, [autoPlay]);
-
-  const videoId = extractYouTubeId(musicUrl);
-  const directAudioUrl = musicUrl && !videoId ? musicUrl : null;
+    if (videoId) setIsPlaying(false);
+  }, [autoPlay, videoId]);
 
   const sendCommand = (command: string, args: any[] = []) => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -117,14 +114,13 @@ export function PremiumAudioPlayer({
 
   return (
     <div className="fixed bottom-6 left-6 z-40">
-      {/* Hidden YouTube Iframe */}
-      {videoId ? (
+      {videoId && !hideUI ? (
         <iframe
           ref={iframeRef}
-          src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=${autoPlay ? 1 : 0}&loop=1&playlist=${videoId}&controls=0`}
-          className="hidden"
+          src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0&loop=1&playlist=${videoId}&controls=1&playsinline=1`}
+          className="mb-2 h-[200px] w-[min(18rem,calc(100vw-3rem))] rounded-2xl border border-white/10 bg-black shadow-2xl"
           allow="autoplay; encrypted-media"
-          title="Audio Player"
+          title="YouTube müzik oynatıcısı"
         />
       ) : null}
       {directAudioUrl ? <audio ref={audioRef} src={directAudioUrl} loop preload="none" /> : null}
@@ -153,6 +149,16 @@ export function PremiumAudioPlayer({
             <span className="text-[10px] text-white/50 uppercase tracking-widest mt-0.5">
               {isPlaying ? "Oynatılıyor" : "Duraklatıldı"}
             </span>
+            {licenseName ? (
+              <a
+                href={licenseUrl || undefined}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-0.5 max-w-[150px] truncate text-[9px] text-white/45 underline"
+              >
+                {licenseName}
+              </a>
+            ) : null}
           </div>
 
           <div className="w-px h-6 bg-white/10 mx-1" />
