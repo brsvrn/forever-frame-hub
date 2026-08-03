@@ -5,6 +5,7 @@ import {
   normalizeMaintenanceSettings,
   type MaintenanceSettings,
 } from "./maintenance";
+import { renderGoogleTagManagerHead, renderGoogleTagManagerNoScript } from "./google-tag-manager";
 
 const SELECT_FIELDS = [
   "id",
@@ -184,6 +185,7 @@ export function renderMaintenancePage(settings: MaintenanceSettings) {
   return `<!doctype html>
 <html lang="tr">
 <head>
+  ${renderGoogleTagManagerHead()}
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
@@ -213,6 +215,7 @@ export function renderMaintenancePage(settings: MaintenanceSettings) {
   </style>
 </head>
 <body>
+  ${renderGoogleTagManagerNoScript()}
   <main>
     <section class="card" aria-labelledby="maintenance-title">
       <div class="brand"><span class="mark">M</span><span>MemoryWedding</span></div>
@@ -239,7 +242,7 @@ export function createMaintenanceResponse(settings: MaintenanceSettings, status 
       expires: "0",
       "x-robots-tag": "noindex, nofollow",
       "content-security-policy":
-        "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+        "default-src 'none'; script-src 'unsafe-inline' https://www.googletagmanager.com; connect-src https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com; img-src data: https://www.googletagmanager.com https://www.google-analytics.com; frame-src https://www.googletagmanager.com; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
       ...(status === 503 ? { "retry-after": "300" } : {}),
     },
   });

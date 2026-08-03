@@ -1,7 +1,10 @@
+import { renderGoogleTagManagerHead, renderGoogleTagManagerNoScript } from "./google-tag-manager";
+
 export function renderErrorPage(): string {
   return `<!doctype html>
 <html lang="en">
   <head>
+    ${renderGoogleTagManagerHead()}
     <meta charset="utf-8" />
     <title>This page didn't load</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,6 +20,7 @@ export function renderErrorPage(): string {
     </style>
   </head>
   <body>
+    ${renderGoogleTagManagerNoScript()}
     <div class="card">
       <h1>This page didn't load</h1>
       <p>Something went wrong on our end. You can try refreshing or head back home.</p>

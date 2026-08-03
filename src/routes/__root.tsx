@@ -11,6 +11,10 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import {
+  GOOGLE_TAG_MANAGER_NOSCRIPT_URL,
+  GOOGLE_TAG_MANAGER_SCRIPT,
+} from "../lib/google-tag-manager";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -115,9 +119,21 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="tr">
       <head>
+        {/* Google Tag Manager */}
+        <script dangerouslySetInnerHTML={{ __html: GOOGLE_TAG_MANAGER_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src={GOOGLE_TAG_MANAGER_NOSCRIPT_URL}
+            height="0"
+            width="0"
+            title="Google Tag Manager"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         {children}
         <Scripts />
       </body>
