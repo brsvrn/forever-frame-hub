@@ -124,7 +124,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  const gtmId = import.meta.env.VITE_GTM_ID || ANALYTICS_CONFIG.gtmId;
+  const gtmId = "GTM-KSV2TJVL";
   const gaId = import.meta.env.VITE_GA4_MEASUREMENT_ID || ANALYTICS_CONFIG.gaMeasurementId;
   const pixelId = import.meta.env.VITE_META_PIXEL_ID || ANALYTICS_CONFIG.metaPixelId;
   const googleAdsId = import.meta.env.VITE_GOOGLE_ADS_ID || ANALYTICS_CONFIG.googleAdsId;
@@ -139,7 +139,7 @@ function RootShell({ children }: { children: ReactNode }) {
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${gtmId}');`,
+})(window,document,'script','dataLayer','GTM-KSV2TJVL');`,
           }}
         />
         {/* End Google Tag Manager */}
@@ -200,16 +200,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </head>
       <body>
         {/* Google Tag Manager (noscript) */}
-        {gtmId && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-            />
-          </noscript>
-        )}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-KSV2TJVL"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          ></iframe>
+        </noscript>
+        {/* End Google Tag Manager (noscript) */}
 
         {/* Meta Pixel (noscript) */}
         {pixelId && (
