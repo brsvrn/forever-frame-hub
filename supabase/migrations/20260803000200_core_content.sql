@@ -125,6 +125,11 @@ CREATE TABLE IF NOT EXISTS public.event_memory_settings (
   CHECK (upload_ends_at IS NULL OR upload_starts_at IS NULL OR upload_ends_at > upload_starts_at)
 );
 
+-- Legacy Supabase-backed uploads only stored a public file_url. New R2-backed
+-- uploads use an opaque object key while existing rows remain readable.
+ALTER TABLE public.guest_uploads
+  ADD COLUMN IF NOT EXISTS file_path TEXT;
+
 ALTER TABLE public.guest_uploads DROP CONSTRAINT IF EXISTS guest_uploads_status_check;
 ALTER TABLE public.guest_uploads ADD CONSTRAINT guest_uploads_status_check
   CHECK (status IN ('pending', 'active', 'approved', 'hidden', 'rejected'));

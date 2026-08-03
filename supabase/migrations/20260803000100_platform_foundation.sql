@@ -1,6 +1,22 @@
 -- MemoryWedding platform foundation.
 -- This migration is additive: legacy invitation columns and public URLs remain valid.
 
+-- Some early production environments were created before this shared trigger helper
+-- was tracked consistently. Keep the foundation migration self-contained.
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.update_updated_at_column() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.update_updated_at_column() TO service_role;
+
 DO $$
 BEGIN
   CREATE TYPE public.event_member_role AS ENUM (
@@ -185,7 +201,8 @@ SELECT
   i.headline,
   i.event_date,
   CASE
-    WHEN i.event_time ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$' THEN i.event_time::time
+    WHEN i.event_time::text ~ '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9](\.[0-9]+)?)?$'
+      THEN i.event_time::text::time
     ELSE NULL
   END,
   i.venue,

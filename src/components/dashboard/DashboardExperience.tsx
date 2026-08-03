@@ -88,6 +88,7 @@ export function DashboardExperience({
   description?: string;
 }) {
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
   const [share, setShare] = useState<ShareSettings | null>(null);
   const [audio, setAudio] = useState<AudioSettings | null>(null);
@@ -128,11 +129,25 @@ export function DashboardExperience({
     setGuestLinks(data.guestLinks as GuestLinkSummary[]);
   }, [invitation.id]);
 
-  useEffect(() => {
-    void load()
-      .catch(() => toast.error("Gelişmiş ayarlar yüklenemedi."))
-      .finally(() => setLoading(false));
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      await load();
+    } catch (error) {
+      setLoadError(
+        error instanceof Error
+          ? error.message
+          : "Müzik ve ses ayarları şu anda yüklenemiyor.",
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [load]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   const saveSection = async (section: "share" | "audio" | "music" | "gift") => {
     if (!share || !audio || !music || !gift || saving) return;
@@ -226,10 +241,29 @@ export function DashboardExperience({
     window.setTimeout(() => recorder.state === "recording" && recorder.stop(), 30_000);
   };
 
-  if (loading || !share || !audio || !music || !gift)
+  if (loading)
     return (
       <div className="grid min-h-64 place-items-center">
         <Loader2 className="size-7 animate-spin text-gold" />
+      </div>
+    );
+
+  if (loadError || !share || !audio || !music || !gift)
+    return (
+      <div className="grid min-h-64 place-items-center rounded-2xl border border-rose-200 bg-rose-50/70 p-6 text-center">
+        <div className="max-w-md">
+          <h2 className="font-display text-xl text-foreground">Müzik ve ses ayarları yüklenemedi</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Bağlantı veya sistem ayarları tamamlanmamış olabilir. Bilgileriniz kaybolmadı.
+          </p>
+          <button
+            type="button"
+            onClick={() => void refresh()}
+            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-rose to-gold px-6 text-sm font-semibold text-background"
+          >
+            Tekrar dene
+          </button>
+        </div>
       </div>
     );
 
