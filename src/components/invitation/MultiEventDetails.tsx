@@ -1,5 +1,6 @@
 import { CalendarDays, Clock, Map, Navigation } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
+import { CalendarLinks } from "./CalendarLinks";
 
 export type PublicEventSchedule = {
   id: string;
@@ -14,16 +15,19 @@ export type PublicEventSchedule = {
   dress_code: string | null;
   parking_info: string | null;
   transport_info: string | null;
+  timezone: string;
 };
 
 export function MultiEventDetails({
   schedules,
   theme,
   lang,
+  calendarEnabled = true,
 }: {
   schedules: PublicEventSchedule[];
   theme: ThemeConfig;
   lang: "tr" | "en";
+  calendarEnabled?: boolean;
 }) {
   return (
     <section className="relative flex min-h-dvh snap-center flex-col items-center px-6 py-24">
@@ -79,14 +83,23 @@ export function MultiEventDetails({
                 </div>
               ) : null}
               <div className="mt-6 flex flex-wrap gap-3">
-                {schedule.event_date ? (
-                  <a
-                    href={`/api/calendar/${schedule.id}`}
-                    className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm ${theme.styles.buttons.secondary}`}
-                  >
-                    <CalendarDays className="size-4" />
-                    {lang === "tr" ? "Takvime Ekle" : "Add to Calendar"}
-                  </a>
+                {calendarEnabled && schedule.event_date ? (
+                  <CalendarLinks
+                    schedule={{
+                      id: schedule.id,
+                      title: schedule.title,
+                      event_date: schedule.event_date,
+                      starts_at: schedule.starts_at,
+                      ends_at: schedule.ends_at,
+                      timezone: schedule.timezone || "Europe/Istanbul",
+                      venue_name: schedule.venue_name,
+                      address: schedule.address,
+                      description: schedule.description,
+                    }}
+                    theme={theme}
+                    lang={lang}
+                    icsHref={`/api/calendar/${schedule.id}`}
+                  />
                 ) : null}
                 {schedule.google_maps_url ? (
                   <a

@@ -205,9 +205,19 @@ function PremiumInvitePage() {
                   <>
                     <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
                     {schedules.length > 0 ? (
-                      <MultiEventDetails schedules={schedules} theme={theme} lang={lang} />
+                      <MultiEventDetails
+                        schedules={schedules}
+                        theme={theme}
+                        lang={lang}
+                        calendarEnabled={eventFeatures?.calendar_enabled !== false}
+                      />
                     ) : (
-                      <EventDetails draft={draft} theme={theme} lang={lang} />
+                      <EventDetails
+                        draft={draft}
+                        theme={theme}
+                        lang={lang}
+                        calendarEnabled={eventFeatures?.calendar_enabled !== false}
+                      />
                     )}
                   </>
                 ) : null}

@@ -2,43 +2,43 @@ import { motion } from "framer-motion";
 import { Map, Clock, CalendarDays, Navigation } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { formatInviteDate, type InvitationDraft } from "@/lib/invitation";
+import { createScheduleIcs, type CalendarSchedule } from "@/lib/calendar";
+import { CalendarLinks } from "./CalendarLinks";
 
 export function EventDetails({
   draft,
   theme,
   lang,
+  calendarEnabled = true,
 }: {
   draft: InvitationDraft;
   theme: ThemeConfig;
   lang: "tr" | "en";
+  calendarEnabled?: boolean;
 }) {
   const dateLabel = formatInviteDate(draft.date, lang);
-
-  const handleAddToCalendar = () => {
-    if (!draft.date) return;
-    const YYYYMMDD = draft.date.replace(/-/g, "");
-    const HHMMSS = draft.time ? draft.time.replace(":", "") + "00" : "120000";
-    const start = `${YYYYMMDD}T${HHMMSS}`;
-
-    const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-DTSTART:${start}
-SUMMARY:${draft.partnerOne} & ${draft.partnerTwo}
-LOCATION:${draft.venue} - ${draft.address}
-END:VEVENT
-END:VCALENDAR`;
-
-    const blob = new Blob([icsContent], { type: "text/calendar" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "davetiye.ics";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  const calendarSchedule: CalendarSchedule | null = draft.date
+    ? {
+        id: draft.slug || "memorywedding",
+        title: [draft.partnerOne, draft.partnerTwo].filter(Boolean).join(" & ") || "Davet",
+        event_date: draft.date,
+        starts_at: draft.time || null,
+        ends_at: null,
+        timezone: "Europe/Istanbul",
+        venue_name: draft.venue,
+        address: [draft.address, draft.city].filter(Boolean).join(", "),
+        description: draft.message || null,
+      }
+    : null;
+  const calendarHref = calendarSchedule
+    ? `data:text/calendar;charset=utf-8,${encodeURIComponent(
+        createScheduleIcs(
+          calendarSchedule,
+          draft.slug || "davet",
+          new Date(`${draft.date}T00:00:00Z`),
+        ),
+      )}`
+    : "";
 
   return (
     <section className="relative py-24 px-6 flex flex-col items-center snap-center">
@@ -117,13 +117,16 @@ END:VCALENDAR`;
         )}
 
         <div className="mt-10 grid grid-cols-2 gap-4">
-          <button
-            onClick={handleAddToCalendar}
-            className={`py-3 rounded-full flex items-center justify-center gap-2 text-sm font-medium ${theme.styles.buttons.secondary}`}
-          >
-            <CalendarDays className="w-4 h-4" />
-            <span>Takvime Ekle</span>
-          </button>
+          {calendarEnabled && calendarSchedule ? (
+            <CalendarLinks
+              schedule={calendarSchedule}
+              theme={theme}
+              lang={lang}
+              icsHref={calendarHref}
+            />
+          ) : (
+            <span />
+          )}
           {draft.mapUrl ? (
             <a
               href={draft.mapUrl}
