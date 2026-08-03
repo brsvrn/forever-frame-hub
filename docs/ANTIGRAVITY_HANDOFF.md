@@ -52,10 +52,10 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
-`db61921` commit’i itibarıyla:
+`29593ba` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
-- `npm test`: **11 test dosyası / 34 test başarılı**
+- `npm test`: **12 test dosyası / 37 test başarılı**
 - `npm run build`: başarılı
 - Bilinen build uyarısı: bazı istemci chunkları 500 kB üzerinde. Bu bir sonraki performans fazında code splitting ile ele alınmalıdır.
 
@@ -63,6 +63,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `29593ba` | Güvenli, markalı 1200×630 Open Graph/WhatsApp görsel üretimi |
 | `db61921` | Lisanslı hazır müzik kataloğu ve YouTube kaynakları |
 | `daeaf60` | Paylaşım görseli üzerinde çift isimleri |
 | `4ccdac5` | Fotoğraf yoksa paylaşım önizlemesinde tema görseli |
@@ -160,8 +161,13 @@ Paket veya tema tarafından desteklenmeyen adımlar gizlenebilir. Anonim kullan�
 - Davetiye sayfasında dinamik Open Graph/Twitter metadata.
 - Özel görsel yoksa davetiye kapağı, o da yoksa seçili tema görseli fallback'i.
 - Builder önizlemesinde tema görseli üzerinde çift isimleri ve okunabilirlik katmanı.
+- `/api/share-image/:slug` davetiye adı, tarih, marka ve tema/kapak arka planıyla gerçek 1200×630 PNG üretir.
+- OG ve Twitter meta etiketleri bu dinamik görseli boyut, tür ve alternatif metin bilgileriyle kullanır.
+- Paylaşım ayarı sürümü görsel URL'sine eklendiği için yeni değişiklikler yeni cache anahtarı alır.
+- Sunucu yalnızca aynı origin, yapılandırılmış Supabase ve yapılandırılmış R2 görsel hostlarını indirir; localhost, özel IP ve keyfi dış hostlar engellenir.
+- Özel kapak veya tema görseli okunamazsa marka renkli güvenli arka plan oluşturulur; özel galeri dosyası kullanılmaz.
 
-Önemli: Şu anda çift isimleri **builder önizlemesinde HTML katmanı** olarak gösterilir. Gerçek WhatsApp `og:image` halen ham tema/kapak görselidir. 1200×630 sunucu üretimli gerçek paylaşım görseli henüz tamamlanmamıştır.
+Canlı WhatsApp/Facebook scraper sonucu bakım modu kapatılmadan gerçek platformda doğrulanamaz; bu smoke test yayın kapısında açık kalır.
 
 ### 5.8 Sesli karşılama
 
@@ -306,35 +312,27 @@ Başlanmadı veya ürün seviyesinde tamamlanmadı:
 
 Tam serbest Canva benzeri editör yapılmamalıdır.
 
-### 7.3 Gerçek otomatik WhatsApp görseli
-
-- 1200×630 sunucu taraflı görsel endpoint'i.
-- Tema arka planı + çift isimleri + tarih + MemoryWedding markası.
-- Güvenli cache key ve revalidation.
-- Özel galeri dosyasını açığa çıkarmama.
-- WhatsApp/Facebook cache davranışı açıklaması ve test akışı.
-
-### 7.4 Dilekler, tepkiler ve dijital anı defteri
+### 7.3 Dilekler, tepkiler ve dijital anı defteri
 
 - Dilek gönderme, onaylama, gizleme ve spam kontrolü.
 - Kalp/alkış/mutluluk/kutlama tepkileri.
 - Fotoğraf, not, dilek ve seslerden dijital anı defteri.
 - PDF dışa aktarma ve kapak seçimi.
 
-### 7.5 Kişisel davetli bağlantılarının kalan kısmı
+### 7.4 Kişisel davetli bağlantılarının kalan kısmı
 
 - Misafir listesi içe aktarma.
 - Kişisel QR kartı.
 - Davet edildiği etkinlikleri seçme arayüzü.
 - LCV ve son açılma bilgilerinin toplu paneli.
 
-### 7.6 Analitik olaylar
+### 7.5 Analitik olaylar
 
 Ana dokümanda listelenen builder, tema, ekip, paylaşım, ses, LCV, QR, kişisel bağlantı, anı ve editör olaylarının tamamı ortak analitik servise bağlanmalıdır.
 
 Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya token gönderilmemelidir.
 
-### 7.7 Eski etkinlik migration ve yayın kapısı
+### 7.6 Eski etkinlik migration ve yayın kapısı
 
 - Eski etkinlik örnekleriyle tam regresyon matrisi.
 - Eski QR kodlarının canlı doğrulaması.
@@ -347,17 +345,13 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P0 — Önce mevcut son işi doğrula
 
-1. `feature/platform-foundation` ve `main` dallarının `db61921` veya daha yeni committe olduğunu doğrula.
+1. `feature/platform-foundation` ve `main` dallarının `29593ba` veya daha yeni committe olduğunu doğrula.
 2. Vercel dağıtımının başarılı olduğunu kontrol et.
 3. Admin bakım bypass ile `/olustur` adım 7'yi aç.
 4. Üç katalog parçasını ayrı ayrı önizle ve kaydet.
 5. Davetiye bağlantısında katalog müziğini masaüstü ve mobilde oynat.
 6. Geçerli/geçersiz YouTube bağlantısı test et.
 7. YouTube iframe'in görünür olduğunu, otomatik başlamadığını ve sesli karşılama sırasında durduğunu doğrula.
-
-### P1 — Gerçek paylaşım görseli
-
-Builder'daki isim bindirmesini gerçek 1200×630 OG görsel üretimine taşı. Bu yapılmadan paylaşım önizlemesi ile WhatsApp sonucu birebir aynı değildir.
 
 ### P1 — Gelişmiş LCV'yi tamamla
 
@@ -426,6 +420,8 @@ PayTR değişkenlerini mevcut canlı ayarlardan isim/değer değiştirmeden koru
 | Gelişmiş ayar şeması | `src/lib/advanced-event-schema.ts` |
 | Müzik kataloğu | `src/lib/music-library.ts` |
 | Davetiye müzik oynatıcı | `src/components/invitation/PremiumAudioPlayer.tsx` |
+| Paylaşım görsel endpoint'i | `src/routes/api.share-image.$slug.ts` |
+| Paylaşım görsel güvenliği/şablonu | `src/lib/share-image.ts` |
 | Etkinlik izinleri | `src/lib/event-permissions.ts` ve `src/lib/event-access.server.ts` |
 | Ekip yönetimi | `src/lib/event-team.functions.ts` |
 | Çoklu program | `src/lib/event-schedules.functions.ts` |
@@ -456,7 +452,7 @@ npm run build
 - Büyük bundle/chunklar dinamik import ile bölünmeli.
 - Bazı eski bileşenlerde ortak form ve hata kalıpları tekrar ediyor.
 - Statik tema motoru ve Supabase tema yönetimi için net tek kaynak kararı gerekli.
-- Gerçek OG görsel üretimi yok.
+- Dinamik OG görselinin gerçek WhatsApp/Facebook cache ve scraper smoke testi bekliyor.
 - Müzik kataloğu üçüncü taraf stream URL'lerine bağlı.
 - YouTube kaynağı veritabanında geriye uyumluluk nedeniyle `legacy` olarak tutuluyor.
 - Tüm planlanan analitik olaylar bağlı değil.
@@ -486,7 +482,8 @@ Antigravity önce kod yazmaya başlamadan şu sırayı izlemelidir:
 1. Bu dosyayı ve üç faz belgesini oku.
 2. `git status`, `git log -5` ve canlı deployment durumunu kontrol et.
 3. Müzik özelliğinin canlı smoke testini tamamla.
-4. Sonucu raporla.
-5. Kullanıcıdan öncelik değişikliği gelmezse gerçek 1200×630 paylaşım görseli işine başla.
+4. `/api/share-image/:slug` yanıtının üretimde PNG ve 1200×630 olduğunu, davetiye HTML'inin bu URL'yi kullandığını doğrula.
+5. Sonucu raporla.
+6. Kullanıcıdan öncelik değişikliği gelmezse gelişmiş LCV'yi tamamlamaya başla.
 
 Bakım modunu kapatma, PayTR akışını yeniden yazma, mevcut tabloları silme veya eski davetiye URL'lerini değiştirme.
