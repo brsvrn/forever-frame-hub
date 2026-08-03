@@ -52,10 +52,10 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
-`4239f2c` commit’i itibarıyla:
+`2c4fbb1` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
-- `npm test`: **13 test dosyası / 41 test başarılı**
+- `npm test`: **13 test dosyası / 43 test başarılı**
 - `npm run build`: başarılı
 - Bilinen build uyarısı: bazı istemci chunkları 500 kB üzerinde. Bu bir sonraki performans fazında code splitting ile ele alınmalıdır.
 
@@ -63,6 +63,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `2c4fbb1` | Tekli/çoklu etkinlikler için Google, Outlook, Apple ve `.ics` takvim akışı |
 | `4239f2c` | Gelişmiş LCV doğrulaması, rapor kartları ve Excel/PDF/CSV çıktıları |
 | `29593ba` | Güvenli, markalı 1200×630 Open Graph/WhatsApp görsel üretimi |
 | `db61921` | Lisanslı hazır müzik kataloğu ve YouTube kaynakları |
@@ -276,7 +277,19 @@ Eksik:
 
 ### 6.5 Takvime ekleme
 
-Temel tarih verisi vardır; fakat Google Calendar, Apple/Outlook ve `.ics` üretiminin tüm çoklu etkinlikler için ortak ve test edilmiş uygulaması tamamlanmamıştır.
+Var:
+
+- Tekli ve çoklu etkinliklerde ortak takvim menüsü.
+- Google Takvim ve Outlook web bağlantıları.
+- Apple Takvim uyumlu `.ics` indirme.
+- Çoklu etkinliklerde sunucu tarafından doğrulanan `.ics` endpoint'i.
+- Etkinlik saat dilimine göre UTC dönüşümü, tüm gün ve gece yarısını aşan etkinlik desteği.
+- Takvim modülü kapalıysa seçeneklerin davetiyeden gizlenmesi.
+
+Eksik veya canlı uçtan uca doğrulanmadı:
+
+- Google/Outlook/Apple bağlantılarının fiziksel iPhone ve Android cihazlarda canlı testi.
+- Takvime ekleme analitik olayının ortak analitik servise bağlanması.
 
 ### 6.6 Yönetim paneli
 
@@ -348,7 +361,7 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P0 — Önce mevcut son işi doğrula
 
-1. `feature/platform-foundation` ve `main` dallarının `4239f2c` veya daha yeni committe olduğunu doğrula.
+1. `feature/platform-foundation` ve `main` dallarının `2c4fbb1` veya daha yeni committe olduğunu doğrula.
 2. Vercel dağıtımının başarılı olduğunu kontrol et.
 3. Admin bakım bypass ile `/olustur` adım 7'yi aç.
 4. Üç katalog parçasını ayrı ayrı önizle ve kaydet.
@@ -359,10 +372,6 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 ### P1 — Gelişmiş LCV'yi tamamla
 
 Kişisel davetli bağlantısını LCV yanıtıyla ilişkilendir, yanıt vermeyenler listesini ve özel soru toplu raporlarını aynı ortak servis üzerinden tamamla. Mevcut koşullu formu ve dışa aktarmaları yeniden yazma.
-
-### P1 — Takvim sistemi
-
-Çoklu etkinliklerle Google, Apple, Outlook ve `.ics` üretimini tamamla.
 
 ### P2 — Tema sayfaları ve tema schema
 
@@ -427,6 +436,7 @@ PayTR değişkenlerini mevcut canlı ayarlardan isim/değer değiştirmeden koru
 | Paylaşım görsel güvenliği/şablonu | `src/lib/share-image.ts` |
 | LCV formu ve sunucu işlemleri | `src/components/invitation/PremiumRSVP.tsx` ve `src/lib/rsvp.functions.ts` |
 | LCV paneli ve dışa aktarma | `src/components/dashboard/DashboardRSVP.tsx` ve `src/lib/rsvp-export.ts` |
+| Takvim bağlantıları ve `.ics` | `src/components/invitation/CalendarLinks.tsx`, `src/lib/calendar.ts` ve `src/routes/api.calendar.$scheduleId.ts` |
 | Etkinlik izinleri | `src/lib/event-permissions.ts` ve `src/lib/event-access.server.ts` |
 | Ekip yönetimi | `src/lib/event-team.functions.ts` |
 | Çoklu program | `src/lib/event-schedules.functions.ts` |
