@@ -124,10 +124,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  const gtmId = ANALYTICS_CONFIG.gtmId;
-  const gaId = ANALYTICS_CONFIG.gaMeasurementId;
-  const pixelId = ANALYTICS_CONFIG.metaPixelId;
-  const googleAdsId = ANALYTICS_CONFIG.googleAdsId;
+  const gtmId = import.meta.env.VITE_GTM_ID || ANALYTICS_CONFIG.gtmId;
+  const gaId = import.meta.env.VITE_GA4_MEASUREMENT_ID || ANALYTICS_CONFIG.gaMeasurementId;
+  const pixelId = import.meta.env.VITE_META_PIXEL_ID || ANALYTICS_CONFIG.metaPixelId;
+  const googleAdsId = import.meta.env.VITE_GOOGLE_ADS_ID || ANALYTICS_CONFIG.googleAdsId;
 
   return (
     <html lang="tr">

@@ -102,9 +102,9 @@ const OdemeBasariliRoute = OdemeBasariliRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const OdemeHataRoute = OdemeHataRouteImport.update({
-  id: '/hata',
-  path: '/hata',
-  getParentRoute: () => OdemeRoute,
+  id: '/odeme/hata',
+  path: '/odeme/hata',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PanelIdRoute = PanelIdRouteImport.update({
   id: '/panel_/$id',
@@ -354,6 +354,7 @@ export interface RootRouteChildren {
   DavetSlugRoute: typeof DavetSlugRoute
   EkipDavetiTokenRoute: typeof EkipDavetiTokenRoute
   OdemeBasariliRoute: typeof OdemeBasariliRoute
+  OdemeHataRoute: typeof OdemeHataRoute
   PanelIdRoute: typeof PanelIdRoute
   SozlesmelerGizlilikRoute: typeof SozlesmelerGizlilikRoute
   SozlesmelerIptalIadeRoute: typeof SozlesmelerIptalIadeRoute
@@ -464,10 +465,10 @@ declare module '@tanstack/react-router' {
     }
     '/odeme/hata': {
       id: '/odeme/hata'
-      path: '/hata'
+      path: '/odeme/hata'
       fullPath: '/odeme/hata'
       preLoaderRoute: typeof OdemeHataRouteImport
-      parentRoute: typeof OdemeRoute
+      parentRoute: typeof rootRouteImport
     }
     '/panel_/$id': {
       id: '/panel_/$id'
@@ -569,6 +570,7 @@ const rootRouteChildren: RootRouteChildren = {
   DavetSlugRoute: DavetSlugRoute,
   EkipDavetiTokenRoute: EkipDavetiTokenRoute,
   OdemeBasariliRoute: OdemeBasariliRoute,
+  OdemeHataRoute: OdemeHataRoute,
   PanelIdRoute: PanelIdRoute,
   SozlesmelerGizlilikRoute: SozlesmelerGizlilikRoute,
   SozlesmelerIptalIadeRoute: SozlesmelerIptalIadeRoute,

@@ -3,49 +3,43 @@ import { getStoredUTM } from "./utm";
 export const ANALYTICS_CONFIG = {
   get gtmId() {
     return (
-      (typeof process !== "undefined" ? process.env?.NEXT_PUBLIC_GTM_ID || process.env?.VITE_GTM_ID : undefined) ||
-      (import.meta as any).env?.VITE_GTM_ID ||
-      (import.meta as any).env?.NEXT_PUBLIC_GTM_ID ||
-      ""
+      import.meta.env.VITE_GTM_ID ||
+      (typeof process !== "undefined" ? process.env?.VITE_GTM_ID || process.env?.NEXT_PUBLIC_GTM_ID : undefined) ||
+      "GTM-KSV2TJVL"
     );
   },
   get gaMeasurementId() {
     return (
-      (typeof process !== "undefined" ? process.env?.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env?.VITE_GA_MEASUREMENT_ID : undefined) ||
-      (import.meta as any).env?.VITE_GA_MEASUREMENT_ID ||
-      (import.meta as any).env?.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+      import.meta.env.VITE_GA4_MEASUREMENT_ID ||
+      (typeof process !== "undefined" ? process.env?.VITE_GA4_MEASUREMENT_ID || process.env?.NEXT_PUBLIC_GA_MEASUREMENT_ID : undefined) ||
       ""
     );
   },
   get metaPixelId() {
     return (
-      (typeof process !== "undefined" ? process.env?.NEXT_PUBLIC_META_PIXEL_ID || process.env?.VITE_META_PIXEL_ID : undefined) ||
-      (import.meta as any).env?.VITE_META_PIXEL_ID ||
-      (import.meta as any).env?.NEXT_PUBLIC_META_PIXEL_ID ||
+      import.meta.env.VITE_META_PIXEL_ID ||
+      (typeof process !== "undefined" ? process.env?.VITE_META_PIXEL_ID || process.env?.NEXT_PUBLIC_META_PIXEL_ID : undefined) ||
       ""
     );
   },
   get googleAdsId() {
     return (
-      (typeof process !== "undefined" ? process.env?.NEXT_PUBLIC_GOOGLE_ADS_ID || process.env?.VITE_GOOGLE_ADS_ID : undefined) ||
-      (import.meta as any).env?.VITE_GOOGLE_ADS_ID ||
-      (import.meta as any).env?.NEXT_PUBLIC_GOOGLE_ADS_ID ||
+      import.meta.env.VITE_GOOGLE_ADS_ID ||
+      (typeof process !== "undefined" ? process.env?.VITE_GOOGLE_ADS_ID || process.env?.NEXT_PUBLIC_GOOGLE_ADS_ID : undefined) ||
       ""
     );
   },
   get googleAdsPurchaseLabel() {
     return (
-      (typeof process !== "undefined" ? process.env?.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL || process.env?.VITE_GOOGLE_ADS_PURCHASE_LABEL : undefined) ||
-      (import.meta as any).env?.VITE_GOOGLE_ADS_PURCHASE_LABEL ||
-      (import.meta as any).env?.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL ||
+      import.meta.env.VITE_GOOGLE_ADS_PURCHASE_LABEL ||
+      (typeof process !== "undefined" ? process.env?.VITE_GOOGLE_ADS_PURCHASE_LABEL || process.env?.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL : undefined) ||
       ""
     );
   },
   get googleAdsBeginCheckoutLabel() {
     return (
-      (typeof process !== "undefined" ? process.env?.NEXT_PUBLIC_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL || process.env?.VITE_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL : undefined) ||
-      (import.meta as any).env?.VITE_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL ||
-      (import.meta as any).env?.NEXT_PUBLIC_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL ||
+      import.meta.env.VITE_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL ||
+      (typeof process !== "undefined" ? process.env?.VITE_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL || process.env?.NEXT_PUBLIC_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL : undefined) ||
       ""
     );
   },
