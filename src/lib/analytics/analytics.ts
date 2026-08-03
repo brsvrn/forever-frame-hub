@@ -61,7 +61,11 @@ function isDebugMode(): boolean {
 
 function logDebug(eventName: string, data: any) {
   if (isDebugMode()) {
-    console.log(`%c[Analytics Event] ${eventName}`, "background: #2563eb; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold;", data);
+    console.log(
+      `%c[Analytics Event] ${eventName}`,
+      "background: #2563eb; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold;",
+      data
+    );
   }
 }
 
@@ -98,7 +102,7 @@ export function trackPageView(url: string, title?: string) {
   }
 }
 
-// 2. View Demo / Preview Interaction
+// 2. Demo Interactions
 export function trackViewDemo(demoId: string, demoTitle: string) {
   if (typeof window === "undefined") return;
 
@@ -142,12 +146,111 @@ export function trackViewDemo(demoId: string, demoTitle: string) {
   }
 }
 
-// 3. Begin Checkout / Package Selection
+export function trackDemoStep(stepIndex: number, stepName: string) {
+  if (typeof window === "undefined") return;
+
+  const eventData = {
+    step_index: stepIndex,
+    step_name: stepName,
+  };
+
+  logDebug("demo_step_view", eventData);
+
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({
+      event: "demo_step_view",
+      ...eventData,
+    });
+  }
+
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "demo_step_view", eventData);
+  }
+}
+
+export function trackDemoCompleted(demoId: string) {
+  if (typeof window === "undefined") return;
+
+  const eventData = {
+    demo_id: demoId,
+  };
+
+  logDebug("demo_completed", eventData);
+
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({
+      event: "demo_completed",
+      ...eventData,
+    });
+  }
+
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "demo_completed", eventData);
+  }
+}
+
+// 3. Package Selection (select_item)
+export function trackSelectItem(packageId: string, packageName: string, price: number) {
+  if (typeof window === "undefined") return;
+
+  const eventData = {
+    item_id: packageId,
+    item_name: packageName,
+    price,
+    currency: "TRY",
+  };
+
+  logDebug("select_item", eventData);
+
+  // GTM
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({
+      event: "select_item",
+      ecommerce: {
+        items: [
+          {
+            item_id: packageId,
+            item_name: packageName,
+            price,
+            quantity: 1,
+          },
+        ],
+      },
+    });
+  }
+
+  // GA4
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "select_item", {
+      items: [
+        {
+          item_id: packageId,
+          item_name: packageName,
+          price,
+          quantity: 1,
+        },
+      ],
+    });
+  }
+
+  // Meta Pixel
+  if (typeof (window as any).fbq === "function") {
+    (window as any).fbq("track", "ViewContent", {
+      content_name: packageName,
+      content_ids: [packageId],
+      value: price,
+      currency: "TRY",
+    });
+  }
+}
+
+// 4. Begin Checkout (begin_checkout)
 export interface CheckoutPayload {
   packageId: string;
   packageName: string;
-  price: number; // in TL (e.g. 500, 750, 1000)
+  price: number;
   currency?: string;
+  eventId?: string;
 }
 
 export function trackBeginCheckout(payload: CheckoutPayload) {
@@ -155,6 +258,7 @@ export function trackBeginCheckout(payload: CheckoutPayload) {
 
   const currency = payload.currency || "TRY";
   const utm = getStoredUTM();
+  const eventId = payload.eventId || `mw_checkout_${Date.now()}`;
 
   const eventData = {
     package_id: payload.packageId,
@@ -201,7 +305,7 @@ export function trackBeginCheckout(payload: CheckoutPayload) {
       ],
     });
 
-    // Google Ads Begin Checkout Conversion (if label exists)
+    // Google Ads Begin Checkout Conversion
     if (ANALYTICS_CONFIG.googleAdsId && ANALYTICS_CONFIG.googleAdsBeginCheckoutLabel) {
       (window as any).gtag("event", "conversion", {
         send_to: `${ANALYTICS_CONFIG.googleAdsId}/${ANALYTICS_CONFIG.googleAdsBeginCheckoutLabel}`,
@@ -211,24 +315,30 @@ export function trackBeginCheckout(payload: CheckoutPayload) {
     }
   }
 
-  // Meta Pixel
+  // Meta Pixel with Deduplication eventID
   if (typeof (window as any).fbq === "function") {
-    (window as any).fbq("track", "InitiateCheckout", {
-      content_name: payload.packageName,
-      content_ids: [payload.packageId],
-      value: payload.price,
-      currency,
-    });
+    (window as any).fbq(
+      "track",
+      "InitiateCheckout",
+      {
+        content_name: payload.packageName,
+        content_ids: [payload.packageId],
+        value: payload.price,
+        currency,
+      },
+      { eventID: eventId }
+    );
   }
 }
 
-// 4. Successful Purchase
+// 5. Purchase (Strictly verified and deduplicated)
 export interface PurchasePayload {
   transactionId: string;
   packageId: string;
   packageName: string;
-  value: number; // in TL (e.g. 500, 750, 1000)
+  value: number;
   currency?: string;
+  eventId?: string;
 }
 
 export function trackPurchase(payload: PurchasePayload) {
@@ -236,6 +346,7 @@ export function trackPurchase(payload: PurchasePayload) {
 
   const currency = payload.currency || "TRY";
   const utm = getStoredUTM();
+  const eventId = payload.eventId || `mw_purchase_${payload.transactionId}`;
 
   const eventData = {
     transaction_id: payload.transactionId,
@@ -269,7 +380,7 @@ export function trackPurchase(payload: PurchasePayload) {
     });
   }
 
-  // GA4
+  // GA4 with unique transaction_id for GA4 deduplication
   if (typeof (window as any).gtag === "function") {
     (window as any).gtag("event", "purchase", {
       transaction_id: payload.transactionId,
@@ -285,7 +396,7 @@ export function trackPurchase(payload: PurchasePayload) {
       ],
     });
 
-    // Google Ads Purchase Conversion
+    // Google Ads Purchase Conversion with transaction_id
     if (ANALYTICS_CONFIG.googleAdsId && ANALYTICS_CONFIG.googleAdsPurchaseLabel) {
       (window as any).gtag("event", "conversion", {
         send_to: `${ANALYTICS_CONFIG.googleAdsId}/${ANALYTICS_CONFIG.googleAdsPurchaseLabel}`,
@@ -296,19 +407,24 @@ export function trackPurchase(payload: PurchasePayload) {
     }
   }
 
-  // Meta Pixel
+  // Meta Pixel with Deduplication eventID matching Server CAPI
   if (typeof (window as any).fbq === "function") {
-    (window as any).fbq("track", "Purchase", {
-      content_name: payload.packageName,
-      content_ids: [payload.packageId],
-      value: payload.value,
-      currency,
-      order_id: payload.transactionId,
-    });
+    (window as any).fbq(
+      "track",
+      "Purchase",
+      {
+        content_name: payload.packageName,
+        content_ids: [payload.packageId],
+        value: payload.value,
+        currency,
+        order_id: payload.transactionId,
+      },
+      { eventID: eventId }
+    );
   }
 }
 
-// 5. Lead / Contact Click
+// 6. Lead / Contact Click
 export function trackLead(leadSource: string) {
   if (typeof window === "undefined") return;
 

@@ -29,7 +29,7 @@ import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
 import { QrGalleryPreview } from "./QrGalleryPreview";
 import { useEffect } from "react";
-import { trackBeginCheckout } from "@/lib/analytics/analytics";
+import { trackSelectItem } from "@/lib/analytics/analytics";
 
 type StepProps = {
   draft: InvitationDraft;
@@ -134,7 +134,7 @@ export function StepTheme({
                   type="button"
                   onClick={() => {
                     update("packageId", pkg.id);
-                    trackBeginCheckout(pkg.id, pkg.name, pkg.price);
+                    trackSelectItem(pkg.id, pkg.name, pkg.price);
                   }}
                   className={cn(
                     "p-4 rounded-2xl border text-left transition-all",

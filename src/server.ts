@@ -100,11 +100,12 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
     if (status === "success") {
       const { data: transaction } = await admin
         .from("transactions")
-        .select("invitation_id, package_type, amount, user_id, status")
+        .select("invitation_id, package_type, amount, user_id, status, is_test_order, meta_purchase_sent")
         .eq("merchant_oid", merchant_oid)
         .maybeSingle();
 
       if (transaction) {
+        // Idempotency: If already marked success, acknowledge immediately
         if (transaction.status === "success") {
           return new Response("OK", {
             status: 200,
@@ -112,12 +113,14 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
           });
         }
 
+        // 1. Mark transaction as success in database
         await admin
           .from("transactions")
           .update({ status: "success", updated_at: new Date().toISOString() })
           .eq("merchant_oid", merchant_oid)
           .eq("status", "pending");
 
+        // 2. Activate invitation
         await admin
           .from("invitations")
           .update({
@@ -126,40 +129,69 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
           })
           .eq("id", transaction.invitation_id);
 
-        // Meta CAPI Server-Side Purchase Event for guaranteed conversion tracking
-        try {
-          let userEmail = "";
-          if (transaction.user_id) {
-            const { data: userData } = await admin.auth.admin.getUserById(transaction.user_id);
-            if (userData?.user?.email) {
-              userEmail = userData.user.email;
+        // 3. Asynchronously trigger Meta CAPI (never blocks or fails the PayTR response)
+        const isTestOrder =
+          transaction.is_test_order === true ||
+          process.env.PAYTR_TEST_MODE !== "0" ||
+          Number(transaction.amount) <= 0;
+
+        if (!isTestOrder && transaction.meta_purchase_sent !== true) {
+          const clientIp =
+            request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+            request.headers.get("x-real-ip") ||
+            undefined;
+          const clientUserAgent = request.headers.get("user-agent") || undefined;
+
+          // Background task to send Meta CAPI
+          (async () => {
+            try {
+              let userEmail = "";
+              let userPhone = "";
+              if (transaction.user_id) {
+                const { data: userData } = await admin.auth.admin.getUserById(transaction.user_id);
+                if (userData?.user?.email) userEmail = userData.user.email;
+                if (userData?.user?.phone) userPhone = userData.user.phone;
+              }
+
+              const rawAmount = transaction.amount ? Number(transaction.amount) : 100000;
+              const finalValue = rawAmount > 1000 ? rawAmount / 100 : rawAmount;
+              const eventId = `mw_purchase_${merchant_oid}`;
+
+              const capiRes = await sendMetaServerEvent({
+                eventName: "Purchase",
+                eventId,
+                eventSourceUrl: "https://memory-wedding.com/odeme/basarili",
+                userData: {
+                  email: userEmail || undefined,
+                  phone: userPhone || undefined,
+                  clientIp,
+                  clientUserAgent,
+                },
+                customData: {
+                  currency: "TRY",
+                  value: finalValue,
+                  content_name: transaction.package_type || "MemoryWedding Paket",
+                  content_type: "product",
+                  order_id: merchant_oid,
+                },
+              });
+
+              if (capiRes.success) {
+                await admin
+                  .from("transactions")
+                  .update({
+                    meta_purchase_sent: true,
+                    analytics_sent_at: new Date().toISOString(),
+                  })
+                  .eq("merchant_oid", merchant_oid);
+              }
+            } catch (capiErr) {
+              console.error("Meta CAPI async execution error:", capiErr);
             }
-          }
-
-          const rawAmount = transaction.amount ? Number(transaction.amount) : 100000;
-          const finalValue = rawAmount > 1000 ? rawAmount / 100 : rawAmount;
-
-          await sendMetaServerEvent({
-            eventName: "Purchase",
-            eventId: merchant_oid,
-            eventSourceUrl: "https://memory-wedding.com/odeme/basarili",
-            userData: {
-              email: userEmail || undefined,
-              clientIp: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || undefined,
-              clientUserAgent: request.headers.get("user-agent") || undefined,
-            },
-            customData: {
-              currency: "TRY",
-              value: finalValue,
-              content_name: transaction.package_type || "MemoryWedding Paket",
-              content_type: "product",
-            },
-          });
-        } catch (capiErr) {
-          console.error("Meta CAPI Server Event error:", capiErr);
+          })();
         }
       } else {
-        console.warn("PayTR Webhook: Transaction not found", merchant_oid);
+        console.warn("PayTR Webhook: Transaction not found for", merchant_oid);
       }
     } else {
       await admin
@@ -173,6 +205,7 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
         .eq("status", "pending");
     }
 
+    // Always respond 200 OK to PayTR on valid hash processing
     return new Response("OK", {
       status: 200,
       headers: { "Content-Type": "text/plain" },

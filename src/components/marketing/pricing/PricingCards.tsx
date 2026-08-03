@@ -1,7 +1,7 @@
 import { FadeIn, SlideUp } from "@/components/motion";
 import { Check, Sparkles } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { trackBeginCheckout } from "@/lib/analytics/analytics";
+import { trackSelectItem } from "@/lib/analytics/analytics";
 
 export function PricingCards() {
   return (
@@ -35,7 +35,7 @@ export function PricingCards() {
               <Link 
                 to="/olustur" 
                 search={{ pkg: "digital_only" }} 
-                onClick={() => trackBeginCheckout("digital_only", "Dijital Davetiye", 500)}
+                onClick={() => trackSelectItem("digital_only", "Dijital Davetiye", 500)}
                 className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8"
               >
                 Seç
@@ -66,7 +66,7 @@ export function PricingCards() {
               <Link 
                 to="/olustur" 
                 search={{ pkg: "qr_only" }} 
-                onClick={() => trackBeginCheckout("qr_only", "QR Paket", 750)}
+                onClick={() => trackSelectItem("qr_only", "QR Paket", 750)}
                 className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8"
               >
                 Seç
@@ -105,7 +105,7 @@ export function PricingCards() {
               <Link 
                 to="/olustur" 
                 search={{ pkg: "full" }} 
-                onClick={() => trackBeginCheckout("full", "2'si Bir Arada", 1000)}
+                onClick={() => trackSelectItem("full", "2'si Bir Arada", 1000)}
                 className="block text-center w-full py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors mb-8 shadow-[0_0_20px_rgba(var(--primary),0.3)]"
               >
                 Tam Paket ile Başla
