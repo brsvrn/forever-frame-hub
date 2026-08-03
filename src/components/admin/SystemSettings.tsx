@@ -3,6 +3,7 @@ import { ExternalLink, Loader2, Save, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { getPackages, getSystemSettings, updateSystemSettings } from "@/lib/admin.api";
 import {
+  enableAdminMaintenanceBypass,
   getAdminMaintenanceSettings,
   updateAdminMaintenanceSettings,
 } from "@/lib/maintenance-admin";
@@ -46,6 +47,7 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
   const [loading, setLoading] = useState(true);
   const [savingMaintenance, setSavingMaintenance] = useState(false);
   const [savingGeneral, setSavingGeneral] = useState(false);
+  const [openingAdminPreview, setOpeningAdminPreview] = useState(false);
   const [toggleTarget, setToggleTarget] = useState<boolean | null>(null);
   const dirtyRef = useRef(false);
 
@@ -153,6 +155,31 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
       toast.error(error instanceof Error ? error.message : "Ayarlar kaydedilemedi.");
     } finally {
       setSavingGeneral(false);
+    }
+  };
+
+  const openAdminPreview = async () => {
+    if (openingAdminPreview) return;
+    if (!maintenance?.allow_admin_access) {
+      toast.error("Önce doğrulanmış admin erişimini açıp bakım ayarlarını kaydedin.");
+      return;
+    }
+
+    const previewWindow = window.open("about:blank", "_blank");
+    setOpeningAdminPreview(true);
+    try {
+      await enableAdminMaintenanceBypass();
+      toast.success("Güvenli yönetici önizlemesi açıldı.");
+      if (previewWindow) {
+        previewWindow.location.replace(`${window.location.origin}/`);
+      } else {
+        window.location.assign("/");
+      }
+    } catch (error) {
+      previewWindow?.close();
+      toast.error(error instanceof Error ? error.message : "Yönetici önizlemesi açılamadı.");
+    } finally {
+      setOpeningAdminPreview(false);
     }
   };
 
@@ -304,6 +331,19 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
           </div>
 
           <div className="flex flex-wrap justify-end gap-3 pt-2">
+            <button
+              type="button"
+              disabled={openingAdminPreview || !maintenance.allow_admin_access}
+              onClick={() => void openAdminPreview()}
+              className="inline-flex items-center gap-2 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {openingAdminPreview ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ExternalLink className="size-4" />
+              )}
+              Geliştirme önizlemesini aç
+            </button>
             <a
               href="/bakim"
               target="_blank"
