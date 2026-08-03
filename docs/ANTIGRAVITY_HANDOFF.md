@@ -52,6 +52,20 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
+`d0ca28e` commit'iyle birlikte son düzeltmeler:
+
+- YouTube video kutusu davetiye üzerinden kaldırıldı; müzik yalnızca sabit alt oynatıcıdan yönetiliyor.
+- Supabase oturumu sunucu fonksiyonlarına Bearer başlığı ve `sb-access-token` çereziyle aktarılıyor.
+- Etkinlik sahibi erişimi sunucuda doğrudan doğrulanıyor; ekip rolleri mevcut izin RPC'sini kullanmaya devam ediyor.
+- Eksik LCV, galeri/anı, paylaşım, ses, müzik ve hediye ayar kayıtları ilk okumada güvenli varsayılanlarla oluşturuluyor.
+- Ayar ekranı yükleme hatasında sonsuz spinner yerine hata metni ve `Tekrar dene` sunuyor.
+- Açılış, kapak ve hikâye ekranlarının mobil tipografi/çakışma düzeni iyileştirildi.
+- `npm run typecheck`: başarılı
+- `npm test`: **18 test dosyası / 53 test başarılı**
+- `npm run build`: başarılı
+
+Not: YouTube sahibi gömülü oynatmayı kapatmışsa video yalnızca YouTube üzerinde çalışır; bu kaynak uygulama tarafından zorla oynatılamaz. Canlı kullanımda gömülmeye izin veren bağlantı veya hazır lisanslı katalog parçası seçilmelidir.
+
 `7bfc1dd` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
@@ -63,6 +77,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `d0ca28e` | Etkinlik ayarlarını otomatik hazırlama, oturum/yetki dayanıklılığı, kompakt müzik oynatıcı ve mobil davetiye düzenleri |
 | `7bfc1dd` | Ana daldaki reklam ölçümü ile platform çalışmalarının güvenli birleşimi; bakım CSP ve checkout tür düzeltmesi |
 | `d6bd70d` | Bakım sayfası şablonuna doğrudan GTM kodunun eklenmesi |
 | `23bd0b7` | Sunucu doğrulamalı satın alma, test siparişi filtresi, Meta CAPI dedup ve UTM kalıcılığı |
