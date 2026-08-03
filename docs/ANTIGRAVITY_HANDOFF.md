@@ -52,10 +52,10 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
-`c144284` commit’i itibarıyla:
+`7201d43` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
-- `npm test`: **15 test dosyası / 47 test başarılı**
+- `npm test`: **16 test dosyası / 49 test başarılı**
 - `npm run build`: başarılı
 - Bilinen build uyarısı: bazı istemci chunkları 500 kB üzerinde. Bu bir sonraki performans fazında code splitting ile ele alınmalıdır.
 
@@ -63,6 +63,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `7201d43` | Tema etkinlik türleri, modüller, görsel slotlar, açılışlar ve galeri stilleri için ortak yetenek şeması |
 | `c144284` | Özel LCV sorularının panel, Excel ve PDF toplu sonuç raporları |
 | `2c05a96` | Kişisel davetli bağlantılarının LCV formu, kota/etkinlik doğrulaması ve yanıt bekleyenler paneliyle bağlanması |
 | `393ab74` | SEO uyumlu tema kataloğu, tema detayları, canlı demo ve builder bağlantısı |
@@ -319,13 +320,14 @@ Var:
 - Kategori, açıklama, renk paleti, desteklenen özellikler ve telefon görünümü.
 - Tema bazlı title/description/Open Graph metadata, canonical URL ve sitemap kayıtları.
 - Canlı demoyu seçilen temayla açma ve builder'a tema seçimini taşıma.
+- Etkinlik türleri, desteklenen bölümler, görsel slotlar, galeri stilleri ve açılış animasyonları için ortak tipli yetenek modeli.
+- Statik ve Supabase tema kayıtlarının aynı yetenek alanlarına normalize edilmesi.
+- Pasif/seçilemez temaların yeni müşteri listesinden gizlenirken eski davetiyelerde kimlikle çözümlenmeye devam etmesi.
 
 Eksik:
 
 - Tema bazlı ayrıntılı ekran görüntüsü galerileri, benzer temalar ve SSS.
 - Tema tanımlarında editoryal uzun açıklama ve etkinlik türleri.
-- `supportedSections`, `imageSlots`, `galleryStyles`, `openingAnimations` alanlarının veri modeline tam taşınması.
-- Pasif temanın yeni müşteriden gizlenip eski etkinlikte çalışmaya devam etmesi.
 - Tema yönetiminin statik `theme-engine` ve Supabase kayıtları arasında tek kaynak stratejisi.
 
 ### 7.2 Kontrollü gelişmiş editör
@@ -375,7 +377,7 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P0 — Önce mevcut son işi doğrula
 
-1. `feature/platform-foundation` ve `main` dallarının `c144284` veya daha yeni committe olduğunu doğrula.
+1. `feature/platform-foundation` ve `main` dallarının `7201d43` veya daha yeni committe olduğunu doğrula.
 2. Vercel dağıtımının başarılı olduğunu kontrol et.
 3. Admin bakım bypass ile `/olustur` adım 7'yi aç.
 4. Üç katalog parçasını ayrı ayrı önizle ve kaydet.
@@ -387,9 +389,9 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 Form, kişisel bağlantı, yanıt bekleyenler, özel soru raporu ve Excel/PDF çıktılarını canlı veride ve fiziksel cihazlarda yayın kapısında doğrula. Mevcut LCV servislerini yeniden yazma.
 
-### P2 — Tema schema'yı tamamla
+### P2 — Tema içeriği ve tek kaynak stratejisi
 
-Mevcut tema tanıtım rotalarını yeniden yazmadan desteklenen modüller, görsel slotlar, etkinlik türleri ve tema bazlı açılış/galeri seçeneklerini ortak schema'ya ekle.
+Mevcut ortak yetenek şemasını yeniden yazmadan tema tanıtım sayfalarının ayrıntılı galeri, benzer tema ve SSS içeriklerini tamamla. Statik varlıklarla Supabase kayıtları için eski davetiyeleri bozmayan tek kaynak stratejisini kesinleştir.
 
 ### P2 — Kontrollü gelişmiş editör
 
