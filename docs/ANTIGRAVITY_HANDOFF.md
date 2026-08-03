@@ -52,10 +52,10 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
-`393ab74` commit’i itibarıyla:
+`2c05a96` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
-- `npm test`: **14 test dosyası / 44 test başarılı**
+- `npm test`: **15 test dosyası / 45 test başarılı**
 - `npm run build`: başarılı
 - Bilinen build uyarısı: bazı istemci chunkları 500 kB üzerinde. Bu bir sonraki performans fazında code splitting ile ele alınmalıdır.
 
@@ -63,6 +63,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `2c05a96` | Kişisel davetli bağlantılarının LCV formu, kota/etkinlik doğrulaması ve yanıt bekleyenler paneliyle bağlanması |
 | `393ab74` | SEO uyumlu tema kataloğu, tema detayları, canlı demo ve builder bağlantısı |
 | `2c4fbb1` | Tekli/çoklu etkinlikler için Google, Outlook, Apple ve `.ics` takvim akışı |
 | `4239f2c` | Gelişmiş LCV doğrulaması, rapor kartları ve Excel/PDF/CSV çıktıları |
@@ -236,12 +237,14 @@ Var:
 - Kısa/uzun metin, evet-hayır, tek/çoklu seçim, sayı, tarih, yemek ve servis soru türleri.
 - Yetişkin, çocuk, ulaşım, yemek ve etkinlik bazlı panel raporları.
 - Güvenli Excel SpreadsheetML, PDF ve CSV dışa aktarma.
+- Kişisel davetli bağlantısından açılan formda ad, iletişim, kişi kotası ve davet edildiği etkinliklerin güvenli biçimde doldurulması.
+- Kişisel bağlantının yalnız izin verilen etkinliklere ve davetli kotasına göre sunucuda doğrulanması.
+- Başarılı LCV yanıtının kişisel bağlantı durumuna işlenmesi ve eşzamanlı ikinci yanıtta kayıt geri alma koruması.
+- Aktif kişisel davetlerden yanıt bekleyenlerin gerçek verilerle panelde listelenmesi.
 
 Eksik veya canlı uçtan uca doğrulanmadı:
 
-- Yanıt vermeyenler listesi.
 - Özel soru yanıtlarının toplu/aggregate raporu.
-- Kişisel davetli bağlantısı ile verilen LCV yanıtının bağlantı kaydına otomatik işlenmesi.
 - Form, rapor ve Excel/PDF çıktılarının canlı ve fiziksel mobil cihaz testi.
 
 ### 6.3 Anı Kutusu
@@ -349,7 +352,7 @@ Tam serbest Canva benzeri editör yapılmamalıdır.
 - Misafir listesi içe aktarma.
 - Kişisel QR kartı.
 - Davet edildiği etkinlikleri seçme arayüzü.
-- LCV ve son açılma bilgilerinin toplu paneli.
+- LCV durumu panelde görünür; son açılma, filtreleme ve toplu işlemler henüz tamamlanmadı.
 
 ### 7.5 Analitik olaylar
 
@@ -370,7 +373,7 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P0 — Önce mevcut son işi doğrula
 
-1. `feature/platform-foundation` ve `main` dallarının `393ab74` veya daha yeni committe olduğunu doğrula.
+1. `feature/platform-foundation` ve `main` dallarının `2c05a96` veya daha yeni committe olduğunu doğrula.
 2. Vercel dağıtımının başarılı olduğunu kontrol et.
 3. Admin bakım bypass ile `/olustur` adım 7'yi aç.
 4. Üç katalog parçasını ayrı ayrı önizle ve kaydet.
@@ -378,9 +381,9 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 6. Geçerli/geçersiz YouTube bağlantısı test et.
 7. YouTube iframe'in görünür olduğunu, otomatik başlamadığını ve sesli karşılama sırasında durduğunu doğrula.
 
-### P1 — Gelişmiş LCV'yi tamamla
+### P1 — Gelişmiş LCV raporlarını tamamla
 
-Kişisel davetli bağlantısını LCV yanıtıyla ilişkilendir, yanıt vermeyenler listesini ve özel soru toplu raporlarını aynı ortak servis üzerinden tamamla. Mevcut koşullu formu ve dışa aktarmaları yeniden yazma.
+Özel soru yanıtlarının toplu raporunu mevcut ortak servis ve dışa aktarma yapısına ekle. Form, kişisel bağlantı ve yanıt bekleyenler akışını yeniden yazma; canlı/fiziksel cihaz testlerini yayın kapısında tamamla.
 
 ### P2 — Tema schema'yı tamamla
 
