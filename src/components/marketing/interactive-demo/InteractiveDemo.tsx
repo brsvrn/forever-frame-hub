@@ -1,13 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FadeIn, SlideUp } from "@/components/motion";
 import { PhoneMockup } from "./PhoneMockup";
 import { Music, MapPin, Camera, Image as ImageIcon, Send, ArrowLeft } from "lucide-react";
+import { trackViewDemo, trackDemoStep, trackDemoCompleted } from "@/lib/analytics/analytics";
 
 export function InteractiveDemo() {
-  const [activeScreen, setActiveScreen] = useState<"envelope" | "invite" | "rsvp" | "gallery">(
+  const [activeScreen, setActiveScreenState] = useState<"envelope" | "invite" | "rsvp" | "gallery">(
     "envelope",
   );
   const [isPlaying, setIsPlaying] = useState(false);
+  const demoViewTracked = useRef(false);
+
+  useEffect(() => {
+    if (!demoViewTracked.current) {
+      demoViewTracked.current = true;
+      trackViewDemo("wedding_invitation_demo", "MemoryWedding İnteraktif Demo");
+    }
+  }, []);
+
+  const screenIndices = {
+    envelope: 1,
+    invite: 2,
+    rsvp: 3,
+    gallery: 4,
+  };
+
+  const setActiveScreen = (screen: "envelope" | "invite" | "rsvp" | "gallery") => {
+    setActiveScreenState(screen);
+    trackDemoStep(screenIndices[screen], screen);
+    if (screen === "gallery") {
+      trackDemoCompleted("wedding_invitation_demo");
+    }
+  };
 
   return (
     <section

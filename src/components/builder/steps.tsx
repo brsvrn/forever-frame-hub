@@ -29,6 +29,7 @@ import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
 import { QrGalleryPreview } from "./QrGalleryPreview";
 import { useEffect } from "react";
+import { trackBeginCheckout, trackSelectItem } from "@/lib/analytics/analytics";
 
 type StepProps = {
   draft: InvitationDraft;
@@ -131,7 +132,10 @@ export function StepTheme({
                 <button
                   key={pkg.id}
                   type="button"
-                  onClick={() => update("packageId", pkg.id)}
+                  onClick={() => {
+                    update("packageId", pkg.id);
+                    trackSelectItem(pkg.id, pkg.name, pkg.price);
+                  }}
                   className={cn(
                     "p-4 rounded-2xl border text-left transition-all",
                     active ? "border-gold bg-gold/10" : "border-border hover:border-gold/50",
@@ -1202,7 +1206,14 @@ export function StepPublish({
           {!isPaid ? (
             <button
               type="button"
-              onClick={() => onPublishChange(true)}
+              onClick={() => {
+                trackBeginCheckout({
+                  packageId: draft.packageId || "standard",
+                  packageName: "MemoryWedding Paket",
+                  price: 1000,
+                });
+                onPublishChange(true);
+              }}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-6 py-2.5 text-sm font-medium text-white transition-all hover:bg-gold/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
             >
               <Sparkles className="size-4" />

@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { initiatePayment } from "@/lib/payment-actions";
 import { supabase } from "@/integrations/supabase/client";
+import { getTrackingPayloadForOrder } from "@/lib/analytics/utm";
+import { trackBeginCheckout } from "@/lib/analytics/analytics";
 
 declare global {
   interface Window {
@@ -18,6 +20,7 @@ function PaymentRoute() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const idempotencyKey = useRef(crypto.randomUUID());
+  const checkoutTracked = useRef(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,16 +42,31 @@ function PaymentRoute() {
           return;
         }
 
+        const tracking = getTrackingPayloadForOrder();
+
         // Get token from server
         const res = await initiatePayment({
           data: {
             invitationId,
             idempotencyKey: idempotencyKey.current,
+            tracking,
           }
         });
 
         if (res.success && res.token) {
           setToken(res.token);
+
+          // Track begin_checkout exactly once when payment session starts
+          if (!checkoutTracked.current) {
+            checkoutTracked.current = true;
+            trackBeginCheckout({
+              packageId: packageType,
+              packageName: `MemoryWedding ${packageType.toUpperCase()} Paket`,
+              price: 1000,
+              currency: "TRY",
+              eventId: res.merchant_oid ? `mw_checkout_${res.merchant_oid}` : undefined,
+            });
+          }
         } else {
           setError(res.error || "Ödeme başlatılamadı.");
         }

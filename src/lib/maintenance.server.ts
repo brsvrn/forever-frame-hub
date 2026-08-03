@@ -5,7 +5,6 @@ import {
   normalizeMaintenanceSettings,
   type MaintenanceSettings,
 } from "./maintenance";
-import { renderGoogleTagManagerHead, renderGoogleTagManagerNoScript } from "./google-tag-manager";
 
 const SELECT_FIELDS = [
   "id",
@@ -185,7 +184,13 @@ export function renderMaintenancePage(settings: MaintenanceSettings) {
   return `<!doctype html>
 <html lang="tr">
 <head>
-  ${renderGoogleTagManagerHead()}
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-KSV2TJVL');</script>
+  <!-- End Google Tag Manager -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
@@ -215,7 +220,10 @@ export function renderMaintenancePage(settings: MaintenanceSettings) {
   </style>
 </head>
 <body>
-  ${renderGoogleTagManagerNoScript()}
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KSV2TJVL"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
   <main>
     <section class="card" aria-labelledby="maintenance-title">
       <div class="brand"><span class="mark">M</span><span>MemoryWedding</span></div>
