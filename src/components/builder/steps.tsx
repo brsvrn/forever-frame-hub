@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Check,
@@ -28,7 +28,6 @@ import {
 import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
 import { QrGalleryPreview } from "./QrGalleryPreview";
-import { useEffect } from "react";
 import { trackBeginCheckout, trackSelectItem } from "@/lib/analytics/analytics";
 
 type StepProps = {
