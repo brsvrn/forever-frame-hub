@@ -52,7 +52,7 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 ## 3. Son doğrulama durumu
 
-`ce35bf4` commit’i itibarıyla:
+`7bfc1dd` commit’i itibarıyla:
 
 - `npm run typecheck`: başarılı
 - `npm test`: **17 test dosyası / 51 test başarılı**
@@ -63,6 +63,10 @@ Bu migrationları canlıda yeniden çalıştırmak gerekmemektedir. Yeni migrati
 
 | Commit | İçerik |
 |---|---|
+| `7bfc1dd` | Ana daldaki reklam ölçümü ile platform çalışmalarının güvenli birleşimi; bakım CSP ve checkout tür düzeltmesi |
+| `d6bd70d` | Bakım sayfası şablonuna doğrudan GTM kodunun eklenmesi |
+| `23bd0b7` | Sunucu doğrulamalı satın alma, test siparişi filtresi, Meta CAPI dedup ve UTM kalıcılığı |
+| `f888027` | GTM, GA4, Meta Pixel/CAPI, Google Ads ve KVKK onay altyapısı |
 | `ce35bf4` | `GTM-KSV2TJVL` Google Tag Manager kurulumu; normal, bakım ve hata HTML yolları |
 | `7201d43` | Tema etkinlik türleri, modüller, görsel slotlar, açılışlar ve galeri stilleri için ortak yetenek şeması |
 | `c144284` | Özel LCV sorularının panel, Excel ve PDF toplu sonuç raporları |
@@ -361,7 +365,9 @@ Tam serbest Canva benzeri editör yapılmamalıdır.
 
 ### 7.5 Analitik olaylar
 
-Google Tag Manager `GTM-KSV2TJVL` kök uygulama HTML'ine, bakım sayfasına ve sunucu hata sayfasına eklenmiştir. Bakım sayfası CSP'si gerekli Google Tag Manager/Analytics kaynaklarına izin verir. Konteynerin Google tarafında yayınlanması ve canlı Tag Assistant doğrulaması yine gereklidir.
+Google Tag Manager `GTM-KSV2TJVL` kök uygulama HTML'ine, bakım sayfasına ve sunucu hata sayfasına eklenmiştir. Bakım sayfası CSP'si gerekli Google Tag Manager/Analytics kaynaklarına izin verir. GA4, Google Ads, Meta Pixel/CAPI, KVKK onayı, UTM kalıcılığı, ödeme başlangıcı ve sunucuda doğrulanmış satın alma temeli vardır. Test siparişleri satış dönüşümü olarak gönderilmemeli ve Meta tarayıcı/sunucu olayları ortak kimlikle tekilleştirilmelidir.
+
+Konteynerin Google Tag Manager tarafında **yayınlanması** ve canlı Tag Assistant doğrulaması yine gereklidir. Taslak/önizleme durumundaki konteyner kodda bulunsa bile normal ziyaretçi ölçümü başlamaz.
 
 Ana dokümanda listelenen builder, tema, ekip, paylaşım, ses, LCV, QR, kişisel bağlantı, anı ve editör olaylarının tamamı ortak analitik servise bağlanmalıdır.
 
@@ -380,7 +386,7 @@ Analitiğe e-posta, telefon, IBAN, ses içeriği, davet metni, özel mesaj veya 
 
 ### P0 — Önce mevcut son işi doğrula
 
-1. `feature/platform-foundation` ve `main` dallarının `ce35bf4` veya daha yeni committe olduğunu doğrula.
+1. `feature/platform-foundation` ve `main` dallarının `7bfc1dd` veya daha yeni committe olduğunu doğrula.
 2. Vercel dağıtımının başarılı olduğunu kontrol et.
 3. Admin bakım bypass ile `/olustur` adım 7'yi aç.
 4. Üç katalog parçasını ayrı ayrı önizle ve kaydet.
