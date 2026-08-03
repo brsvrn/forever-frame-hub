@@ -118,6 +118,7 @@ export function DashboardExperience({
     share?.cover_image_url ||
     invitation.cover_photo ||
     (share?.use_theme_image ? resolveTheme(invitation.theme).image : "");
+  const coupleNames = [invitation.partner_one, invitation.partner_two].filter(Boolean).join(" & ");
 
   const load = useCallback(async () => {
     const data = await getAdvancedEventSettings({ data: { invitationId: invitation.id } });
@@ -322,11 +323,22 @@ export function DashboardExperience({
           </div>
           <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-background">
             <div
-              className="aspect-[1.91/1] bg-cover bg-center"
+              className="relative grid aspect-[1.91/1] place-items-center overflow-hidden bg-cover bg-center"
               style={{
                 backgroundImage: sharePreviewImage ? `url(${sharePreviewImage})` : undefined,
               }}
-            />
+            >
+              {sharePreviewImage && <div className="absolute inset-0 bg-black/15" aria-hidden="true" />}
+              <p
+                className={`relative px-6 text-center font-display text-3xl sm:text-4xl ${
+                  sharePreviewImage
+                    ? "text-white [text-shadow:0_2px_16px_rgb(0_0_0_/_0.65)]"
+                    : "text-foreground"
+                }`}
+              >
+                {coupleNames || "Davetlisiniz"}
+              </p>
+            </div>
             <div className="p-4">
               <p className="font-medium">
                 {share.share_title || `${invitation.partner_one} & ${invitation.partner_two}`}
