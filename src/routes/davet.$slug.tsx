@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { z } from "zod";
 import { House, Palette, RotateCcw } from "lucide-react";
 import {
   getPublicInvitation,
@@ -31,6 +32,7 @@ import {
 } from "@/lib/theme-engine";
 
 export const Route = createFileRoute("/davet/$slug")({
+  validateSearch: z.object({ theme: z.string().optional() }),
   loader: async ({ params }) => {
     if (params.slug === "demo") {
       return {
@@ -139,10 +141,14 @@ export const Route = createFileRoute("/davet/$slug")({
 
 function PremiumInvitePage() {
   const { invitation, schedules, eventFeatures, advanced } = Route.useLoaderData();
+  const search = Route.useSearch();
   const { lang } = useI18n();
   const draft = rowToDraft(invitation as InvitationRow);
   const isDemo = invitation.slug === "demo";
-  const [previewThemeId, setPreviewThemeId] = useState<InviteThemeId>(draft.theme);
+  const initialDemoTheme = selectableThemes.some((theme) => theme.id === search.theme)
+    ? (search.theme as InviteThemeId)
+    : draft.theme;
+  const [previewThemeId, setPreviewThemeId] = useState<InviteThemeId>(initialDemoTheme);
   const theme = resolveTheme(isDemo ? previewThemeId : draft.theme);
   const pkg = (invitation as InvitationRow & { package?: { features?: Record<string, boolean> } })
     .package;

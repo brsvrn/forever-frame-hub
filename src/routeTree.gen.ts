@@ -28,6 +28,8 @@ import { Route as SozlesmelerGizlilikRouteImport } from './routes/sozlesmeler.gi
 import { Route as SozlesmelerIptalIadeRouteImport } from './routes/sozlesmeler.iptal-iade'
 import { Route as SozlesmelerMesafeliSatisRouteImport } from './routes/sozlesmeler.mesafeli-satis'
 import { Route as SozlesmelerTeslimatRouteImport } from './routes/sozlesmeler.teslimat'
+import { Route as TemalarIndexRouteImport } from './routes/temalar.index'
+import { Route as TemalarSlugRouteImport } from './routes/temalar.$slug'
 import { Route as ApiAdminMaintenanceBypassRouteImport } from './routes/api.admin.maintenance-bypass'
 import { Route as ApiAdminSystemSettingsRouteImport } from './routes/api.admin.system-settings'
 import { Route as ApiCalendarScheduleIdRouteImport } from './routes/api.calendar.$scheduleId'
@@ -130,6 +132,16 @@ const SozlesmelerTeslimatRoute = SozlesmelerTeslimatRouteImport.update({
   path: '/sozlesmeler/teslimat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TemalarIndexRoute = TemalarIndexRouteImport.update({
+  id: '/temalar/',
+  path: '/temalar/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemalarSlugRoute = TemalarSlugRouteImport.update({
+  id: '/temalar/$slug',
+  path: '/temalar/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminMaintenanceBypassRoute =
   ApiAdminMaintenanceBypassRouteImport.update({
     id: '/api/admin/maintenance-bypass',
@@ -176,7 +188,9 @@ export interface FileRoutesByFullPath {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
+  '/temalar/$slug': typeof TemalarSlugRoute
   '/odeme/': typeof OdemeIndexRoute
+  '/temalar/': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
@@ -202,7 +216,9 @@ export interface FileRoutesByTo {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
+  '/temalar/$slug': typeof TemalarSlugRoute
   '/odeme': typeof OdemeIndexRoute
+  '/temalar': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
@@ -229,7 +245,9 @@ export interface FileRoutesById {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
+  '/temalar/$slug': typeof TemalarSlugRoute
   '/odeme/': typeof OdemeIndexRoute
+  '/temalar/': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
@@ -257,7 +275,9 @@ export interface FileRouteTypes {
     | '/sozlesmeler/iptal-iade'
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
+    | '/temalar/$slug'
     | '/odeme/'
+    | '/temalar/'
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
@@ -283,7 +303,9 @@ export interface FileRouteTypes {
     | '/sozlesmeler/iptal-iade'
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
+    | '/temalar/$slug'
     | '/odeme'
+    | '/temalar'
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
@@ -309,7 +331,9 @@ export interface FileRouteTypes {
     | '/sozlesmeler/iptal-iade'
     | '/sozlesmeler/mesafeli-satis'
     | '/sozlesmeler/teslimat'
+    | '/temalar/$slug'
     | '/odeme/'
+    | '/temalar/'
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
@@ -336,7 +360,9 @@ export interface RootRouteChildren {
   SozlesmelerIptalIadeRoute: typeof SozlesmelerIptalIadeRoute
   SozlesmelerMesafeliSatisRoute: typeof SozlesmelerMesafeliSatisRoute
   SozlesmelerTeslimatRoute: typeof SozlesmelerTeslimatRoute
+  TemalarSlugRoute: typeof TemalarSlugRoute
   OdemeIndexRoute: typeof OdemeIndexRoute
+  TemalarIndexRoute: typeof TemalarIndexRoute
   ApiAdminMaintenanceBypassRoute: typeof ApiAdminMaintenanceBypassRoute
   ApiAdminSystemSettingsRoute: typeof ApiAdminSystemSettingsRoute
   ApiCalendarScheduleIdRoute: typeof ApiCalendarScheduleIdRoute
@@ -479,6 +505,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SozlesmelerTeslimatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/temalar/': {
+      id: '/temalar/'
+      path: '/temalar'
+      fullPath: '/temalar/'
+      preLoaderRoute: typeof TemalarIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/temalar/$slug': {
+      id: '/temalar/$slug'
+      path: '/temalar/$slug'
+      fullPath: '/temalar/$slug'
+      preLoaderRoute: typeof TemalarSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/maintenance-bypass': {
       id: '/api/admin/maintenance-bypass'
       path: '/api/admin/maintenance-bypass'
@@ -536,7 +576,9 @@ const rootRouteChildren: RootRouteChildren = {
   SozlesmelerIptalIadeRoute: SozlesmelerIptalIadeRoute,
   SozlesmelerMesafeliSatisRoute: SozlesmelerMesafeliSatisRoute,
   SozlesmelerTeslimatRoute: SozlesmelerTeslimatRoute,
+  TemalarSlugRoute: TemalarSlugRoute,
   OdemeIndexRoute: OdemeIndexRoute,
+  TemalarIndexRoute: TemalarIndexRoute,
   ApiAdminMaintenanceBypassRoute: ApiAdminMaintenanceBypassRoute,
   ApiAdminSystemSettingsRoute: ApiAdminSystemSettingsRoute,
   ApiCalendarScheduleIdRoute: ApiCalendarScheduleIdRoute,

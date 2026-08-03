@@ -42,6 +42,7 @@ import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { DashboardTeam } from "@/components/dashboard/DashboardTeam";
 import type { InvitationRow } from "@/lib/invitations.api";
+import { selectableThemes, type InviteThemeId } from "@/lib/theme-engine";
 
 const builderStepIds = builderSteps.map((step) => step.id);
 
@@ -280,6 +281,18 @@ function BuilderPage() {
       active = false;
     };
   }, [setDraft]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("edit")) return;
+    const requestedTheme = params.get("theme");
+    if (!requestedTheme || !selectableThemes.some((theme) => theme.id === requestedTheme)) return;
+    setDraft((current) => ({ ...current, theme: requestedTheme as InviteThemeId }));
+    params.delete("theme");
+    const query = params.toString();
+    window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+  }, [hydrated, setDraft]);
 
   useEffect(() => {
     let active = true;
