@@ -17,6 +17,24 @@ import lakeComoGarden from "@/assets/theme-lake-como-garden.png";
 import grandBallroom from "@/assets/theme-grand-ballroom.png";
 import themeBohoChic from "@/assets/theme-boho-chic.jpg";
 import themeEtherealLight from "@/assets/theme-ethereal-light.jpg";
+import {
+  buildThemeCapabilities,
+  type ThemeCapabilities,
+  type ThemeEventType,
+  type ThemeGalleryStyle,
+  type ThemeImageSlot,
+  type ThemeOpeningId,
+  type ThemeSection,
+} from "./theme-capabilities";
+
+export type {
+  ThemeCapabilities,
+  ThemeEventType,
+  ThemeGalleryStyle,
+  ThemeImageSlot,
+  ThemeOpeningId,
+  ThemeSection,
+} from "./theme-capabilities";
 
 export type CoastalThemeId =
   | "turquoise-cove"
@@ -31,7 +49,6 @@ export type ItalianThemeId = "amalfi-lemon-terrace" | "tuscan-golden-hills" | "l
 export type LuxuryThemeId = "grand-ballroom";
 export type CinematicThemeId = "cinematic-flow" | "boho-motion" | "ethereal-light";
 export type ThemeCategory = "coastal" | "nature" | "italy" | "luxury" | "cinematic" | "classic";
-
 export type InviteThemeId =
   | CoastalThemeId
   | NatureThemeId
@@ -51,6 +68,11 @@ export interface ThemeConfig {
   tag: { tr: string; en: string };
   image: string;
   selectable?: boolean;
+  isActive: boolean;
+  isFeatured: boolean;
+  isPremium: boolean;
+  sortOrder: number;
+  capabilities: ThemeCapabilities;
   primaryColor?: string;
   secondaryColor?: string;
   coverVideoUrl?: string;
@@ -103,12 +125,17 @@ export interface ThemeConfig {
   };
 }
 
+type ThemeDefinition = Omit<
+  ThemeConfig,
+  "isActive" | "isFeatured" | "isPremium" | "sortOrder" | "capabilities"
+>;
+
 const coastalMusic = {
   defaultTrack: "/audio/acoustic-breeze.mp3",
   title: "Coastal Acoustic",
 };
 
-export const themes: Record<InviteThemeId, ThemeConfig> = {
+const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
   "turquoise-cove": {
     id: "turquoise-cove",
     name: "Turquoise Cove",
@@ -680,7 +707,7 @@ function legacyTheme(
   image: string,
   accent: string,
   ink: string,
-): ThemeConfig {
+): ThemeDefinition {
   return {
     id,
     name,
@@ -715,7 +742,32 @@ function legacyTheme(
   };
 }
 
-export const selectableThemes = Object.values(themes).filter((theme) => theme.selectable !== false);
+function capabilitiesOf(theme: ThemeDefinition): ThemeCapabilities {
+  return buildThemeCapabilities({
+    category: theme.category,
+    galleryStyle: theme.styles.gallery.gridStyle,
+    openingStyle: theme.openingAnimation.style,
+    hasVideo: Boolean(theme.coverVideoUrl),
+  });
+}
+
+export const themes = Object.fromEntries(
+  Object.entries(themeDefinitions).map(([id, theme], index) => [
+    id,
+    {
+      ...theme,
+      isActive: true,
+      isFeatured: theme.selectable !== false && index < 6,
+      isPremium: theme.category === "luxury" || theme.category === "cinematic",
+      sortOrder: index,
+      capabilities: capabilitiesOf(theme),
+    },
+  ]),
+) as Record<InviteThemeId, ThemeConfig>;
+
+export const selectableThemes = Object.values(themes)
+  .filter((theme) => theme.isActive && theme.selectable !== false)
+  .sort((a, b) => a.sortOrder - b.sortOrder);
 
 export function resolveTheme(themeId?: string | null): ThemeConfig {
   return themes[themeId as InviteThemeId] ?? themes["turquoise-cove"];
