@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { InvitationRow } from "@/lib/invitations.api";
 import type { EventRole } from "@/lib/event-permissions";
 import { roleHasPermission } from "@/lib/event-permissions";
+import { resolveTheme } from "@/lib/theme-engine";
 import {
   completeEventAudioUpload,
   createEventGuestLink,
@@ -113,6 +114,10 @@ export function DashboardExperience({
   const canGuestLinks = roleHasPermission(role, "edit_rsvp");
   const shows = (section: DashboardExperienceSection) =>
     !visibleSections || visibleSections.includes(section);
+  const sharePreviewImage =
+    share?.cover_image_url ||
+    invitation.cover_photo ||
+    (share?.use_theme_image ? resolveTheme(invitation.theme).image : "");
 
   const load = useCallback(async () => {
     const data = await getAdvancedEventSettings({ data: { invitationId: invitation.id } });
@@ -319,7 +324,7 @@ export function DashboardExperience({
             <div
               className="aspect-[1.91/1] bg-cover bg-center"
               style={{
-                backgroundImage: `url(${share.cover_image_url || invitation.cover_photo || ""})`,
+                backgroundImage: sharePreviewImage ? `url(${sharePreviewImage})` : undefined,
               }}
             />
             <div className="p-4">
