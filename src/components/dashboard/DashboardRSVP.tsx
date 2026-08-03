@@ -1,20 +1,37 @@
 import { useState, useEffect } from "react";
-import { Download, Search, CheckCircle2, XCircle, HelpCircle, UserCheck } from "lucide-react";
+import {
+  Download,
+  Search,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  UserCheck,
+  FileSpreadsheet,
+  FileText,
+} from "lucide-react";
 import type { InvitationRow, RsvpRow } from "@/lib/invitations.api";
 import { getRsvpResults, type RsvpResults } from "@/lib/rsvp.functions";
+import { createRsvpSpreadsheetXml, pdfSafeText } from "@/lib/rsvp-export";
 
 export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
   const [rsvps, setRsvps] = useState<RsvpRow[] | null>(null);
   const [details, setDetails] = useState<RsvpResults | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "yes" | "no" | "maybe">("all");
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    getRsvpResults({ data: { invitationId: invitation.id } }).then((result) => {
-      setDetails(result);
-      setRsvps(result.rsvps as RsvpRow[]);
-    });
+    getRsvpResults({ data: { invitationId: invitation.id } })
+      .then((result) => {
+        setDetails(result);
+        setRsvps(result.rsvps as RsvpRow[]);
+      })
+      .catch(() => setLoadError("LCV yanıtları yüklenemedi. Lütfen sayfayı yenileyin."));
   }, [invitation.id]);
+
+  if (loadError) {
+    return <div className="rounded-xl border border-rose/30 bg-rose/10 p-5 text-rose">{loadError}</div>;
+  }
 
   if (!rsvps) {
     return <div className="text-muted-foreground">Misafir Listesi Yükleniyor...</div>;
@@ -35,6 +52,17 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
   const totalMaybe = rsvps
     .filter((r) => r.status === "maybe")
     .reduce((sum, r) => sum + r.party_size, 0);
+  const attending = rsvps.filter((rsvp) => rsvp.status === "yes");
+  const totalAdults = attending.reduce((sum, rsvp) => sum + Number(rsvp.adult_count || 0), 0);
+  const totalChildren = attending.reduce((sum, rsvp) => sum + Number(rsvp.child_count || 0), 0);
+  const transportCount = attending.filter((rsvp) => rsvp.transport_required === true).length;
+  const mealBreakdown = Array.from(
+    attending.reduce((counts, rsvp) => {
+      const meal = rsvp.meal_preference?.trim();
+      if (meal) counts.set(meal, (counts.get(meal) || 0) + Number(rsvp.party_size || 1));
+      return counts;
+    }, new Map<string, number>()),
+  ).sort((a, b) => b[1] - a[1]);
 
   const questionLabels = new Map(
     details?.questions.map((question) => [question.id, question.label]),
@@ -55,60 +83,112 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
       );
     return { events: eventNames.join(" / "), answers: answerText.join(" | ") };
   };
+  const rsvpPartySizes = new Map(rsvps.map((rsvp) => [rsvp.id, Number(rsvp.party_size || 1)]));
+  const eventBreakdown = Array.from(
+    (details?.selections ?? []).reduce((counts, selection) => {
+      if (!selection.attending) return counts;
+      const label = scheduleLabels.get(selection.schedule_id) || "Etkinlik";
+      counts.set(label, (counts.get(label) || 0) + (rsvpPartySizes.get(selection.rsvp_id) || 1));
+      return counts;
+    }, new Map<string, number>()),
+  ).sort((a, b) => b[1] - a[1]);
 
-  const downloadCsv = () => {
-    const escapeCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
-    const labels = { yes: "Katılıyor", no: "Katılamıyor", maybe: "Belirsiz" } as const;
-    const rows = rsvps.map((rsvp) => {
-      const extra = detailText(rsvp.id);
-      return [
-        rsvp.guest_name,
-        labels[rsvp.status],
-        rsvp.party_size,
-        rsvp.adult_count,
-        rsvp.child_count,
-        rsvp.guest_email,
-        rsvp.guest_phone,
-        rsvp.meal_preference,
-        rsvp.allergy_info,
-        rsvp.transport_required ? "Evet" : "Hayır",
-        extra.events,
-        extra.answers,
-        rsvp.note,
-        new Date(rsvp.created_at).toLocaleString("tr-TR"),
-      ]
-        .map(escapeCell)
-        .join(",");
-    });
-    const csv = [
-      [
-        "Misafir Adı",
-        "Durum",
-        "Kişi Sayısı",
-        "Yetişkin",
-        "Çocuk",
-        "E-posta",
-        "Telefon",
-        "Yemek",
-        "Alerji",
-        "Ulaşım",
-        "Katılacağı Etkinlikler",
-        "Özel Soru Yanıtları",
-        "Not",
-        "Tarih",
-      ]
-        .map(escapeCell)
-        .join(","),
-      ...rows,
-    ].join("\r\n");
-    const href = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+  const exportHeaders = [
+    "Misafir Adı",
+    "Durum",
+    "Kişi Sayısı",
+    "Yetişkin",
+    "Çocuk",
+    "E-posta",
+    "Telefon",
+    "Yemek",
+    "Alerji",
+    "Ulaşım",
+    "Katılacağı Etkinlikler",
+    "Özel Soru Yanıtları",
+    "Not",
+    "Tarih",
+  ];
+  const statusLabels = { yes: "Katılıyor", no: "Katılamıyor", maybe: "Belirsiz" } as const;
+  const exportRows = rsvps.map((rsvp) => {
+    const extra = detailText(rsvp.id);
+    return [
+      rsvp.guest_name,
+      statusLabels[rsvp.status],
+      rsvp.party_size,
+      rsvp.adult_count,
+      rsvp.child_count,
+      rsvp.guest_email,
+      rsvp.guest_phone,
+      rsvp.meal_preference,
+      rsvp.allergy_info,
+      rsvp.transport_required ? "Evet" : "Hayır",
+      extra.events,
+      extra.answers,
+      rsvp.note,
+      new Date(rsvp.created_at).toLocaleString("tr-TR"),
+    ];
+  });
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const href = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = href;
-    link.download = `${invitation.slug}-misafir-listesi.csv`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+  };
+
+  const downloadCsv = () => {
+    const escapeCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+    const csv = [exportHeaders, ...exportRows]
+      .map((row) => row.map(escapeCell).join(","))
+      .join("\r\n");
+    downloadBlob(
+      new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }),
+      `${invitation.slug}-misafir-listesi.csv`,
+    );
+  };
+
+  const downloadExcel = () => {
+    const xml = createRsvpSpreadsheetXml(exportHeaders, exportRows);
+    downloadBlob(
+      new Blob([xml], { type: "application/vnd.ms-excel;charset=utf-8" }),
+      `${invitation.slug}-misafir-listesi.xls`,
+    );
+  };
+
+  const downloadPdf = async () => {
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(17);
+    doc.text(pdfSafeText(`${invitation.partner_one} & ${invitation.partner_two} - LCV Raporu`), 14, 18);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(
+      pdfSafeText(
+        `Toplam yanit: ${rsvps.length} | Katilan: ${totalComing} | Yetiskin: ${totalAdults} | Cocuk: ${totalChildren}`,
+      ),
+      14,
+      26,
+    );
+    let y = 36;
+    exportRows.forEach((row, index) => {
+      const line = pdfSafeText(
+        `${index + 1}. ${row[0]} | ${row[1]} | ${row[2]} kisi | ${row[6] || "telefon yok"} | ${row[10] || "etkinlik belirtilmedi"}`,
+      );
+      const lines = doc.splitTextToSize(line, 180) as string[];
+      if (y + lines.length * 5 > 285) {
+        doc.addPage();
+        y = 18;
+      }
+      doc.text(lines, 14, y);
+      y += lines.length * 5 + 3;
+    });
+    doc.save(`${invitation.slug}-lcv-raporu.pdf`);
   };
 
   const StatusIcon = ({ status }: { status: string }) => {
@@ -149,14 +229,32 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={downloadCsv}
-          className="flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground hover:text-foreground rounded-xl transition-colors text-sm"
-        >
-          <Download className="w-4 h-4" />
-          CSV Olarak İndir
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={downloadExcel}
+            className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm text-foreground transition-colors hover:border-gold/50"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            Excel İndir
+          </button>
+          <button
+            type="button"
+            onClick={() => void downloadPdf()}
+            className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm text-foreground transition-colors hover:border-gold/50"
+          >
+            <FileText className="w-4 h-4" />
+            PDF İndir
+          </button>
+          <button
+            type="button"
+            onClick={downloadCsv}
+            className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm text-foreground transition-colors hover:border-gold/50"
+          >
+            <Download className="w-4 h-4" />
+            CSV İndir
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -177,6 +275,56 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
           <p className="text-amber-500/70 text-sm mb-1">Belirsiz</p>
           <p className="text-2xl font-semibold text-amber-400">{totalMaybe}</p>
         </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <section className="rounded-2xl border border-border bg-card/30 p-5">
+          <h3 className="text-sm font-medium text-foreground">Kişi Dağılımı</h3>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-xl bg-surface p-3">
+              <p className="text-2xl font-semibold">{totalAdults}</p>
+              <p className="text-xs text-muted-foreground">Yetişkin</p>
+            </div>
+            <div className="rounded-xl bg-surface p-3">
+              <p className="text-2xl font-semibold">{totalChildren}</p>
+              <p className="text-xs text-muted-foreground">Çocuk</p>
+            </div>
+            <div className="rounded-xl bg-surface p-3">
+              <p className="text-2xl font-semibold">{transportCount}</p>
+              <p className="text-xs text-muted-foreground">Ulaşım</p>
+            </div>
+          </div>
+        </section>
+        <section className="rounded-2xl border border-border bg-card/30 p-5">
+          <h3 className="text-sm font-medium text-foreground">Yemek Tercihleri</h3>
+          <div className="mt-3 space-y-2 text-sm">
+            {mealBreakdown.length ? (
+              mealBreakdown.map(([label, count]) => (
+                <div key={label} className="flex justify-between gap-3">
+                  <span className="truncate text-muted-foreground">{label}</span>
+                  <strong>{count}</strong>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground">Henüz yemek tercihi yok.</p>
+            )}
+          </div>
+        </section>
+        <section className="rounded-2xl border border-border bg-card/30 p-5">
+          <h3 className="text-sm font-medium text-foreground">Etkinlik Bazlı Katılım</h3>
+          <div className="mt-3 space-y-2 text-sm">
+            {eventBreakdown.length ? (
+              eventBreakdown.map(([label, count]) => (
+                <div key={label} className="flex justify-between gap-3">
+                  <span className="truncate text-muted-foreground">{label}</span>
+                  <strong>{count} kişi</strong>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground">Etkinlik bazlı seçim bulunmuyor.</p>
+            )}
+          </div>
+        </section>
       </div>
 
       {/* Filters */}

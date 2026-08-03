@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { advancedRsvpSubmissionSchema, validateQuestionAnswer } from "./rsvp-schema";
+import {
+  advancedRsvpSubmissionSchema,
+  hasAttendingSchedule,
+  validateQuestionAnswer,
+} from "./rsvp-schema";
 
 describe("advanced RSVP validation", () => {
   it("rejects invalid counts and bot honeypot values", () => {
@@ -24,5 +28,15 @@ describe("advanced RSVP validation", () => {
     expect(validateQuestionAnswer(question, "Vegan")).toBe(true);
     expect(validateQuestionAnswer(question, "Balık")).toBe(false);
     expect(validateQuestionAnswer(question, null)).toBe(false);
+  });
+
+  it("requires an affirmative event-level selection", () => {
+    expect(
+      hasAttendingSchedule([
+        { scheduleId: "one", attending: false },
+        { scheduleId: "two", attending: false },
+      ]),
+    ).toBe(false);
+    expect(hasAttendingSchedule([{ scheduleId: "one", attending: true }])).toBe(true);
   });
 });

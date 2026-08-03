@@ -27,6 +27,12 @@ export const advancedRsvpSubmissionSchema = z.object({
 
 export type AdvancedRsvpSubmission = z.infer<typeof advancedRsvpSubmissionSchema>;
 
+export function hasAttendingSchedule(
+  selections: Array<{ scheduleId: string; attending: boolean }>,
+) {
+  return selections.some((selection) => selection.attending === true);
+}
+
 type Question = {
   id: string;
   question_type: string;

@@ -1,7 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { advancedRsvpSubmissionSchema, validateQuestionAnswer } from "./rsvp-schema";
+import {
+  advancedRsvpSubmissionSchema,
+  hasAttendingSchedule,
+  validateQuestionAnswer,
+} from "./rsvp-schema";
 import type { Json } from "@/integrations/supabase/types";
 
 const publicFormInput = z.object({ invitationId: z.string().uuid() });
@@ -180,8 +184,8 @@ export const submitAdvancedRsvp = createServerFn({ method: "POST" })
     }
     if (
       settings?.event_level_attendance &&
-      data.status === "yes" &&
-      data.scheduleSelections.length === 0
+      data.status !== "no" &&
+      !hasAttendingSchedule(data.scheduleSelections)
     ) {
       throw new Error("En az bir etkinlik seçmelisiniz.");
     }

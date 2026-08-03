@@ -53,8 +53,8 @@ export function PremiumRSVP({ theme, invitationId }: { theme: ThemeConfig; invit
             invitationId,
             guestName: name.trim(),
             status,
-            adultCount: status === "yes" ? partySize : 0,
-            childCount: status === "yes" ? childCount : 0,
+            adultCount: status !== "no" ? partySize : 0,
+            childCount: status !== "no" ? childCount : 0,
             guestPhone: phone.trim() || null,
             guestEmail: email.trim() || null,
             mealPreference: mealPreference || null,
@@ -346,6 +346,19 @@ export function PremiumRSVP({ theme, invitationId }: { theme: ThemeConfig; invit
                             ))
                           )}
                         </select>
+                      ) : question.question_type === "long_text" ? (
+                        <textarea
+                          value={String(answers[question.id] ?? "")}
+                          required={question.is_required}
+                          maxLength={3000}
+                          onChange={(event) =>
+                            setAnswers((current) => ({
+                              ...current,
+                              [question.id]: event.target.value,
+                            }))
+                          }
+                          className="mt-2 min-h-28 w-full resize-y bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white"
+                        />
                       ) : (
                         <input
                           type={
