@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 const optionalText = (max: number) => z.string().trim().max(max).nullable();
+const nullableDateTime = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+  z.string().datetime().nullable(),
+);
 
 export const familyDetailsSchema = z.object({
   bride_mother: optionalText(160),
@@ -50,8 +54,8 @@ export const memorySettingsSchema = z
     guest_name_required: z.boolean(),
     moderation_required: z.boolean(),
     gallery_visibility: z.enum(["private", "public_after_approval"]),
-    upload_starts_at: z.string().datetime().nullable(),
-    upload_ends_at: z.string().datetime().nullable(),
+    upload_starts_at: nullableDateTime,
+    upload_ends_at: nullableDateTime,
     max_image_size_mb: z.number().int().min(1).max(100),
     max_video_size_mb: z.number().int().min(1).max(500),
     max_audio_seconds: z.union([z.literal(30), z.literal(60)]),
@@ -76,7 +80,7 @@ export const rsvpSettingsSchema = z.object({
   collect_transport_need: z.boolean(),
   collect_special_note: z.boolean(),
   event_level_attendance: z.boolean(),
-  response_deadline: z.string().datetime().nullable(),
+  response_deadline: nullableDateTime,
 });
 
 export const coreContentSectionSchema = z.discriminatedUnion("section", [
