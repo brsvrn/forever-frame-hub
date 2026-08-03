@@ -11,7 +11,11 @@ import {
 } from "lucide-react";
 import type { InvitationRow, RsvpRow } from "@/lib/invitations.api";
 import { getRsvpResults, type RsvpResults } from "@/lib/rsvp.functions";
-import { createRsvpSpreadsheetXml, pdfSafeText } from "@/lib/rsvp-export";
+import {
+  createRsvpSpreadsheetXml,
+  pdfSafeText,
+  summarizeRsvpQuestions,
+} from "@/lib/rsvp-export";
 
 export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
   const [rsvps, setRsvps] = useState<RsvpRow[] | null>(null);
@@ -92,6 +96,15 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
       return counts;
     }, new Map<string, number>()),
   ).sort((a, b) => b[1] - a[1]);
+  const questionSummaries = summarizeRsvpQuestions(
+    details?.questions ?? [],
+    details?.answers ?? [],
+  );
+  const questionSummaryRows = questionSummaries.flatMap((summary) =>
+    summary.values.length
+      ? summary.values.map((value) => [summary.label, value.label, value.count, summary.responseCount])
+      : [[summary.label, "Henüz yanıt yok", 0, 0]],
+  );
 
   const exportHeaders = [
     "Misafir Adı",
@@ -153,7 +166,13 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
   };
 
   const downloadExcel = () => {
-    const xml = createRsvpSpreadsheetXml(exportHeaders, exportRows);
+    const xml = createRsvpSpreadsheetXml(exportHeaders, exportRows, [
+      {
+        name: "Özel Sorular",
+        headers: ["Soru", "Yanıt", "Sayı", "Toplam Yanıtlayan"],
+        rows: questionSummaryRows,
+      },
+    ]);
     downloadBlob(
       new Blob([xml], { type: "application/vnd.ms-excel;charset=utf-8" }),
       `${invitation.slug}-misafir-listesi.xls`,
@@ -188,6 +207,30 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
       doc.text(lines, 14, y);
       y += lines.length * 5 + 3;
     });
+    if (questionSummaries.length) {
+      doc.addPage();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.text("Ozel Soru Ozeti", 14, 18);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      y = 28;
+      questionSummaries.forEach((summary) => {
+        const values = summary.values.length
+          ? summary.values.map((value) => `${value.label}: ${value.count}`).join(" | ")
+          : "Henuz yanit yok";
+        const lines = doc.splitTextToSize(
+          pdfSafeText(`${summary.label} (${summary.responseCount} yanit) - ${values}`),
+          180,
+        ) as string[];
+        if (y + lines.length * 5 > 285) {
+          doc.addPage();
+          y = 18;
+        }
+        doc.text(lines, 14, y);
+        y += lines.length * 5 + 4;
+      });
+    }
     doc.save(`${invitation.slug}-lcv-raporu.pdf`);
   };
 
@@ -361,6 +404,41 @@ export function DashboardRSVP({ invitation }: { invitation: InvitationRow }) {
                     ? `Bağlantı ${guest.view_count} kez açıldı`
                     : "Bağlantı henüz açılmadı"}
                 </p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {questionSummaries.length ? (
+        <section className="rounded-2xl border border-border bg-card/30 p-5 sm:p-6">
+          <div>
+            <h3 className="font-display text-2xl">Özel Soru Sonuçları</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Eklediğiniz sorulara verilen yanıtların toplu dağılımı.
+            </p>
+          </div>
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            {questionSummaries.map((summary) => (
+              <article key={summary.questionId} className="rounded-xl border border-border bg-surface p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-medium text-foreground">{summary.label}</p>
+                  <span className="whitespace-nowrap text-xs text-muted-foreground">
+                    {summary.responseCount} yanıt
+                  </span>
+                </div>
+                <div className="mt-3 space-y-2 text-sm">
+                  {summary.values.length ? (
+                    summary.values.map((value) => (
+                      <div key={value.label} className="flex items-start justify-between gap-4">
+                        <span className="break-words text-muted-foreground">{value.label}</span>
+                        <strong>{value.count}</strong>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">Henüz yanıt yok.</p>
+                  )}
+                </div>
               </article>
             ))}
           </div>

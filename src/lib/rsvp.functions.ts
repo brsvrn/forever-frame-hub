@@ -33,7 +33,7 @@ export type RsvpResults = {
   }>;
   selections: Array<{ rsvp_id: string; schedule_id: string; attending: boolean }>;
   answers: Array<{ rsvp_id: string; question_id: string; answer: Json }>;
-  questions: Array<{ id: string; label: string }>;
+  questions: Array<{ id: string; label: string; question_type: string }>;
   schedules: Array<{ id: string; title: string }>;
   pendingGuestLinks: Array<{
     id: string;
@@ -63,7 +63,7 @@ export const getRsvpResults = createServerFn({ method: "GET" })
         .order("created_at", { ascending: false }),
       admin
         .from("event_custom_questions")
-        .select("id,label")
+        .select("id,label,question_type")
         .eq("invitation_id", data.invitationId),
       admin.from("event_schedules").select("id,title").eq("invitation_id", data.invitationId),
       admin
