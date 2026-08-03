@@ -2,12 +2,18 @@ import { useState } from "react";
 import { FadeIn, SlideUp } from "@/components/motion";
 import { PhoneMockup } from "./PhoneMockup";
 import { Music, MapPin, Camera, Image as ImageIcon, Send, ArrowLeft } from "lucide-react";
+import { trackViewDemo } from "@/lib/analytics/analytics";
 
 export function InteractiveDemo() {
-  const [activeScreen, setActiveScreen] = useState<"envelope" | "invite" | "rsvp" | "gallery">(
+  const [activeScreen, setActiveScreenState] = useState<"envelope" | "invite" | "rsvp" | "gallery">(
     "envelope",
   );
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const setActiveScreen = (screen: "envelope" | "invite" | "rsvp" | "gallery") => {
+    setActiveScreenState(screen);
+    trackViewDemo(`demo_${screen}`, `İnteraktif Demo: ${screen.toUpperCase()}`);
+  };
 
   return (
     <section

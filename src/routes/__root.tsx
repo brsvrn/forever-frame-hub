@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -12,6 +13,10 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
+import { CookieConsentBanner } from "@/components/cookie/CookieConsentBanner";
+import { ANALYTICS_CONFIG, trackPageView } from "@/lib/analytics/analytics";
+import { captureUTMParams } from "@/lib/analytics/utm";
+import { getStoredConsent, applyConsentToThirdParties } from "@/lib/analytics/consent";
 
 function NotFoundComponent() {
   return (
@@ -89,6 +94,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:image", content: "/logo.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "google-site-verification",
+        content:
+          (typeof process !== "undefined" ? process.env?.GOOGLE_SITE_VERIFICATION || process.env?.VITE_GOOGLE_SITE_VERIFICATION : undefined) ||
+          (import.meta as any).env?.VITE_GOOGLE_SITE_VERIFICATION ||
+          "",
+      },
     ],
     links: [
       {
@@ -112,12 +124,108 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const gtmId = ANALYTICS_CONFIG.gtmId;
+  const gaId = ANALYTICS_CONFIG.gaMeasurementId;
+  const pixelId = ANALYTICS_CONFIG.metaPixelId;
+  const googleAdsId = ANALYTICS_CONFIG.googleAdsId;
+
   return (
     <html lang="tr">
       <head>
         <HeadContent />
+        {/* Google Consent Mode v2 Default Setup */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied'
+              });
+            `,
+          }}
+        />
+
+        {/* Google Tag Manager */}
+        {gtmId && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','${gtmId}');
+              `,
+            }}
+          />
+        )}
+
+        {/* Google Analytics 4 & Google Ads */}
+        {(gaId || googleAdsId) && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId || googleAdsId}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  ${gaId ? `gtag('config', '${gaId}', { send_page_view: false });` : ""}
+                  ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ""}
+                `,
+              }}
+            />
+          </>
+        )}
+
+        {/* Meta Pixel */}
+        {pixelId && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${pixelId}');
+              `,
+            }}
+          />
+        )}
       </head>
       <body>
+        {/* Google Tag Manager (noscript) */}
+        {gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
+
+        {/* Meta Pixel (noscript) */}
+        {pixelId && (
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
+            />
+          </noscript>
+        )}
+
         {children}
         <Scripts />
       </body>
@@ -127,10 +235,26 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+
+  useEffect(() => {
+    // 1. Capture UTM parameters and store
+    captureUTMParams();
+
+    // 2. Apply existing consent if any
+    const consent = getStoredConsent();
+    applyConsentToThirdParties(consent);
+  }, []);
+
+  useEffect(() => {
+    // 3. Track page views on route changes
+    trackPageView(location.pathname);
+  }, [location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <CookieConsentBanner />
       <Toaster />
     </QueryClientProvider>
   );

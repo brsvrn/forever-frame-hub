@@ -1,6 +1,7 @@
 import { FadeIn, SlideUp } from "@/components/motion";
 import { Check, Sparkles } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { trackBeginCheckout } from "@/lib/analytics/analytics";
 
 export function PricingCards() {
   return (
@@ -31,7 +32,12 @@ export function PricingCards() {
                 <span className="text-4xl font-bold tracking-tight text-foreground">₺500</span>
                 <span className="text-foreground/80 font-medium text-sm">/ Tek Seferlik</span>
               </div>
-              <Link to="/olustur" search={{ pkg: "digital_only" }} className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8">
+              <Link 
+                to="/olustur" 
+                search={{ pkg: "digital_only" }} 
+                onClick={() => trackBeginCheckout("digital_only", "Dijital Davetiye", 500)}
+                className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8"
+              >
                 Seç
               </Link>
               <ul className="space-y-4 mt-auto">
@@ -57,7 +63,12 @@ export function PricingCards() {
                 <span className="text-4xl font-bold tracking-tight text-foreground">₺750</span>
                 <span className="text-foreground/80 font-medium text-sm">/ Tek Seferlik</span>
               </div>
-              <Link to="/olustur" search={{ pkg: "qr_only" }} className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8">
+              <Link 
+                to="/olustur" 
+                search={{ pkg: "qr_only" }} 
+                onClick={() => trackBeginCheckout("qr_only", "QR Paket", 750)}
+                className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8"
+              >
                 Seç
               </Link>
               <ul className="space-y-4 mt-auto">
@@ -91,7 +102,12 @@ export function PricingCards() {
                 <span className="text-5xl font-bold tracking-tight">₺1.000</span>
                 <span className="text-neutral-300 font-medium text-sm">/ Tek Seferlik</span>
               </div>
-              <Link to="/olustur" search={{ pkg: "full" }} className="block text-center w-full py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors mb-8 shadow-[0_0_20px_rgba(var(--primary),0.3)]">
+              <Link 
+                to="/olustur" 
+                search={{ pkg: "full" }} 
+                onClick={() => trackBeginCheckout("full", "2'si Bir Arada", 1000)}
+                className="block text-center w-full py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors mb-8 shadow-[0_0_20px_rgba(var(--primary),0.3)]"
+              >
                 Tam Paket ile Başla
               </Link>
               <ul className="space-y-4 mt-auto">

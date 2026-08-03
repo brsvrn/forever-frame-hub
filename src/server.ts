@@ -46,6 +46,7 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 import { validatePayTRCallback } from "./lib/paytr";
 import { getServiceSupabase } from "./lib/supabase-admin";
+import { sendMetaServerEvent } from "./lib/analytics/meta-capi";
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
@@ -99,7 +100,7 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
     if (status === "success") {
       const { data: transaction } = await admin
         .from("transactions")
-        .select("invitation_id, package_type, status")
+        .select("invitation_id, package_type, amount, user_id, status")
         .eq("merchant_oid", merchant_oid)
         .maybeSingle();
 
@@ -110,6 +111,7 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
             headers: { "Content-Type": "text/plain" },
           });
         }
+
         await admin
           .from("transactions")
           .update({ status: "success", updated_at: new Date().toISOString() })
@@ -123,6 +125,39 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
             package_type: transaction.package_type,
           })
           .eq("id", transaction.invitation_id);
+
+        // Meta CAPI Server-Side Purchase Event for guaranteed conversion tracking
+        try {
+          let userEmail = "";
+          if (transaction.user_id) {
+            const { data: userData } = await admin.auth.admin.getUserById(transaction.user_id);
+            if (userData?.user?.email) {
+              userEmail = userData.user.email;
+            }
+          }
+
+          const rawAmount = transaction.amount ? Number(transaction.amount) : 100000;
+          const finalValue = rawAmount > 1000 ? rawAmount / 100 : rawAmount;
+
+          await sendMetaServerEvent({
+            eventName: "Purchase",
+            eventId: merchant_oid,
+            eventSourceUrl: "https://memory-wedding.com/odeme/basarili",
+            userData: {
+              email: userEmail || undefined,
+              clientIp: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || undefined,
+              clientUserAgent: request.headers.get("user-agent") || undefined,
+            },
+            customData: {
+              currency: "TRY",
+              value: finalValue,
+              content_name: transaction.package_type || "MemoryWedding Paket",
+              content_type: "product",
+            },
+          });
+        } catch (capiErr) {
+          console.error("Meta CAPI Server Event error:", capiErr);
+        }
       } else {
         console.warn("PayTR Webhook: Transaction not found", merchant_oid);
       }

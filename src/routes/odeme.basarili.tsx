@@ -1,16 +1,42 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { CheckCircle } from "lucide-react";
+import { trackPurchase } from "@/lib/analytics/analytics";
 
 export const Route = createFileRoute("/odeme/basarili")({
   component: SuccessRoute,
 });
 
 function SuccessRoute() {
+  const tracked = useRef(false);
+
   useEffect(() => {
-    // If we are in an iframe, break out to the parent window
+    if (!tracked.current) {
+      tracked.current = true;
+      const params = new URLSearchParams(window.location.search);
+      const merchantOid = params.get("merchant_oid") || `TX_${Date.now()}`;
+      const amount = parseFloat(params.get("amount") || "1000");
+
+      trackPurchase({
+        transaction_id: merchantOid,
+        value: amount,
+        currency: "TRY",
+        items: [
+          {
+            item_id: "memory_wedding_package",
+            item_name: "MemoryWedding Premium Paket",
+            price: amount,
+            quantity: 1,
+          },
+        ],
+      });
+    }
+
+    // If we are in an iframe, break out to the parent window after slight delay for event firing
     if (window !== window.top) {
-      window.top!.location.href = "/panel";
+      setTimeout(() => {
+        if (window.top) window.top.location.href = "/panel";
+      }, 500);
     }
   }, []);
 
