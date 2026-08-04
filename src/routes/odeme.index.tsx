@@ -7,7 +7,7 @@ import { trackBeginCheckout } from "@/lib/analytics/analytics";
 
 declare global {
   interface Window {
-    iFrameResize?: (options: Record<string, never>, selector: string) => void;
+    iFrameResize?: (options: Record<string, unknown>, selector: string) => void;
   }
 }
 

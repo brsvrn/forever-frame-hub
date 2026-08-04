@@ -63,10 +63,11 @@ export function CookieConsentBanner() {
 
             <div className="flex items-center justify-between pt-2 border-t border-white/10">
               <div>
-                <span className="font-medium text-white">Performans & Analiz</span>
+                <label htmlFor="consent-analytics" className="font-medium text-white cursor-pointer">Performans & Analiz</label>
                 <p className="text-[11px] text-zinc-400">Site kullanımını ve ziyaretçi trafiğini analiz eder.</p>
               </div>
               <input
+                id="consent-analytics"
                 type="checkbox"
                 checked={analyticsAllowed}
                 onChange={(e) => setAnalyticsAllowed(e.target.checked)}
@@ -76,10 +77,11 @@ export function CookieConsentBanner() {
 
             <div className="flex items-center justify-between pt-2 border-t border-white/10">
               <div>
-                <span className="font-medium text-white">Pazarlama & Reklam</span>
+                <label htmlFor="consent-marketing" className="font-medium text-white cursor-pointer">Pazarlama & Reklam</label>
                 <p className="text-[11px] text-zinc-400">İlgi alanlarınıza göre kişiselleştirilmiş reklamlar sunar.</p>
               </div>
               <input
+                id="consent-marketing"
                 type="checkbox"
                 checked={marketingAllowed}
                 onChange={(e) => setMarketingAllowed(e.target.checked)}

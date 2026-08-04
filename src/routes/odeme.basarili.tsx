@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { CheckCircle } from "lucide-react";
 import { trackPurchase } from "@/lib/analytics/analytics";
 import { verifyAndConsumePurchaseEvent } from "@/lib/payment-actions";
@@ -10,7 +10,6 @@ export const Route = createFileRoute("/odeme/basarili")({
 
 function SuccessRoute() {
   const verifiedRef = useRef(false);
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     async function verifyAndTrack() {
@@ -40,8 +39,6 @@ function SuccessRoute() {
         }
       } catch (err) {
         console.error("Purchase verification error:", err);
-      } finally {
-        setChecking(false);
       }
 
       // If loaded inside PayTR iframe, break out to parent window

@@ -199,7 +199,13 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
+              onClick={() => {
+                const nextTab = tab.id as TabType;
+                setActiveTab(nextTab);
+                const url = new URL(window.location.href);
+                url.searchParams.set("tab", nextTab);
+                window.history.replaceState({}, "", url.toString());
+              }}
               className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl text-sm transition-all ${
                 activeTab === tab.id
                   ? "bg-rose text-foreground font-medium shadow-sm"
@@ -231,7 +237,7 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
               için tasarlanmış QR kodlu masa kartlarınızı indirebilirsiniz.
             </p>
             <PrintableQR
-              url={`https://memorywedding.com/davet/${invitation.slug}`}
+              url={`${import.meta.env.VITE_SITE_URL || "https://www.memory-wedding.com"}/davet/${invitation.slug}`}
               partnerOne={invitation.partner_one}
               partnerTwo={invitation.partner_two}
               themeConfig={resolveTheme(invitation.theme)}

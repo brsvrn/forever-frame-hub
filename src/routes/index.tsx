@@ -13,6 +13,7 @@ import { FAQAccordion } from "@/components/marketing/faq/FAQAccordion";
 import { PremiumCTA } from "@/components/marketing/cta/PremiumCTA";
 import { SecuritySection } from "@/components/marketing/security/SecuritySection";
 import { I18nProvider } from "@/lib/i18n";
+import { PhoneProvider } from "@/contexts/PhoneContext";
 
 const title = "MemoryWedding — Dijital Davetiye, LCV ve Canlı Galeri";
 const description =
@@ -51,8 +52,6 @@ export const Route = createFileRoute("/")({
   }),
   component: MarketingLandingPage,
 });
-
-import { PhoneProvider } from "@/contexts/PhoneContext";
 
 function MarketingLandingPage() {
   return (

@@ -27,21 +27,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     const { data } = supabase.auth.onAuthStateChange((_event, next) => {
+      if (!mounted) return;
       syncServerAccessTokenCookie(next);
       setSession(next);
       syncAuthCookie(next);
-      setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: current }) => {
+      if (!mounted) return;
       syncServerAccessTokenCookie(current.session);
       setSession(current.session);
       syncAuthCookie(current.session);
       setLoading(false);
     });
 
-    return () => data.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      data.subscription.unsubscribe();
+    };
   }, []);
 
   const value = useMemo<AuthValue>(

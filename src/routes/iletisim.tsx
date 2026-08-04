@@ -12,7 +12,7 @@ function IletisimPage() {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-24 md:py-32 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-bold mb-8">İletişim</h1>
-        <div className="prose prose-neutral dark:prose-invert max-w-none">
+        <div className="max-w-none">
           <p className="text-lg text-muted-foreground mb-8">
             MemoryWedding hizmetleri ile ilgili her türlü soru, öneri ve talebiniz için bizimle iletişime geçebilirsiniz.
           </p>

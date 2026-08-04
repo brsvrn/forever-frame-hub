@@ -92,6 +92,7 @@ function AuthPage() {
     });
 
     if (error) {
+      console.warn("[Auth] Google OAuth error:", error.message);
       setError(c.genericError);
     }
   };

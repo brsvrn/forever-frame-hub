@@ -282,8 +282,12 @@ function InvitationCard({
               onClick={async () => {
                 if (!window.confirm(copy.deleteConfirm)) return;
                 setBusy(true);
-                await deleteManagedEvent({ data: { invitationId: row.id } });
-                await onChanged();
+                try {
+                  await deleteManagedEvent({ data: { invitationId: row.id } });
+                  await onChanged();
+                } finally {
+                  setBusy(false);
+                }
               }}
               className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border px-4 text-sm text-muted-foreground transition-colors hover:text-rose disabled:opacity-50"
             >

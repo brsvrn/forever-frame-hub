@@ -9,7 +9,7 @@ export const Route = createFileRoute("/d/$slug/$token")({
     if (!guest) throw notFound();
     return guest;
   },
-  head: ({ loaderData }) => {
+  head: ({ loaderData, match }) => {
     const siteOrigin =
       typeof process !== "undefined" && process.env?.VITE_SITE_URL
         ? process.env.VITE_SITE_URL
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/d/$slug/$token")({
     const imageUrl = loaderData
       ? `${siteOrigin}/api/share-image/${loaderData.invitationSlug}`
       : `${siteOrigin}/og-image.png`;
+    const token = (match?.params as { token?: string })?.token ?? "";
 
     return {
       meta: [
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/d/$slug/$token")({
         { property: "og:type", content: "website" },
         { property: "og:title", content: guestTitle },
         { property: "og:description", content: guestDesc },
-        { property: "og:url", content: `${siteOrigin}/d/${loaderData?.invitationSlug}/${params.token}` },
+        { property: "og:url", content: `${siteOrigin}/d/${loaderData?.invitationSlug}/${token}` },
         { property: "og:image", content: imageUrl },
         { property: "og:image:secure_url", content: imageUrl },
         { property: "og:image:type", content: "image/jpeg" },

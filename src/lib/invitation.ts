@@ -57,6 +57,12 @@ export const emptyDraft: InvitationDraft = {
   customSections: [],
 };
 
+function getThreeMonthsAhead(): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 3);
+  return d.toISOString().slice(0, 10);
+}
+
 export const sampleDraft: InvitationDraft = {
   packageId: "",
   theme: "turquoise-cove",
@@ -66,7 +72,7 @@ export const sampleDraft: InvitationDraft = {
   headline: "Evleniyoruz",
   message:
     "Hayatımızın en güzel gününde yanımızda olmanızdan mutluluk duyarız. Sizinle paylaşacağımız her an, hatırlayacağımız bir anı olacak.",
-  date: "2026-06-14",
+  date: getThreeMonthsAhead(),
   time: "18:30",
   venue: "Sait Halim Paşa Yalısı",
   address: "Köybaşı Cad. No: 83, Yeniköy",
