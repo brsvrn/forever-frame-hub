@@ -98,9 +98,13 @@ export function PremiumAudioPlayer({
               setIsReady(true);
               const safeVol = Math.round(Math.max(0, Math.min(1, volume)) * 100);
               event.target.setVolume(safeVol);
-              if (pendingPlayRef.current) {
-                event.target.playVideo();
-                setIsPlaying(true);
+              if (pendingPlayRef.current || autoPlay) {
+                try {
+                  event.target.playVideo();
+                  setIsPlaying(true);
+                } catch (e) {
+                  console.warn("YouTube play error on ready:", e);
+                }
               }
             },
             onStateChange: (event: any) => {
@@ -150,7 +154,7 @@ export function PremiumAudioPlayer({
         ytPlayerRef.current = null;
       }
     };
-  }, [videoId, volume]);
+  }, [videoId, volume, autoPlay]);
 
   // Handle Play/Pause
   const togglePlay = useCallback(() => {
@@ -187,21 +191,82 @@ export function PremiumAudioPlayer({
     }
   }, [videoId, isPlaying, customTitle, dynamicTitle, theme.music.title]);
 
-  // Handle Autoplay on mount
+  // Listen for immediate "Davetiyeyi Aç" user gesture event
+  useEffect(() => {
+    const handleUserOpen = () => {
+      pendingPlayRef.current = true;
+      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
+        try {
+          ytPlayerRef.current.unMute();
+          const safeVol = Math.round(Math.max(0, Math.min(1, volume)) * 100);
+          ytPlayerRef.current.setVolume(safeVol);
+          ytPlayerRef.current.playVideo();
+          setIsPlaying(true);
+          trackMusicPlay(customTitle || dynamicTitle || undefined);
+        } catch (e) {
+          console.warn("Play on open error:", e);
+        }
+      } else if (audioRef.current) {
+        audioRef.current
+          .play()
+          .then(() => {
+            setIsPlaying(true);
+            trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
+          })
+          .catch((err) => {
+            console.warn("Direct audio play on open error:", err);
+          });
+      }
+    };
+
+    window.addEventListener("memorywedding:user-opened-invitation", handleUserOpen);
+    return () => {
+      window.removeEventListener("memorywedding:user-opened-invitation", handleUserOpen);
+    };
+  }, [videoId, volume, customTitle, dynamicTitle, theme.music.title]);
+
+  // Handle Autoplay prop change
   useEffect(() => {
     if (autoPlay) {
       pendingPlayRef.current = true;
-      if (directAudioUrl && audioRef.current) {
+      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
+        try {
+          ytPlayerRef.current.playVideo();
+          setIsPlaying(true);
+        } catch (e) {
+          console.warn("Autoplay YT error:", e);
+        }
+      } else if (directAudioUrl && audioRef.current) {
         audioRef.current
           .play()
           .then(() => setIsPlaying(true))
           .catch(() => {
-            // Autoplay blocked by browser policy until user gesture
             setIsPlaying(false);
           });
       }
     }
-  }, [autoPlay, directAudioUrl]);
+  }, [autoPlay, videoId, directAudioUrl]);
+
+  // Fallback: start music on first user touch anywhere if autoplay was requested but blocked
+  useEffect(() => {
+    if (!autoPlay || isPlaying) return;
+    const handleFirstTouch = () => {
+      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
+        try {
+          ytPlayerRef.current.playVideo();
+          setIsPlaying(true);
+        } catch {}
+      } else if (audioRef.current) {
+        audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+      }
+    };
+    window.addEventListener("touchstart", handleFirstTouch, { once: true, passive: true });
+    window.addEventListener("click", handleFirstTouch, { once: true, passive: true });
+    return () => {
+      window.removeEventListener("touchstart", handleFirstTouch);
+      window.removeEventListener("click", handleFirstTouch);
+    };
+  }, [autoPlay, isPlaying, videoId]);
 
   // Synchronize Mute
   useEffect(() => {
@@ -270,9 +335,12 @@ export function PremiumAudioPlayer({
 
   return (
     <div className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 sm:left-6 sm:translate-x-0">
-      {/* Hidden YouTube Container */}
+      {/* Off-screen YouTube Container */}
       {videoId ? (
-        <div className="pointer-events-none absolute bottom-0 left-0 h-px w-px opacity-0 overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed -left-[9999px] -top-[9999px] h-48 w-48 opacity-0"
+        >
           <div id={ytContainerId.current} />
         </div>
       ) : null}

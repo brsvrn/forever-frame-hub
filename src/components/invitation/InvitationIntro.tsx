@@ -173,8 +173,12 @@ export function InvitationIntro({
               animate={{ opacity: 1 }}
               transition={{ duration: reduceMotion ? 1 : 1.5, ease: easeSilk }}
               type="button"
-              data-testid="open-invitation"
-              onClick={onComplete}
+              onClick={() => {
+                try {
+                  window.dispatchEvent(new CustomEvent("memorywedding:user-opened-invitation"));
+                } catch {}
+                onComplete();
+              }}
               className="group relative z-20 inline-flex min-h-14 max-w-[calc(100vw-2rem)] touch-manipulation items-center gap-3 rounded-full border border-white/35 bg-black/40 px-5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white shadow-2xl backdrop-blur-xl transition duration-200 hover:scale-[1.03] hover:bg-white hover:text-slate-950 active:scale-95 sm:gap-4 sm:px-7 sm:text-xs sm:tracking-[0.2em]"
             >
               <span className="grid size-9 place-items-center rounded-full bg-white text-slate-950">
