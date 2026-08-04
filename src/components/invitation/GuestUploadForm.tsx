@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Upload, X, CheckCircle, FileVideo, FileImage } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { finalizeGuestUpload, requestGuestUploadUrl } from "@/lib/guest-memory.functions";
+import { trackMemoryUpload } from "@/lib/analytics/analytics";
 
 interface GuestUploadFormProps {
   theme: ThemeConfig;
@@ -119,6 +120,7 @@ export function GuestUploadForm({ theme, invitationId, children }: GuestUploadFo
       setUploading(false);
 
       if (completed > 0) {
+        trackMemoryUpload(completed);
         setSuccess(true);
         setTimeout(() => {
           setIsOpen(false);

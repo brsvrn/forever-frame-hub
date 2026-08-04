@@ -142,7 +142,7 @@ export function InvitationIntro({
                 />
               ) : null}
               <h1
-                className={`max-w-4xl text-5xl font-light leading-none sm:text-7xl md:text-8xl ${theme.styles.typography.display}`}
+                className={`max-w-4xl text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-light leading-tight sm:leading-none break-words px-4 ${theme.styles.typography.display}`}
                 style={{
                   textShadow:
                     theme.category === "luxury"
@@ -159,7 +159,7 @@ export function InvitationIntro({
                   duration: nameFadeDuration,
                   ease: easeSilk,
                 }}
-                className="my-8 h-px w-24 origin-center"
+                className="my-5 sm:my-8 h-px w-20 sm:w-24 origin-center"
                 style={{ backgroundColor: theme.qr.accent }}
               />
             </motion.div>

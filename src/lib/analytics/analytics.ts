@@ -443,3 +443,106 @@ export function trackLead(leadSource: string) {
     });
   }
 }
+
+// 7. RSVP Submission (Strictly no PII)
+export interface RsvpEventPayload {
+  status: "yes" | "no" | "maybe";
+  partySize: number;
+  hasDietary: boolean;
+  hasTransport: boolean;
+}
+
+export function trackRsvpSubmit(payload: RsvpEventPayload) {
+  if (typeof window === "undefined") return;
+
+  const eventData = {
+    rsvp_status: payload.status,
+    party_size: payload.partySize,
+    has_dietary: payload.hasDietary,
+    has_transport: payload.hasTransport,
+  };
+
+  logDebug("rsvp_submit", eventData);
+
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({
+      event: "rsvp_submit",
+      ...eventData,
+    });
+  }
+
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "rsvp_submit", eventData);
+  }
+
+  if (typeof (window as any).fbq === "function") {
+    (window as any).fbq("trackCustom", "RSVPSubmit", eventData);
+  }
+}
+
+// 8. Music Interaction
+export function trackMusicPlay(title?: string) {
+  if (typeof window === "undefined") return;
+
+  const eventData = {
+    music_title: title || "Background Music",
+  };
+
+  logDebug("music_play", eventData);
+
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({
+      event: "music_play",
+      ...eventData,
+    });
+  }
+
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "music_play", eventData);
+  }
+}
+
+// 9. Memory Box / Guest Photo Upload
+export function trackMemoryUpload(itemCount: number) {
+  if (typeof window === "undefined") return;
+
+  const eventData = {
+    item_count: itemCount,
+  };
+
+  logDebug("guest_memory_upload", eventData);
+
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({
+      event: "guest_memory_upload",
+      ...eventData,
+    });
+  }
+
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "guest_memory_upload", eventData);
+  }
+}
+
+// 10. Share Invitation Click
+export function trackShareClick(platform: "whatsapp" | "copy_link" | "qr" | "social") {
+  if (typeof window === "undefined") return;
+
+  const eventData = {
+    share_platform: platform,
+  };
+
+  logDebug("share_invitation", eventData);
+
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({
+      event: "share_invitation",
+      ...eventData,
+    });
+  }
+
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "share_invitation", eventData);
+  }
+}
+

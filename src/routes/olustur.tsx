@@ -43,6 +43,7 @@ import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { DashboardTeam } from "@/components/dashboard/DashboardTeam";
 import type { InvitationRow } from "@/lib/invitations.api";
 import { selectableThemes, type InviteThemeId } from "@/lib/theme-engine";
+import { trackDemoStep } from "@/lib/analytics/analytics";
 
 const builderStepIds = builderSteps.map((step) => step.id);
 
@@ -364,6 +365,8 @@ function BuilderPage() {
           isPaid ? nextPublished : false,
           editingId,
         );
+        const actualPaid = isPaid || Boolean((saved as any).is_paid);
+        setIsPaid(actualPaid);
         setEditingId(saved.id);
         setSavedInvitation(saved);
         try {
@@ -372,7 +375,7 @@ function BuilderPage() {
           console.warn("Core invitation sections could not be synchronized", coreError);
         }
 
-        if (!isPaid && nextPublished) {
+        if (!actualPaid && nextPublished) {
           // Redirect to checkout
           window.location.href = `/odeme?invitationId=${saved.id}&packageType=${draft.packageId}`;
           return;
@@ -412,6 +415,9 @@ function BuilderPage() {
           const saved = await saveInvitation(draft, session.user.id, isPublished, editingId);
           setEditingId(saved.id);
           setSavedInvitation(saved);
+          if ((saved as any).is_paid) {
+            setIsPaid(true);
+          }
           try {
             await syncCoreSections(saved.id);
           } catch (coreError) {
@@ -541,7 +547,12 @@ function BuilderPage() {
   activeStepIds.current = steps.map((step) => step.id);
 
   useEffect(() => {
-    if (!steps.some((step) => step.id === stepId)) setStepId(steps[0].id);
+    if (!steps.some((step) => step.id === stepId)) {
+      setStepId(steps[0].id);
+    } else {
+      const idx = steps.findIndex((step) => step.id === stepId);
+      trackDemoStep(idx + 1, stepId);
+    }
   }, [stepId, steps]);
 
   const currentStep = Math.max(

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, Music } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { extractYouTubeVideoId } from "@/lib/music-library";
+import { trackMusicPlay } from "@/lib/analytics/analytics";
 
 export function PremiumAudioPlayer({
   theme,
@@ -71,12 +72,13 @@ export function PremiumAudioPlayer({
   useEffect(() => {
     if (isPlaying) {
       sendCommand("playVideo");
+      trackMusicPlay(customTitle || dynamicTitle || undefined);
       void audioRef.current?.play().catch(() => setIsPlaying(false));
     } else {
       sendCommand("pauseVideo");
       audioRef.current?.pause();
     }
-  }, [isPlaying]);
+  }, [isPlaying, customTitle, dynamicTitle]);
 
   useEffect(() => {
     if (isMuted) {

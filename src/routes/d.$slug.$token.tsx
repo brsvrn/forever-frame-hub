@@ -9,16 +9,40 @@ export const Route = createFileRoute("/d/$slug/$token")({
     if (!guest) throw notFound();
     return guest;
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: loaderData
-          ? `${loaderData.guestName} için özel davetiye | MemoryWedding`
-          : "Davetiye bulunamadı",
-      },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const siteOrigin =
+      typeof process !== "undefined" && process.env?.VITE_SITE_URL
+        ? process.env.VITE_SITE_URL
+        : "https://www.memory-wedding.com";
+    const guestTitle = loaderData
+      ? `Sayın ${loaderData.guestName}, Özel Düğün Davetiyeniz`
+      : "Özel Davetiye | MemoryWedding";
+    const guestDesc = loaderData?.welcomeMessage || "Bu özel günümüzde sizleri de aramızda görmekten mutluluk duyarız.";
+    const imageUrl = loaderData
+      ? `${siteOrigin}/api/share-image/${loaderData.invitationSlug}`
+      : `${siteOrigin}/og-image.png`;
+
+    return {
+      meta: [
+        { title: guestTitle },
+        { name: "description", content: guestDesc },
+        { property: "og:site_name", content: "MemoryWedding" },
+        { property: "og:type", content: "website" },
+        { property: "og:title", content: guestTitle },
+        { property: "og:description", content: guestDesc },
+        { property: "og:image", content: imageUrl },
+        { property: "og:image:secure_url", content: imageUrl },
+        { property: "og:image:type", content: "image/png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: guestTitle },
+        { name: "twitter:description", content: guestDesc },
+        { name: "twitter:image", content: imageUrl },
+        { name: "robots", content: "noindex, nofollow" },
+      ],
+    };
+  },
   component: PersonalInvitation,
   notFoundComponent: () => (
     <div className="grid min-h-dvh place-items-center bg-slate-950 px-5 text-center text-white">

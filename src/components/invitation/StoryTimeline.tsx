@@ -22,7 +22,7 @@ export function StoryTimeline({ draft, theme }: { draft: InvitationDraft; theme:
               transition={{ duration: 0.8, delay: i * 0.08 }}
               className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
             >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-black/50 backdrop-blur-md text-white/90 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 text-xs font-semibold">
+              <div className="flex items-center justify-center min-w-10 h-10 px-2.5 rounded-full border border-white/20 bg-black/50 backdrop-blur-md text-white/90 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 text-xs font-semibold text-center whitespace-nowrap">
                 {story.date}
               </div>
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nullableIsoDatetime } from "./core-content-schema";
 
 const httpUrl = z
   .string()
@@ -83,7 +84,7 @@ export const guestLinkInputSchema = z.object({
   welcome_message: z.string().trim().max(600).nullable().default(null),
   invited_party_size: z.number().int().min(1).max(50).default(1),
   schedule_ids: z.array(z.string().uuid()).max(20).default([]),
-  expires_at: z.string().datetime().nullable().default(null),
+  expires_at: nullableIsoDatetime.default(null),
 });
 
 export type ShareSettings = z.infer<typeof shareSettingsSchema>;

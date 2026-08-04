@@ -105,21 +105,22 @@ export const Route = createFileRoute("/davet/$slug")({
     const meta = [
       { title: pageTitle },
       { name: "description", content: pageDesc },
+      { property: "og:site_name", content: "MemoryWedding" },
       { property: "og:title", content: pageTitle },
       { property: "og:description", content: pageDesc },
       { property: "og:type", content: "website" },
       { property: "og:url", content: pageUrl },
+      { property: "og:image", content: shareImage },
+      { property: "og:image:secure_url", content: shareImage },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:alt", content: `${names} davetiyesi` },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: pageTitle },
       { name: "twitter:description", content: pageDesc },
+      { name: "twitter:image", content: shareImage },
     ];
-
-    meta.push({ property: "og:image", content: shareImage });
-    meta.push({ property: "og:image:width", content: "1200" });
-    meta.push({ property: "og:image:height", content: "630" });
-    meta.push({ property: "og:image:type", content: "image/png" });
-    meta.push({ property: "og:image:alt", content: `${names} davetiyesi` });
-    meta.push({ name: "twitter:image", content: shareImage });
 
     return { meta };
   },

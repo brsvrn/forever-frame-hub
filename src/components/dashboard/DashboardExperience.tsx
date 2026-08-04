@@ -131,22 +131,58 @@ export function DashboardExperience({
 
   const load = useCallback(async () => {
     const data = await getAdvancedEventSettings({ data: { invitationId: invitation.id } });
-    setShare(shareSettingsSchema.parse(data.share || {}));
-    setAudio(audioSettingsSchema.parse(data.audio || {}));
-    const parsedMusic = musicSettingsSchema.parse(data.music || {});
+    const shareObj = data.share ?? {};
+    const audioObj = data.audio ?? {};
+    const musicObj = data.music ?? {};
+    const giftObj = data.gift ?? {};
+
+    setShare(
+      shareSettingsSchema.parse({
+        share_title: shareObj.share_title ?? null,
+        share_description: shareObj.share_description ?? null,
+        share_message: shareObj.share_message ?? null,
+        cover_image_url: shareObj.cover_image_url ?? null,
+        use_theme_image: shareObj.use_theme_image ?? true,
+      }),
+    );
+    setAudio(
+      audioSettingsSchema.parse({
+        is_enabled: Boolean(audioObj.is_enabled),
+        title: audioObj.title ?? null,
+        description: audioObj.description ?? null,
+        alternative_text: audioObj.alternative_text ?? null,
+      }),
+    );
+    const parsedMusic = musicSettingsSchema.parse({
+      is_enabled: Boolean(musicObj.is_enabled),
+      title: musicObj.title ?? null,
+      volume: musicObj.volume != null ? Number(musicObj.volume) : 0.65,
+      source_type: musicObj.source_type || (invitation.music_url ? "legacy" : "none"),
+      track_id: musicObj.track_id || invitation.music_url || null,
+      license_name: musicObj.license_name ?? null,
+      license_url: musicObj.license_url ?? null,
+    });
     setMusic(parsedMusic);
     setYoutubeUrl(
       parsedMusic.source_type === "legacy" ? youtubeWatchUrl(parsedMusic.track_id) || "" : "",
     );
-    setGift(giftSettingsSchema.parse(data.gift || {}));
+    setGift(
+      giftSettingsSchema.parse({
+        is_enabled: Boolean(giftObj.is_enabled),
+        account_holder: giftObj.account_holder ?? null,
+        iban: giftObj.iban ?? null,
+        bank_name: giftObj.bank_name ?? null,
+        description: giftObj.description ?? null,
+      }),
+    );
     setVersions({
       share: Number(data.share?.version || 1),
       audio: Number(data.audio?.version || 1),
       music: Number(data.music?.version || 1),
       gift: Number(data.gift?.version || 1),
     });
-    setGuestLinks(data.guestLinks as GuestLinkSummary[]);
-  }, [invitation.id]);
+    setGuestLinks((data.guestLinks as GuestLinkSummary[]) ?? []);
+  }, [invitation.id, invitation.music_url]);
 
   const refresh = useCallback(async () => {
     setLoading(true);

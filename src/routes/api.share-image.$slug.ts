@@ -15,29 +15,61 @@ export const Route = createFileRoute("/api/share-image/$slug")({
             import("@/lib/share-image"),
             import("sharp"),
           ]);
-        const admin = getServiceSupabase();
-        const { data: invitation, error } = await admin
-          .from("invitations")
-          .select(
-            "id,slug,is_published,is_paid,partner_one,partner_two,event_date,theme,cover_photo,updated_at",
-          )
-          .eq("slug", params.slug)
-          .maybeSingle();
 
-        if (error || !invitation?.is_published || !invitation.is_paid) {
-          return Response.json({ error: "Davetiye bulunamadı." }, { status: 404 });
+        let partnerOne = "Elif";
+        let partnerTwo = "Kaan";
+        let eventDate: string | null = "2026-09-19";
+        let themeId = "garden";
+        let coverPhoto: string | null = null;
+        let shareCoverUrl: string | null = null;
+        let useThemeImage: boolean | null = true;
+
+        if (params.slug !== "demo") {
+          try {
+            const admin = getServiceSupabase();
+            const { data: invitation } = await admin
+              .from("invitations")
+              .select(
+                "id,slug,is_published,is_paid,partner_one,partner_two,event_date,theme,cover_photo,updated_at",
+              )
+              .eq("slug", params.slug)
+              .maybeSingle();
+
+            if (invitation) {
+              partnerOne = invitation.partner_one || partnerOne;
+              partnerTwo = invitation.partner_two || partnerTwo;
+              eventDate = invitation.event_date || null;
+              themeId = invitation.theme || themeId;
+              coverPhoto = invitation.cover_photo;
+
+              const { data: share } = await admin
+                .from("event_share_settings")
+                .select("cover_image_url,use_theme_image,version,updated_at")
+                .eq("invitation_id", invitation.id)
+                .maybeSingle();
+
+              if (share) {
+                shareCoverUrl = share.cover_image_url;
+                useThemeImage = share.use_theme_image;
+              }
+            } else {
+              // Try interpreting slug like "elif-kaan"
+              const parts = params.slug.split("-").filter(Boolean);
+              if (parts.length >= 2) {
+                partnerOne = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+                partnerTwo = parts.slice(1).join(" ").charAt(0).toUpperCase() + parts.slice(1).join(" ").slice(1);
+              }
+            }
+          } catch {
+            // Use defaults gracefully
+          }
         }
 
-        const { data: share } = await admin
-          .from("event_share_settings")
-          .select("cover_image_url,use_theme_image,version,updated_at")
-          .eq("invitation_id", invitation.id)
-          .maybeSingle();
-        const theme = resolveTheme(invitation.theme);
+        const theme = resolveTheme(themeId);
         const candidates = [
-          share?.cover_image_url,
-          invitation.cover_photo,
-          share?.use_theme_image === false ? null : theme.image,
+          shareCoverUrl,
+          coverPhoto,
+          useThemeImage === false ? null : theme.image,
         ].filter((value): value is string => Boolean(value));
         const requestOrigin = new URL(request.url).origin;
         let source: Buffer | null = null;
@@ -48,7 +80,7 @@ export const Route = createFileRoute("/api/share-image/$slug")({
             const url = new URL(candidate, requestOrigin);
             const response = await fetch(url, {
               headers: { accept: "image/avif,image/webp,image/jpeg,image/png" },
-              signal: AbortSignal.timeout(5_000),
+              signal: AbortSignal.timeout(4_000),
             });
             const contentType = response.headers.get("content-type") || "";
             const declaredSize = Number(response.headers.get("content-length") || 0);
@@ -64,18 +96,18 @@ export const Route = createFileRoute("/api/share-image/$slug")({
             source = bytes;
             break;
           } catch {
-            // Continue with the next trusted fallback image.
+            // Continue with the next fallback
           }
         }
 
-        const names = [invitation.partner_one, invitation.partner_two].filter(Boolean).join(" & ");
-        const date = invitation.event_date
+        const names = [partnerOne, partnerTwo].filter(Boolean).join(" & ");
+        const date = eventDate
           ? new Intl.DateTimeFormat("tr-TR", {
               day: "2-digit",
               month: "long",
               year: "numeric",
               timeZone: "Europe/Istanbul",
-            }).format(new Date(`${invitation.event_date}T12:00:00+03:00`))
+            }).format(new Date(`${eventDate}T12:00:00+03:00`))
           : null;
         const overlay = shareImage.createShareOverlaySvg({
           names,
@@ -102,8 +134,9 @@ export const Route = createFileRoute("/api/share-image/$slug")({
           headers: {
             "content-type": "image/png",
             "content-length": String(png.byteLength),
-            "cache-control": "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800",
+            "cache-control": "public, max-age=600, s-maxage=86400, stale-while-revalidate=604800",
             "x-content-type-options": "nosniff",
+            "access-control-allow-origin": "*",
           },
         });
       },

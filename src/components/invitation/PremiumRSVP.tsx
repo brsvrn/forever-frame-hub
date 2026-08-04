@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, HelpCircle, ArrowRight, Loader2 } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { getPublicRsvpForm, submitAdvancedRsvp } from "@/lib/rsvp.functions";
+import { trackRsvpSubmit } from "@/lib/analytics/analytics";
 
 type RsvpForm = Awaited<ReturnType<typeof getPublicRsvpForm>>;
 
@@ -95,6 +96,12 @@ export function PremiumRSVP({
           },
         });
       }
+      trackRsvpSubmit({
+        status,
+        partySize: status !== "no" ? partySize + childCount : 0,
+        hasDietary: Boolean(mealPreference || allergyInfo.trim()),
+        hasTransport: Boolean(transportRequired),
+      });
       setStep(2);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bir hata oluştu, lütfen tekrar deneyin.");

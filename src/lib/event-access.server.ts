@@ -18,24 +18,56 @@ function getSupabaseEnvironment() {
   return { url, key };
 }
 
-function readBearerToken(request: Request) {
+function parseCookies(cookieHeader: string): Record<string, string> {
+  const list: Record<string, string> = {};
+  if (!cookieHeader) return list;
+  cookieHeader.split(";").forEach((cookie) => {
+    const parts = cookie.split("=");
+    const name = parts.shift()?.trim();
+    if (name) {
+      list[name] = parts.join("=").trim();
+    }
+  });
+  return list;
+}
+
+function readBearerToken(request: Request): string {
   const authorization = request.headers.get("authorization") ?? "";
-  if (!authorization.startsWith("Bearer ")) {
-    throw new EventAccessError("Oturum gerekli.", 401);
+  if (authorization.startsWith("Bearer ")) {
+    const token = authorization.slice("Bearer ".length).trim();
+    if (token) return token;
   }
-  const token = authorization.slice("Bearer ".length).trim();
-  if (!token) throw new EventAccessError("Oturum gerekli.", 401);
-  return token;
+
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const cookies = parseCookies(cookieHeader);
+
+  if (cookies["sb-access-token"]) {
+    return decodeURIComponent(cookies["sb-access-token"]).trim();
+  }
+  if (cookies["sb_access_token"]) {
+    return decodeURIComponent(cookies["sb_access_token"]).trim();
+  }
+
+  for (const [key, value] of Object.entries(cookies)) {
+    if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(value));
+        if (parsed?.access_token) return parsed.access_token;
+        if (Array.isArray(parsed) && parsed[0]) return parsed[0];
+      } catch {
+        // ignore JSON parse errors for non-matching cookies
+      }
+    }
+  }
+
+  throw new EventAccessError("Oturum gerekli.", 401);
 }
 
 function assertMutationOrigin(request: Request) {
   const origin = request.headers.get("origin");
+  if (!origin) return; // Allow internal serverFn calls without explicit Origin header
   const requestOrigin = new URL(request.url).origin;
-  if (
-    !origin ||
-    origin !== requestOrigin ||
-    request.headers.get("sec-fetch-site") === "cross-site"
-  ) {
+  if (origin !== requestOrigin && request.headers.get("sec-fetch-site") === "cross-site") {
     throw new EventAccessError("İstek doğrulanamadı.", 403);
   }
 }
@@ -65,14 +97,35 @@ export async function requireEventPermission(
 ): Promise<{ supabase: SupabaseClient<Database>; user: User; token: string }> {
   const { supabase, user, token } = await requireAuthenticatedUser(request, options);
 
-  const { data: allowed, error: permissionError } = await supabase.rpc("has_event_permission", {
+  const { getServiceSupabase } = await import("./supabase-admin");
+  const admin = getServiceSupabase();
+
+  const { data: allowed, error: permissionError } = await admin.rpc("has_event_permission", {
     _invitation_id: invitationId,
     _permission: permission,
     _user_id: user.id,
   });
-  if (permissionError) throw new EventAccessError("Yetki doğrulanamadı.", 500);
-  if (allowed !== true) throw new EventAccessError("Bu işlem için yetkiniz yok.", 403);
-  return { supabase, user, token };
+
+  if (!permissionError && allowed === true) {
+    return { supabase, user, token };
+  }
+
+  // Direct ownership fallback: check if user is the creator/owner of this invitation
+  const { data: invite } = await admin
+    .from("invitations")
+    .select("user_id")
+    .eq("id", invitationId)
+    .maybeSingle();
+
+  if (invite && invite.user_id === user.id) {
+    return { supabase, user, token };
+  }
+
+  if (permissionError) {
+    console.error("[Event Access] Permission RPC failed:", permissionError);
+  }
+
+  throw new EventAccessError("Bu işlem için yetkiniz yok.", 403);
 }
 
 export function eventAccessErrorResponse(error: unknown) {

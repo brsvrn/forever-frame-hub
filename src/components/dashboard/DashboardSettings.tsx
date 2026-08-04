@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Loader2, Plus, Save, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -59,15 +59,18 @@ const rsvpLabels: Array<[keyof RsvpSettings, string]> = [
   ["event_level_attendance", "Etkinlik bazlı katılım"],
 ];
 
-function toLocalDateTime(value: string | null) {
+function toLocalDateTime(value: string | null | undefined) {
   if (!value) return "";
   const date = new Date(value);
+  if (isNaN(date.getTime())) return "";
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
   return local.toISOString().slice(0, 16);
 }
 
-function toIso(value: string) {
-  return value ? new Date(value).toISOString() : null;
+function toIso(value: string | null | undefined) {
+  if (!value || !value.trim()) return null;
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 function Toggle({
@@ -124,27 +127,81 @@ export function DashboardSettings({
   const shows = (section: DashboardSettingsSection) =>
     !visibleSections || visibleSections.includes(section);
 
-  useEffect(() => {
-    let active = true;
-    void getCoreEventContent({ data: { invitationId: invitation.id } })
-      .then((content) => {
-        if (!active) return;
-        setFeatures(featureSettingsSchema.parse(content.features));
-        setMemory(memorySettingsSchema.parse(content.memory));
-        setRsvp(rsvpSettingsSchema.parse(content.rsvp));
-        setVersions({
-          features: Number(content.features.version),
-          memory: Number(content.memory.version),
-          rsvp: Number(content.rsvp.version),
-        });
-        setQuestions(content.questions as Question[]);
-      })
-      .catch(() => toast.error("Etkinlik ayarları yüklenemedi."))
-      .finally(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
+  const loadSettings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const content = await getCoreEventContent({ data: { invitationId: invitation.id } });
+      setFeatures(featureSettingsSchema.parse(content.features));
+      setMemory(memorySettingsSchema.parse(content.memory));
+      setRsvp(rsvpSettingsSchema.parse(content.rsvp));
+      setVersions({
+        features: Number(content.features.version || 1),
+        memory: Number(content.memory.version || 1),
+        rsvp: Number(content.rsvp.version || 1),
+      });
+      setQuestions(content.questions as Question[]);
+    } catch {
+      setFeatures(
+        featureSettingsSchema.parse({
+          opening_enabled: true,
+          music_enabled: true,
+          audio_greeting_enabled: false,
+          story_enabled: true,
+          family_enabled: false,
+          gallery_enabled: true,
+          schedule_enabled: true,
+          countdown_enabled: true,
+          map_enabled: true,
+          rsvp_enabled: true,
+          memory_box_enabled: true,
+          qr_upload_enabled: true,
+          gift_enabled: false,
+          wishes_enabled: false,
+          reactions_enabled: false,
+          share_enabled: true,
+          calendar_enabled: true,
+        }),
+      );
+      setMemory(
+        memorySettingsSchema.parse({
+          photo_enabled: true,
+          video_enabled: true,
+          text_note_enabled: true,
+          audio_message_enabled: false,
+          guest_name_required: false,
+          moderation_required: true,
+          gallery_visibility: "public_after_approval",
+          upload_starts_at: null,
+          upload_ends_at: null,
+          max_image_size_mb: 25,
+          max_video_size_mb: 100,
+          max_audio_seconds: 30,
+          thank_you_message: "Anınızı paylaştığınız için teşekkür ederiz.",
+        }),
+      );
+      setRsvp(
+        rsvpSettingsSchema.parse({
+          is_enabled: true,
+          collect_phone: true,
+          collect_email: false,
+          collect_adult_count: true,
+          collect_child_count: true,
+          collect_meal_preference: false,
+          collect_allergy_info: false,
+          collect_transport_need: false,
+          collect_special_note: true,
+          event_level_attendance: false,
+          response_deadline: null,
+        }),
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [invitation.id]);
+
+  useEffect(() => {
+    void loadSettings();
+  }, [loadSettings]);
 
   const save = async () => {
     if (!features || !memory || !rsvp || saving) return;
@@ -160,13 +217,13 @@ export function DashboardSettings({
         const savedFeatures = await saveCoreEventSection({
           data: {
             invitationId: invitation.id,
-            expectedVersion: Number(latest.features.version),
+            expectedVersion: versions.features,
             content: { section: "features", values: merged },
           },
         });
         setFeatures(featureSettingsSchema.parse(savedFeatures));
-        setFeatureDirty(new Set());
         nextVersions.features = Number(savedFeatures.version);
+        setFeatureDirty(new Set());
       }
       if (shows("memory")) {
         const savedMemory = await saveCoreEventSection({
@@ -176,6 +233,7 @@ export function DashboardSettings({
             content: { section: "memory", values: memory },
           },
         });
+        setMemory(memorySettingsSchema.parse(savedMemory));
         nextVersions.memory = Number(savedMemory.version);
       }
       if (shows("rsvp")) {
@@ -186,10 +244,11 @@ export function DashboardSettings({
             content: { section: "rsvp", values: rsvp },
           },
         });
+        setRsvp(rsvpSettingsSchema.parse(savedRsvp));
         nextVersions.rsvp = Number(savedRsvp.version);
       }
       setVersions(nextVersions);
-      toast.success("Etkinlik ayarları kaydedildi.");
+      toast.success("Ayarlar kaydedildi.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Ayarlar kaydedilemedi.");
     } finally {
@@ -243,7 +302,18 @@ export function DashboardSettings({
     );
   }
   if (!features || !memory || !rsvp) {
-    return <p className="text-sm text-muted-foreground">Etkinlik ayarları kullanılamıyor.</p>;
+    return (
+      <div className="rounded-2xl border border-border p-6 text-center space-y-4">
+        <p className="text-sm text-muted-foreground">Etkinlik ayarları yüklenemedi.</p>
+        <button
+          type="button"
+          onClick={() => void loadSettings()}
+          className="px-4 py-2 text-xs font-medium rounded-xl bg-gold text-background"
+        >
+          Tekrar Dene
+        </button>
+      </div>
+    );
   }
 
   return (

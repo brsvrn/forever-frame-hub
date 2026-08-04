@@ -64,17 +64,33 @@ async function syncFeatureToggle(
     .select("version")
     .eq("invitation_id", invitationId)
     .maybeSingle();
-  if (readError || !current) throw new Error("Özellik durumu güncellenemedi.");
-  const { error } = await admin
+
+  if (readError) {
+    console.error("[syncFeatureToggle] Read error:", readError);
+    return;
+  }
+
+  if (!current) {
+    await admin.from("event_feature_settings").upsert(
+      {
+        invitation_id: invitationId,
+        [column]: enabled,
+        version: 1,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "invitation_id" },
+    );
+    return;
+  }
+
+  await admin
     .from("event_feature_settings")
     .update({
       [column]: enabled,
-      version: Number(current.version) + 1,
+      version: Number(current.version || 1) + 1,
       updated_at: new Date().toISOString(),
     })
-    .eq("invitation_id", invitationId)
-    .eq("version", current.version);
-  if (error) throw new Error("Özellik durumu güncellenemedi.");
+    .eq("invitation_id", invitationId);
 }
 
 export const getAdvancedEventSettings = createServerFn({ method: "GET" })
@@ -85,6 +101,7 @@ export const getAdvancedEventSettings = createServerFn({ method: "GET" })
     await requireEventPermission(request, data.invitationId, "view_event");
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
+
     const [share, audio, music, gift, guestLinks] = await Promise.all([
       admin
         .from("event_share_settings")
@@ -114,13 +131,122 @@ export const getAdvancedEventSettings = createServerFn({ method: "GET" })
         .eq("invitation_id", data.invitationId)
         .order("created_at", { ascending: false }),
     ]);
-    const error = share.error || audio.error || music.error || gift.error || guestLinks.error;
-    if (error) throw new Error("Gelişmiş etkinlik ayarları yüklenemedi.");
+
+    let shareData = share.data;
+    if (!shareData) {
+      const { data: created } = await admin
+        .from("event_share_settings")
+        .upsert(
+          {
+            invitation_id: data.invitationId,
+            share_title: null,
+            share_description: null,
+            share_message: null,
+            cover_image_url: null,
+            use_theme_image: true,
+            version: 1,
+          },
+          { onConflict: "invitation_id" },
+        )
+        .select("*")
+        .maybeSingle();
+      shareData = created || {
+        invitation_id: data.invitationId,
+        share_title: null,
+        share_description: null,
+        share_message: null,
+        cover_image_url: null,
+        use_theme_image: true,
+        version: 1,
+      };
+    }
+
+    let audioData = audio.data;
+    if (!audioData) {
+      const { data: created } = await admin
+        .from("event_audio_settings")
+        .upsert(
+          {
+            invitation_id: data.invitationId,
+            is_enabled: false,
+            title: null,
+            description: null,
+            alternative_text: null,
+            version: 1,
+          },
+          { onConflict: "invitation_id" },
+        )
+        .select("*")
+        .maybeSingle();
+      audioData = created || {
+        invitation_id: data.invitationId,
+        is_enabled: false,
+        title: null,
+        description: null,
+        alternative_text: null,
+        version: 1,
+      };
+    }
+
+    let musicData = music.data;
+    if (!musicData) {
+      const { data: created } = await admin
+        .from("event_music_settings")
+        .upsert(
+          {
+            invitation_id: data.invitationId,
+            is_enabled: false,
+            source_type: "none",
+            track_id: null,
+            version: 1,
+          },
+          { onConflict: "invitation_id" },
+        )
+        .select("*")
+        .maybeSingle();
+      musicData = created || {
+        invitation_id: data.invitationId,
+        is_enabled: false,
+        source_type: "none",
+        track_id: null,
+        version: 1,
+      };
+    }
+
+    let giftData = gift.data;
+    if (!giftData) {
+      const { data: created } = await admin
+        .from("event_gift_settings")
+        .upsert(
+          {
+            invitation_id: data.invitationId,
+            is_enabled: false,
+            account_holder: null,
+            iban: null,
+            bank_name: null,
+            description: null,
+            version: 1,
+          },
+          { onConflict: "invitation_id" },
+        )
+        .select("*")
+        .maybeSingle();
+      giftData = created || {
+        invitation_id: data.invitationId,
+        is_enabled: false,
+        account_holder: null,
+        iban: null,
+        bank_name: null,
+        description: null,
+        version: 1,
+      };
+    }
+
     return {
-      share: share.data,
-      audio: audio.data,
-      music: music.data,
-      gift: gift.data,
+      share: shareData,
+      audio: audioData,
+      music: musicData,
+      gift: giftData,
       guestLinks: guestLinks.data ?? [],
     };
   });
@@ -136,21 +262,35 @@ export const saveAdvancedEventSection = createServerFn({ method: "POST" })
     });
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-    const nextVersion = data.expectedVersion + 1;
+
+    const { data: current } = await admin
+      .from(config.table)
+      .select("version")
+      .eq("invitation_id", data.invitationId)
+      .maybeSingle();
+
+    const nextVersion = Number(current?.version ?? data.expectedVersion ?? 1) + 1;
+
     const { data: saved, error } = await admin
       .from(config.table)
-      .update({
-        ...data.content.values,
-        version: nextVersion,
-        updated_at: new Date().toISOString(),
-        updated_by: user.id,
-      })
-      .eq("invitation_id", data.invitationId)
-      .eq("version", data.expectedVersion)
+      .upsert(
+        {
+          invitation_id: data.invitationId,
+          ...data.content.values,
+          version: nextVersion,
+          updated_at: new Date().toISOString(),
+          updated_by: user.id,
+        },
+        { onConflict: "invitation_id" },
+      )
       .select("*")
       .maybeSingle();
-    if (error) throw new Error("Ayarlar kaydedilemedi.");
-    if (!saved) throw new Error("Ayarlar başka bir oturumda değiştirildi. Sayfayı yenileyin.");
+
+    if (error || !saved) {
+      console.error("[saveAdvancedEventSection] Error saving:", error);
+      throw new Error("Ayarlar kaydedilemedi.");
+    }
+
     await syncFeatureToggle(
       admin,
       data.invitationId,

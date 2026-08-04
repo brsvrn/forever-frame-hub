@@ -55,7 +55,14 @@ export const initiatePayment = createServerFn({ method: "POST" })
         .eq("id", data.invitationId)
         .single();
       if (invitationError || !invitation) throw new Error("Davetiye bulunamadı.");
-      if (invitation.is_paid) throw new Error("Bu davetiye için ödeme zaten tamamlanmış.");
+      if (invitation.is_paid) {
+        return {
+          success: false,
+          alreadyPaid: true,
+          invitationId: data.invitationId,
+          error: "Bu davetiye için ödeme zaten tamamlanmış.",
+        };
+      }
       if (!invitation.package_id) throw new Error("Davetiye paketi bulunamadı.");
 
       const { data: selectedPackage, error: packageError } = await admin

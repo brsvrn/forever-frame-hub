@@ -12,6 +12,15 @@ type AuthValue = {
 
 const AuthContext = createContext<AuthValue | null>(null);
 
+function syncAuthCookie(session: Session | null) {
+  if (typeof document === "undefined") return;
+  if (session?.access_token) {
+    document.cookie = `sb-access-token=${encodeURIComponent(session.access_token)}; path=/; max-age=604800; SameSite=Lax`;
+  } else {
+    document.cookie = `sb-access-token=; path=/; max-age=0; SameSite=Lax`;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,11 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
+      syncAuthCookie(next);
       setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: current }) => {
       setSession(current.session);
+      syncAuthCookie(current.session);
       setLoading(false);
     });
 

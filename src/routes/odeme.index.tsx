@@ -18,6 +18,7 @@ export const Route = createFileRoute("/odeme/")({
 function PaymentRoute() {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [alreadyPaid, setAlreadyPaid] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const idempotencyKey = useRef(crypto.randomUUID());
   const checkoutTracked = useRef(false);
@@ -67,6 +68,11 @@ function PaymentRoute() {
               eventId: res.merchant_oid ? `mw_checkout_${res.merchant_oid}` : undefined,
             });
           }
+        } else if ((res as any).alreadyPaid || res.error?.includes("ödeme zaten tamamlanmış")) {
+          setAlreadyPaid(invitationId);
+          setTimeout(() => {
+            window.location.href = `/panel/${invitationId}`;
+          }, 1500);
         } else {
           setError(res.error || "Ödeme başlatılamadı.");
         }
@@ -107,7 +113,25 @@ function PaymentRoute() {
           </div>
         )}
 
-        {error && (
+        {alreadyPaid && (
+          <div className="flex flex-col items-center justify-center h-full space-y-4 text-center">
+            <div className="size-16 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
+              <svg className="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold">Ödeme Zaten Tamamlanmış</h2>
+            <p className="text-muted-foreground">Bu davetiye için ödeme onaylanmıştır. Yönetim paneline yönlendiriliyorsunuz...</p>
+            <a 
+              href={`/panel/${alreadyPaid}`}
+              className="mt-4 px-6 py-2 bg-gold text-background font-medium rounded-full hover:bg-gold/90 transition-colors"
+            >
+              Yönetim Paneline Git
+            </a>
+          </div>
+        )}
+
+        {error && !alreadyPaid && (
           <div className="flex flex-col items-center justify-center h-full space-y-4 text-center">
             <div className="size-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
               <svg className="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
