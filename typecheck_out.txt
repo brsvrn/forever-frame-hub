@@ -1,5 +1,0 @@
-
-> typecheck
-> tsc --noEmit
-
-src/routes/d.$slug.$token.tsx(33,89): error TS2304: Cannot find name 'params'.
