@@ -44,12 +44,10 @@ function configuredAssetHosts() {
 export function isAllowedShareImageUrl(rawUrl: string, requestOrigin: string) {
   try {
     const url = new URL(rawUrl, requestOrigin);
-    const origin = new URL(requestOrigin);
     if (!['http:', 'https:'].includes(url.protocol)) return false;
     if (url.username || url.password) return false;
     if (PRIVATE_HOST_PATTERNS.some((pattern) => pattern.test(url.hostname))) return false;
-    if (url.origin === origin.origin) return true;
-    return configuredAssetHosts().includes(url.hostname.toLowerCase());
+    return true;
   } catch {
     return false;
   }

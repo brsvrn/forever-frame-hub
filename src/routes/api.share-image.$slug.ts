@@ -114,26 +114,42 @@ export const Route = createFileRoute("/api/share-image/$slug")({
           date,
           accent: theme.primaryColor,
         });
-        const sharp = sharpModule.default;
-        const base = source
-          ? sharp(source).resize(WIDTH, HEIGHT, { fit: "cover", position: "centre" })
-          : sharp({
-              create: {
-                width: WIDTH,
-                height: HEIGHT,
-                channels: 4,
-                background: theme.secondaryColor || "#241d22",
-              },
-            });
-        const png = await base
-          .composite([{ input: overlay, top: 0, left: 0 }])
-          .png({ compressionLevel: 9, quality: 90 })
-          .toBuffer();
+        const sharp = sharpModule.default || sharpModule;
+        let imageBuffer: Buffer;
+        try {
+          const base = source
+            ? sharp(source).resize(WIDTH, HEIGHT, { fit: "cover", position: "centre" })
+            : sharp({
+                create: {
+                  width: WIDTH,
+                  height: HEIGHT,
+                  channels: 4,
+                  background: theme.secondaryColor || "#241d22",
+                },
+              });
+          imageBuffer = await base
+            .composite([{ input: overlay, top: 0, left: 0 }])
+            .jpeg({ quality: 85, mozjpeg: true })
+            .toBuffer();
+        } catch {
+          // Robust fallback if source image buffer is invalid
+          imageBuffer = await sharp({
+            create: {
+              width: WIDTH,
+              height: HEIGHT,
+              channels: 4,
+              background: theme.secondaryColor || "#241d22",
+            },
+          })
+            .composite([{ input: overlay, top: 0, left: 0 }])
+            .jpeg({ quality: 85 })
+            .toBuffer();
+        }
 
-        return new Response(new Uint8Array(png), {
+        return new Response(new Uint8Array(imageBuffer), {
           headers: {
-            "content-type": "image/png",
-            "content-length": String(png.byteLength),
+            "content-type": "image/jpeg",
+            "content-length": String(imageBuffer.byteLength),
             "cache-control": "public, max-age=600, s-maxage=86400, stale-while-revalidate=604800",
             "x-content-type-options": "nosniff",
             "access-control-allow-origin": "*",

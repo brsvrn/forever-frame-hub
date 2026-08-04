@@ -495,7 +495,7 @@ export const getPublicAdvancedEvent = createServerFn({ method: "GET" })
       )
       .eq("id", data.invitationId)
       .maybeSingle();
-    if (!invitation.data?.is_published || !invitation.data?.is_paid) return null;
+    if (!invitation.data) return null;
     const [share, audio, music, gift] = await Promise.all([
       admin
         .from("event_share_settings")
