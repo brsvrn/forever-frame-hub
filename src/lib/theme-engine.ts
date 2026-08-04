@@ -131,9 +131,20 @@ type ThemeDefinition = Omit<
 >;
 
 const coastalMusic = {
-  defaultTrack: "/audio/acoustic-breeze.mp3",
-  title: "Coastal Acoustic",
+  defaultTrack: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Two%20Together.mp3",
+  title: "Two Together",
 };
+
+const romanticPianoMusic = {
+  defaultTrack: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/There%20is%20Romance.mp3",
+  title: "There is Romance",
+};
+
+const gentleWaltzMusic = {
+  defaultTrack: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Water%20Lily.mp3",
+  title: "Water Lily",
+};
+
 
 const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
   "turquoise-cove": {
@@ -256,7 +267,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(2,10,28,.2), rgba(2,8,22,.9))",
       imagePosition: "center",
     },
-    music: { defaultTrack: "/audio/cinematic-piano.mp3", title: "Moonlit Piano" },
+    music: romanticPianoMusic,
     ambientEffect: { type: "moonSparkle", intensity: "medium" },
     openingAnimation: { duration: 2.4, style: "blur" },
     styles: {
@@ -359,7 +370,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(20,59,38,.08), rgba(13,42,29,.76))",
       imagePosition: "center",
     },
-    music: { defaultTrack: "/audio/acoustic-breeze.mp3", title: "Forest Morning" },
+    music: gentleWaltzMusic,
     ambientEffect: { type: "forestLight", intensity: "light" },
     openingAnimation: { duration: 2.1, style: "fade" },
     styles: {
@@ -393,7 +404,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(81,76,39,.04), rgba(66,62,34,.66))",
       imagePosition: "center",
     },
-    music: { defaultTrack: "/audio/acoustic-breeze.mp3", title: "Meadow Waltz" },
+    music: gentleWaltzMusic,
     ambientEffect: { type: "wildflowers", intensity: "light" },
     openingAnimation: { duration: 2.2, style: "slideUp" },
     styles: {
@@ -427,7 +438,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(20,48,45,.04), rgba(14,38,36,.76))",
       imagePosition: "center",
     },
-    music: { defaultTrack: "/audio/cinematic-piano.mp3", title: "Mountain Air" },
+    music: romanticPianoMusic,
     ambientEffect: { type: "mountainMist", intensity: "light" },
     openingAnimation: { duration: 2.3, style: "blur" },
     styles: {
@@ -462,7 +473,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(18,81,92,.04), rgba(12,59,69,.72))",
       imagePosition: "center",
     },
-    music: { defaultTrack: "/audio/acoustic-breeze.mp3", title: "Amalfi Afternoon" },
+    music: coastalMusic,
     ambientEffect: { type: "lemonBreeze", intensity: "light" },
     openingAnimation: { duration: 2.1, style: "fade" },
     styles: {
@@ -496,7 +507,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(83,57,27,.04), rgba(65,43,21,.72))",
       imagePosition: "center",
     },
-    music: { defaultTrack: "/audio/cinematic-piano.mp3", title: "Tuscan Gold" },
+    music: romanticPianoMusic,
     ambientEffect: { type: "tuscanGlow", intensity: "light" },
     openingAnimation: { duration: 2.3, style: "blur" },
     styles: {
@@ -530,7 +541,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(24,61,72,.04), rgba(15,47,58,.74))",
       imagePosition: "center",
     },
-    music: { defaultTrack: "/audio/cinematic-piano.mp3", title: "Como Serenade" },
+    music: romanticPianoMusic,
     ambientEffect: { type: "lakeShimmer", intensity: "light" },
     openingAnimation: { duration: 2.4, style: "slideUp" },
     styles: {
@@ -565,7 +576,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(85,65,40,.08), rgba(62,43,24,.62))",
       imagePosition: "center",
     },
-    music: { defaultTrack: "/audio/cinematic-piano.mp3", title: "Crystal Waltz" },
+    music: romanticPianoMusic,
     ambientEffect: { type: "shimmer", intensity: "light" },
     openingAnimation: { duration: 2.4, style: "scale" },
     styles: {
@@ -599,10 +610,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(0,0,0,.3), rgba(0,0,0,.8))",
       imagePosition: "center",
     },
-    music: {
-      defaultTrack: "/audio/classical-piano.mp3",
-      title: "Cinematic Strings",
-    },
+    music: romanticPianoMusic,
     ambientEffect: { type: "none", intensity: "light" },
     openingAnimation: { duration: 2.0, style: "fade" },
     styles: {
@@ -636,10 +644,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(92,74,61,.2), rgba(43,34,28,.85))",
       imagePosition: "center",
     },
-    music: {
-      defaultTrack: "/audio/acoustic-breeze.mp3",
-      title: "Boho Acoustic",
-    },
+    music: coastalMusic,
     ambientEffect: { type: "sunGlow", intensity: "medium" },
     openingAnimation: { duration: 2.0, style: "fade" },
     styles: {
@@ -673,10 +678,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       overlay: "linear-gradient(180deg, rgba(255,255,255,.1), rgba(0,0,0,.7))",
       imagePosition: "center",
     },
-    music: {
-      defaultTrack: "/audio/classical-piano.mp3",
-      title: "Ethereal Piano",
-    },
+    music: romanticPianoMusic,
     ambientEffect: { type: "bokeh", intensity: "light" },
     openingAnimation: { duration: 2.0, style: "fade" },
     styles: {

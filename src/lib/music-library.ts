@@ -62,15 +62,25 @@ export function extractYouTubeVideoId(value?: string | null): string | null {
   if (/^[\w-]{11}$/.test(trimmed)) return trimmed;
 
   try {
-    const url = new URL(trimmed);
+    // Check direct regex first for common patterns
+    const directMatch = trimmed.match(
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([\w-]{11})/,
+    );
+    if (directMatch && directMatch[1]) return directMatch[1];
+
+    const url = new URL(trimmed.startsWith("http") ? trimmed : `https://${trimmed}`);
     const hostname = url.hostname.replace(/^www\./, "");
     let candidate: string | null = null;
 
     if (hostname === "youtu.be") candidate = url.pathname.split("/").filter(Boolean)[0] ?? null;
-    if (hostname === "youtube.com" || hostname === "m.youtube.com" || hostname === "music.youtube.com") {
+    if (
+      hostname === "youtube.com" ||
+      hostname === "m.youtube.com" ||
+      hostname === "music.youtube.com"
+    ) {
       candidate =
         url.searchParams.get("v") ||
-        url.pathname.match(/^\/(?:embed|shorts|live)\/([\w-]{11})/)?.[1] ||
+        url.pathname.match(/^\/(?:embed|shorts|live|v)\/([\w-]{11})/)?.[1] ||
         null;
     }
 
@@ -85,3 +95,4 @@ export function youtubeWatchUrl(videoId?: string | null) {
     ? `https://www.youtube.com/watch?v=${videoId}`
     : null;
 }
+

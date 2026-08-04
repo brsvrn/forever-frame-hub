@@ -68,7 +68,7 @@ export const Route = createFileRoute("/davet/$slug")({
     }
 
     const invitation = await getPublicInvitation(params.slug);
-    if (!invitation || !(invitation as any).is_paid) throw notFound();
+    if (!invitation) throw notFound();
     const [schedules, eventFeatures, advanced] = await Promise.all([
       getPublicSchedules(invitation.id),
       getPublicFeatureSettings(invitation.id),

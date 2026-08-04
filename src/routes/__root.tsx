@@ -92,8 +92,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#0E1220" },
       { property: "og:site_name", content: "MemoryWedding" },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "/logo.jpg" },
+      { property: "og:image", content: "https://www.memory-wedding.com/logo.jpg" },
+      { property: "og:image:secure_url", content: "https://www.memory-wedding.com/logo.jpg" },
+      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://www.memory-wedding.com/logo.jpg" },
       {
         name: "google-site-verification",
         content:

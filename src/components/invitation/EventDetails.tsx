@@ -90,6 +90,12 @@ export function EventDetails({
           </div>
         </div>
 
+        {draft.rsvpLabel?.trim() && (
+          <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+            <p className="text-xs font-medium text-white/80 leading-relaxed">{draft.rsvpLabel.trim()}</p>
+          </div>
+        )}
+
         {draft.mapUrl && (
           <div className="mt-10 pt-8 border-t border-white/10">
             <a

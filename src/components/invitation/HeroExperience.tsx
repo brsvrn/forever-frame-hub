@@ -93,6 +93,23 @@ export function HeroExperience({
           </div>
         )}
 
+        {/* Davetiye Metni / Özel Notumuz */}
+        {draft.message?.trim() && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mx-auto mt-8 max-w-xl rounded-2xl border border-white/20 bg-black/30 p-6 text-center shadow-xl backdrop-blur-md sm:mt-10 sm:p-8"
+          >
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/60">
+              {lang === "tr" ? "Davetiye Notumuz" : "Our Message"}
+            </p>
+            <p className="font-serif italic text-base leading-relaxed text-white/95 sm:text-lg">
+              “{draft.message.trim()}”
+            </p>
+          </motion.div>
+        )}
+
         {/* Geri Sayım */}
         {daysLeft !== null && (
           <div className="mt-8 inline-block rounded-full border border-white/20 bg-white/10 px-6 py-2 backdrop-blur-sm sm:mt-12">
