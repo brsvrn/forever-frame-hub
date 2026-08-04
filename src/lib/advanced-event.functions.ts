@@ -101,7 +101,13 @@ export const getAdvancedEventSettings = createServerFn({ method: "GET" })
     await requireEventPermission(request, data.invitationId, "view_event");
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-
+    const { ensureAdvancedEventSettings, ensureCoreEventSettings } = await import(
+      "./event-settings.server"
+    );
+    await Promise.all([
+      ensureCoreEventSettings(admin, data.invitationId),
+      ensureAdvancedEventSettings(admin, data.invitationId),
+    ]);
     const [share, audio, music, gift, guestLinks] = await Promise.all([
       admin
         .from("event_share_settings")
@@ -262,15 +268,14 @@ export const saveAdvancedEventSection = createServerFn({ method: "POST" })
     });
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-
-    const { data: current } = await admin
-      .from(config.table)
-      .select("version")
-      .eq("invitation_id", data.invitationId)
-      .maybeSingle();
-
-    const nextVersion = Number(current?.version ?? data.expectedVersion ?? 1) + 1;
-
+    const { ensureAdvancedEventSettings, ensureCoreEventSettings } = await import(
+      "./event-settings.server"
+    );
+    await Promise.all([
+      ensureCoreEventSettings(admin, data.invitationId),
+      ensureAdvancedEventSettings(admin, data.invitationId),
+    ]);
+    const nextVersion = data.expectedVersion + 1;
     const { data: saved, error } = await admin
       .from(config.table)
       .upsert(

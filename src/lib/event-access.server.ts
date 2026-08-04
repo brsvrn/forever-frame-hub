@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import type { EventPermission } from "./event-permissions";
+import { readServerAccessTokenCookie } from "./auth-cookie";
 
 export class EventAccessError extends Error {
   constructor(
@@ -33,34 +34,12 @@ function parseCookies(cookieHeader: string): Record<string, string> {
 
 function readBearerToken(request: Request): string {
   const authorization = request.headers.get("authorization") ?? "";
-  if (authorization.startsWith("Bearer ")) {
-    const token = authorization.slice("Bearer ".length).trim();
-    if (token) return token;
-  }
-
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const cookies = parseCookies(cookieHeader);
-
-  if (cookies["sb-access-token"]) {
-    return decodeURIComponent(cookies["sb-access-token"]).trim();
-  }
-  if (cookies["sb_access_token"]) {
-    return decodeURIComponent(cookies["sb_access_token"]).trim();
-  }
-
-  for (const [key, value] of Object.entries(cookies)) {
-    if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-      try {
-        const parsed = JSON.parse(decodeURIComponent(value));
-        if (parsed?.access_token) return parsed.access_token;
-        if (Array.isArray(parsed) && parsed[0]) return parsed[0];
-      } catch {
-        // ignore JSON parse errors for non-matching cookies
-      }
-    }
-  }
-
-  throw new EventAccessError("Oturum gerekli.", 401);
+  const headerToken = authorization.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length).trim()
+    : "";
+  const token = headerToken || readServerAccessTokenCookie(request) || "";
+  if (!token) throw new EventAccessError("Oturum gerekli.", 401);
+  return token;
 }
 
 function assertMutationOrigin(request: Request) {
@@ -100,6 +79,14 @@ export async function requireEventPermission(
   const { getServiceSupabase } = await import("./supabase-admin");
   const admin = getServiceSupabase();
 
+  const { data: invitation, error: invitationError } = await admin
+    .from("invitations")
+    .select("user_id")
+    .eq("id", invitationId)
+    .maybeSingle();
+  if (invitationError) throw new EventAccessError("Yetki doğrulanamadı.", 500);
+  if (invitation?.user_id === user.id) return { supabase, user, token };
+
   const { data: allowed, error: permissionError } = await admin.rpc("has_event_permission", {
     _invitation_id: invitationId,
     _permission: permission,
@@ -107,17 +94,6 @@ export async function requireEventPermission(
   });
 
   if (!permissionError && allowed === true) {
-    return { supabase, user, token };
-  }
-
-  // Direct ownership fallback: check if user is the creator/owner of this invitation
-  const { data: invite } = await admin
-    .from("invitations")
-    .select("user_id")
-    .eq("id", invitationId)
-    .maybeSingle();
-
-  if (invite && invite.user_id === user.id) {
     return { supabase, user, token };
   }
 

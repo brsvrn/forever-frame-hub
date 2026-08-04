@@ -31,191 +31,72 @@ export const getCoreEventContent = createServerFn({ method: "GET" })
     await requireEventPermission(requestOrThrow(), data.invitationId, "view_event");
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-
-    const [
-      familyRes,
-      invitationRes,
-      featuresRes,
-      memoryRes,
-      rsvpRes,
-      schedulesRes,
-      questionsRes,
-      templatesRes,
-      inviteRowRes,
-    ] = await Promise.all([
-      admin.from("event_family_details").select("*").eq("invitation_id", data.invitationId).maybeSingle(),
-      admin.from("event_invitation_content").select("*").eq("invitation_id", data.invitationId).maybeSingle(),
-      admin.from("event_feature_settings").select("*").eq("invitation_id", data.invitationId).maybeSingle(),
-      admin.from("event_memory_settings").select("*").eq("invitation_id", data.invitationId).maybeSingle(),
-      admin.from("event_rsvp_settings").select("*").eq("invitation_id", data.invitationId).maybeSingle(),
-      admin.from("event_schedules").select("*").eq("invitation_id", data.invitationId).order("sort_order"),
-      admin.from("event_custom_questions").select("*").eq("invitation_id", data.invitationId).order("sort_order"),
-      admin.from("invitation_text_templates").select("*").eq("is_active", true).eq("locale", "tr").order("sort_order"),
-      admin.from("invitations").select("headline, message, family_info").eq("id", data.invitationId).maybeSingle(),
-    ]);
-
-    let family = familyRes.data;
-    let invitationContent = invitationRes.data;
-    let features = featuresRes.data;
-    let memory = memoryRes.data;
-    let rsvp = rsvpRes.data;
-    const inviteRow = inviteRowRes.data;
-
-    // Auto-create missing default rows if needed
-    if (!family) {
-      const familyInfo = (inviteRow?.family_info as any) || {};
-      const { data: created } = await admin
-        .from("event_family_details")
-        .upsert(
-          {
-            invitation_id: data.invitationId,
-            bride_mother: familyInfo.bride?.mother || null,
-            bride_father: familyInfo.bride?.father || null,
-            bride_family_name: familyInfo.bride?.familyName || null,
-            groom_mother: familyInfo.groom?.mother || null,
-            groom_father: familyInfo.groom?.father || null,
-            groom_family_name: familyInfo.groom?.familyName || null,
-            version: 1,
-          },
-          { onConflict: "invitation_id" },
-        )
-        .select("*")
-        .single();
-      family = created || {
-        invitation_id: data.invitationId,
-        bride_mother: null,
-        bride_father: null,
-        bride_family_name: null,
-        groom_mother: null,
-        groom_father: null,
-        groom_family_name: null,
-        version: 1,
-      };
-    }
-
-    if (!invitationContent) {
-      const { data: created } = await admin
-        .from("event_invitation_content")
-        .upsert(
-          {
-            invitation_id: data.invitationId,
-            headline: inviteRow?.headline || "Evleniyoruz",
-            invitation_text: inviteRow?.message || "Bu mutlu günümüzde sizleri de yanımızda görmekten mutluluk duyarız.",
-            template_id: null,
-            version: 1,
-          },
-          { onConflict: "invitation_id" },
-        )
-        .select("*")
-        .single();
-      invitationContent = created || {
-        invitation_id: data.invitationId,
-        headline: inviteRow?.headline || "Evleniyoruz",
-        invitation_text: inviteRow?.message || "Bu mutlu günümüzde sizleri de yanımızda görmekten mutluluk duyarız.",
-        template_id: null,
-        version: 1,
-      };
-    }
-
-    if (!features) {
-      const { data: created } = await admin
-        .from("event_feature_settings")
-        .upsert(
-          {
-            invitation_id: data.invitationId,
-            opening_enabled: true,
-            story_enabled: true,
-            schedule_enabled: true,
-            calendar_enabled: true,
-            rsvp_enabled: true,
-            memory_box_enabled: true,
-            qr_upload_enabled: true,
-            audio_greeting_enabled: true,
-            music_enabled: true,
-            gift_enabled: true,
-            share_enabled: true,
-            version: 1,
-          },
-          { onConflict: "invitation_id" },
-        )
-        .select("*")
-        .single();
-      features = created || {
-        invitation_id: data.invitationId,
-        opening_enabled: true,
-        story_enabled: true,
-        schedule_enabled: true,
-        calendar_enabled: true,
-        rsvp_enabled: true,
-        memory_box_enabled: true,
-        qr_upload_enabled: true,
-        audio_greeting_enabled: true,
-        music_enabled: true,
-        gift_enabled: true,
-        share_enabled: true,
-        version: 1,
-      };
-    }
-
-    if (!memory) {
-      const memoryDefault = {
-        invitation_id: data.invitationId,
-        photo_enabled: true,
-        video_enabled: true,
-        text_note_enabled: true,
-        audio_message_enabled: false,
-        guest_name_required: false,
-        moderation_required: true,
-        gallery_visibility: "public_after_approval",
-        upload_starts_at: null,
-        upload_ends_at: null,
-        max_image_size_mb: 25,
-        max_video_size_mb: 100,
-        max_audio_seconds: 30,
-        thank_you_message: "Anınızı paylaştığınız için teşekkür ederiz.",
-        version: 1,
-      };
-      const { data: created } = await admin
-        .from("event_memory_settings")
-        .upsert(memoryDefault, { onConflict: "invitation_id" })
-        .select("*")
-        .single();
-      memory = created || memoryDefault;
-    }
-
-    if (!rsvp) {
-      const rsvpDefault = {
-        invitation_id: data.invitationId,
-        is_enabled: true,
-        collect_phone: true,
-        collect_email: false,
-        collect_adult_count: true,
-        collect_child_count: true,
-        collect_meal_preference: false,
-        collect_allergy_info: false,
-        collect_transport_need: false,
-        collect_special_note: true,
-        event_level_attendance: false,
-        response_deadline: null,
-        version: 1,
-      };
-      const { data: created } = await admin
-        .from("event_rsvp_settings")
-        .upsert(rsvpDefault, { onConflict: "invitation_id" })
-        .select("*")
-        .single();
-      rsvp = created || rsvpDefault;
-    }
-
-    return {
+    const { ensureCoreEventSettings } = await import("./event-settings.server");
+    await ensureCoreEventSettings(admin, data.invitationId);
+    const [family, invitation, features, memory, rsvp, schedules, questions, templates] =
+      await Promise.all([
+        admin
+          .from("event_family_details")
+          .select("*")
+          .eq("invitation_id", data.invitationId)
+          .single(),
+        admin
+          .from("event_invitation_content")
+          .select("*")
+          .eq("invitation_id", data.invitationId)
+          .single(),
+        admin
+          .from("event_feature_settings")
+          .select("*")
+          .eq("invitation_id", data.invitationId)
+          .single(),
+        admin
+          .from("event_memory_settings")
+          .select("*")
+          .eq("invitation_id", data.invitationId)
+          .single(),
+        admin
+          .from("event_rsvp_settings")
+          .select("*")
+          .eq("invitation_id", data.invitationId)
+          .single(),
+        admin
+          .from("event_schedules")
+          .select("*")
+          .eq("invitation_id", data.invitationId)
+          .order("sort_order"),
+        admin
+          .from("event_custom_questions")
+          .select("*")
+          .eq("invitation_id", data.invitationId)
+          .order("sort_order"),
+        admin
+          .from("invitation_text_templates")
+          .select("*")
+          .eq("is_active", true)
+          .eq("locale", "tr")
+          .order("sort_order"),
+      ]);
+    const failure = [
       family,
-      invitation: invitationContent,
+      invitation,
       features,
       memory,
       rsvp,
-      schedules: schedulesRes.data ?? [],
-      questions: questionsRes.data ?? [],
-      templates: templatesRes.data ?? [],
+      schedules,
+      questions,
+      templates,
+    ].find((result) => result.error);
+    if (failure?.error) throw new Error("Etkinlik içerikleri yüklenemedi.");
+    return {
+      family: family.data,
+      invitation: invitation.data,
+      features: features.data,
+      memory: memory.data,
+      rsvp: rsvp.data,
+      schedules: schedules.data ?? [],
+      questions: questions.data ?? [],
+      templates: templates.data ?? [],
     };
   });
 
@@ -230,7 +111,9 @@ export const saveCoreEventSection = createServerFn({ method: "POST" })
     });
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-    const { data: current } = await admin
+    const { ensureCoreEventSettings } = await import("./event-settings.server");
+    await ensureCoreEventSettings(admin, data.invitationId);
+    const { data: current, error: readError } = await admin
       .from(config.table)
       .select("*")
       .eq("invitation_id", data.invitationId)

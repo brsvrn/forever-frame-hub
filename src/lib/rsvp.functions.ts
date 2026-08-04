@@ -114,13 +114,15 @@ export const getPublicRsvpForm = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-    const [{ data: invitation }, { data: settings }, { data: questions }, { data: schedules }] =
-      await Promise.all([
-        admin
-          .from("invitations")
-          .select("id,is_published,is_paid")
-          .eq("id", data.invitationId)
-          .maybeSingle(),
+    const { data: invitation } = await admin
+      .from("invitations")
+      .select("id,is_published,is_paid")
+      .eq("id", data.invitationId)
+      .maybeSingle();
+    if (!invitation) throw new Error("Davetiye bulunamadı.");
+    const { ensureCoreEventSettings } = await import("./event-settings.server");
+    await ensureCoreEventSettings(admin, data.invitationId);
+    const [{ data: settings }, { data: questions }, { data: schedules }] = await Promise.all([
         admin
           .from("event_rsvp_settings")
           .select("*")
@@ -178,13 +180,15 @@ export const submitAdvancedRsvp = createServerFn({ method: "POST" })
     if (data.website) throw new Error("İstek doğrulanamadı.");
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
-    const [{ data: invitation }, { data: settings }, { data: questions }, { data: schedules }] =
-      await Promise.all([
-        admin
-          .from("invitations")
-          .select("id,is_published,is_paid")
-          .eq("id", data.invitationId)
-          .maybeSingle(),
+    const { data: invitation } = await admin
+      .from("invitations")
+      .select("id,is_published,is_paid")
+      .eq("id", data.invitationId)
+      .maybeSingle();
+    if (!invitation) throw new Error("Davetiye bulunamadı.");
+    const { ensureCoreEventSettings } = await import("./event-settings.server");
+    await ensureCoreEventSettings(admin, data.invitationId);
+    const [{ data: settings }, { data: questions }, { data: schedules }] = await Promise.all([
         admin
           .from("event_rsvp_settings")
           .select("*")

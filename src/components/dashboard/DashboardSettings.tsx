@@ -122,13 +122,15 @@ export function DashboardSettings({
     is_required: false,
   });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [featureDirty, setFeatureDirty] = useState<Set<keyof FeatureSettings>>(new Set());
   const shows = (section: DashboardSettingsSection) =>
     !visibleSections || visibleSections.includes(section);
 
-  const loadSettings = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const content = await getCoreEventContent({ data: { invitationId: invitation.id } });
       setFeatures(featureSettingsSchema.parse(content.features));
@@ -140,68 +142,19 @@ export function DashboardSettings({
         rsvp: Number(content.rsvp.version || 1),
       });
       setQuestions(content.questions as Question[]);
-    } catch {
-      setFeatures(
-        featureSettingsSchema.parse({
-          opening_enabled: true,
-          music_enabled: true,
-          audio_greeting_enabled: false,
-          story_enabled: true,
-          family_enabled: false,
-          gallery_enabled: true,
-          schedule_enabled: true,
-          countdown_enabled: true,
-          map_enabled: true,
-          rsvp_enabled: true,
-          memory_box_enabled: true,
-          qr_upload_enabled: true,
-          gift_enabled: false,
-          wishes_enabled: false,
-          reactions_enabled: false,
-          share_enabled: true,
-          calendar_enabled: true,
-        }),
-      );
-      setMemory(
-        memorySettingsSchema.parse({
-          photo_enabled: true,
-          video_enabled: true,
-          text_note_enabled: true,
-          audio_message_enabled: false,
-          guest_name_required: false,
-          moderation_required: true,
-          gallery_visibility: "public_after_approval",
-          upload_starts_at: null,
-          upload_ends_at: null,
-          max_image_size_mb: 25,
-          max_video_size_mb: 100,
-          max_audio_seconds: 30,
-          thank_you_message: "Anınızı paylaştığınız için teşekkür ederiz.",
-        }),
-      );
-      setRsvp(
-        rsvpSettingsSchema.parse({
-          is_enabled: true,
-          collect_phone: true,
-          collect_email: false,
-          collect_adult_count: true,
-          collect_child_count: true,
-          collect_meal_preference: false,
-          collect_allergy_info: false,
-          collect_transport_need: false,
-          collect_special_note: true,
-          event_level_attendance: false,
-          response_deadline: null,
-        }),
-      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Etkinlik ayarları yüklenemedi.";
+      setLoadError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   }, [invitation.id]);
 
   useEffect(() => {
-    void loadSettings();
-  }, [loadSettings]);
+    void load();
+  }, [load]);
 
   const save = async () => {
     if (!features || !memory || !rsvp || saving) return;
@@ -303,14 +256,16 @@ export function DashboardSettings({
   }
   if (!features || !memory || !rsvp) {
     return (
-      <div className="rounded-2xl border border-border p-6 text-center space-y-4">
-        <p className="text-sm text-muted-foreground">Etkinlik ayarları yüklenemedi.</p>
+      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          {loadError || "Etkinlik ayarları kullanılamıyor."}
+        </p>
         <button
           type="button"
-          onClick={() => void loadSettings()}
-          className="px-4 py-2 text-xs font-medium rounded-xl bg-gold text-background"
+          onClick={() => void load()}
+          className="mt-4 min-h-11 rounded-xl border border-border px-5 text-sm hover:bg-accent"
         >
-          Tekrar Dene
+          Tekrar dene
         </button>
       </div>
     );

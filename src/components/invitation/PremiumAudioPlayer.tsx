@@ -115,13 +115,15 @@ export function PremiumAudioPlayer({
   if (!videoId && !directAudioUrl) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-40">
-      {videoId && !hideUI ? (
+    <div className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 sm:left-6 sm:translate-x-0">
+      {videoId ? (
         <iframe
           ref={iframeRef}
-          src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0&loop=1&playlist=${videoId}&controls=1&playsinline=1`}
-          className="mb-2 h-[200px] w-[min(18rem,calc(100vw-3rem))] rounded-2xl border border-white/10 bg-black shadow-2xl"
+          src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0&loop=1&playlist=${videoId}&controls=0&disablekb=1&playsinline=1`}
+          className="pointer-events-none absolute bottom-0 left-0 h-px w-px opacity-0"
           allow="autoplay; encrypted-media"
+          tabIndex={-1}
+          aria-hidden="true"
           title="YouTube müzik oynatıcısı"
         />
       ) : null}
@@ -132,10 +134,12 @@ export function PremiumAudioPlayer({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 1 }}
-          className="flex items-center gap-3 bg-black/20 backdrop-blur-xl border border-white/10 rounded-full p-2 pr-4 shadow-2xl"
+          className="flex w-full items-center gap-3 rounded-full border border-white/10 bg-black/35 p-2 pr-4 shadow-2xl backdrop-blur-xl"
         >
           <button
+            type="button"
             onClick={() => setIsPlaying(!isPlaying)}
+            aria-label={isPlaying ? "Müziği duraklat" : "Müziği oynat"}
             className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
           >
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-1" />}
@@ -166,7 +170,9 @@ export function PremiumAudioPlayer({
           <div className="w-px h-6 bg-white/10 mx-1" />
 
           <button
+            type="button"
             onClick={() => setIsMuted(!isMuted)}
+            aria-label={isMuted ? "Sesi aç" : "Sesi kapat"}
             className="w-8 h-8 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-colors"
           >
             {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
