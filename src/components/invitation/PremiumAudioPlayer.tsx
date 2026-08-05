@@ -312,6 +312,41 @@ export function PremiumAudioPlayer({
     }
   }, [volume, videoId]);
 
+  // Mobile interaction fallback: if music is supposed to play but was delayed by mobile autoplay policy, start on next touch/scroll
+  useEffect(() => {
+    const handleMobileInteraction = () => {
+      if (userExplicitPausedRef.current) return;
+      if (!autoPlay && !pendingPlayRef.current) return;
+
+      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
+        try {
+          ytPlayerRef.current.unMute();
+          const safeVol = Math.round(Math.max(0, Math.min(1, volume)) * 100);
+          ytPlayerRef.current.setVolume(safeVol);
+          ytPlayerRef.current.playVideo();
+          setIsPlaying(true);
+        } catch {}
+      } else if (audioRef.current && audioRef.current.paused) {
+        audioRef.current
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch(() => {});
+      }
+    };
+
+    window.addEventListener("touchstart", handleMobileInteraction, { passive: true });
+    window.addEventListener("touchend", handleMobileInteraction, { passive: true });
+    window.addEventListener("click", handleMobileInteraction, { passive: true });
+    window.addEventListener("scroll", handleMobileInteraction, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleMobileInteraction);
+      window.removeEventListener("touchend", handleMobileInteraction);
+      window.removeEventListener("click", handleMobileInteraction);
+      window.removeEventListener("scroll", handleMobileInteraction);
+    };
+  }, [autoPlay, videoId, volume]);
+
   // Handle Voice-over pause/resume events
   useEffect(() => {
     const voiceStarted = () => {
@@ -350,11 +385,11 @@ export function PremiumAudioPlayer({
 
   return (
     <div className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 sm:left-6 sm:translate-x-0">
-      {/* Off-screen YouTube Container */}
+      {/* In-viewport minimal YouTube Container for mobile playback compatibility */}
       {videoId ? (
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed -left-[9999px] -top-[9999px] h-48 w-48 opacity-0"
+          className="pointer-events-none fixed bottom-1 left-1 -z-50 h-4 w-4 overflow-hidden opacity-[0.01]"
         >
           <div id={ytContainerId.current} />
         </div>
@@ -366,7 +401,8 @@ export function PremiumAudioPlayer({
           ref={audioRef}
           src={directAudioUrl}
           loop
-          preload="metadata"
+          preload="auto"
+          playsInline
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
         />
