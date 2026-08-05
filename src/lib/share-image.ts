@@ -47,7 +47,10 @@ export function isAllowedShareImageUrl(rawUrl: string, requestOrigin: string) {
     if (!['http:', 'https:'].includes(url.protocol)) return false;
     if (url.username || url.password) return false;
     if (PRIVATE_HOST_PATTERNS.some((pattern) => pattern.test(url.hostname))) return false;
-    return true;
+
+    const requestHost = new URL(requestOrigin).hostname.toLowerCase();
+    const allowedHosts = new Set([requestHost, ...configuredAssetHosts()]);
+    return allowedHosts.has(url.hostname.toLowerCase());
   } catch {
     return false;
   }

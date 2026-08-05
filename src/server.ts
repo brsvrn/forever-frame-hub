@@ -126,6 +126,7 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
           .update({
             is_paid: true,
             package_type: transaction.package_type,
+            package_id: transaction.package_type,
           })
           .eq("id", transaction.invitation_id);
 

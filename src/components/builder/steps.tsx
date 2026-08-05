@@ -8,6 +8,7 @@ import {
   Landmark,
   Leaf,
   Link2,
+  Lock,
   Monitor,
   Smartphone,
   Sparkles,
@@ -42,6 +43,7 @@ type PackageStepProps = StepProps & {
   packagesLoading: boolean;
   features: PackageFeatures;
   mode?: "all" | "package-event" | "theme";
+  isPaid?: boolean;
 };
 
 export function StepHeader({ title, desc }: { title: string; desc: string }) {
@@ -62,6 +64,7 @@ export function StepTheme({
   packagesLoading,
   features,
   mode = "all",
+  isPaid = false,
 }: PackageStepProps) {
   const [themes, setThemes] = useState<any[]>([]);
   const [themesLoading, setThemesLoading] = useState(true);
@@ -77,6 +80,7 @@ export function StepTheme({
   }, []);
 
   const hasInvitation = features.digital_invitation !== false;
+  const currentPackage = packages.find((pkg) => pkg.id === draft.packageId);
 
   const filteredThemes = useMemo(() => {
     if (selectedCategory === "all") return themes;
@@ -97,9 +101,13 @@ export function StepTheme({
       <StepHeader
         title={
           mode === "package-event"
-            ? lang === "tr"
-              ? "Paket ve Etkinlik Türü"
-              : "Package and Event Type"
+            ? isPaid
+              ? lang === "tr"
+                ? "Etkinlik Türü ve Paket Bilgisi"
+                : "Event Type & Package"
+              : lang === "tr"
+                ? "Paket ve Etkinlik Türü"
+                : "Package and Event Type"
             : hasInvitation
               ? copy.theme.title
               : lang === "tr"
@@ -108,9 +116,13 @@ export function StepTheme({
         }
         desc={
           mode === "package-event"
-            ? lang === "tr"
-              ? "Paketinizi ve davetiyenin hazırlanacağı etkinlik türünü seçin."
-              : "Choose your package and the event type for this invitation."
+            ? isPaid
+              ? lang === "tr"
+                ? "Etkinlik türünüzü güncelleyin. Satın aldığınız paket güvenle kilitlidir."
+                : "Update your event type. Your purchased package is securely locked."
+              : lang === "tr"
+                ? "Paketinizi ve davetiyenin hazırlanacağı etkinlik türünü seçin."
+                : "Choose your package and the event type for this invitation."
             : hasInvitation
               ? copy.theme.desc
               : lang === "tr"
@@ -119,43 +131,96 @@ export function StepTheme({
         }
       />
 
-      {mode !== "theme" && !packagesLoading && packages.length > 0 && (
-        <div className="mb-10">
-          <h3 className="text-xl font-medium mb-4">
-            {lang === "tr" ? "Paket Seçimi" : "Package Selection"}
-          </h3>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {packages.map((pkg) => {
-              const active = draft.packageId === pkg.id;
-              return (
-                <button
-                  key={pkg.id}
-                  type="button"
-                  onClick={() => {
-                    update("packageId", pkg.id);
-                    trackSelectItem(pkg.id, pkg.name, pkg.price);
-                  }}
-                  className={cn(
-                    "p-4 rounded-2xl border text-left transition-all",
-                    active ? "border-gold bg-gold/10" : "border-border hover:border-gold/50",
+      {mode !== "theme" && (
+        isPaid ? (
+          <div className="mb-8 rounded-3xl border border-gold/40 bg-gold/5 p-6 backdrop-blur-sm shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3.5">
+                <div className="mt-0.5 grid size-11 shrink-0 place-items-center rounded-2xl bg-gold/15 text-gold border border-gold/30">
+                  <Lock className="size-5" />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-lg font-semibold text-foreground">
+                      {getPackageDisplayName(currentPackage?.name || draft.packageId, lang)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-500/30">
+                      <Check className="size-3" />
+                      {lang === "tr" ? "Satın Alındı & Kilitli" : "Purchased & Active"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                    {lang === "tr"
+                      ? "Bu etkinlik için paket satın alınmıştır. Satın alınan paket değiştirilemez."
+                      : "The package has been purchased for this event and cannot be modified."}
+                  </p>
+                  {currentPackage?.features && (
+                    <div className="mt-2 text-xs text-gold/90 font-medium">
+                      {currentPackage.features.digital_invitation
+                        ? currentPackage.features.qr_gallery
+                          ? lang === "tr"
+                            ? "✓ Dijital Davetiye + QR Fotoğraf Yükleme"
+                            : "✓ Digital Invitation + QR Gallery"
+                          : lang === "tr"
+                            ? "✓ Sadece Dijital Davetiye"
+                            : "✓ Digital Invitation only"
+                        : lang === "tr"
+                          ? "✓ Sadece QR Fotoğraf Yükleme"
+                          : "✓ QR Photo Gallery only"}
+                    </div>
                   )}
-                >
-                  <div className="font-semibold text-lg">
-                    {getPackageDisplayName(pkg.name, lang)}
+                </div>
+              </div>
+              {currentPackage?.price ? (
+                <div className="rounded-2xl border border-gold/20 bg-background/50 px-4 py-2.5 text-right self-start sm:self-auto">
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                    {lang === "tr" ? "Ödenen Tutar" : "Paid Amount"}
                   </div>
-                  <div className="text-gold font-medium mt-1">{pkg.price} ₺</div>
-                  <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                    {pkg.features?.digital_invitation
-                      ? pkg.features?.qr_gallery
-                        ? "Dijital Davetiye + QR Fotoğraf Yükleme"
-                        : "Sadece Dijital Davetiye"
-                      : "Sadece QR Fotoğraf Yükleme"}
-                  </div>
-                </button>
-              );
-            })}
+                  <div className="text-xl font-bold text-gold">{currentPackage.price} ₺</div>
+                </div>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : (
+          !packagesLoading && packages.length > 0 && (
+            <div className="mb-10">
+              <h3 className="text-xl font-medium mb-4">
+                {lang === "tr" ? "Paket Seçimi" : "Package Selection"}
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {packages.map((pkg) => {
+                  const active = draft.packageId === pkg.id;
+                  return (
+                    <button
+                      key={pkg.id}
+                      type="button"
+                      onClick={() => {
+                        update("packageId", pkg.id);
+                        trackSelectItem(pkg.id, pkg.name, pkg.price);
+                      }}
+                      className={cn(
+                        "p-4 rounded-2xl border text-left transition-all",
+                        active ? "border-gold bg-gold/10" : "border-border hover:border-gold/50",
+                      )}
+                    >
+                      <div className="font-semibold text-lg">
+                        {getPackageDisplayName(pkg.name, lang)}
+                      </div>
+                      <div className="text-gold font-medium mt-1">{pkg.price} ₺</div>
+                      <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                        {pkg.features?.digital_invitation
+                          ? pkg.features?.qr_gallery
+                            ? "Dijital Davetiye + QR Fotoğraf Yükleme"
+                            : "Sadece Dijital Davetiye"
+                          : "Sadece QR Fotoğraf Yükleme"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )
+        )
       )}
 
       {mode !== "theme" &&

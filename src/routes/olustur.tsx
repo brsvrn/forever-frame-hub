@@ -310,7 +310,7 @@ function BuilderPage() {
   }, []);
 
   useEffect(() => {
-    if (!hydrated || packagesLoading || packages.length === 0) return;
+    if (!hydrated || packagesLoading || packages.length === 0 || isPaid || loadingExisting) return;
 
     const params = new URLSearchParams(window.location.search);
     const pkgQuery = params.get("pkg");
@@ -339,7 +339,7 @@ function BuilderPage() {
         packages[0];
       update("packageId", preferredPackage.id);
     }
-  }, [draft.packageId, hydrated, packages, packagesLoading, update]);
+  }, [draft.packageId, hydrated, isPaid, loadingExisting, packages, packagesLoading, update]);
 
   const handlePublishChange = useCallback(
     async (nextPublished: boolean) => {
@@ -463,7 +463,10 @@ function BuilderPage() {
   const hasQrGallery = features.qr_gallery === true;
   const steps = useMemo(() => {
     const english: Record<BuilderStepId, { label: string; desc: string }> = {
-      "package-event": { label: "Package & Event", desc: "Choose package and event type" },
+      "package-event": {
+        label: isPaid ? "Event Type" : "Package & Event",
+        desc: isPaid ? "Your event type and package" : "Choose package and event type",
+      },
       theme: { label: "Theme", desc: "Choose your visual language" },
       "basic-info": { label: "Basic Info", desc: "Names, title and cover" },
       family: { label: "Family", desc: "Optional family details" },
@@ -480,7 +483,7 @@ function BuilderPage() {
       publish: { label: "Publish", desc: "Link, sharing and QR" },
     };
     const descriptions: Record<BuilderStepId, string> = {
-      "package-event": "Paket ve etkinlik türü",
+      "package-event": isPaid ? "Etkinlik türü ve paket" : "Paket ve etkinlik türü",
       theme: "Görsel dilinizi seçin",
       "basic-info": "İsimler, başlık ve kapak",
       family: "İsteğe bağlı aile bilgileri",
@@ -498,7 +501,14 @@ function BuilderPage() {
     };
     const localized = builderSteps.map((step) => ({
       id: step.id,
-      label: lang === "tr" ? step.label : english[step.id].label,
+      label:
+        step.id === "package-event" && isPaid
+          ? lang === "tr"
+            ? "Etkinlik Türü"
+            : "Event Type"
+          : lang === "tr"
+            ? step.label
+            : english[step.id].label,
       desc: lang === "tr" ? descriptions[step.id] : english[step.id].desc,
     }));
 
@@ -513,8 +523,14 @@ function BuilderPage() {
           if (step.id === "package-event")
             return {
               ...step,
-              label: lang === "tr" ? "Paket" : "Package",
-              desc: lang === "tr" ? "QR paketinizi seçin" : "Choose your QR package",
+              label: isPaid ? (lang === "tr" ? "Etkinlik Türü" : "Event Type") : lang === "tr" ? "Paket" : "Package",
+              desc: isPaid
+                ? lang === "tr"
+                  ? "QR paketiniz kilitlidir"
+                  : "Your QR package is locked"
+                : lang === "tr"
+                  ? "QR paketinizi seçin"
+                  : "Choose your QR package",
             };
           if (step.id === "basic-info")
             return {
@@ -543,7 +559,7 @@ function BuilderPage() {
         (step.id !== "music-audio" || features.music !== false) &&
         (step.id !== "gallery-memory" || hasQrGallery),
     );
-  }, [features.music, hasQrGallery, lang, qrOnly]);
+  }, [features.music, hasQrGallery, isPaid, lang, qrOnly]);
   activeStepIds.current = steps.map((step) => step.id);
 
   useEffect(() => {
@@ -679,6 +695,7 @@ function BuilderPage() {
                     packagesLoading={packagesLoading}
                     features={features}
                     mode="package-event"
+                    isPaid={isPaid}
                   />
                 ) : null}
                 {stepId === "theme" ? (
@@ -688,6 +705,7 @@ function BuilderPage() {
                     packagesLoading={packagesLoading}
                     features={features}
                     mode="theme"
+                    isPaid={isPaid}
                   />
                 ) : null}
                 {stepId === "basic-info" ? (

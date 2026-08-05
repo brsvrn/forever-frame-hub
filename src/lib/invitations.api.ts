@@ -88,8 +88,23 @@ export async function saveInvitation(
   invitationId?: string,
 ) {
   const slug = resolveSlug(draft);
+  const rowData = draftToRow(draft, slug);
+
+  // If updating an existing invitation, check if it's already paid to lock the package
+  if (invitationId) {
+    const { data: existing } = await supabase
+      .from("invitations")
+      .select("package_id, is_paid")
+      .eq("id", invitationId)
+      .maybeSingle();
+
+    if (existing?.is_paid && existing.package_id) {
+      rowData.package_id = existing.package_id;
+    }
+  }
+
   const payload = {
-    ...draftToRow(draft, slug),
+    ...rowData,
     user_id: userId,
     is_published: isPublished,
     published_at: isPublished ? new Date().toISOString() : null,
