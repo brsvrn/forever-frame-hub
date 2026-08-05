@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX, Music } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Play, Pause, Volume2, VolumeX, Music, Loader2 } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { extractYouTubeVideoId } from "@/lib/music-library";
 import { trackMusicPlay } from "@/lib/analytics/analytics";
@@ -9,30 +9,52 @@ declare global {
   interface Window {
     YT?: any;
     onYouTubeIframeAPIReady?: () => void;
+    __ytApiLoadingPromise?: Promise<void>;
   }
 }
 
-/** Unlock the browser's audio context (iOS/Android requirement) inside a user gesture handler */
+/** Helper to safely load YouTube Iframe API once */
+function loadYouTubeIframeApi(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (window.YT && window.YT.Player) return Promise.resolve();
+  if (window.__ytApiLoadingPromise) return window.__ytApiLoadingPromise;
+
+  window.__ytApiLoadingPromise = new Promise<void>((resolve) => {
+    const existingScript = document.querySelector('script[src*="youtube.com/iframe_api"]');
+    const prevReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (prevReady) prevReady();
+      resolve();
+    };
+
+    if (!existingScript) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  });
+
+  return window.__ytApiLoadingPromise;
+}
+
+/** Unlock Web Audio Context for iOS Safari / Android Chrome in user gestures */
 function unlockAudioContext() {
   try {
-    const ACtx =
-      window.AudioContext ||
-      (window as any).webkitAudioContext;
+    const ACtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!ACtx) return;
     const ctx = new ACtx();
-    // Create and immediately start/stop a silent buffer to unlock
     const buf = ctx.createBuffer(1, 1, 22050);
     const src = ctx.createBufferSource();
     src.buffer = buf;
     src.connect(ctx.destination);
     src.start(0);
     src.stop(0);
-    // Resume if suspended
     if (ctx.state === "suspended") {
       ctx.resume().catch(() => {});
     }
   } catch {
-    // Silently ignore — AudioContext is optional enhancement
+    // Ignore audio context errors
   }
 }
 
@@ -55,27 +77,44 @@ export function PremiumAudioPlayer({
   licenseName?: string;
   licenseUrl?: string;
 }) {
-  // Determine source: custom YouTube ID, custom direct audio, or theme default track
-  const effectiveUrl = musicUrl?.trim() || theme.music.defaultTrack;
-  const videoId = extractYouTubeVideoId(effectiveUrl);
-  // Always use directAudioUrl when there is no YouTube videoId
-  const directAudioUrl = !videoId ? effectiveUrl : null;
+  // Determine raw track vs default theme track
+  const rawUrl = musicUrl?.trim() || theme.music.defaultTrack;
+  const initialVideoId = extractYouTubeVideoId(rawUrl);
 
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(initialVideoId);
+  const [activeDirectUrl, setActiveDirectUrl] = useState<string | null>(
+    !initialVideoId ? rawUrl : null,
+  );
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [hasAutoplayBlocked, setHasAutoplayBlocked] = useState(false);
   const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
 
-  // audioRef is always set — the <audio> element is always rendered (just hidden)
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
   const ytContainerId = useRef(`yt-audio-${Math.random().toString(36).slice(2, 9)}`);
-  const resumeAfterVoiceRef = useRef(false);
-  // Track desired-play state independently of player readiness
-  const pendingPlayRef = useRef(autoPlay);
+  const ytReadyRef = useRef(false);
+
+  const playPromiseRef = useRef<Promise<void> | null>(null);
   const userExplicitPausedRef = useRef(false);
-  const isMutedRef = useRef(false);
+  const resumeAfterVoiceRef = useRef(false);
+  const isMutedRef = useRef(isMuted);
   isMutedRef.current = isMuted;
 
+  // Track if we already attempted fallback
+  const hasFallenBackRef = useRef(false);
+
+  // Sync URLs when props change
+  useEffect(() => {
+    const nextRawUrl = musicUrl?.trim() || theme.music.defaultTrack;
+    const nextVideoId = extractYouTubeVideoId(nextRawUrl);
+    setActiveVideoId(nextVideoId);
+    setActiveDirectUrl(!nextVideoId ? nextRawUrl : null);
+    hasFallenBackRef.current = false;
+  }, [musicUrl, theme.music.defaultTrack]);
+
+  // Volume calculations
   const getTargetVolume = useCallback(
     (muted: boolean) => {
       if (muted) return 0;
@@ -85,24 +124,22 @@ export function PremiumAudioPlayer({
     [volume],
   );
 
-  /** Apply volume/mute to whichever player is active */
+  /** Apply volume / mute to active player */
   const applyAudioLevels = useCallback(
     (muted: boolean) => {
       const vol = getTargetVolume(muted);
-      const ytVol = Math.round(vol * 100);
 
-      if (videoId && ytPlayerRef.current) {
+      if (activeVideoId && ytPlayerRef.current && ytReadyRef.current) {
         try {
           if (muted) {
             if (typeof ytPlayerRef.current.mute === "function") ytPlayerRef.current.mute();
             if (typeof ytPlayerRef.current.setVolume === "function") ytPlayerRef.current.setVolume(0);
           } else {
             if (typeof ytPlayerRef.current.unMute === "function") ytPlayerRef.current.unMute();
-            if (typeof ytPlayerRef.current.setVolume === "function") ytPlayerRef.current.setVolume(ytVol || 65);
+            if (typeof ytPlayerRef.current.setVolume === "function")
+              ytPlayerRef.current.setVolume(Math.round(vol * 100) || 65);
           }
-        } catch (e) {
-          console.warn("YouTube volume/mute error:", e);
-        }
+        } catch {}
       }
 
       if (audioRef.current) {
@@ -110,125 +147,127 @@ export function PremiumAudioPlayer({
         audioRef.current.volume = vol;
       }
     },
-    [videoId, getTargetVolume],
+    [activeVideoId, getTargetVolume],
   );
 
-  /** Try to play the HTML5 audio element, with iOS unlock */
-  const playDirectAudio = useCallback(
-    (trackTitle?: string | null) => {
-      const el = audioRef.current;
-      if (!el) return;
-      unlockAudioContext();
-      applyAudioLevels(isMutedRef.current);
-      el.play()
-        .then(() => {
-          setIsPlaying(true);
-          trackMusicPlay(trackTitle || undefined);
-        })
-        .catch((err) => {
-          console.warn("Direct audio play error:", err);
-          setIsPlaying(false);
-        });
-    },
-    [applyAudioLevels],
-  );
-
-  // Fetch YouTube video title via oEmbed
+  // Keep levels updated
   useEffect(() => {
-    if (videoId && !customTitle) {
-      fetch(
-        `https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${videoId}`,
-      )
-        .then((res) => res.json())
+    applyAudioLevels(isMutedRef.current);
+  }, [volume, applyAudioLevels]);
+
+  // Fetch YouTube title via oEmbed
+  useEffect(() => {
+    if (activeVideoId && !customTitle) {
+      let active = true;
+      fetch(`https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${activeVideoId}`)
+        .then((r) => r.json())
         .then((data) => {
-          if (data && data.title) {
+          if (active && data && data.title) {
             setDynamicTitle(data.title);
           }
         })
         .catch(() => {});
+      return () => {
+        active = false;
+      };
     }
-  }, [videoId, customTitle]);
+  }, [activeVideoId, customTitle]);
+
+  /** Fallback to default theme MP3 track if custom audio or YouTube fails */
+  const triggerFallbackToThemeTrack = useCallback(() => {
+    if (hasFallenBackRef.current) return;
+    hasFallenBackRef.current = true;
+    console.info("Falling back to theme default track:", theme.music.defaultTrack);
+    setActiveVideoId(null);
+    setActiveDirectUrl(theme.music.defaultTrack);
+  }, [theme.music.defaultTrack]);
 
   // ── Initialize YouTube Player ──────────────────────────────────────────────
   useEffect(() => {
-    if (!videoId) return;
+    if (!activeVideoId) return;
 
     let isMounted = true;
+    ytReadyRef.current = false;
 
-    const initYT = () => {
-      if (!window.YT || !window.YT.Player) return;
-      if (ytPlayerRef.current) return;
+    loadYouTubeIframeApi().then(() => {
+      if (!isMounted || !window.YT || !window.YT.Player) return;
 
       try {
+        if (ytPlayerRef.current) {
+          try {
+            ytPlayerRef.current.destroy();
+          } catch {}
+          ytPlayerRef.current = null;
+        }
+
         ytPlayerRef.current = new window.YT.Player(ytContainerId.current, {
           height: "1",
           width: "1",
-          videoId: videoId,
+          videoId: activeVideoId,
           playerVars: {
             autoplay: 0,
             controls: 0,
             disablekb: 1,
             fs: 0,
             loop: 1,
-            playlist: videoId,
+            playlist: activeVideoId,
             playsinline: 1,
             enablejsapi: 1,
-            origin: window.location.origin,
+            origin: typeof window !== "undefined" ? window.location.origin : undefined,
             modestbranding: 1,
           },
           events: {
             onReady: (event: any) => {
               if (!isMounted) return;
+              ytReadyRef.current = true;
               applyAudioLevels(isMutedRef.current);
-              if ((pendingPlayRef.current || autoPlay) && !userExplicitPausedRef.current) {
+
+              if (autoPlay && !userExplicitPausedRef.current) {
                 try {
                   event.target.playVideo();
                   setIsPlaying(true);
-                } catch (e) {
-                  console.warn("YouTube play error on ready:", e);
+                  setHasAutoplayBlocked(false);
+                } catch {
+                  setHasAutoplayBlocked(true);
                 }
               }
             },
             onStateChange: (event: any) => {
               if (!isMounted) return;
+              // 1 = playing, 2 = paused, 3 = buffering, 0 = ended
               if (event.data === 1) {
                 setIsPlaying(true);
+                setIsBuffering(false);
+                setHasAutoplayBlocked(false);
               } else if (event.data === 2) {
                 setIsPlaying(false);
+                setIsBuffering(false);
+              } else if (event.data === 3) {
+                setIsBuffering(true);
               } else if (event.data === 0) {
-                // Ended → loop
                 if (!userExplicitPausedRef.current) {
-                  event.target.playVideo();
+                  try {
+                    event.target.playVideo();
+                  } catch {}
                 }
               }
             },
             onError: (err: any) => {
-              console.warn("YouTube Player error:", err);
+              console.warn("YouTube player error, switching to fallback:", err);
+              if (!isMounted) return;
+              triggerFallbackToThemeTrack();
             },
           },
         });
       } catch (err) {
-        console.warn("Could not create YouTube player:", err);
+        console.warn("Could not instantiate YouTube player:", err);
+        triggerFallbackToThemeTrack();
       }
-    };
-
-    if (!window.YT) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName("script")[0];
-      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
-
-      const previousOnReady = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => {
-        if (previousOnReady) previousOnReady();
-        initYT();
-      };
-    } else {
-      initYT();
-    }
+    });
 
     return () => {
       isMounted = false;
+      ytReadyRef.current = false;
       if (ytPlayerRef.current) {
         try {
           ytPlayerRef.current.destroy();
@@ -236,254 +275,207 @@ export function PremiumAudioPlayer({
         ytPlayerRef.current = null;
       }
     };
-  }, [videoId, autoPlay, applyAudioLevels]);
+  }, [activeVideoId, autoPlay, applyAudioLevels, triggerFallbackToThemeTrack]);
 
-  // ── Handle Play/Pause Toggle ───────────────────────────────────────────────
-  const togglePlay = useCallback(
-    (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      if (videoId) {
-        if (ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
-          const ytState =
-            typeof ytPlayerRef.current.getPlayerState === "function"
-              ? ytPlayerRef.current.getPlayerState()
-              : null;
-          const isCurrentlyPlaying = ytState === 1 || isPlaying;
+  /** Core Play Engine: Starts audio playback reliably across direct audio & YouTube */
+  const playAudio = useCallback(
+    async (isUserGesture: boolean = false): Promise<boolean> => {
+      if (isUserGesture) {
+        unlockAudioContext();
+        userExplicitPausedRef.current = false;
+        setHasAutoplayBlocked(false);
+      }
 
-          if (isCurrentlyPlaying) {
-            userExplicitPausedRef.current = true;
-            pendingPlayRef.current = false;
-            try {
-              ytPlayerRef.current.pauseVideo();
-            } catch {}
-            setIsPlaying(false);
-          } else {
-            userExplicitPausedRef.current = false;
-            pendingPlayRef.current = true;
-            unlockAudioContext();
-            applyAudioLevels(isMutedRef.current);
-            try {
-              ytPlayerRef.current.playVideo();
-              setIsPlaying(true);
-              trackMusicPlay(customTitle || dynamicTitle || undefined);
-            } catch (err) {
-              console.warn("YouTube play error:", err);
-            }
+      applyAudioLevels(isMutedRef.current);
+
+      // 1. YouTube playback
+      if (activeVideoId) {
+        if (ytPlayerRef.current && ytReadyRef.current && typeof ytPlayerRef.current.playVideo === "function") {
+          try {
+            ytPlayerRef.current.playVideo();
+            setIsPlaying(true);
+            setHasAutoplayBlocked(false);
+            trackMusicPlay(customTitle || dynamicTitle || undefined);
+            return true;
+          } catch (e) {
+            console.warn("YouTube play failed:", e);
+            if (!isUserGesture) setHasAutoplayBlocked(true);
+            return false;
           }
-        } else {
-          const nextState = !isPlaying;
-          userExplicitPausedRef.current = !nextState;
-          pendingPlayRef.current = nextState;
-          setIsPlaying(nextState);
         }
-      } else if (audioRef.current) {
-        const isCurrentlyPlaying = !audioRef.current.paused || isPlaying;
-        if (isCurrentlyPlaying) {
-          userExplicitPausedRef.current = true;
-          pendingPlayRef.current = false;
-          audioRef.current.pause();
-          setIsPlaying(false);
-        } else {
-          userExplicitPausedRef.current = false;
-          pendingPlayRef.current = true;
-          playDirectAudio(customTitle || dynamicTitle || theme.music.title);
+        return false;
+      }
+
+      // 2. Direct HTML5 audio element playback
+      const el = audioRef.current;
+      if (!el) return false;
+
+      try {
+        // If already playing without pause, avoid duplicate call
+        if (!el.paused && isPlaying) return true;
+
+        setIsBuffering(true);
+        const promise = el.play();
+        playPromiseRef.current = promise;
+
+        await promise;
+        playPromiseRef.current = null;
+        setIsPlaying(true);
+        setIsBuffering(false);
+        setHasAutoplayBlocked(false);
+        trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
+        return true;
+      } catch (err: any) {
+        playPromiseRef.current = null;
+        setIsBuffering(false);
+
+        if (err?.name === "NotAllowedError") {
+          // Autoplay policy prevented playback until user interaction
+          if (!isUserGesture) {
+            setHasAutoplayBlocked(true);
+            setIsPlaying(false);
+          }
+        } else if (err?.name !== "AbortError") {
+          console.warn("Direct audio playback error:", err);
+          // If custom URL broke, trigger theme fallback
+          if (activeDirectUrl !== theme.music.defaultTrack) {
+            triggerFallbackToThemeTrack();
+          }
         }
+        return false;
       }
     },
-    [videoId, isPlaying, applyAudioLevels, customTitle, dynamicTitle, theme.music.title, playDirectAudio],
+    [
+      activeVideoId,
+      activeDirectUrl,
+      isPlaying,
+      applyAudioLevels,
+      customTitle,
+      dynamicTitle,
+      theme.music.title,
+      theme.music.defaultTrack,
+      triggerFallbackToThemeTrack,
+    ],
   );
 
-  // ── Handle Mute/Unmute Toggle ──────────────────────────────────────────────
-  const toggleMute = useCallback(
-    (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      setIsMuted((prevMuted) => {
-        const nextMuted = !prevMuted;
-        isMutedRef.current = nextMuted;
-        applyAudioLevels(nextMuted);
-        return nextMuted;
+  /** Core Pause Engine: Pauses playback cleanly */
+  const pauseAudio = useCallback((isUserExplicit: boolean = true) => {
+    if (isUserExplicit) {
+      userExplicitPausedRef.current = true;
+    }
+
+    if (activeVideoId && ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === "function") {
+      try {
+        ytPlayerRef.current.pauseVideo();
+      } catch {}
+    }
+
+    if (audioRef.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+    }
+
+    setIsPlaying(false);
+    setIsBuffering(false);
+  }, [activeVideoId]);
+
+  // ── Global trigger for "Davetiyeyi Aç" button ─────────────────────────────
+  useEffect(() => {
+    (window as any).__MW_PLAY_AUDIO__ = () => {
+      void playAudio(true);
+    };
+
+    const handleUserOpen = () => {
+      void playAudio(true);
+    };
+
+    window.addEventListener("memorywedding:user-opened-invitation", handleUserOpen);
+    return () => {
+      delete (window as any).__MW_PLAY_AUDIO__;
+      window.removeEventListener("memorywedding:user-opened-invitation", handleUserOpen);
+    };
+  }, [playAudio]);
+
+  // ── Handle Autoplay prop changes & initial mount ───────────────────────────
+  useEffect(() => {
+    if (autoPlay && !userExplicitPausedRef.current) {
+      void playAudio(false);
+    }
+  }, [autoPlay, playAudio]);
+
+  // ── Handle Autoplay Blocked Fallback (unlock on first user touch anywhere) ───
+  useEffect(() => {
+    if (!hasAutoplayBlocked || userExplicitPausedRef.current) return;
+
+    const handleFirstUserTouch = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.(".premium-audio-player-ui")) return;
+
+      if (!userExplicitPausedRef.current) {
+        void playAudio(true);
+      }
+    };
+
+    window.addEventListener("pointerdown", handleFirstUserTouch, { once: true, passive: true });
+    return () => {
+      window.removeEventListener("pointerdown", handleFirstUserTouch);
+    };
+  }, [hasAutoplayBlocked, playAudio]);
+
+  // ── Toggle Play / Pause Button ─────────────────────────────────────────────
+  const handleTogglePlay = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (isPlaying) {
+        pauseAudio(true);
+      } else {
+        void playAudio(true);
+      }
+    },
+    [isPlaying, pauseAudio, playAudio],
+  );
+
+  // ── Toggle Mute / Unmute Button ────────────────────────────────────────────
+  const handleToggleMute = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setIsMuted((prev) => {
+        const next = !prev;
+        isMutedRef.current = next;
+        applyAudioLevels(next);
+        return next;
       });
     },
     [applyAudioLevels],
   );
 
-  // ── Global play trigger (synchronous, inside user click handler) ───────────
+  // ── Voice-over Pause & Resume Handling ─────────────────────────────────────
   useEffect(() => {
-    (window as any).__MW_PLAY_AUDIO__ = () => {
-      unlockAudioContext();
-      userExplicitPausedRef.current = false;
-      pendingPlayRef.current = true;
-      applyAudioLevels(isMutedRef.current);
-
-      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
-        try {
-          ytPlayerRef.current.playVideo();
-          setIsPlaying(true);
-        } catch {}
-      } else if (audioRef.current) {
-        // Always call play() synchronously inside the click handler.
-        // iOS Safari accepts the play request even if audio isn't loaded yet —
-        // the browser queues the intent as long as it is within the gesture.
-        const el = audioRef.current;
-        el.play()
-          .then(() => setIsPlaying(true))
-          .catch((e) => {
-            console.warn("play audio helper error", e);
-            // If failed because not loaded, trigger load; onCanPlay will retry
-            if (el.readyState === 0) el.load();
-          });
-      }
-    };
-    return () => {
-      delete (window as any).__MW_PLAY_AUDIO__;
-    };
-  }, [videoId, applyAudioLevels]);
-
-  // ── Listen for "Davetiyeyi Aç" event ──────────────────────────────────────
-  useEffect(() => {
-    const handleUserOpen = () => {
-      unlockAudioContext();
-      userExplicitPausedRef.current = false;
-      pendingPlayRef.current = true;
-      applyAudioLevels(isMutedRef.current);
-
-      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
-        try {
-          ytPlayerRef.current.playVideo();
-          setIsPlaying(true);
-          trackMusicPlay(customTitle || dynamicTitle || undefined);
-        } catch (e) {
-          console.warn("Play on open error:", e);
-        }
-      } else if (audioRef.current) {
-        // Always attempt play() synchronously — browser queues the gesture intent
-        audioRef.current
-          .play()
-          .then(() => {
-            setIsPlaying(true);
-            trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
-          })
-          .catch((err) => {
-            console.warn("Direct audio play on open error:", err);
-            // Trigger load; onCanPlay will pick up pendingPlayRef
-            if (audioRef.current?.readyState === 0) audioRef.current.load();
-          });
-      }
-    };
-
-    window.addEventListener("memorywedding:user-opened-invitation", handleUserOpen);
-    return () => {
-      window.removeEventListener("memorywedding:user-opened-invitation", handleUserOpen);
-    };
-  }, [videoId, applyAudioLevels, customTitle, dynamicTitle, theme.music.title]);
-
-  // ── Autoplay prop change ───────────────────────────────────────────────────
-  useEffect(() => {
-    if (autoPlay && !userExplicitPausedRef.current) {
-      pendingPlayRef.current = true;
-      applyAudioLevels(isMutedRef.current);
-      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
-        try {
-          ytPlayerRef.current.playVideo();
-          setIsPlaying(true);
-        } catch (e) {
-          console.warn("Autoplay YT error:", e);
-        }
-      } else if (directAudioUrl && audioRef.current) {
-        audioRef.current
-          .play()
-          .then(() => setIsPlaying(true))
-          .catch(() => {
-            setIsPlaying(false);
-          });
-      }
-    }
-  }, [autoPlay, videoId, directAudioUrl, applyAudioLevels]);
-
-  // ── Mobile interaction fallback ────────────────────────────────────────────
-  useEffect(() => {
-    const handleMobileUnlock = (e: Event) => {
-      const target = e.target as HTMLElement | null;
-      // Don't intercept clicks on the player's own UI
-      if (target?.closest?.(".premium-audio-player-ui")) return;
-
-      if (userExplicitPausedRef.current) return;
-      if (!autoPlay && !pendingPlayRef.current) return;
-
-      applyAudioLevels(isMutedRef.current);
-
-      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
-        try {
-          ytPlayerRef.current.playVideo();
-          setIsPlaying(true);
-        } catch {}
-      } else if (audioRef.current && audioRef.current.paused) {
-        audioRef.current
-          .play()
-          .then(() => setIsPlaying(true))
-          .catch(() => {});
-      }
-    };
-
-    window.addEventListener("touchstart", handleMobileUnlock, { passive: true });
-    window.addEventListener("touchend", handleMobileUnlock, { passive: true });
-    window.addEventListener("click", handleMobileUnlock, { passive: true });
-
-    return () => {
-      window.removeEventListener("touchstart", handleMobileUnlock);
-      window.removeEventListener("touchend", handleMobileUnlock);
-      window.removeEventListener("click", handleMobileUnlock);
-    };
-  }, [autoPlay, videoId, applyAudioLevels]);
-
-  // ── Keep volume synchronized if volume prop changes ────────────────────────
-  useEffect(() => {
-    applyAudioLevels(isMutedRef.current);
-  }, [volume, applyAudioLevels]);
-
-  // ── Voice-over pause/resume ────────────────────────────────────────────────
-  useEffect(() => {
-    const voiceStarted = () => {
+    const handleVoiceStart = () => {
       resumeAfterVoiceRef.current = isPlaying;
-      if (videoId && ytPlayerRef.current) {
-        try {
-          ytPlayerRef.current.pauseVideo();
-        } catch {}
-      }
-      if (audioRef.current) audioRef.current.pause();
-      setIsPlaying(false);
+      pauseAudio(false);
     };
-    const voiceEnded = () => {
-      if (resumeAfterVoiceRef.current) {
-        if (videoId && ytPlayerRef.current) {
-          try {
-            applyAudioLevels(isMutedRef.current);
-            ytPlayerRef.current.playVideo();
-          } catch {}
-        }
-        if (audioRef.current) {
-          applyAudioLevels(isMutedRef.current);
-          void audioRef.current.play().catch(() => {});
-        }
-        setIsPlaying(true);
+
+    const handleVoiceEnd = () => {
+      if (resumeAfterVoiceRef.current && !userExplicitPausedRef.current) {
+        void playAudio(false);
       }
       resumeAfterVoiceRef.current = false;
     };
 
-    window.addEventListener("memorywedding:voice-start", voiceStarted);
-    window.addEventListener("memorywedding:voice-end", voiceEnded);
+    window.addEventListener("memorywedding:voice-start", handleVoiceStart);
+    window.addEventListener("memorywedding:voice-end", handleVoiceEnd);
     return () => {
-      window.removeEventListener("memorywedding:voice-start", voiceStarted);
-      window.removeEventListener("memorywedding:voice-end", voiceEnded);
+      window.removeEventListener("memorywedding:voice-start", handleVoiceStart);
+      window.removeEventListener("memorywedding:voice-end", handleVoiceEnd);
     };
-  }, [isPlaying, videoId, applyAudioLevels]);
+  }, [isPlaying, pauseAudio, playAudio]);
 
   const displayTitle = customTitle || dynamicTitle || theme.music.title || "Düğün Müziği";
 
   return (
     <div className="premium-audio-player-ui fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 sm:left-6 sm:translate-x-0">
-      {/* In-viewport minimal YouTube Container for mobile playback compatibility */}
-      {videoId ? (
+      {/* Hidden YouTube Container */}
+      {activeVideoId ? (
         <div
           aria-hidden="true"
           className="pointer-events-none fixed bottom-1 left-1 -z-50 h-4 w-4 overflow-hidden opacity-[0.01]"
@@ -492,95 +484,123 @@ export function PremiumAudioPlayer({
         </div>
       ) : null}
 
-      {/*
-        HTML5 Audio — always rendered so audioRef is always populated.
-        Visibility/audibility is controlled via volume/muted props.
-        onCanPlay: fires when the browser can start playing. If there's a
-        pending play request (from user gesture), start playing now.
-      */}
-      {directAudioUrl ? (
+      {/* HTML5 Audio Element */}
+      {activeDirectUrl ? (
         <audio
           ref={audioRef}
-          src={directAudioUrl}
+          src={activeDirectUrl}
           loop
           preload="auto"
           playsInline
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onCanPlay={() => {
-            // If the user already tapped "Davetiyeyi aç" but the audio wasn't
-            // ready at that moment, play now that it's loaded.
-            if (pendingPlayRef.current && !userExplicitPausedRef.current) {
-              applyAudioLevels(isMutedRef.current);
-              audioRef.current
-                ?.play()
-                .then(() => setIsPlaying(true))
-                .catch(() => {});
-            }
+          onPlay={() => {
+            setIsPlaying(true);
+            setIsBuffering(false);
+            setHasAutoplayBlocked(false);
+          }}
+          onPause={() => {
+            setIsPlaying(false);
+            setIsBuffering(false);
+          }}
+          onWaiting={() => setIsBuffering(true)}
+          onPlaying={() => {
+            setIsPlaying(true);
+            setIsBuffering(false);
+          }}
+          onError={() => {
+            console.warn("Direct audio source error on element");
+            triggerFallbackToThemeTrack();
           }}
         />
       ) : null}
 
-      {!hideUI && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="flex w-full items-center gap-3 rounded-full border border-white/15 bg-black/60 p-2 pr-4 shadow-2xl backdrop-blur-xl transition-all"
-        >
-          <button
-            type="button"
-            onClick={togglePlay}
-            aria-label={isPlaying ? "Müziği duraklat" : "Müziği oynat"}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30 active:scale-95 cursor-pointer"
+      {/* Floating Audio Controller */}
+      <AnimatePresence>
+        {!hideUI && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className={`flex w-full items-center gap-3 rounded-full border border-white/15 bg-slate-950/80 p-2 pr-4 shadow-2xl backdrop-blur-xl transition-all ${
+              hasAutoplayBlocked ? "ring-2 ring-rose-400/50 shadow-rose-500/20" : ""
+            }`}
           >
-            {isPlaying ? (
-              <Pause className="h-4 w-4" />
-            ) : (
-              <Play className="ml-0.5 h-4 w-4" />
-            )}
-          </button>
+            {/* Play/Pause Button */}
+            <button
+              type="button"
+              onClick={handleTogglePlay}
+              aria-label={isPlaying ? "Müziği duraklat" : "Müziği oynat"}
+              className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white transition-all active:scale-95 cursor-pointer ${
+                isPlaying
+                  ? "bg-white/20 hover:bg-white/30"
+                  : hasAutoplayBlocked
+                    ? "bg-rose-500 hover:bg-rose-600 shadow-lg shadow-rose-500/40 animate-pulse"
+                    : "bg-white/25 hover:bg-white/35"
+              }`}
+            >
+              {isBuffering ? (
+                <Loader2 className="h-4 w-4 animate-spin text-white" />
+              ) : isPlaying ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="ml-0.5 h-4 w-4 fill-current" />
+              )}
+            </button>
 
-          <div className="flex min-w-0 flex-1 flex-col mr-1">
-            <div className="flex items-center gap-1.5">
-              <Music
-                className={`h-3 w-3 shrink-0 ${
-                  isPlaying ? "animate-pulse text-rose-300" : "text-white/50"
-                }`}
-              />
-              <span className="truncate text-xs font-medium text-white/90">
-                {displayTitle}
-              </span>
+            {/* Track Info */}
+            <div className="flex min-w-0 flex-1 flex-col mr-1">
+              <div className="flex items-center gap-1.5">
+                {isPlaying ? (
+                  <span className="flex items-end gap-0.5 h-3 w-3 shrink-0">
+                    <span className="w-0.5 bg-rose-400 rounded-full animate-[bounce_1s_infinite_100ms] h-2" />
+                    <span className="w-0.5 bg-rose-400 rounded-full animate-[bounce_1s_infinite_300ms] h-3" />
+                    <span className="w-0.5 bg-rose-400 rounded-full animate-[bounce_1s_infinite_200ms] h-1.5" />
+                  </span>
+                ) : (
+                  <Music className="h-3 w-3 shrink-0 text-white/50" />
+                )}
+                <span className="truncate text-xs font-medium text-white/95">
+                  {displayTitle}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[10px] uppercase tracking-widest text-white/60">
+                  {isBuffering
+                    ? "Yükleniyor..."
+                    : isPlaying
+                      ? "Oynatılıyor"
+                      : hasAutoplayBlocked
+                        ? "Başlatmak için dokunun"
+                        : "Duraklatıldı"}
+                </span>
+                {licenseName ? (
+                  <a
+                    href={licenseUrl || undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="max-w-[120px] truncate text-[9px] text-white/40 underline hover:text-white/60"
+                  >
+                    {licenseName}
+                  </a>
+                ) : null}
+              </div>
             </div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[10px] uppercase tracking-widest text-white/50">
-                {isPlaying ? "Oynatılıyor" : "Duraklatıldı"}
-              </span>
-              {licenseName ? (
-                <a
-                  href={licenseUrl || undefined}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="max-w-[130px] truncate text-[9px] text-white/40 underline hover:text-white/60"
-                >
-                  {licenseName}
-                </a>
-              ) : null}
-            </div>
-          </div>
 
-          <div className="h-6 w-px bg-white/15 mx-1 shrink-0" />
+            {/* Divider */}
+            <div className="h-6 w-px bg-white/15 mx-1 shrink-0" />
 
-          <button
-            type="button"
-            onClick={toggleMute}
-            aria-label={isMuted ? "Sesi aç" : "Sesi kapat"}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/80 transition-colors hover:text-white active:scale-95 cursor-pointer"
-          >
-            {isMuted ? <VolumeX className="h-4 w-4 text-rose-300" /> : <Volume2 className="h-4 w-4" />}
-          </button>
-        </motion.div>
-      )}
+            {/* Mute/Unmute Button */}
+            <button
+              type="button"
+              onClick={handleToggleMute}
+              aria-label={isMuted ? "Sesi aç" : "Sesi kapat"}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/80 transition-colors hover:text-white active:scale-95 cursor-pointer"
+            >
+              {isMuted ? <VolumeX className="h-4 w-4 text-rose-300" /> : <Volume2 className="h-4 w-4" />}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
