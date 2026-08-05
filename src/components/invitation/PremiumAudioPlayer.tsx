@@ -276,6 +276,30 @@ export function PremiumAudioPlayer({
     [applyAudioLevels],
   );
 
+  // Expose global play trigger for synchronous user click handlers
+  useEffect(() => {
+    (window as any).__MW_PLAY_AUDIO__ = () => {
+      userExplicitPausedRef.current = false;
+      pendingPlayRef.current = true;
+      applyAudioLevels(isMutedRef.current);
+
+      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
+        try {
+          ytPlayerRef.current.playVideo();
+          setIsPlaying(true);
+        } catch {}
+      } else if (audioRef.current) {
+        audioRef.current
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch((e) => console.warn("play audio helper error", e));
+      }
+    };
+    return () => {
+      delete (window as any).__MW_PLAY_AUDIO__;
+    };
+  }, [videoId, applyAudioLevels]);
+
   // Listen for immediate "Davetiyeyi Aç" user gesture event
   useEffect(() => {
     const handleUserOpen = () => {
@@ -333,7 +357,7 @@ export function PremiumAudioPlayer({
     }
   }, [autoPlay, videoId, directAudioUrl, applyAudioLevels]);
 
-  // Mobile interaction fallback: if music was requested but blocked by initial autoplay policy, unlock on next user touch
+  // Mobile interaction fallback: if music was requested, unlock on user tap/touch
   useEffect(() => {
     const handleMobileUnlock = (e: Event) => {
       const target = e.target as HTMLElement | null;
@@ -360,10 +384,12 @@ export function PremiumAudioPlayer({
     };
 
     window.addEventListener("touchstart", handleMobileUnlock, { passive: true });
+    window.addEventListener("touchend", handleMobileUnlock, { passive: true });
     window.addEventListener("click", handleMobileUnlock, { passive: true });
 
     return () => {
       window.removeEventListener("touchstart", handleMobileUnlock);
+      window.removeEventListener("touchend", handleMobileUnlock);
       window.removeEventListener("click", handleMobileUnlock);
     };
   }, [autoPlay, videoId, applyAudioLevels]);

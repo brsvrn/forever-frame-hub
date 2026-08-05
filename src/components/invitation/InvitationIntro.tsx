@@ -185,6 +185,9 @@ export function InvitationIntro({
               type="button"
               onClick={() => {
                 try {
+                  if (typeof (window as any).__MW_PLAY_AUDIO__ === "function") {
+                    (window as any).__MW_PLAY_AUDIO__();
+                  }
                   window.dispatchEvent(new CustomEvent("memorywedding:user-opened-invitation"));
                 } catch {}
                 onComplete();

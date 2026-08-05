@@ -139,17 +139,17 @@ type ThemeDefinition = Omit<
 >;
 
 const coastalMusic = {
-  defaultTrack: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Two%20Together.mp3",
+  defaultTrack: "/music/two-together.mp3",
   title: "Two Together",
 };
 
 const romanticPianoMusic = {
-  defaultTrack: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/There%20is%20Romance.mp3",
+  defaultTrack: "/music/there-is-romance.mp3",
   title: "There is Romance",
 };
 
 const gentleWaltzMusic = {
-  defaultTrack: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Water%20Lily.mp3",
+  defaultTrack: "/music/water-lily.mp3",
   title: "Water Lily",
 };
 

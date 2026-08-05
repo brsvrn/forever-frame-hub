@@ -1,8 +1,8 @@
 import { usePhone } from "@/contexts/PhoneContext";
 import { resolveTheme } from "@/lib/theme-engine";
-import type { CSSProperties, ReactNode } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music, MapPin, Camera, Image as ImageIcon, Send, ArrowLeft } from "lucide-react";
+import { Music, MapPin, Camera, Image as ImageIcon, Send, ArrowLeft, Volume2, VolumeX } from "lucide-react";
 
 interface PhoneMockupProps {
   className?: string;
@@ -12,6 +12,8 @@ interface PhoneMockupProps {
 export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
   const { activeScreen, setActiveScreen, activeTheme, isPlaying, setIsPlaying } = usePhone();
   const themeConfig = resolveTheme(activeTheme);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const theme = {
     bg: "bg-[var(--phone-theme-bg)]",
     textColor: "text-[var(--phone-theme-text)]",
@@ -25,10 +27,32 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
     "--phone-theme-accent-ink": themeConfig.qr.ink,
   } as CSSProperties;
 
+  // Real audio playback synchronized with isPlaying state
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.play().catch(() => {
+        setIsPlaying(false);
+      });
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying, setIsPlaying]);
+
   return (
     <div
       className={`relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[600px] w-[300px] shadow-[0_0_50px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(0,0,0,0.3)] overflow-hidden ${className}`}
     >
+      {/* Hidden audio element for interactive demo */}
+      <audio
+        ref={audioRef}
+        src={themeConfig.music.defaultTrack}
+        loop
+        preload="auto"
+        playsInline
+      />
+
       {/* Dynamic Island / Notch */}
       <div className="absolute top-0 inset-x-0 h-7 flex justify-center z-50">
         <div className="w-24 h-6 bg-black rounded-b-3xl"></div>
@@ -54,7 +78,7 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden p-6"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden p-5"
               style={{ backgroundColor: themeConfig.qr.paper }}
             >
               {themeConfig.coverVideoUrl ? (
@@ -74,11 +98,17 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                   style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
                 />
               )}
-              <div className="relative z-10 flex flex-col items-center text-center mb-12">
-                <span className={`text-xs font-semibold tracking-[0.3em] uppercase mb-3 opacity-70`} style={{ color: themeConfig.qr.ink }}>
+              <div className="relative z-10 flex flex-col items-center text-center mb-8 max-w-full px-2">
+                <span
+                  className="text-[10px] font-semibold tracking-[0.25em] uppercase mb-2 opacity-70"
+                  style={{ color: themeConfig.qr.ink }}
+                >
                   Özel Günümüze
                 </span>
-                <span className={`text-4xl ${theme.font}`} style={{ color: themeConfig.qr.ink }}>
+                <span
+                  className={`text-xl font-light tracking-[0.14em] uppercase break-words max-w-[220px] leading-tight text-center ${theme.font}`}
+                  style={{ color: themeConfig.qr.ink }}
+                >
                   Davetlisiniz
                 </span>
               </div>
@@ -86,15 +116,18 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="group relative z-10 flex aspect-[4/3] w-full cursor-pointer items-center justify-center overflow-hidden rounded-md border-2 border-white/60 bg-white/70 shadow-xl backdrop-blur-md"
-                onClick={() => setActiveScreen("invite")}
+                onClick={() => {
+                  setActiveScreen("invite");
+                  setIsPlaying(true);
+                }}
               >
                 <div
                   className="absolute top-0 inset-x-0 h-[55%] bg-stone-50 origin-top border-b border-stone-200 z-10 shadow-sm"
                   style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
                 ></div>
-                <span className={`text-4xl z-0 mt-8 ${theme.font}`} style={{ color: themeConfig.qr.ink }}>A & E</span>
+                <span className={`text-2xl z-0 mt-8 tracking-widest ${theme.font}`} style={{ color: themeConfig.qr.ink }}>A & E</span>
               </motion.div>
-              <p className="relative z-10 mt-12 animate-pulse text-xs font-semibold uppercase tracking-[0.2em] text-stone-600">
+              <p className="relative z-10 mt-8 animate-pulse text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-600">
                 Zarfı Açmak İçin Dokunun
               </p>
             </motion.div>
@@ -110,7 +143,7 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
               className={`absolute inset-0 flex flex-col z-10 ${theme.bg}`}
             >
               <div className="flex-1 overflow-y-auto pb-20 no-scrollbar relative">
-                <div className="h-[280px] bg-stone-200 relative">
+                <div className="h-[260px] bg-stone-200 relative">
                   <img
                     src={themeConfig.image}
                     alt={themeConfig.name}
@@ -139,15 +172,15 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                   </motion.div>
                 </div>
 
-                <div className="p-8 text-center relative z-10">
+                <div className="p-6 text-center relative z-10">
                   <span
-                    className={`uppercase tracking-[0.3em] text-[10px] font-semibold mb-6 block opacity-80 ${theme.textColor}`}
+                    className={`uppercase tracking-[0.25em] text-[9px] font-semibold mb-4 block opacity-80 ${theme.textColor}`}
                   >
                     Davetlisiniz
                   </span>
-                  <h2 className={`text-4xl mb-1 ${theme.font} ${theme.textColor}`}>Ayşe</h2>
-                  <span className={`text-xl mb-1 block py-1 opacity-70 ${theme.textColor}`}>&</span>
-                  <h2 className={`text-4xl mb-8 ${theme.font} ${theme.textColor}`}>Emre</h2>
+                  <h2 className={`text-3xl mb-1 ${theme.font} ${theme.textColor}`}>Ayşe</h2>
+                  <span className={`text-lg mb-1 block py-0.5 opacity-70 ${theme.textColor}`}>&</span>
+                  <h2 className={`text-3xl mb-6 ${theme.font} ${theme.textColor}`}>Emre</h2>
 
                   <div
                     className={`h-[1px] w-12 mx-auto mb-8 opacity-20 bg-current ${theme.textColor}`}

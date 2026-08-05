@@ -35,6 +35,8 @@ import { ThemeManager } from "@/components/admin/ThemeManager";
 import { PackageManager } from "@/components/admin/PackageManager";
 import { SystemSettings } from "@/components/admin/SystemSettings";
 import { getAuditLogs } from "@/lib/admin.api";
+import { AdminUserGuideModal } from "@/components/admin/AdminUserGuideModal";
+import { BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: () => (
@@ -124,6 +126,7 @@ export type AdminTabType =
 function AdminDashboard({ email }: { email: string }) {
   const [activeTab, setActiveTab] = useState<AdminTabType>("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showGuideModal, setShowGuideModal] = useState(false);
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -164,6 +167,8 @@ function AdminDashboard({ email }: { email: string }) {
 
   return (
     <div className="min-h-dvh bg-background text-foreground font-sans flex flex-col md:flex-row">
+      <AdminUserGuideModal isOpen={showGuideModal} onClose={() => setShowGuideModal(false)} />
+
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-surface border-b border-border sticky top-0 z-40">
         <div className="flex items-center gap-2">
@@ -178,12 +183,21 @@ function AdminDashboard({ email }: { email: string }) {
           </div>
         </div>
 
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 rounded-xl bg-card border border-border text-foreground"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowGuideModal(true)}
+            className="p-2 rounded-xl bg-gold/10 border border-gold/30 text-gold text-xs font-semibold flex items-center gap-1.5"
+            title="Kullanım Kılavuzu"
+          >
+            <BookOpen className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-xl bg-card border border-border text-foreground"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar Navigation */}
@@ -213,6 +227,17 @@ function AdminDashboard({ email }: { email: string }) {
             className="md:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground"
           >
             <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Quick Guide Trigger in Sidebar */}
+        <div className="px-4 pt-4">
+          <button
+            onClick={() => setShowGuideModal(true)}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-gold/20 via-amber-500/10 to-gold/20 border border-gold/30 text-gold text-xs font-semibold hover:bg-gold/30 transition-all shadow-sm"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>Kullanım Kılavuzu</span>
           </button>
         </div>
 

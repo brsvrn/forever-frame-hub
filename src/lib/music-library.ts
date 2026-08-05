@@ -18,8 +18,7 @@ export const musicLibrary: MusicLibraryTrack[] = [
     title: "There is Romance",
     artist: "Kevin MacLeod",
     mood: "Romantik piyano",
-    streamUrl:
-      "https://incompetech.com/music/royalty-free/mp3-royaltyfree/There%20is%20Romance.mp3",
+    streamUrl: "/music/there-is-romance.mp3",
     sourceUrl:
       "https://incompetech.com/music/royalty-free/index.html?Search=Search&isrc=USUAN1100044",
     licenseName: "CC BY 4.0",
@@ -31,7 +30,7 @@ export const musicLibrary: MusicLibraryTrack[] = [
     title: "Two Together",
     artist: "Kevin MacLeod",
     mood: "Sıcak ve zarif",
-    streamUrl: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Two%20Together.mp3",
+    streamUrl: "/music/two-together.mp3",
     sourceUrl:
       "https://incompetech.com/music/royalty-free/index.html?Search=Search&isrc=USUAN1100031",
     licenseName: "CC BY 4.0",
@@ -43,7 +42,7 @@ export const musicLibrary: MusicLibraryTrack[] = [
     title: "Water Lily",
     artist: "Kevin MacLeod",
     mood: "Sade ve huzurlu",
-    streamUrl: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Water%20Lily.mp3",
+    streamUrl: "/music/water-lily.mp3",
     sourceUrl:
       "https://incompetech.com/music/royalty-free/index.html?Search=Search&isrc=USUAN1400035",
     licenseName: "CC BY 4.0",
