@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { AnimatePresence } from "framer-motion";
 import { z } from "zod";
 import { House, Palette, RotateCcw } from "lucide-react";
 import {
@@ -193,15 +194,17 @@ function PremiumInvitePage() {
         />
       ) : null}
 
-      {!hasOpened && features.digital_invitation !== false && openingEnabled ? (
-        <InvitationIntro
-          key={theme.id}
-          theme={theme}
-          partnerOne={draft.partnerOne}
-          partnerTwo={draft.partnerTwo}
-          onComplete={() => setHasOpened(true)}
-        />
-      ) : null}
+      <AnimatePresence>
+        {!hasOpened && features.digital_invitation !== false && openingEnabled ? (
+          <InvitationIntro
+            key={`intro-${theme.id}`}
+            theme={theme}
+            partnerOne={draft.partnerOne}
+            partnerTwo={draft.partnerTwo}
+            onComplete={() => setHasOpened(true)}
+          />
+        ) : null}
+      </AnimatePresence>
 
       {(hasOpened || !openingEnabled || features.digital_invitation === false) && (
         <div key={`invite-${theme.id}`}>
