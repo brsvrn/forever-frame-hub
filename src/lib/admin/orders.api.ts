@@ -3,7 +3,7 @@ import type { AdminOrderSummary } from "./types";
 import { logAdminAction } from "./audit.api";
 
 export async function getAdminOrders(options?: {
-  status?: "all" | "success" | "pending" | "failed" | "refunded";
+  status?: "all" | "real" | "test" | "success" | "pending" | "failed" | "refunded";
   searchQuery?: string;
 }): Promise<AdminOrderSummary[]> {
   let query = supabase
@@ -17,6 +17,7 @@ export async function getAdminOrders(options?: {
       amount,
       currency,
       status,
+      is_test_order,
       created_at,
       updated_at,
       refund_status,
@@ -36,7 +37,7 @@ export async function getAdminOrders(options?: {
     `)
     .order("created_at", { ascending: false });
 
-  if (options?.status && options.status !== "all") {
+  if (options?.status && options.status !== "all" && options.status !== "real" && options.status !== "test") {
     if (options.status === "success") {
       query = query.in("status", ["success", "paid"]);
     } else if (options.status === "refunded") {
@@ -85,10 +86,13 @@ export async function getAdminOrders(options?: {
     });
   }
 
-  return (rows || []).map((r) => {
+  const list = (rows || []).map((r) => {
     const userProfile = userMap[r.user_id];
     const invInfo = r.invitation_id ? invMap[r.invitation_id] : undefined;
-    const isTestOrder = (r.merchant_oid || "").toLowerCase().includes("test") || (r.amount === 1 || r.amount === 100);
+    const isTestOrder =
+      r.is_test_order === true ||
+      (r.merchant_oid || "").toLowerCase().includes("test") ||
+      Number(r.amount) <= 100;
 
     return {
       id: r.id,
@@ -122,6 +126,15 @@ export async function getAdminOrders(options?: {
       referrer: r.referrer,
     };
   });
+
+  if (options?.status === "real") {
+    return list.filter((o) => !o.isTestOrder);
+  }
+  if (options?.status === "test") {
+    return list.filter((o) => o.isTestOrder);
+  }
+
+  return list;
 }
 
 export async function updateOrderAdminNotes(
@@ -146,4 +159,69 @@ export async function updateOrderAdminNotes(
 
   await logAdminAction(adminEmail, "update_order", "transaction", orderId, { notes, refundStatus });
   return data;
+}
+
+export async function deleteAdminOrder(adminEmail: string, orderId: string) {
+  const { error } = await supabase.from("transactions").delete().eq("id", orderId);
+  if (error) {
+    console.error("Failed to delete transaction", error);
+    throw error;
+  }
+  await logAdminAction(adminEmail, "delete_order", "transaction", orderId);
+  return { success: true };
+}
+
+export async function purgeTestOrders(adminEmail: string) {
+  const { data: rows, error: fetchError } = await supabase
+    .from("transactions")
+    .select("id, merchant_oid, is_test_order, amount");
+
+  if (fetchError) throw fetchError;
+
+  const testIds = (rows || [])
+    .filter(
+      (r: any) =>
+        r.is_test_order === true ||
+        (r.merchant_oid || "").toLowerCase().includes("test") ||
+        Number(r.amount) <= 100
+    )
+    .map((r: any) => r.id);
+
+  if (testIds.length > 0) {
+    const { error: delError } = await supabase
+      .from("transactions")
+      .delete()
+      .in("id", testIds);
+    if (delError) throw delError;
+  }
+
+  await logAdminAction(adminEmail, "purge_test_orders", "transaction", "all", {
+    count: testIds.length,
+  });
+
+  return { success: true, count: testIds.length };
+}
+
+export async function purgeAllOrders(adminEmail: string) {
+  const { data: rows, error: fetchError } = await supabase
+    .from("transactions")
+    .select("id");
+
+  if (fetchError) throw fetchError;
+
+  const allIds = (rows || []).map((r: any) => r.id);
+
+  if (allIds.length > 0) {
+    const { error: delError } = await supabase
+      .from("transactions")
+      .delete()
+      .in("id", allIds);
+    if (delError) throw delError;
+  }
+
+  await logAdminAction(adminEmail, "purge_all_orders", "transaction", "all", {
+    count: allIds.length,
+  });
+
+  return { success: true, count: allIds.length };
 }

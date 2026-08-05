@@ -135,6 +135,10 @@ CREATE POLICY retention_jobs_admin_all ON public.retention_jobs FOR ALL TO authe
   USING (public.has_role(auth.uid(), 'admin'))
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
+CREATE POLICY transactions_admin_all ON public.transactions FOR ALL TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
 -- 9. Atomic Code Redemption Function
 CREATE OR REPLACE FUNCTION public.redeem_access_code_atomic(
   p_code_hash TEXT,

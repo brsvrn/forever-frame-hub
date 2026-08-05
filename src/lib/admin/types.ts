@@ -15,6 +15,8 @@ export interface AdminStats {
   failedOrders: number;
   totalRevenue: number;
   monthRevenue: number;
+  testOrdersCount: number;
+  testRevenue: number;
   activeCodes: number;
   usedCodes: number;
   totalMediaFiles: number;

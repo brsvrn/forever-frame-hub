@@ -13,8 +13,14 @@ import {
   Tag,
   Globe,
   Share2,
+  Trash2,
 } from "lucide-react";
-import { getAdminOrders, updateOrderAdminNotes } from "@/lib/admin/orders.api";
+import {
+  getAdminOrders,
+  updateOrderAdminNotes,
+  deleteAdminOrder,
+  purgeTestOrders,
+} from "@/lib/admin/orders.api";
 import type { AdminOrderSummary } from "@/lib/admin/types";
 import { toast } from "sonner";
 
@@ -25,9 +31,11 @@ interface AdminOrdersManagerProps {
 export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
   const [orders, setOrders] = useState<AdminOrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [purging, setPurging] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<
-    "all" | "success" | "pending" | "failed" | "refunded"
+    "all" | "real" | "test" | "success" | "pending" | "failed" | "refunded"
   >("all");
   const [selectedOrder, setSelectedOrder] = useState<AdminOrderSummary | null>(null);
   const [savingNotes, setSavingNotes] = useState(false);
@@ -77,8 +85,43 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
     }
   };
 
+  const handleDeleteOrder = async (orderId: string, merchantOid: string) => {
+    if (!window.confirm(`'${merchantOid}' numaralı sipariş kaydını silmek istediğinize emin misiniz?`)) {
+      return;
+    }
+    setDeletingId(orderId);
+    try {
+      await deleteAdminOrder(adminEmail, orderId);
+      toast.success("Sipariş kaydı başarıyla silindi.");
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(null);
+      }
+      await loadOrders();
+    } catch (error) {
+      toast.error("Sipariş silinirken hata oluştu.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handlePurgeTestOrders = async () => {
+    if (!window.confirm("Veritabanındaki tüm test / deneme sipariş kayıtlarını kalıcı olarak silmek istediğinize emin misiniz?")) {
+      return;
+    }
+    setPurging(true);
+    try {
+      const res = await purgeTestOrders(adminEmail);
+      toast.success(`${res.count} adet test siparişi veritabanından temizlendi.`);
+      await loadOrders();
+    } catch (error) {
+      toast.error("Test siparişleri temizlenirken hata oluştu.");
+    } finally {
+      setPurging(false);
+    }
+  };
+
   const formatCurrency = (amount: number) => {
-    const valInTL = amount > 10000 ? amount / 100 : amount;
+    const valInTL = amount >= 100 ? amount / 100 : amount;
     return new Intl.NumberFormat("tr-TR", {
       style: "currency",
       currency: "TRY",
@@ -96,6 +139,8 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
     );
   });
 
+  const testCount = orders.filter((o) => o.isTestOrder).length;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Header */}
@@ -103,8 +148,30 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Sipariş & PayTR Yönetimi</h2>
           <p className="text-sm text-muted-foreground">
-            Tüm PayTR işlemlerini, tutarları, UTM dönüşüm kaynaklarını ve iade durumlarını izleyin.
+            Tüm gerçek PayTR işlemlerini, canlı ciroyu, UTM dönüşüm kaynaklarını ve iade durumlarını izleyin.
           </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {testCount > 0 && (
+            <button
+              onClick={handlePurgeTestOrders}
+              disabled={purging || loading}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Test Verilerini Sil ({testCount})</span>
+            </button>
+          )}
+
+          <button
+            onClick={loadOrders}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface hover:bg-surface/80 border border-border text-xs text-foreground transition-all"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-gold" : ""}`} />
+            <span>Yenile</span>
+          </button>
         </div>
       </div>
 
@@ -127,6 +194,8 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
           {(
             [
               { id: "all", label: "Tümü" },
+              { id: "real", label: "Canlı Siparişler" },
+              { id: "test", label: "Test / Deneme" },
               { id: "success", label: "Başarılı" },
               { id: "pending", label: "Bekleyen" },
               { id: "failed", label: "Başarısız" },
@@ -155,8 +224,9 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
           <span className="text-xs text-muted-foreground">Siparişler yükleniyor...</span>
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="py-16 text-center bg-card/40 rounded-2xl border border-border text-muted-foreground text-sm">
-          Sipariş bulunamadı.
+        <div className="py-16 text-center bg-card/40 rounded-2xl border border-border text-muted-foreground text-sm space-y-2">
+          <CreditCard className="w-8 h-8 mx-auto text-muted-foreground/50" />
+          <div>Bu filtreye uygun sipariş kaydı bulunmamaktadır.</div>
         </div>
       ) : (
         <div className="bg-card/70 border border-border rounded-2xl overflow-hidden shadow-sm">
@@ -168,6 +238,7 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
                   <th className="px-5 py-3.5 font-medium">Müşteri</th>
                   <th className="px-5 py-3.5 font-medium">Tutar & Paket</th>
                   <th className="px-5 py-3.5 font-medium">Durum</th>
+                  <th className="px-5 py-3.5 font-medium">Tür</th>
                   <th className="px-5 py-3.5 font-medium">Kaynak / UTM</th>
                   <th className="px-5 py-3.5 font-medium text-right">İşlem</th>
                 </tr>
@@ -233,18 +304,25 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
                           <span className="capitalize">{order.status}</span>
                         </span>
 
-                        {order.isTestOrder && (
-                          <span className="text-[10px] text-amber-400/80 font-mono">
-                            [Test Siparişi]
-                          </span>
-                        )}
-
                         {order.refundStatus !== "none" && (
                           <span className="text-[10px] text-rose-400 font-semibold">
                             İade: {order.refundStatus}
                           </span>
                         )}
                       </div>
+                    </td>
+
+                    {/* Type Badge */}
+                    <td className="px-5 py-4">
+                      {order.isTestOrder ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[11px] font-mono">
+                          Test
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-medium">
+                          Canlı
+                        </span>
+                      )}
                     </td>
 
                     {/* UTM / Source Badge */}
@@ -264,13 +342,23 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
 
                     {/* Action */}
                     <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => openDetailModal(order)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-surface hover:bg-accent/10 border border-border text-xs text-foreground transition-all"
-                      >
-                        <span>Detay</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => openDetailModal(order)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-surface hover:bg-accent/10 border border-border text-xs text-foreground transition-all"
+                        >
+                          <span>Detay</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteOrder(order.id, order.merchantOid)}
+                          disabled={deletingId === order.id}
+                          className="p-1.5 rounded-xl bg-surface hover:bg-rose-500/20 border border-border hover:border-rose-500/30 text-muted-foreground hover:text-rose-400 transition-all"
+                          title="Siparişi Sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -287,8 +375,15 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-border pb-4">
               <div>
-                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase mb-1">
-                  PayTR İşlem Detayı
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase">
+                    PayTR İşlem Detayı
+                  </div>
+                  {selectedOrder.isTestOrder && (
+                    <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-mono">
+                      Test İşlemi
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-lg font-mono font-bold text-foreground">
                   {selectedOrder.merchantOid}
@@ -405,23 +500,34 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+            <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
               <button
                 type="button"
-                onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2 rounded-xl bg-surface hover:bg-accent/10 border border-border text-xs text-foreground"
+                onClick={() => handleDeleteOrder(selectedOrder.id, selectedOrder.merchantOid)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-semibold text-rose-400 transition-all"
               >
-                Kapat
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Siparişi Sil</span>
               </button>
-              <button
-                type="button"
-                onClick={handleSaveNotes}
-                disabled={savingNotes}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gold text-zinc-950 font-semibold text-xs transition-all hover:bg-gold/90 disabled:opacity-50 shadow-lg shadow-gold/20"
-              >
-                {savingNotes && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                Not ve Durumu Kaydet
-              </button>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedOrder(null)}
+                  className="px-4 py-2 rounded-xl bg-surface hover:bg-accent/10 border border-border text-xs text-foreground"
+                >
+                  Kapat
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveNotes}
+                  disabled={savingNotes}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gold text-zinc-950 font-semibold text-xs transition-all hover:bg-gold/90 disabled:opacity-50 shadow-lg shadow-gold/20"
+                >
+                  {savingNotes && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  Not ve Durumu Kaydet
+                </button>
+              </div>
             </div>
           </div>
         </div>

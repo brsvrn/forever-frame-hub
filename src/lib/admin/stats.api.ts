@@ -54,22 +54,40 @@ export async function getAdminDashboardStats(): Promise<AdminStats> {
     // Fetch transactions
     const { data: transactions } = await supabase
       .from("transactions")
-      .select("id, status, amount, created_at");
+      .select("id, status, amount, created_at, is_test_order, merchant_oid");
 
-    let totalOrders = (transactions || []).length;
+    let totalOrders = 0;
     let paidOrders = 0;
     let pendingOrders = 0;
     let failedOrders = 0;
     let totalRevenue = 0;
     let monthRevenue = 0;
+    let testOrdersCount = 0;
+    let testRevenue = 0;
 
     (transactions || []).forEach((tx) => {
+      const isTest =
+        tx.is_test_order === true ||
+        (tx.merchant_oid || "").toLowerCase().includes("test") ||
+        Number(tx.amount) <= 100;
+
+      const amt = Number(tx.amount) || 0;
+      // PayTR stores amounts in kuruş (e.g. 79900 = 799 TL, 40000 = 400 TL, 100 = 1 TL)
+      const valInTL = amt >= 100 ? amt / 100 : amt;
+
+      if (isTest) {
+        testOrdersCount++;
+        if (tx.status === "success" || (tx.status as any) === "paid") {
+          testRevenue += valInTL;
+        }
+        return;
+      }
+
+      // Real production orders only
+      totalOrders++;
       const isPaid = tx.status === "success" || (tx.status as any) === "paid";
       if (isPaid) {
         paidOrders++;
-        const amt = Number(tx.amount) || 0;
-        // In kuruş if > 1000 or in TL
-        const valInTL = amt > 10000 ? amt / 100 : amt;
         totalRevenue += valInTL;
         if (tx.created_at >= monthStart.toISOString()) {
           monthRevenue += valInTL;
@@ -111,6 +129,8 @@ export async function getAdminDashboardStats(): Promise<AdminStats> {
       failedOrders,
       totalRevenue,
       monthRevenue,
+      testOrdersCount,
+      testRevenue,
       activeCodes: activeCodes || 0,
       usedCodes: usedCodes || 0,
       totalMediaFiles: totalMediaFiles || 0,
@@ -133,6 +153,8 @@ export async function getAdminDashboardStats(): Promise<AdminStats> {
       failedOrders: 0,
       totalRevenue: 0,
       monthRevenue: 0,
+      testOrdersCount: 0,
+      testRevenue: 0,
       activeCodes: 0,
       usedCodes: 0,
       totalMediaFiles: 0,

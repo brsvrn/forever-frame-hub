@@ -13,9 +13,14 @@ import {
   ShieldCheck,
   AlertCircle,
   ArrowUpRight,
+  Trash2,
+  CheckCircle2,
+  SlidersHorizontal,
 } from "lucide-react";
 import { getAdminDashboardStats } from "@/lib/admin/stats.api";
+import { purgeTestOrders } from "@/lib/admin/orders.api";
 import type { AdminStats } from "@/lib/admin/types";
+import { toast } from "sonner";
 
 interface AdminDashboardOverviewProps {
   onNavigateTab: (tabId: string) => void;
@@ -25,6 +30,7 @@ interface AdminDashboardOverviewProps {
 export function AdminDashboardOverview({ onNavigateTab, adminEmail }: AdminDashboardOverviewProps) {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [purging, setPurging] = useState(false);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -36,6 +42,22 @@ export function AdminDashboardOverview({ onNavigateTab, adminEmail }: AdminDashb
   useEffect(() => {
     fetchStats();
   }, []);
+
+  const handlePurgeTestOrders = async () => {
+    if (!window.confirm("Veritabanındaki tüm test / deneme sipariş kayıtlarını kalıcı olarak silmek istediğinize emin misiniz?")) {
+      return;
+    }
+    setPurging(true);
+    try {
+      const res = await purgeTestOrders(adminEmail);
+      toast.success(`${res.count} adet test siparişi veritabanından temizlendi.`);
+      await fetchStats();
+    } catch (error) {
+      toast.error("Test siparişleri temizlenirken hata oluştu.");
+    } finally {
+      setPurging(false);
+    }
+  };
 
   const formatBytes = (bytes: number) => {
     if (!bytes || bytes === 0) return "0 MB";
@@ -66,14 +88,14 @@ export function AdminDashboardOverview({ onNavigateTab, adminEmail }: AdminDashb
               Hoş Geldiniz, {adminEmail.split("@")[0]}
             </h1>
             <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-              MemoryWedding platformundaki tüm etkinlikleri, ödemeleri, kullanım kodlarını ve sistem ayarlarını buradan yönetebilirsiniz.
+              MemoryWedding platformundaki tüm gerçek etkinlikleri, canlı ödemeleri, kullanım kodlarını ve sistem ayarlarını buradan yönetebilirsiniz.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={fetchStats}
-              disabled={loading}
+              disabled={loading || purging}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface/80 hover:bg-surface border border-border text-xs font-medium text-foreground transition-all hover:border-gold/30"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-gold" : ""}`} />
@@ -93,12 +115,37 @@ export function AdminDashboardOverview({ onNavigateTab, adminEmail }: AdminDashb
         <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
       </div>
 
+      {/* Test Orders Notice & Purge Option (Only shown if test data exists) */}
+      {(stats?.testOrdersCount || 0) > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wide">
+                Geliştirme / Test Sipariş Kaydı Bulundu ({stats?.testOrdersCount} adet)
+              </h4>
+              <p className="text-xs text-amber-200/80 mt-0.5 leading-relaxed">
+                Veritabanında önceki testlerden kalan <strong>{stats?.testOrdersCount} adet</strong> test işlemi tespit edildi. Bunlar canlı cironuza <u>dahil edilmemiştir</u>.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handlePurgeTestOrders}
+            disabled={purging}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-semibold text-amber-300 transition-all shrink-0"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            {purging ? "Temizleniyor..." : "Test Verilerini Temizle"}
+          </button>
+        </div>
+      )}
+
       {/* Main Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {/* Total Revenue */}
         <div className="bg-card/70 backdrop-blur-md border border-border/80 rounded-2xl p-5 relative overflow-hidden transition-all hover:border-gold/40 hover:shadow-lg">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Toplam Ciro</span>
+            <span className="text-xs font-medium text-muted-foreground">Toplam Ciro (Net Canlı)</span>
             <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <TrendingUp className="w-4 h-4" />
             </div>
@@ -216,7 +263,7 @@ export function AdminDashboardOverview({ onNavigateTab, adminEmail }: AdminDashb
           <div>
             <div className="flex items-center gap-2 text-foreground font-semibold text-sm mb-4">
               <CreditCard className="w-4 h-4 text-emerald-400" />
-              Sipariş & PayTR Durumu
+              Sipariş & PayTR Durumu (Canlı)
             </div>
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
