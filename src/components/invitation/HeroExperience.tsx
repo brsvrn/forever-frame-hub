@@ -4,15 +4,6 @@ import type { ThemeConfig } from "@/lib/theme-engine";
 import { formatInviteDate, type InvitationDraft } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
 
-function getDaysLeft(dateStr?: string | null): number | null {
-  if (!dateStr) return null;
-  const target = new Date(dateStr);
-  const now = new Date();
-  const diffTime = target.getTime() - now.getTime();
-  if (diffTime < 0) return null;
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
 export function HeroExperience({
   draft,
   theme,
@@ -23,7 +14,6 @@ export function HeroExperience({
   lang: "tr" | "en";
 }) {
   const dateLabel = formatInviteDate(draft.date, lang);
-  const daysLeft = getDaysLeft(draft.date);
 
   return (
     <section className="relative flex min-h-dvh flex-col items-center justify-center px-5 py-24 text-center snap-start sm:px-8 sm:py-28">
@@ -108,15 +98,6 @@ export function HeroExperience({
               “{draft.message.trim()}”
             </p>
           </motion.div>
-        )}
-
-        {/* Geri Sayım */}
-        {daysLeft !== null && (
-          <div className="mt-8 inline-block rounded-full border border-white/20 bg-white/10 px-6 py-2 backdrop-blur-sm sm:mt-12">
-            <p className="text-sm font-medium text-white">
-              {daysLeft} {lang === "tr" ? "Gün Kaldı" : "Days Left"}
-            </p>
-          </div>
         )}
       </motion.div>
 

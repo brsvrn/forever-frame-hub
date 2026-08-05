@@ -23,6 +23,8 @@ import { PremiumQRExperience } from "@/components/invitation/PremiumQRExperience
 import { MemoryWall } from "@/components/invitation/MemoryWall";
 import { VoiceGreeting } from "@/components/invitation/VoiceGreeting";
 import { GiftSection } from "@/components/invitation/GiftSection";
+import { CountdownTimer } from "@/components/invitation/CountdownTimer";
+import { InvitationFooter } from "@/components/invitation/InvitationFooter";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
 import {
   resolveTheme,
@@ -224,6 +226,12 @@ function PremiumInvitePage() {
                 {eventFeatures?.story_enabled !== false ? (
                   <StoryTimeline draft={draft} theme={theme} />
                 ) : null}
+                <CountdownTimer
+                  eventDate={draft.date}
+                  eventTime={draft.time || (schedules.length > 0 ? schedules[0].starts_at : null)}
+                  theme={theme}
+                  lang={lang}
+                />
                 {eventFeatures?.schedule_enabled !== false ? (
                   <>
                     <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
@@ -267,6 +275,8 @@ function PremiumInvitePage() {
             {eventFeatures?.gift_enabled !== false && advanced?.gift ? (
               <GiftSection settings={advanced.gift} />
             ) : null}
+
+            <InvitationFooter draft={draft} theme={theme} lang={lang} />
           </main>
         </div>
       )}
