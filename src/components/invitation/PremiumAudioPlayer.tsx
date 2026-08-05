@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX, Music, Loader2 } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Music } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { extractYouTubeVideoId } from "@/lib/music-library";
 import { trackMusicPlay } from "@/lib/analytics/analytics";
@@ -47,13 +47,51 @@ export function PremiumAudioPlayer({
   const resumeAfterVoiceRef = useRef(false);
   const pendingPlayRef = useRef(autoPlay);
   const userExplicitPausedRef = useRef(false);
-  const hasFirstInteractionRef = useRef(false);
+  const isMutedRef = useRef(false);
+  isMutedRef.current = isMuted;
+
+  const getTargetVolume = useCallback(
+    (muted: boolean) => {
+      if (muted) return 0;
+      const rawVol = volume == null ? 0.65 : Number(volume);
+      return Math.max(0, Math.min(1, rawVol));
+    },
+    [volume]
+  );
+
+  // Apply mute/unmute and volume to active players
+  const applyAudioLevels = useCallback(
+    (muted: boolean) => {
+      const vol = getTargetVolume(muted);
+      const ytVol = Math.round(vol * 100);
+
+      if (videoId && ytPlayerRef.current) {
+        try {
+          if (muted) {
+            if (typeof ytPlayerRef.current.mute === "function") ytPlayerRef.current.mute();
+            if (typeof ytPlayerRef.current.setVolume === "function") ytPlayerRef.current.setVolume(0);
+          } else {
+            if (typeof ytPlayerRef.current.unMute === "function") ytPlayerRef.current.unMute();
+            if (typeof ytPlayerRef.current.setVolume === "function") ytPlayerRef.current.setVolume(ytVol || 65);
+          }
+        } catch (e) {
+          console.warn("YouTube volume/mute error:", e);
+        }
+      }
+
+      if (audioRef.current) {
+        audioRef.current.muted = muted;
+        audioRef.current.volume = vol;
+      }
+    },
+    [videoId, getTargetVolume]
+  );
 
   // Fetch YouTube video title via oEmbed
   useEffect(() => {
     if (videoId && !customTitle) {
       fetch(
-        `https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${videoId}`,
+        `https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${videoId}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -91,6 +129,7 @@ export function PremiumAudioPlayer({
             loop: 1,
             playlist: videoId,
             playsinline: 1,
+            enablejsapi: 1,
             origin: window.location.origin,
             modestbranding: 1,
           },
@@ -98,8 +137,7 @@ export function PremiumAudioPlayer({
             onReady: (event: any) => {
               if (!isMounted) return;
               setIsReady(true);
-              const safeVol = Math.round(Math.max(0, Math.min(1, volume)) * 100);
-              event.target.setVolume(safeVol);
+              applyAudioLevels(isMutedRef.current);
               if ((pendingPlayRef.current || autoPlay) && !userExplicitPausedRef.current) {
                 try {
                   event.target.playVideo();
@@ -158,18 +196,21 @@ export function PremiumAudioPlayer({
         ytPlayerRef.current = null;
       }
     };
-  }, [videoId, volume, autoPlay]);
+  }, [videoId, autoPlay, applyAudioLevels]);
 
-  // Handle Play/Pause
+  // Handle Play/Pause Toggle
   const togglePlay = useCallback(() => {
     if (videoId) {
       if (ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         if (isPlaying) {
           userExplicitPausedRef.current = true;
+          pendingPlayRef.current = false;
           ytPlayerRef.current.pauseVideo();
           setIsPlaying(false);
         } else {
           userExplicitPausedRef.current = false;
+          pendingPlayRef.current = true;
+          applyAudioLevels(isMutedRef.current);
           ytPlayerRef.current.playVideo();
           setIsPlaying(true);
           trackMusicPlay(customTitle || dynamicTitle || undefined);
@@ -183,10 +224,13 @@ export function PremiumAudioPlayer({
     } else if (audioRef.current) {
       if (isPlaying) {
         userExplicitPausedRef.current = true;
+        pendingPlayRef.current = false;
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
         userExplicitPausedRef.current = false;
+        pendingPlayRef.current = true;
+        applyAudioLevels(isMutedRef.current);
         audioRef.current
           .play()
           .then(() => {
@@ -199,18 +243,25 @@ export function PremiumAudioPlayer({
           });
       }
     }
-  }, [videoId, isPlaying, customTitle, dynamicTitle, theme.music.title]);
+  }, [videoId, isPlaying, applyAudioLevels, customTitle, dynamicTitle, theme.music.title]);
+
+  // Handle Mute/Unmute Toggle
+  const toggleMute = useCallback(() => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    isMutedRef.current = nextMuted;
+    applyAudioLevels(nextMuted);
+  }, [isMuted, applyAudioLevels]);
 
   // Listen for immediate "Davetiyeyi Aç" user gesture event
   useEffect(() => {
     const handleUserOpen = () => {
       userExplicitPausedRef.current = false;
       pendingPlayRef.current = true;
+      applyAudioLevels(isMutedRef.current);
+
       if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         try {
-          ytPlayerRef.current.unMute();
-          const safeVol = Math.round(Math.max(0, Math.min(1, volume)) * 100);
-          ytPlayerRef.current.setVolume(safeVol);
           ytPlayerRef.current.playVideo();
           setIsPlaying(true);
           trackMusicPlay(customTitle || dynamicTitle || undefined);
@@ -234,12 +285,13 @@ export function PremiumAudioPlayer({
     return () => {
       window.removeEventListener("memorywedding:user-opened-invitation", handleUserOpen);
     };
-  }, [videoId, volume, customTitle, dynamicTitle, theme.music.title]);
+  }, [videoId, applyAudioLevels, customTitle, dynamicTitle, theme.music.title]);
 
   // Handle Autoplay prop change
   useEffect(() => {
     if (autoPlay && !userExplicitPausedRef.current) {
       pendingPlayRef.current = true;
+      applyAudioLevels(isMutedRef.current);
       if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         try {
           ytPlayerRef.current.playVideo();
@@ -256,73 +308,20 @@ export function PremiumAudioPlayer({
           });
       }
     }
-  }, [autoPlay, videoId, directAudioUrl]);
+  }, [autoPlay, videoId, directAudioUrl, applyAudioLevels]);
 
-  // Fallback: start music on first user touch anywhere if autoplay was requested but blocked by browser policy
+  // Mobile interaction fallback: if music was requested but blocked by initial autoplay policy, unlock on next user touch
   useEffect(() => {
-    if (!autoPlay || hasFirstInteractionRef.current) return;
-    const handleFirstTouch = () => {
-      if (hasFirstInteractionRef.current) return;
-      hasFirstInteractionRef.current = true;
-      if (userExplicitPausedRef.current) return;
+    if (isPlaying) return;
 
-      if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
-        try {
-          ytPlayerRef.current.playVideo();
-          setIsPlaying(true);
-        } catch {}
-      } else if (audioRef.current) {
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-      }
-    };
-    window.addEventListener("touchstart", handleFirstTouch, { once: true, passive: true });
-    window.addEventListener("click", handleFirstTouch, { once: true, passive: true });
-    return () => {
-      window.removeEventListener("touchstart", handleFirstTouch);
-      window.removeEventListener("click", handleFirstTouch);
-    };
-  }, [autoPlay, videoId]);
-
-  // Synchronize Mute
-  useEffect(() => {
-    if (videoId && ytPlayerRef.current) {
-      try {
-        if (isMuted) {
-          ytPlayerRef.current.mute();
-        } else {
-          ytPlayerRef.current.unMute();
-        }
-      } catch {}
-    }
-    if (audioRef.current) {
-      audioRef.current.muted = isMuted;
-    }
-  }, [isMuted, videoId]);
-
-  // Synchronize Volume
-  useEffect(() => {
-    const safeVolume = Math.max(0, Math.min(1, volume));
-    if (videoId && ytPlayerRef.current) {
-      try {
-        ytPlayerRef.current.setVolume(Math.round(safeVolume * 100));
-      } catch {}
-    }
-    if (audioRef.current) {
-      audioRef.current.volume = safeVolume;
-    }
-  }, [volume, videoId]);
-
-  // Mobile interaction fallback: if music is supposed to play but was delayed by mobile autoplay policy, start on next touch/scroll
-  useEffect(() => {
-    const handleMobileInteraction = () => {
+    const handleMobileUnlock = () => {
       if (userExplicitPausedRef.current) return;
       if (!autoPlay && !pendingPlayRef.current) return;
 
+      applyAudioLevels(isMutedRef.current);
+
       if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         try {
-          ytPlayerRef.current.unMute();
-          const safeVol = Math.round(Math.max(0, Math.min(1, volume)) * 100);
-          ytPlayerRef.current.setVolume(safeVol);
           ytPlayerRef.current.playVideo();
           setIsPlaying(true);
         } catch {}
@@ -334,18 +333,19 @@ export function PremiumAudioPlayer({
       }
     };
 
-    window.addEventListener("touchstart", handleMobileInteraction, { passive: true });
-    window.addEventListener("touchend", handleMobileInteraction, { passive: true });
-    window.addEventListener("click", handleMobileInteraction, { passive: true });
-    window.addEventListener("scroll", handleMobileInteraction, { passive: true });
+    window.addEventListener("touchstart", handleMobileUnlock, { passive: true, once: true });
+    window.addEventListener("click", handleMobileUnlock, { passive: true, once: true });
 
     return () => {
-      window.removeEventListener("touchstart", handleMobileInteraction);
-      window.removeEventListener("touchend", handleMobileInteraction);
-      window.removeEventListener("click", handleMobileInteraction);
-      window.removeEventListener("scroll", handleMobileInteraction);
+      window.removeEventListener("touchstart", handleMobileUnlock);
+      window.removeEventListener("click", handleMobileUnlock);
     };
-  }, [autoPlay, videoId, volume]);
+  }, [isPlaying, autoPlay, videoId, applyAudioLevels]);
+
+  // Keep volume synchronized if volume prop changes
+  useEffect(() => {
+    applyAudioLevels(isMutedRef.current);
+  }, [volume, applyAudioLevels]);
 
   // Handle Voice-over pause/resume events
   useEffect(() => {
@@ -363,10 +363,14 @@ export function PremiumAudioPlayer({
       if (resumeAfterVoiceRef.current) {
         if (videoId && ytPlayerRef.current) {
           try {
+            applyAudioLevels(isMutedRef.current);
             ytPlayerRef.current.playVideo();
           } catch {}
         }
-        if (audioRef.current) void audioRef.current.play().catch(() => {});
+        if (audioRef.current) {
+          applyAudioLevels(isMutedRef.current);
+          void audioRef.current.play().catch(() => {});
+        }
         setIsPlaying(true);
       }
       resumeAfterVoiceRef.current = false;
@@ -378,7 +382,7 @@ export function PremiumAudioPlayer({
       window.removeEventListener("memorywedding:voice-start", voiceStarted);
       window.removeEventListener("memorywedding:voice-end", voiceEnded);
     };
-  }, [isPlaying, videoId]);
+  }, [isPlaying, videoId, applyAudioLevels]);
 
   const displayTitle =
     customTitle || dynamicTitle || theme.music.title || "Düğün Müziği";
@@ -460,11 +464,11 @@ export function PremiumAudioPlayer({
 
           <button
             type="button"
-            onClick={() => setIsMuted(!isMuted)}
+            onClick={toggleMute}
             aria-label={isMuted ? "Sesi aç" : "Sesi kapat"}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/70 transition-colors hover:text-white"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/70 transition-colors hover:text-white active:scale-95"
           >
-            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            {isMuted ? <VolumeX className="h-4 w-4 text-rose-300" /> : <Volume2 className="h-4 w-4" />}
           </button>
         </motion.div>
       )}
