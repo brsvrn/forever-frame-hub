@@ -12,6 +12,30 @@ declare global {
   }
 }
 
+/** Unlock the browser's audio context (iOS/Android requirement) inside a user gesture handler */
+function unlockAudioContext() {
+  try {
+    const ACtx =
+      window.AudioContext ||
+      (window as any).webkitAudioContext;
+    if (!ACtx) return;
+    const ctx = new ACtx();
+    // Create and immediately start/stop a silent buffer to unlock
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(0);
+    src.stop(0);
+    // Resume if suspended
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+  } catch {
+    // Silently ignore — AudioContext is optional enhancement
+  }
+}
+
 export function PremiumAudioPlayer({
   theme,
   autoPlay = false,
@@ -34,17 +58,19 @@ export function PremiumAudioPlayer({
   // Determine source: custom YouTube ID, custom direct audio, or theme default track
   const effectiveUrl = musicUrl?.trim() || theme.music.defaultTrack;
   const videoId = extractYouTubeVideoId(effectiveUrl);
+  // Always use directAudioUrl when there is no YouTube videoId
   const directAudioUrl = !videoId ? effectiveUrl : null;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
-  const [isReady, setIsReady] = useState(false);
 
+  // audioRef is always set — the <audio> element is always rendered (just hidden)
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
   const ytContainerId = useRef(`yt-audio-${Math.random().toString(36).slice(2, 9)}`);
   const resumeAfterVoiceRef = useRef(false);
+  // Track desired-play state independently of player readiness
   const pendingPlayRef = useRef(autoPlay);
   const userExplicitPausedRef = useRef(false);
   const isMutedRef = useRef(false);
@@ -56,10 +82,10 @@ export function PremiumAudioPlayer({
       const rawVol = volume == null ? 0.65 : Number(volume);
       return Math.max(0, Math.min(1, rawVol));
     },
-    [volume]
+    [volume],
   );
 
-  // Apply mute/unmute and volume to active players
+  /** Apply volume/mute to whichever player is active */
   const applyAudioLevels = useCallback(
     (muted: boolean) => {
       const vol = getTargetVolume(muted);
@@ -84,14 +110,34 @@ export function PremiumAudioPlayer({
         audioRef.current.volume = vol;
       }
     },
-    [videoId, getTargetVolume]
+    [videoId, getTargetVolume],
+  );
+
+  /** Try to play the HTML5 audio element, with iOS unlock */
+  const playDirectAudio = useCallback(
+    (trackTitle?: string | null) => {
+      const el = audioRef.current;
+      if (!el) return;
+      unlockAudioContext();
+      applyAudioLevels(isMutedRef.current);
+      el.play()
+        .then(() => {
+          setIsPlaying(true);
+          trackMusicPlay(trackTitle || undefined);
+        })
+        .catch((err) => {
+          console.warn("Direct audio play error:", err);
+          setIsPlaying(false);
+        });
+    },
+    [applyAudioLevels],
   );
 
   // Fetch YouTube video title via oEmbed
   useEffect(() => {
     if (videoId && !customTitle) {
       fetch(
-        `https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${videoId}`
+        `https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${videoId}`,
       )
         .then((res) => res.json())
         .then((data) => {
@@ -103,12 +149,9 @@ export function PremiumAudioPlayer({
     }
   }, [videoId, customTitle]);
 
-  // Initialize YouTube Player if videoId exists
+  // ── Initialize YouTube Player ──────────────────────────────────────────────
   useEffect(() => {
-    if (!videoId) {
-      setIsReady(true);
-      return;
-    }
+    if (!videoId) return;
 
     let isMounted = true;
 
@@ -136,7 +179,6 @@ export function PremiumAudioPlayer({
           events: {
             onReady: (event: any) => {
               if (!isMounted) return;
-              setIsReady(true);
               applyAudioLevels(isMutedRef.current);
               if ((pendingPlayRef.current || autoPlay) && !userExplicitPausedRef.current) {
                 try {
@@ -150,13 +192,11 @@ export function PremiumAudioPlayer({
             onStateChange: (event: any) => {
               if (!isMounted) return;
               if (event.data === 1) {
-                // YT.PlayerState.PLAYING
                 setIsPlaying(true);
               } else if (event.data === 2) {
-                // YT.PlayerState.PAUSED
                 setIsPlaying(false);
               } else if (event.data === 0) {
-                // YT.PlayerState.ENDED -> Loop
+                // Ended → loop
                 if (!userExplicitPausedRef.current) {
                   event.target.playVideo();
                 }
@@ -198,7 +238,7 @@ export function PremiumAudioPlayer({
     };
   }, [videoId, autoPlay, applyAudioLevels]);
 
-  // Handle Play/Pause Toggle
+  // ── Handle Play/Pause Toggle ───────────────────────────────────────────────
   const togglePlay = useCallback(
     (e?: React.MouseEvent) => {
       e?.stopPropagation();
@@ -220,6 +260,7 @@ export function PremiumAudioPlayer({
           } else {
             userExplicitPausedRef.current = false;
             pendingPlayRef.current = true;
+            unlockAudioContext();
             applyAudioLevels(isMutedRef.current);
             try {
               ytPlayerRef.current.playVideo();
@@ -245,24 +286,14 @@ export function PremiumAudioPlayer({
         } else {
           userExplicitPausedRef.current = false;
           pendingPlayRef.current = true;
-          applyAudioLevels(isMutedRef.current);
-          audioRef.current
-            .play()
-            .then(() => {
-              setIsPlaying(true);
-              trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
-            })
-            .catch((err) => {
-              console.warn("Direct audio play error:", err);
-              setIsPlaying(false);
-            });
+          playDirectAudio(customTitle || dynamicTitle || theme.music.title);
         }
       }
     },
-    [videoId, isPlaying, applyAudioLevels, customTitle, dynamicTitle, theme.music.title],
+    [videoId, isPlaying, applyAudioLevels, customTitle, dynamicTitle, theme.music.title, playDirectAudio],
   );
 
-  // Handle Mute/Unmute Toggle
+  // ── Handle Mute/Unmute Toggle ──────────────────────────────────────────────
   const toggleMute = useCallback(
     (e?: React.MouseEvent) => {
       e?.stopPropagation();
@@ -276,9 +307,10 @@ export function PremiumAudioPlayer({
     [applyAudioLevels],
   );
 
-  // Expose global play trigger for synchronous user click handlers
+  // ── Global play trigger (synchronous, inside user click handler) ───────────
   useEffect(() => {
     (window as any).__MW_PLAY_AUDIO__ = () => {
+      unlockAudioContext();
       userExplicitPausedRef.current = false;
       pendingPlayRef.current = true;
       applyAudioLevels(isMutedRef.current);
@@ -289,10 +321,17 @@ export function PremiumAudioPlayer({
           setIsPlaying(true);
         } catch {}
       } else if (audioRef.current) {
-        audioRef.current
-          .play()
-          .then(() => setIsPlaying(true))
-          .catch((e) => console.warn("play audio helper error", e));
+        // Ensure the audio element has a src loaded before playing
+        const el = audioRef.current;
+        if (el.readyState >= 2) {
+          // HAVE_CURRENT_DATA or better — can play immediately
+          el.play()
+            .then(() => setIsPlaying(true))
+            .catch((e) => console.warn("play audio helper error", e));
+        } else {
+          // Not loaded yet — set pending; the onCanPlay handler will fire play()
+          el.load();
+        }
       }
     };
     return () => {
@@ -300,9 +339,10 @@ export function PremiumAudioPlayer({
     };
   }, [videoId, applyAudioLevels]);
 
-  // Listen for immediate "Davetiyeyi Aç" user gesture event
+  // ── Listen for "Davetiyeyi Aç" event ──────────────────────────────────────
   useEffect(() => {
     const handleUserOpen = () => {
+      unlockAudioContext();
       userExplicitPausedRef.current = false;
       pendingPlayRef.current = true;
       applyAudioLevels(isMutedRef.current);
@@ -316,15 +356,20 @@ export function PremiumAudioPlayer({
           console.warn("Play on open error:", e);
         }
       } else if (audioRef.current) {
-        audioRef.current
-          .play()
-          .then(() => {
-            setIsPlaying(true);
-            trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
-          })
-          .catch((err) => {
-            console.warn("Direct audio play on open error:", err);
-          });
+        const el = audioRef.current;
+        if (el.readyState >= 2) {
+          el.play()
+            .then(() => {
+              setIsPlaying(true);
+              trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
+            })
+            .catch((err) => {
+              console.warn("Direct audio play on open error:", err);
+            });
+        } else {
+          el.load();
+          // onCanPlay will pick up pendingPlayRef and start playback
+        }
       }
     };
 
@@ -334,7 +379,7 @@ export function PremiumAudioPlayer({
     };
   }, [videoId, applyAudioLevels, customTitle, dynamicTitle, theme.music.title]);
 
-  // Handle Autoplay prop change
+  // ── Autoplay prop change ───────────────────────────────────────────────────
   useEffect(() => {
     if (autoPlay && !userExplicitPausedRef.current) {
       pendingPlayRef.current = true;
@@ -357,13 +402,12 @@ export function PremiumAudioPlayer({
     }
   }, [autoPlay, videoId, directAudioUrl, applyAudioLevels]);
 
-  // Mobile interaction fallback: if music was requested, unlock on user tap/touch
+  // ── Mobile interaction fallback ────────────────────────────────────────────
   useEffect(() => {
     const handleMobileUnlock = (e: Event) => {
       const target = e.target as HTMLElement | null;
-      if (target?.closest?.(".premium-audio-player-ui")) {
-        return;
-      }
+      // Don't intercept clicks on the player's own UI
+      if (target?.closest?.(".premium-audio-player-ui")) return;
 
       if (userExplicitPausedRef.current) return;
       if (!autoPlay && !pendingPlayRef.current) return;
@@ -394,12 +438,12 @@ export function PremiumAudioPlayer({
     };
   }, [autoPlay, videoId, applyAudioLevels]);
 
-  // Keep volume synchronized if volume prop changes
+  // ── Keep volume synchronized if volume prop changes ────────────────────────
   useEffect(() => {
     applyAudioLevels(isMutedRef.current);
   }, [volume, applyAudioLevels]);
 
-  // Handle Voice-over pause/resume events
+  // ── Voice-over pause/resume ────────────────────────────────────────────────
   useEffect(() => {
     const voiceStarted = () => {
       resumeAfterVoiceRef.current = isPlaying;
@@ -436,8 +480,7 @@ export function PremiumAudioPlayer({
     };
   }, [isPlaying, videoId, applyAudioLevels]);
 
-  const displayTitle =
-    customTitle || dynamicTitle || theme.music.title || "Düğün Müziği";
+  const displayTitle = customTitle || dynamicTitle || theme.music.title || "Düğün Müziği";
 
   return (
     <div className="premium-audio-player-ui fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 sm:left-6 sm:translate-x-0">
@@ -451,7 +494,12 @@ export function PremiumAudioPlayer({
         </div>
       ) : null}
 
-      {/* Direct HTML5 Audio */}
+      {/*
+        HTML5 Audio — always rendered so audioRef is always populated.
+        Visibility/audibility is controlled via volume/muted props.
+        onCanPlay: fires when the browser can start playing. If there's a
+        pending play request (from user gesture), start playing now.
+      */}
       {directAudioUrl ? (
         <audio
           ref={audioRef}
@@ -461,6 +509,17 @@ export function PremiumAudioPlayer({
           playsInline
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
+          onCanPlay={() => {
+            // If the user already tapped "Davetiyeyi aç" but the audio wasn't
+            // ready at that moment, play now that it's loaded.
+            if (pendingPlayRef.current && !userExplicitPausedRef.current) {
+              applyAudioLevels(isMutedRef.current);
+              audioRef.current
+                ?.play()
+                .then(() => setIsPlaying(true))
+                .catch(() => {});
+            }
+          }}
         />
       ) : null}
 

@@ -185,6 +185,23 @@ export function InvitationIntro({
               type="button"
               onClick={() => {
                 try {
+                  // Unlock iOS audio context synchronously inside the click handler
+                  const ACtx =
+                    window.AudioContext ||
+                    (window as any).webkitAudioContext;
+                  if (ACtx) {
+                    try {
+                      const ctx = new ACtx();
+                      const buf = ctx.createBuffer(1, 1, 22050);
+                      const src = ctx.createBufferSource();
+                      src.buffer = buf;
+                      src.connect(ctx.destination);
+                      src.start(0);
+                      src.stop(0);
+                      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+                    } catch {}
+                  }
+                  // Call the global audio trigger (if player is ready)
                   if (typeof (window as any).__MW_PLAY_AUDIO__ === "function") {
                     (window as any).__MW_PLAY_AUDIO__();
                   }
