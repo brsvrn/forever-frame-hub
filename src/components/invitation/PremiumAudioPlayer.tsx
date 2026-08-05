@@ -399,7 +399,10 @@ export function PremiumAudioPlayer({
 
   // ── Unlock audio on first user touch anywhere if blocked ───────────────────
   useEffect(() => {
-    const handleFirstTouch = () => {
+    const handleFirstTouch = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.(".premium-audio-player-ui")) return;
+
       if (!userExplicitMutedRef.current && (!isPlayingRef.current || isMutedRef.current)) {
         void playAudio(true);
       }
@@ -412,8 +415,7 @@ export function PremiumAudioPlayer({
   }, [playAudio]);
 
   // ── Bulletproof Mobile Backgrounding & Page Visibility Handling ────────────
-  // Triggers instantly when user presses home button, minimizes browser,
-  // switches apps/tabs, or locks screen on iOS / Android / Desktop.
+  // Triggers ONLY when user switches apps/tabs, goes to mobile home screen, or locks phone.
   useEffect(() => {
     const handleAppGoingToBackground = () => {
       // Check if music was active before backgrounding
@@ -428,7 +430,6 @@ export function PremiumAudioPlayer({
     const handleAppReturningToForeground = () => {
       // Resume playback if it was playing and user didn't explicitly mute
       if (wasPlayingBeforeHiddenRef.current && !userExplicitMutedRef.current) {
-        // Small delay to ensure browser media subsystem has resumed on mobile
         setTimeout(() => {
           if (!document.hidden && document.visibilityState === "visible") {
             void playAudio(false);
@@ -445,14 +446,12 @@ export function PremiumAudioPlayer({
       }
     };
 
-    // Standard Visibility API
+    // Standard Visibility API (Tab switch, minimize, mobile home screen)
     document.addEventListener("visibilitychange", onVisibilityChange, true);
 
-    // Mobile & Desktop Lifecycle Events
+    // Mobile & Desktop Lifecycle Events (Unload, bfcache, freeze)
     window.addEventListener("pagehide", handleAppGoingToBackground, true);
     window.addEventListener("pageshow", handleAppReturningToForeground, true);
-    window.addEventListener("blur", handleAppGoingToBackground, true);
-    window.addEventListener("focus", handleAppReturningToForeground, true);
     document.addEventListener("freeze", handleAppGoingToBackground, true);
     document.addEventListener("resume", handleAppReturningToForeground, true);
 
@@ -460,8 +459,6 @@ export function PremiumAudioPlayer({
       document.removeEventListener("visibilitychange", onVisibilityChange, true);
       window.removeEventListener("pagehide", handleAppGoingToBackground, true);
       window.removeEventListener("pageshow", handleAppReturningToForeground, true);
-      window.removeEventListener("blur", handleAppGoingToBackground, true);
-      window.removeEventListener("focus", handleAppReturningToForeground, true);
       document.removeEventListener("freeze", handleAppGoingToBackground, true);
       document.removeEventListener("resume", handleAppReturningToForeground, true);
     };

@@ -44,12 +44,10 @@ export function VoiceGreeting({
 
     document.addEventListener("visibilitychange", handleBackground, true);
     window.addEventListener("pagehide", handleBackground, true);
-    window.addEventListener("blur", handleBackground, true);
 
     return () => {
       document.removeEventListener("visibilitychange", handleBackground, true);
       window.removeEventListener("pagehide", handleBackground, true);
-      window.removeEventListener("blur", handleBackground, true);
     };
   }, []);
 
