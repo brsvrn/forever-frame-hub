@@ -1,66 +1,79 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { AdminUserSummary } from "./types";
 import { logAdminAction } from "./audit.api";
+import { getAdminUsersServer } from "./admin.functions";
 
 export async function getAdminUsers(): Promise<AdminUserSummary[]> {
-  // Fetch profiles
-  const { data: profiles, error: profileErr } = await supabase
-    .from("profiles")
-    .select("id, email, full_name, avatar_url, created_at, updated_at")
-    .order("created_at", { ascending: false });
-
-  if (profileErr) {
-    console.error("Failed to fetch user profiles", profileErr);
-    throw profileErr;
+  // 1. Try server function with service role (retrieves real auth emails)
+  try {
+    const serverResult = await getAdminUsersServer({});
+    if (serverResult && Array.isArray(serverResult) && serverResult.length > 0) {
+      return serverResult;
+    }
+  } catch (err) {
+    console.warn("getAdminUsersServer failed, falling back to client query:", err);
   }
 
-  // Fetch admin user roles
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("user_id, role")
-    .eq("role", "admin");
+  // 2. Client fallback with safe select("*")
+  try {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  const adminSet = new Set((roles || []).map((r) => r.user_id));
+    // Fetch admin user roles
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("user_id, role")
+      .eq("role", "admin");
 
-  // Fetch event counts per user
-  const { data: invitations } = await supabase
-    .from("invitations")
-    .select("user_id, id");
+    const adminSet = new Set((roles || []).map((r: any) => r.user_id));
 
-  const eventCountMap: Record<string, number> = {};
-  (invitations || []).forEach((inv) => {
-    eventCountMap[inv.user_id] = (eventCountMap[inv.user_id] || 0) + 1;
-  });
+    // Fetch event counts per user
+    const { data: invitations } = await supabase
+      .from("invitations")
+      .select("user_id, id");
 
-  // Fetch order counts and spent per user
-  const { data: transactions } = await supabase
-    .from("transactions")
-    .select("user_id, amount, status");
+    const eventCountMap: Record<string, number> = {};
+    (invitations || []).forEach((inv: any) => {
+      if (inv.user_id) eventCountMap[inv.user_id] = (eventCountMap[inv.user_id] || 0) + 1;
+    });
 
-  const orderCountMap: Record<string, number> = {};
-  const spentMap: Record<string, number> = {};
+    // Fetch order counts and spent per user
+    const { data: transactions } = await supabase
+      .from("transactions")
+      .select("user_id, amount, status");
 
-  (transactions || []).forEach((tx) => {
-    orderCountMap[tx.user_id] = (orderCountMap[tx.user_id] || 0) + 1;
-    if (tx.status === "success" || (tx.status as any) === "paid") {
-      const amt = Number(tx.amount) || 0;
-      const inTL = amt > 10000 ? amt / 100 : amt;
-      spentMap[tx.user_id] = (spentMap[tx.user_id] || 0) + inTL;
-    }
-  });
+    const orderCountMap: Record<string, number> = {};
+    const spentMap: Record<string, number> = {};
 
-  return (profiles || []).map((p) => ({
-    id: p.id,
-    email: p.email || "kullanici@memorywedding.com",
-    fullName: p.full_name,
-    avatarUrl: p.avatar_url,
-    role: adminSet.has(p.id) ? "admin" : "user",
-    createdAt: p.created_at,
-    eventCount: eventCountMap[p.id] || 0,
-    orderCount: orderCountMap[p.id] || 0,
-    totalSpent: spentMap[p.id] || 0,
-    isActive: true,
-  }));
+    (transactions || []).forEach((tx: any) => {
+      if (tx.user_id) {
+        orderCountMap[tx.user_id] = (orderCountMap[tx.user_id] || 0) + 1;
+        if (tx.status === "success" || (tx.status as any) === "paid") {
+          const amt = Number(tx.amount) || 0;
+          const inTL = amt > 10000 ? amt / 100 : amt;
+          spentMap[tx.user_id] = (spentMap[tx.user_id] || 0) + inTL;
+        }
+      }
+    });
+
+    return (profiles || []).map((p: any) => ({
+      id: p.id,
+      email: p.email || "kullanici@memorywedding.com",
+      fullName: p.full_name || "İsimsiz Kullanıcı",
+      avatarUrl: p.avatar_url,
+      role: adminSet.has(p.id) ? "admin" : "user",
+      createdAt: p.created_at || new Date().toISOString(),
+      eventCount: eventCountMap[p.id] || 0,
+      orderCount: orderCountMap[p.id] || 0,
+      totalSpent: spentMap[p.id] || 0,
+      isActive: true,
+    }));
+  } catch (err) {
+    console.error("Critical getAdminUsers client error:", err);
+    return [];
+  }
 }
 
 export async function toggleUserAdminRole(

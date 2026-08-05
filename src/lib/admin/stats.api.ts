@@ -19,7 +19,7 @@ export async function getAdminDashboardStats(): Promise<AdminStats> {
     // Fetch invitations breakdown
     const { data: events } = await supabase
       .from("invitations")
-      .select("id, is_published, is_paid, lifecycle_status, created_at, event_date, deleted_at, storage_used");
+      .select("*");
 
     let draftEvents = 0;
     let publishedEvents = 0;
@@ -29,12 +29,12 @@ export async function getAdminDashboardStats(): Promise<AdminStats> {
     let todayCreatedEvents = 0;
     let totalMediaStorageBytes = 0;
 
-    (events || []).forEach((ev) => {
+    (events || []).forEach((ev: any) => {
       if (ev.deleted_at) return;
       if (!ev.is_published) draftEvents++;
       else publishedEvents++;
 
-      if (ev.created_at >= todayStart.toISOString()) todayCreatedEvents++;
+      if (ev.created_at && ev.created_at >= todayStart.toISOString()) todayCreatedEvents++;
       if (ev.storage_used) totalMediaStorageBytes += Number(ev.storage_used) || 0;
 
       if (ev.event_date) {
@@ -54,7 +54,7 @@ export async function getAdminDashboardStats(): Promise<AdminStats> {
     // Fetch transactions
     const { data: transactions } = await supabase
       .from("transactions")
-      .select("id, status, amount, created_at, is_test_order, merchant_oid");
+      .select("*");
 
     let totalOrders = 0;
     let paidOrders = 0;
