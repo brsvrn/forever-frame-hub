@@ -180,10 +180,7 @@ function PremiumInvitePage() {
   }, []);
 
   return (
-    <div
-      className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30"
-      style={{ fontFamily: `"${theme.font || "Manrope"}", sans-serif` }}
-    >
+    <div className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30">
       {isDemo ? (
         <DemoThemeSwitcher
           value={previewThemeId}

@@ -207,7 +207,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFF4DE",
     secondaryColor: "#6B2F2A",
     coverVideoUrl: "/videos/golden-sunset.mp4",
-    font: "Alex Brush",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#FFBE7C",
       ink: "#5A2825",
@@ -223,7 +223,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-script text-[#FFF0D4] font-normal tracking-wide text-[1.1em] leading-[1.05] drop-shadow-md",
         sans: "font-sans",
-        subheading: "font-serif uppercase tracking-[0.3em] text-[#FFD79A]/90 text-xs font-medium",
+        subheading: "font-sans uppercase tracking-[0.3em] text-[#FFD79A] text-xs font-semibold",
         ampersand: "font-parisienne text-[#FFC06E] text-[1.1em] font-normal mx-2 opacity-95",
       },
       textColor: "text-[#FFFDF7]",
@@ -291,7 +291,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#EEF4FF",
     secondaryColor: "#07162F",
     coverVideoUrl: "/videos/moonlit-shore.mp4",
-    font: "Cinzel",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#C8D8F3",
       ink: "#0A1730",
@@ -307,7 +307,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-cinzel font-normal tracking-[0.24em] uppercase text-[#EDF2F7]",
         sans: "font-sans",
-        subheading: "font-cinzel tracking-[0.35em] uppercase text-[#A0AEC0] text-xs font-semibold",
+        subheading: "font-sans uppercase tracking-[0.35em] text-[#CBD5E0] text-xs font-semibold",
         ampersand: "font-bodoni italic text-[#CBD5E0] text-[0.85em] font-light mx-2",
       },
       textColor: "text-[#F7FAFC]",
@@ -333,7 +333,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#F8FCFF",
     secondaryColor: "#073D76",
     coverVideoUrl: "/videos/aegean-morning.mp4",
-    font: "Great Vibes",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#E1479B",
       ink: "#073B73",
@@ -347,7 +347,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     styles: {
       overlay: "bg-blue-950/25",
       typography: {
-        display: "font-cursive text-[#FFF1F2] font-normal tracking-wide text-[1.15em] leading-[1.08]",
+        display: "font-pinyon text-[#FFF1F2] font-normal tracking-wide text-[1.15em] leading-[1.08]",
         sans: "font-sans",
         subheading: "font-sans uppercase tracking-[0.3em] text-[#FBCFE8] text-xs font-bold",
         ampersand: "font-pinyon text-[#F472B6] text-[1.1em] mx-2 font-normal",
@@ -375,7 +375,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#4C4034",
     secondaryColor: "#F4E8D4",
     coverVideoUrl: "/videos/soft-sand-dunes.mp4",
-    font: "Bodoni Moda",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#D8B988",
       ink: "#463A30",
@@ -407,7 +407,6 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       icons: { color: "text-[#E2C799]" },
     },
   },
-
   "emerald-forest": {
     id: "emerald-forest",
     name: "Emerald Forest",
@@ -418,7 +417,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#F2F7E8",
     secondaryColor: "#173A2A",
     coverVideoUrl: "/videos/emerald-forest.mp4",
-    font: "Marcellus",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#BFD69B",
       ink: "#173A2A",
@@ -460,7 +459,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFF9F0",
     secondaryColor: "#4E5131",
     coverVideoUrl: "/videos/wildflower-meadow.mp4",
-    font: "Parisienne",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#D6B1CC",
       ink: "#4A4B2D",
@@ -476,7 +475,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-parisienne text-[#FFF0F5] font-normal tracking-wider text-[1.1em] leading-[1.05]",
         sans: "font-sans",
-        subheading: "font-serif uppercase tracking-[0.3em] text-[#F9A8D4] text-xs font-medium",
+        subheading: "font-sans uppercase tracking-[0.3em] text-[#F9A8D4] text-xs font-semibold",
         ampersand: "font-pinyon text-[#F472B6] text-[1.15em] font-normal mx-2",
       },
       textColor: "text-[#FFF1F2]",
@@ -518,7 +517,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-montserrat font-extralight tracking-[0.35em] uppercase text-[#F0FDF4]",
         sans: "font-sans",
-        subheading: "font-montserrat uppercase tracking-[0.45em] text-[#CCFBF1] text-xs font-light",
+        subheading: "font-sans uppercase tracking-[0.4em] text-[#CCFBF1] text-xs font-semibold",
         ampersand: "font-display italic text-[#99F6E4] font-light opacity-80 mx-2 text-[0.8em]",
       },
       textColor: "text-[#F8FAFC]",
@@ -545,7 +544,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFFBE9",
     secondaryColor: "#164D59",
     coverVideoUrl: "/videos/amalfi-lemon-terrace.mp4",
-    font: "Italiana",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#F2D45C",
       ink: "#164D59",
@@ -587,7 +586,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFF4D9",
     secondaryColor: "#4C3B24",
     coverVideoUrl: "/videos/tuscan-golden-hills.mp4",
-    font: "Playfair Display",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#D9A94A",
       ink: "#493820",
@@ -603,7 +602,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-playfair italic font-medium tracking-normal text-[#FEF3C7]",
         sans: "font-sans",
-        subheading: "font-serif uppercase tracking-[0.3em] text-[#FCD34D] text-xs font-semibold",
+        subheading: "font-sans uppercase tracking-[0.3em] text-[#FCD34D] text-xs font-semibold",
         ampersand: "font-pinyon text-[#F59E0B] text-[1.15em] font-normal mx-2",
       },
       textColor: "text-[#FFFBEB]",
@@ -629,7 +628,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#F7F5EC",
     secondaryColor: "#183D48",
     coverVideoUrl: "/videos/lake-como-garden.mp4",
-    font: "Cinzel",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#C9C7B0",
       ink: "#183D48",
@@ -645,7 +644,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-cinzel font-normal tracking-[0.18em] uppercase text-[#F8FAFC]",
         sans: "font-sans",
-        subheading: "font-cinzel tracking-[0.32em] uppercase text-[#CBD5E0] text-xs font-medium",
+        subheading: "font-sans uppercase tracking-[0.32em] text-[#CBD5E0] text-xs font-semibold",
         ampersand: "font-bodoni italic text-[#E2E8F0] font-light opacity-90 mx-2 text-[0.85em]",
       },
       textColor: "text-[#F8FAFC]",
@@ -672,7 +671,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFF9EE",
     secondaryColor: "#5B4934",
     coverVideoUrl: "/videos/grand-ballroom.mp4",
-    font: "Cinzel Decorative",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#D8B878",
       ink: "#4D3C29",
@@ -688,7 +687,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-cinzel-decorative font-bold tracking-wide text-[#FDE68A] drop-shadow-md",
         sans: "font-sans",
-        subheading: "font-cinzel tracking-[0.35em] uppercase text-[#FCD34D] text-xs font-bold",
+        subheading: "font-sans uppercase tracking-[0.35em] text-[#FCD34D] text-xs font-bold",
         ampersand: "font-pinyon text-[#F59E0B] text-[1.2em] font-normal mx-2",
       },
       textColor: "text-[#FFFBEB]",
@@ -730,7 +729,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-montserrat font-black tracking-[0.25em] uppercase text-white drop-shadow-lg",
         sans: "font-sans",
-        subheading: "font-montserrat uppercase tracking-[0.45em] text-white/80 text-xs font-black",
+        subheading: "font-sans uppercase tracking-[0.45em] text-white/80 text-xs font-black",
         ampersand: "font-montserrat font-extralight opacity-70 text-white mx-2 text-[0.75em]",
       },
       textColor: "text-white",
@@ -756,7 +755,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FAF3E0",
     secondaryColor: "#5C4A3D",
     coverVideoUrl: "/videos/boho-motion.mp4",
-    font: "Alex Brush",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#D4A373",
       ink: "#5C4A3D",
@@ -798,7 +797,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFFFFF",
     secondaryColor: "#333333",
     coverVideoUrl: "/videos/ethereal-light.mp4",
-    font: "Prata",
+    font: "Plus Jakarta Sans",
     qr: {
       accent: "#B8C5B3",
       ink: "#222222",
@@ -814,7 +813,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-prata font-normal tracking-wide text-[#FFFFFF] drop-shadow-sm",
         sans: "font-sans",
-        subheading: "font-sans uppercase tracking-[0.38em] text-[#E2E8F0] text-xs font-medium",
+        subheading: "font-sans uppercase tracking-[0.38em] text-[#E2E8F0] text-xs font-semibold",
         ampersand: "font-pinyon text-[#FFFFFF] text-[1.15em] font-normal mx-2 opacity-90",
       },
       textColor: "text-[#FFFFFF]",
@@ -855,7 +854,7 @@ function legacyTheme(
     selectable: false,
     primaryColor: accent,
     secondaryColor: ink,
-    font: "Cormorant Garamond",
+    font: "Plus Jakarta Sans",
     qr: {
       accent,
       ink,
@@ -870,7 +869,7 @@ function legacyTheme(
       typography: {
         display: "font-serif text-white",
         sans: "font-sans",
-        subheading: "font-sans uppercase tracking-widest text-white/70 text-xs",
+        subheading: "font-sans uppercase tracking-widest text-white/70 text-xs font-semibold",
         ampersand: "font-serif italic text-white/70 mx-2",
       },
       textColor: "text-white",

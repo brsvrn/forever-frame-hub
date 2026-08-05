@@ -45,11 +45,11 @@ export function EventDetails({
       <div
         className={`max-w-xl w-full ${theme.styles.cards.wrapper} rounded-3xl p-8 sm:p-10 shadow-2xl`}
       >
-        <h3 className={`text-2xl text-center mb-10 ${theme.styles.typography.display}`}>
-          Etkinlik Bilgileri
+        <h3 className={`text-2xl text-center mb-10 font-sans font-bold tracking-tight ${theme.styles.textColor || "text-white"}`}>
+          {lang === "tr" ? "Etkinlik Bilgileri" : "Event Details"}
         </h3>
 
-        <div className="space-y-6">
+        <div className="space-y-6 font-sans">
           <div className="flex items-start gap-4">
             <div
               className={`w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0 ${theme.styles.icons.color}`}
@@ -57,8 +57,10 @@ export function EventDetails({
               <CalendarDays className="w-5 h-5" />
             </div>
             <div>
-              <p className={`text-xs uppercase tracking-widest mb-1 ${theme.styles.typography.subheading || "text-white/50"}`}>Tarih</p>
-              <p className={`font-medium ${theme.styles.textColor || "text-white"}`}>{dateLabel || "Tarih Belirlenmedi"}</p>
+              <p className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
+                {lang === "tr" ? "Tarih" : "Date"}
+              </p>
+              <p className={`font-semibold text-base ${theme.styles.textColor || "text-white"}`}>{dateLabel || "Tarih Belirlenmedi"}</p>
             </div>
           </div>
 
@@ -69,8 +71,10 @@ export function EventDetails({
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <p className={`text-xs uppercase tracking-widest mb-1 ${theme.styles.typography.subheading || "text-white/50"}`}>Saat</p>
-              <p className={`font-medium ${theme.styles.textColor || "text-white"}`}>{draft.time || "Saat Belirlenmedi"}</p>
+              <p className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
+                {lang === "tr" ? "Saat" : "Time"}
+              </p>
+              <p className={`font-semibold text-base ${theme.styles.textColor || "text-white"}`}>{draft.time || "Saat Belirlenmedi"}</p>
             </div>
           </div>
 
@@ -81,9 +85,11 @@ export function EventDetails({
               <Map className="w-5 h-5" />
             </div>
             <div>
-              <p className={`text-xs uppercase tracking-widest mb-1 ${theme.styles.typography.subheading || "text-white/50"}`}>Konum</p>
-              <p className={`font-medium ${theme.styles.textColor || "text-white"}`}>{draft.venue || "Mekan Belirlenmedi"}</p>
-              <p className={`text-sm mt-1 ${theme.styles.mutedTextColor || "text-white/70"}`}>
+              <p className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
+                {lang === "tr" ? "Konum" : "Location"}
+              </p>
+              <p className={`font-semibold text-base ${theme.styles.textColor || "text-white"}`}>{draft.venue || "Mekan Belirlenmedi"}</p>
+              <p className={`text-sm mt-1 font-medium ${theme.styles.mutedTextColor || "text-white/75"}`}>
                 {draft.address} {draft.city}
               </p>
             </div>
@@ -91,13 +97,13 @@ export function EventDetails({
         </div>
 
         {draft.rsvpLabel?.trim() && (
-          <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
-            <p className={`text-xs font-medium leading-relaxed ${theme.styles.mutedTextColor || "text-white/80"}`}>{draft.rsvpLabel.trim()}</p>
+          <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 text-center font-sans">
+            <p className={`text-xs font-medium leading-relaxed ${theme.styles.mutedTextColor || "text-white/85"}`}>{draft.rsvpLabel.trim()}</p>
           </div>
         )}
 
         {draft.mapUrl && (
-          <div className="mt-10 pt-8 border-t border-white/10">
+          <div className="mt-10 pt-8 border-t border-white/10 font-sans">
             <a
               href={draft.mapUrl}
               target="_blank"
@@ -105,15 +111,15 @@ export function EventDetails({
               className="block group relative overflow-hidden rounded-2xl bg-white/5 border border-white/10 transition-colors hover:bg-white/10"
             >
               <div className="absolute inset-0 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=Istanbul&zoom=13&size=600x300&maptype=roadmap&style=feature:all|element:labels|visibility:off&style=feature:landscape|color:0x222222&style=feature:water|color:0x000000&key=dummy')] opacity-20 bg-cover bg-center grayscale group-hover:opacity-40 transition-opacity" />
-              <div className="relative p-6 flex flex-col items-center justify-center text-center gap-3">
+              <div className="relative p-6 flex flex-col items-center justify-center text-center gap-3 font-sans">
                 <div
                   className={`w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md ${theme.styles.icons.color}`}
                 >
                   <Map className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-white font-medium text-lg">{draft.venue || "Konum"}</p>
-                  <p className="text-white/50 text-sm mt-1">
+                  <p className="text-white font-semibold text-lg">{draft.venue || "Konum"}</p>
+                  <p className="text-white/70 text-sm mt-1 font-medium">
                     {lang === "tr" ? "Haritada Görüntüle" : "View on Map"}
                   </p>
                 </div>
@@ -122,7 +128,7 @@ export function EventDetails({
           </div>
         )}
 
-        <div className="mt-10 grid grid-cols-2 gap-4">
+        <div className="mt-10 grid grid-cols-2 gap-4 font-sans">
           {calendarEnabled && calendarSchedule ? (
             <CalendarLinks
               schedule={calendarSchedule}
@@ -138,18 +144,18 @@ export function EventDetails({
               href={draft.mapUrl}
               target="_blank"
               rel="noreferrer"
-              className={`py-3 rounded-full flex items-center justify-center gap-2 text-sm font-medium ${theme.styles.buttons.primary}`}
+              className={`py-3 rounded-full flex items-center justify-center gap-2 text-sm font-semibold transition-transform active:scale-95 ${theme.styles.buttons.primary}`}
             >
               <Navigation className="w-4 h-4" />
-              <span>Yol Tarifi</span>
+              <span>{lang === "tr" ? "Yol Tarifi" : "Directions"}</span>
             </a>
           ) : (
             <button
               disabled
-              className={`py-3 rounded-full flex items-center justify-center gap-2 text-sm font-medium opacity-50 cursor-not-allowed ${theme.styles.buttons.primary}`}
+              className={`py-3 rounded-full flex items-center justify-center gap-2 text-sm font-semibold opacity-50 cursor-not-allowed ${theme.styles.buttons.primary}`}
             >
               <Navigation className="w-4 h-4" />
-              <span>Yol Tarifi</span>
+              <span>{lang === "tr" ? "Yol Tarifi" : "Directions"}</span>
             </button>
           )}
         </div>

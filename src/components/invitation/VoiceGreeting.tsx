@@ -33,12 +33,12 @@ export function VoiceGreeting({
   };
 
   return (
-    <section className="relative flex min-h-[55dvh] snap-start items-center justify-center px-5 py-20">
-      <div className={`w-full max-w-xl rounded-[2rem] p-7 text-center shadow-2xl sm:p-10 ${theme.styles.cards.wrapper}`}>
+    <section className="relative flex min-h-[55dvh] snap-start items-center justify-center px-5 py-20 font-sans">
+      <div className={`w-full max-w-xl rounded-[2rem] p-7 text-center shadow-2xl sm:p-10 font-sans ${theme.styles.cards.wrapper}`}>
         <Volume2 className={`mx-auto size-6 ${theme.styles.icons.color || "opacity-70"}`} aria-hidden="true" />
-        <h2 className={`mt-4 text-3xl ${theme.styles.typography.display}`}>{title || "Size özel bir mesajımız var"}</h2>
+        <h2 className={`mt-4 font-sans font-bold text-2xl sm:text-3xl tracking-tight ${theme.styles.textColor || "text-white"}`}>{title || "Size özel bir mesajımız var"}</h2>
         {description ? (
-          <p className={`mx-auto mt-3 max-w-md text-sm leading-7 ${theme.styles.mutedTextColor || "text-white/75"}`}>{description}</p>
+          <p className={`mx-auto mt-3 max-w-md font-sans text-sm font-medium leading-relaxed ${theme.styles.mutedTextColor || "text-white/75"}`}>{description}</p>
         ) : null}
         <audio
           ref={audioRef}
@@ -53,15 +53,15 @@ export function VoiceGreeting({
         <button
           type="button"
           onClick={() => void toggle()}
-          className={`mx-auto mt-6 inline-flex min-h-12 items-center gap-3 rounded-full px-6 text-sm font-medium transition ${theme.styles.buttons.primary}`}
+          className={`mx-auto mt-6 inline-flex min-h-12 items-center gap-3 rounded-full px-6 font-sans font-semibold text-sm transition active:scale-95 ${theme.styles.buttons.primary}`}
         >
           {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
           {playing ? "Duraklat" : "Sesli mesajı dinle"}
         </button>
         {alternativeText ? (
-          <details className={`mt-5 text-left text-sm ${theme.styles.mutedTextColor || "text-white/70"}`}>
-            <summary className="cursor-pointer text-center font-medium">Yazılı metni göster</summary>
-            <p className="mt-3 whitespace-pre-line leading-7">{alternativeText}</p>
+          <details className={`mt-5 text-left text-sm font-sans ${theme.styles.mutedTextColor || "text-white/70"}`}>
+            <summary className="cursor-pointer text-center font-sans font-semibold">Yazılı metni göster</summary>
+            <p className="mt-3 whitespace-pre-line font-sans font-medium leading-relaxed">{alternativeText}</p>
           </details>
         ) : null}
       </div>

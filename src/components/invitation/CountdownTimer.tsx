@@ -120,7 +120,7 @@ export function CountdownTimer({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-2.5 sm:gap-5">
+          <div className="grid grid-cols-4 gap-2.5 sm:gap-5 font-sans">
             {units.map((unit, idx) => (
               <motion.div
                 key={unit.label}
@@ -130,10 +130,10 @@ export function CountdownTimer({
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                 className={`group relative flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl transition-all duration-300 ${theme.styles.cards.wrapper}`}
               >
-                <span className={`text-2xl sm:text-4xl lg:text-5xl font-light leading-none tracking-tight tabular-nums ${theme.styles.textColor || "text-white"}`}>
+                <span className={`font-sans text-2xl sm:text-4xl lg:text-5xl font-bold leading-none tracking-tight tabular-nums ${theme.styles.textColor || "text-white"}`}>
                   {unit.value}
                 </span>
-                <span className={`mt-2.5 text-[9px] sm:text-[11px] uppercase tracking-[0.2em] font-medium transition-colors ${theme.styles.mutedTextColor || "text-white/60"}`}>
+                <span className={`font-sans mt-2.5 text-[10px] sm:text-[12px] uppercase tracking-[0.2em] font-bold transition-colors ${theme.styles.mutedTextColor || "text-white/75"}`}>
                   {unit.label}
                 </span>
               </motion.div>

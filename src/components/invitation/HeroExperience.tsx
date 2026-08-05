@@ -24,7 +24,7 @@ export function HeroExperience({
         className="relative z-10 w-full max-w-3xl"
       >
         <p
-          className={`mb-5 break-words ${
+          className={`mb-5 break-words font-sans ${
             theme.styles.typography.subheading ||
             "text-[0.65rem] uppercase tracking-[0.28em] text-white/70 sm:text-xs sm:tracking-[0.4em]"
           } sm:mb-6`}
@@ -47,20 +47,20 @@ export function HeroExperience({
         </h2>
 
         <div
-          className={`mt-8 flex flex-col items-center justify-center gap-4 ${
+          className={`mt-8 flex flex-col items-center justify-center gap-4 font-sans ${
             theme.styles.textColor || "text-white/90"
           } sm:mt-12 sm:flex-row sm:gap-6`}
         >
           <div className="flex min-w-0 items-center justify-center gap-2">
             <Calendar className="w-4 h-4 opacity-70 shrink-0" />
-            <span className="break-words text-xs uppercase tracking-[0.14em] sm:text-sm sm:tracking-widest font-medium">
+            <span className="font-sans break-words text-xs uppercase tracking-[0.14em] sm:text-sm sm:tracking-widest font-semibold">
               {dateLabel || "Tarih Belirlenmedi"}
             </span>
           </div>
           <div className="hidden sm:block w-1 h-1 rounded-full bg-white/30" />
           <div className="flex min-w-0 items-center justify-center gap-2">
             <MapPin className="w-4 h-4 opacity-70 shrink-0" />
-            <span className="break-words text-xs uppercase tracking-[0.14em] sm:text-sm sm:tracking-widest font-medium">
+            <span className="font-sans break-words text-xs uppercase tracking-[0.14em] sm:text-sm sm:tracking-widest font-semibold">
               {draft.city || "Mekan Belirlenmedi"}
             </span>
           </div>
@@ -68,14 +68,14 @@ export function HeroExperience({
 
         {/* Aile Bilgileri */}
         {draft.familyInfo && (
-          <div className={`mt-8 flex flex-col items-center justify-center gap-5 text-sm ${theme.styles.mutedTextColor || "text-white/70"} sm:mt-12 sm:flex-row sm:gap-8`}>
+          <div className={`mt-8 flex flex-col items-center justify-center gap-5 font-sans text-sm ${theme.styles.mutedTextColor || "text-white/70"} sm:mt-12 sm:flex-row sm:gap-8`}>
             {draft.familyInfo.bride &&
               (draft.familyInfo.bride.mother || draft.familyInfo.bride.father) && (
                 <div className="text-center">
-                  <p className={`tracking-widest uppercase text-[10px] sm:text-xs mb-1 font-semibold ${theme.styles.typography.subheading || "text-white/60"}`}>
+                  <p className={`font-sans tracking-widest uppercase text-[11px] sm:text-xs mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
                     {lang === "tr" ? "Kız Tarafı" : "Bride's Family"}
                   </p>
-                  <p className={`font-medium ${theme.styles.textColor || "text-white"}`}>
+                  <p className={`font-sans font-semibold text-sm sm:text-base ${theme.styles.textColor || "text-white"}`}>
                     {[draft.familyInfo.bride.mother, draft.familyInfo.bride.father]
                       .filter(Boolean)
                       .join(" & ")}
@@ -85,10 +85,10 @@ export function HeroExperience({
             {draft.familyInfo.groom &&
               (draft.familyInfo.groom.mother || draft.familyInfo.groom.father) && (
                 <div className="text-center">
-                  <p className={`tracking-widest uppercase text-[10px] sm:text-xs mb-1 font-semibold ${theme.styles.typography.subheading || "text-white/60"}`}>
+                  <p className={`font-sans tracking-widest uppercase text-[11px] sm:text-xs mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
                     {lang === "tr" ? "Erkek Tarafı" : "Groom's Family"}
                   </p>
-                  <p className={`font-medium ${theme.styles.textColor || "text-white"}`}>
+                  <p className={`font-sans font-semibold text-sm sm:text-base ${theme.styles.textColor || "text-white"}`}>
                     {[draft.familyInfo.groom.mother, draft.familyInfo.groom.father]
                       .filter(Boolean)
                       .join(" & ")}
@@ -106,10 +106,10 @@ export function HeroExperience({
             transition={{ duration: 0.8, delay: 0.6 }}
             className={`mx-auto mt-8 max-w-xl rounded-2xl p-6 text-center shadow-xl sm:mt-10 sm:p-8 ${theme.styles.cards.wrapper}`}
           >
-            <p className={`mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] ${theme.styles.typography.subheading || "text-white/60"}`}>
+            <p className={`mb-2 font-sans text-[11px] font-bold uppercase tracking-[0.24em] ${theme.styles.typography.subheading || "text-white/60"}`}>
               {lang === "tr" ? "Davetiye Notumuz" : "Our Message"}
             </p>
-            <p className={`italic text-base leading-relaxed sm:text-lg ${theme.styles.textColor || "text-white"}`}>
+            <p className={`font-sans italic text-base leading-relaxed sm:text-lg ${theme.styles.textColor || "text-white"}`}>
               “{draft.message.trim()}”
             </p>
           </motion.div>

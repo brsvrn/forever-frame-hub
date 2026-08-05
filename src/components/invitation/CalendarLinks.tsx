@@ -58,15 +58,15 @@ export function CalendarLinks({
   const outlookLabel = lang === "tr" ? "Outlook Takvim" : "Outlook Calendar";
 
   return (
-    <details className="group relative">
+    <details className="group relative font-sans">
       <summary
-        className={`inline-flex min-h-11 cursor-pointer list-none items-center justify-center gap-2 rounded-full px-5 text-sm [&::-webkit-details-marker]:hidden ${theme.styles.buttons.secondary}`}
+        className={`inline-flex min-h-11 cursor-pointer list-none items-center justify-center gap-2 rounded-full px-5 text-sm font-sans font-semibold [&::-webkit-details-marker]:hidden transition-transform active:scale-95 ${theme.styles.buttons.secondary}`}
       >
         <CalendarDays className="size-4" />
         {label}
         <ChevronDown className="size-3 transition-transform group-open:rotate-180" />
       </summary>
-      <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-30 min-w-56 overflow-hidden rounded-2xl border border-white/15 bg-black/90 p-1.5 text-sm text-white shadow-2xl backdrop-blur-xl">
+      <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-30 min-w-56 overflow-hidden rounded-2xl border border-white/15 bg-black/90 p-1.5 text-sm text-white shadow-2xl backdrop-blur-xl font-sans">
         <a
           href={createGoogleCalendarUrl(schedule)}
           target="_blank"
@@ -74,7 +74,7 @@ export function CalendarLinks({
           className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 hover:bg-white/10 transition-colors"
         >
           <GoogleCalendarIcon className="size-4 shrink-0" />
-          <span className="font-medium text-white/90">{googleLabel}</span>
+          <span className="font-sans font-semibold text-white/90">{googleLabel}</span>
         </a>
         <a
           href={icsHref}
@@ -82,7 +82,7 @@ export function CalendarLinks({
           className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 hover:bg-white/10 transition-colors"
         >
           <AppleCalendarIcon className="size-4 shrink-0 text-white" />
-          <span className="font-medium text-white/90">{appleLabel}</span>
+          <span className="font-sans font-semibold text-white/90">{appleLabel}</span>
         </a>
         <a
           href={createOutlookCalendarUrl(schedule)}
@@ -91,7 +91,7 @@ export function CalendarLinks({
           className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 hover:bg-white/10 transition-colors"
         >
           <OutlookCalendarIcon className="size-4 shrink-0" />
-          <span className="font-medium text-white/90">{outlookLabel}</span>
+          <span className="font-sans font-semibold text-white/90">{outlookLabel}</span>
         </a>
       </div>
     </details>

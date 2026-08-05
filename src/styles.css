@@ -20,7 +20,9 @@
   --radius-4xl: calc(var(--radius) + 16px);
 
   --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-inter: "Inter", sans-serif;
   --font-cursive: "Great Vibes", cursive;
   --font-script: "Alex Brush", cursive;
   --font-parisienne: "Parisienne", cursive;

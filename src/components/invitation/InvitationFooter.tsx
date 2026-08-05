@@ -107,18 +107,18 @@ export function InvitationFooter({
 
         {/* Date & Location */}
         {(dateLabel || locationLabel) && (
-          <p className={`mt-4 text-xs sm:text-sm font-medium tracking-[0.16em] uppercase ${theme.styles.mutedTextColor || "text-white/70"}`}>
+          <p className={`mt-4 font-sans text-xs sm:text-sm font-bold tracking-[0.16em] uppercase ${theme.styles.mutedTextColor || "text-white/80"}`}>
             {[dateLabel, locationLabel].filter(Boolean).join(" · ")}
           </p>
         )}
 
         {/* Share Action Buttons */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4 font-sans">
           {/* WhatsApp Share Button */}
           <button
             type="button"
             onClick={handleShareWhatsApp}
-            className="group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-5 py-2.5 text-sm font-medium text-emerald-200 shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:border-emerald-400 hover:bg-emerald-900/60 active:scale-[0.98]"
+            className="group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full border border-emerald-500/40 bg-emerald-950/40 px-5 py-2.5 font-sans text-sm font-semibold text-emerald-200 shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:border-emerald-400 hover:bg-emerald-900/60 active:scale-[0.98]"
           >
             <svg
               className="size-4 shrink-0 fill-current text-emerald-400"
@@ -135,7 +135,7 @@ export function InvitationFooter({
           <button
             type="button"
             onClick={handleShareStory}
-            className="group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full border border-pink-500/40 bg-gradient-to-r from-pink-950/40 via-purple-950/40 to-amber-950/30 px-5 py-2.5 text-sm font-medium text-pink-200 shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:border-pink-400 hover:from-pink-900/60 hover:to-purple-900/60 active:scale-[0.98]"
+            className="group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full border border-pink-500/40 bg-gradient-to-r from-pink-950/40 via-purple-950/40 to-amber-950/30 px-5 py-2.5 font-sans text-sm font-semibold text-pink-200 shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:border-pink-400 hover:from-pink-900/60 hover:to-purple-900/60 active:scale-[0.98]"
           >
             <svg
               className="size-4 shrink-0 fill-current text-pink-400"
@@ -159,7 +159,7 @@ export function InvitationFooter({
           <button
             type="button"
             onClick={handleCopyLink}
-            className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:border-white/40 hover:bg-white/20 active:scale-[0.98]"
+            className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 font-sans text-sm font-semibold text-white shadow-xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:border-white/40 hover:bg-white/20 active:scale-[0.98]"
           >
             {copiedLink ? (
               <Check className="size-4 text-emerald-400" />
@@ -179,8 +179,8 @@ export function InvitationFooter({
         </div>
 
         {/* Branding */}
-        <div className="mt-16 border-t border-white/10 pt-8">
-          <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">
+        <div className="mt-16 border-t border-white/10 pt-8 font-sans">
+          <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.24em] text-white/50">
             MemoryWedding Dijital Davetiye
           </p>
         </div>

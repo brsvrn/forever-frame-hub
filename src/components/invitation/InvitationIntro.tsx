@@ -114,7 +114,7 @@ export function InvitationIntro({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: nameFadeDuration, ease: easeSilk }}
-              className="mb-5 text-[0.65rem] font-semibold uppercase text-white/80"
+              className="mb-5 font-sans text-xs font-bold uppercase tracking-widest text-white/90"
             >
               {theme.tag.tr}
             </motion.p>
@@ -189,7 +189,7 @@ export function InvitationIntro({
                 } catch {}
                 onComplete();
               }}
-              className="group relative z-20 inline-flex min-h-14 max-w-[calc(100vw-2rem)] touch-manipulation items-center gap-3 rounded-full border border-white/35 bg-black/40 px-5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white shadow-2xl backdrop-blur-xl transition duration-200 hover:scale-[1.03] hover:bg-white hover:text-slate-950 active:scale-95 sm:gap-4 sm:px-7 sm:text-xs sm:tracking-[0.2em]"
+              className="group relative z-20 inline-flex min-h-14 max-w-[calc(100vw-2rem)] touch-manipulation items-center gap-3 rounded-full border border-white/35 bg-black/40 px-5 font-sans text-xs font-bold uppercase tracking-[0.16em] text-white shadow-2xl backdrop-blur-xl transition duration-200 hover:scale-[1.03] hover:bg-white hover:text-slate-950 active:scale-95 sm:gap-4 sm:px-7 sm:text-xs sm:tracking-[0.2em]"
             >
               <span className="grid size-9 place-items-center rounded-full bg-white text-slate-950">
                 <Play className="ml-0.5 size-3.5" fill="currentColor" aria-hidden="true" />

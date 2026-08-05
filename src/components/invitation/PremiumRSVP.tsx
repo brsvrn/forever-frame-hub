@@ -111,9 +111,9 @@ export function PremiumRSVP({
   };
 
   return (
-    <section className="relative py-24 px-6 flex flex-col items-center snap-center">
+    <section className="relative py-24 px-6 flex flex-col items-center snap-center font-sans">
       <div
-        className={`max-w-md w-full ${theme.styles.cards.wrapper} rounded-3xl overflow-hidden shadow-2xl transition-all duration-500`}
+        className={`max-w-md w-full font-sans ${theme.styles.cards.wrapper} rounded-3xl overflow-hidden shadow-2xl transition-all duration-500`}
       >
         <AnimatePresence mode="wait">
           {step === 0 && (
@@ -122,21 +122,21 @@ export function PremiumRSVP({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="p-8 text-center"
+              className="p-8 text-center font-sans"
             >
-              <h3 className={`text-2xl mb-2 ${theme.styles.typography.display}`}>
+              <h3 className={`font-sans font-bold text-2xl mb-2 tracking-tight ${theme.styles.textColor || "text-white"}`}>
                 Lütfen Cevap Verin
               </h3>
-              <p className="opacity-75 text-sm mb-8">Bizimle olabilecek misiniz?</p>
+              <p className={`font-sans text-sm mb-8 font-medium ${theme.styles.mutedTextColor || "opacity-75 text-white"}`}>Bizimle olabilecek misiniz?</p>
 
-              <div className="space-y-3">
+              <div className="space-y-3 font-sans">
                 <button
                   type="button"
                   onClick={() => {
                     setStatus("yes");
                     setStep(1);
                   }}
-                  className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-medium transition-all cursor-pointer ${
+                  className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-sans font-semibold text-sm transition-all cursor-pointer ${
                     status === "yes"
                       ? theme.styles.buttons.primary
                       : "border border-current/15 bg-black/10 text-inherit hover:bg-black/20"
@@ -188,7 +188,7 @@ export function PremiumRSVP({
               className="p-8"
             >
               <h3
-                className={`text-2xl mb-6 text-center ${theme.styles.typography.display}`}
+                className={`text-2xl mb-6 text-center font-sans font-bold tracking-tight ${theme.styles.textColor || "text-white"}`}
               >
                 Detaylar
               </h3>
@@ -544,10 +544,10 @@ export function PremiumRSVP({
               <div className="w-16 h-16 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center mx-auto mb-6">
                 <Check className="w-8 h-8" />
               </div>
-              <h3 className={`text-2xl mb-2 ${theme.styles.typography.display}`}>
+              <h3 className={`text-2xl mb-2 font-sans font-bold tracking-tight ${theme.styles.textColor || "text-white"}`}>
                 Teşekkürler
               </h3>
-              <p className="opacity-80">Yanıtınız başarıyla iletildi.</p>
+              <p className={`font-sans font-medium ${theme.styles.mutedTextColor || "opacity-80 text-white"}`}>Yanıtınız başarıyla iletildi.</p>
             </motion.div>
           )}
         </AnimatePresence>
