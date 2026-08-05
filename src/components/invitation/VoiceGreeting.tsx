@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Pause, Play, Volume2 } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 
@@ -31,6 +31,27 @@ export function VoiceGreeting({
       window.dispatchEvent(new CustomEvent("memorywedding:voice-end"));
     }
   };
+
+  useEffect(() => {
+    const handleBackground = () => {
+      const audio = audioRef.current;
+      if (audio && !audio.paused) {
+        audio.pause();
+        setPlaying(false);
+        window.dispatchEvent(new CustomEvent("memorywedding:voice-end"));
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleBackground, true);
+    window.addEventListener("pagehide", handleBackground, true);
+    window.addEventListener("blur", handleBackground, true);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleBackground, true);
+      window.removeEventListener("pagehide", handleBackground, true);
+      window.removeEventListener("blur", handleBackground, true);
+    };
+  }, []);
 
   return (
     <section className="relative flex min-h-[55dvh] snap-start items-center justify-center px-5 py-20 font-sans">

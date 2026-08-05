@@ -39,7 +39,7 @@ function loadYouTubeIframeApi(): Promise<void> {
   return window.__ytApiLoadingPromise;
 }
 
-/** Unlock Web Audio Context for iOS Safari / Android Chrome in user gestures */
+/** Unlock Web Audio Context for iOS Safari / Android Chrome on user gestures */
 function unlockAudioContext() {
   try {
     const ACtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -92,10 +92,15 @@ export function PremiumAudioPlayer({
   const ytContainerId = useRef(`yt-audio-${Math.random().toString(36).slice(2, 9)}`);
   const ytReadyRef = useRef(false);
 
+  // Live state tracking with refs to prevent stale closures in event listeners
+  const isPlayingRef = useRef(false);
+  const isMutedRef = useRef(false);
   const userExplicitMutedRef = useRef(false);
   const wasPlayingBeforeHiddenRef = useRef(false);
   const resumeAfterVoiceRef = useRef(false);
-  const isMutedRef = useRef(isMuted);
+
+  // Keep refs synchronized
+  isPlayingRef.current = isPlaying;
   isMutedRef.current = isMuted;
 
   // Track if we already attempted fallback
@@ -203,6 +208,7 @@ export function PremiumAudioPlayer({
               if (autoPlay && !userExplicitMutedRef.current) {
                 try {
                   event.target.playVideo();
+                  isPlayingRef.current = true;
                   setIsPlaying(true);
                 } catch {}
               }
@@ -211,8 +217,10 @@ export function PremiumAudioPlayer({
               if (!isMounted) return;
               // 1 = playing, 2 = paused, 3 = buffering, 0 = ended
               if (event.data === 1) {
+                isPlayingRef.current = true;
                 setIsPlaying(true);
               } else if (event.data === 2) {
+                isPlayingRef.current = false;
                 setIsPlaying(false);
               } else if (event.data === 0) {
                 if (!userExplicitMutedRef.current) {
@@ -247,6 +255,53 @@ export function PremiumAudioPlayer({
     };
   }, [activeVideoId, autoPlay, applyAudioLevels, triggerFallbackToThemeTrack]);
 
+  /** Hard stop all audio elements and iframes immediately */
+  const forceStopAllAudio = useCallback((isUserExplicit: boolean = false) => {
+    if (isUserExplicit) {
+      userExplicitMutedRef.current = true;
+    }
+
+    isPlayingRef.current = false;
+    setIsPlaying(false);
+
+    // 1. Direct HTML5 audio element
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause();
+        audioRef.current.muted = true;
+      } catch {}
+    }
+
+    // 2. YouTube player API
+    if (ytPlayerRef.current) {
+      try {
+        if (typeof ytPlayerRef.current.pauseVideo === "function") ytPlayerRef.current.pauseVideo();
+        if (typeof ytPlayerRef.current.mute === "function") ytPlayerRef.current.mute();
+        if (typeof ytPlayerRef.current.setVolume === "function") ytPlayerRef.current.setVolume(0);
+      } catch {}
+    }
+
+    // 3. Post direct pause / mute commands to any iframes in DOM
+    try {
+      const iframes = document.querySelectorAll<HTMLIFrameElement>("iframe");
+      iframes.forEach((iframe) => {
+        try {
+          iframe.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', "*");
+          iframe.contentWindow?.postMessage('{"event":"command","func":"mute","args":""}', "*");
+        } catch {}
+      });
+    } catch {}
+
+    // 4. Pause any stray audio elements
+    try {
+      document.querySelectorAll("audio").forEach((el) => {
+        try {
+          el.pause();
+        } catch {}
+      });
+    } catch {}
+  }, []);
+
   /** Core Play Engine: Starts audio playback reliably across direct audio & YouTube */
   const playAudio = useCallback(
     async (isUserGesture: boolean = false): Promise<boolean> => {
@@ -263,7 +318,10 @@ export function PremiumAudioPlayer({
       if (activeVideoId) {
         if (ytPlayerRef.current && ytReadyRef.current && typeof ytPlayerRef.current.playVideo === "function") {
           try {
+            ytPlayerRef.current.unMute();
+            ytPlayerRef.current.setVolume(Math.round(getTargetVolume(isMutedRef.current) * 100) || 65);
             ytPlayerRef.current.playVideo();
+            isPlayingRef.current = true;
             setIsPlaying(true);
             trackMusicPlay(customTitle || theme.music.title);
             return true;
@@ -280,8 +338,10 @@ export function PremiumAudioPlayer({
       if (!el) return false;
 
       try {
-        if (!el.paused && isPlaying) return true;
+        el.muted = isMutedRef.current;
+        el.volume = getTargetVolume(isMutedRef.current);
         await el.play();
+        isPlayingRef.current = true;
         setIsPlaying(true);
         trackMusicPlay(customTitle || theme.music.title);
         return true;
@@ -298,35 +358,13 @@ export function PremiumAudioPlayer({
     [
       activeVideoId,
       activeDirectUrl,
-      isPlaying,
       applyAudioLevels,
+      getTargetVolume,
       customTitle,
       theme.music.title,
       theme.music.defaultTrack,
       triggerFallbackToThemeTrack,
     ],
-  );
-
-  /** Core Pause Engine: Pauses playback cleanly */
-  const pauseAudio = useCallback(
-    (isUserExplicit: boolean = false) => {
-      if (isUserExplicit) {
-        userExplicitMutedRef.current = true;
-      }
-
-      if (activeVideoId && ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === "function") {
-        try {
-          ytPlayerRef.current.pauseVideo();
-        } catch {}
-      }
-
-      if (audioRef.current && !audioRef.current.paused) {
-        audioRef.current.pause();
-      }
-
-      setIsPlaying(false);
-    },
-    [activeVideoId],
   );
 
   // ── Global trigger for "Davetiyeyi Aç" button & Envelope Opening ─────────
@@ -362,7 +400,7 @@ export function PremiumAudioPlayer({
   // ── Unlock audio on first user touch anywhere if blocked ───────────────────
   useEffect(() => {
     const handleFirstTouch = () => {
-      if (!userExplicitMutedRef.current && (!isPlaying || isMutedRef.current)) {
+      if (!userExplicitMutedRef.current && (!isPlayingRef.current || isMutedRef.current)) {
         void playAudio(true);
       }
     };
@@ -371,52 +409,63 @@ export function PremiumAudioPlayer({
     return () => {
       window.removeEventListener("pointerdown", handleFirstTouch);
     };
-  }, [isPlaying, playAudio]);
+  }, [playAudio]);
 
-  // ── Page Visibility / Mobile Background Audio Handling ────────────────────
-  // When user minimizes browser, switches tab, or locks screen, audio pauses.
-  // When returning to the page, audio resumes automatically.
+  // ── Bulletproof Mobile Backgrounding & Page Visibility Handling ────────────
+  // Triggers instantly when user presses home button, minimizes browser,
+  // switches apps/tabs, or locks screen on iOS / Android / Desktop.
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden || document.visibilityState === "hidden") {
-        // Page is hidden / minimized / switched to home screen
-        if (isPlaying && !userExplicitMutedRef.current && !isMutedRef.current) {
-          wasPlayingBeforeHiddenRef.current = true;
-        } else {
-          wasPlayingBeforeHiddenRef.current = false;
-        }
-        pauseAudio(false);
-      } else if (document.visibilityState === "visible") {
-        // Page is visible again / user returned to browser
-        if (wasPlayingBeforeHiddenRef.current && !userExplicitMutedRef.current) {
-          void playAudio(false);
-        }
-      }
-    };
-
-    const handlePageHide = () => {
-      if (isPlaying && !userExplicitMutedRef.current && !isMutedRef.current) {
+    const handleAppGoingToBackground = () => {
+      // Check if music was active before backgrounding
+      if (isPlayingRef.current && !userExplicitMutedRef.current && !isMutedRef.current) {
         wasPlayingBeforeHiddenRef.current = true;
       }
-      pauseAudio(false);
+
+      // Hard stop and silence all audio immediately
+      forceStopAllAudio(false);
     };
 
-    const handlePageShow = () => {
+    const handleAppReturningToForeground = () => {
+      // Resume playback if it was playing and user didn't explicitly mute
       if (wasPlayingBeforeHiddenRef.current && !userExplicitMutedRef.current) {
-        void playAudio(false);
+        // Small delay to ensure browser media subsystem has resumed on mobile
+        setTimeout(() => {
+          if (!document.hidden && document.visibilityState === "visible") {
+            void playAudio(false);
+          }
+        }, 150);
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pagehide", handlePageHide);
-    window.addEventListener("pageshow", handlePageShow);
+    const onVisibilityChange = () => {
+      if (document.hidden || document.visibilityState === "hidden") {
+        handleAppGoingToBackground();
+      } else if (document.visibilityState === "visible") {
+        handleAppReturningToForeground();
+      }
+    };
+
+    // Standard Visibility API
+    document.addEventListener("visibilitychange", onVisibilityChange, true);
+
+    // Mobile & Desktop Lifecycle Events
+    window.addEventListener("pagehide", handleAppGoingToBackground, true);
+    window.addEventListener("pageshow", handleAppReturningToForeground, true);
+    window.addEventListener("blur", handleAppGoingToBackground, true);
+    window.addEventListener("focus", handleAppReturningToForeground, true);
+    document.addEventListener("freeze", handleAppGoingToBackground, true);
+    document.addEventListener("resume", handleAppReturningToForeground, true);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pagehide", handlePageHide);
-      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", onVisibilityChange, true);
+      window.removeEventListener("pagehide", handleAppGoingToBackground, true);
+      window.removeEventListener("pageshow", handleAppReturningToForeground, true);
+      window.removeEventListener("blur", handleAppGoingToBackground, true);
+      window.removeEventListener("focus", handleAppReturningToForeground, true);
+      document.removeEventListener("freeze", handleAppGoingToBackground, true);
+      document.removeEventListener("resume", handleAppReturningToForeground, true);
     };
-  }, [isPlaying, pauseAudio, playAudio]);
+  }, [forceStopAllAudio, playAudio]);
 
   // ── Toggle Sound (Ses Aç / Kapat) Button ──────────────────────────────────
   const handleToggleSound = useCallback(
@@ -429,7 +478,7 @@ export function PremiumAudioPlayer({
         userExplicitMutedRef.current = true;
         wasPlayingBeforeHiddenRef.current = false;
         applyAudioLevels(true);
-        pauseAudio(true);
+        forceStopAllAudio(true);
       } else {
         // Sound is OFF -> Turn Sound ON (Unmute & Play)
         setIsMuted(false);
@@ -439,14 +488,14 @@ export function PremiumAudioPlayer({
         void playAudio(true);
       }
     },
-    [isMuted, isPlaying, applyAudioLevels, pauseAudio, playAudio],
+    [isMuted, isPlaying, applyAudioLevels, forceStopAllAudio, playAudio],
   );
 
   // ── Voice-over Pause & Resume Handling ─────────────────────────────────────
   useEffect(() => {
     const handleVoiceStart = () => {
-      resumeAfterVoiceRef.current = isPlaying && !isMutedRef.current;
-      pauseAudio(false);
+      resumeAfterVoiceRef.current = isPlayingRef.current && !isMutedRef.current;
+      forceStopAllAudio(false);
     };
 
     const handleVoiceEnd = () => {
@@ -462,7 +511,7 @@ export function PremiumAudioPlayer({
       window.removeEventListener("memorywedding:voice-start", handleVoiceStart);
       window.removeEventListener("memorywedding:voice-end", handleVoiceEnd);
     };
-  }, [isPlaying, pauseAudio, playAudio]);
+  }, [forceStopAllAudio, playAudio]);
 
   const isSoundActive = isPlaying && !isMuted;
 
@@ -486,9 +535,18 @@ export function PremiumAudioPlayer({
           loop
           preload="auto"
           playsInline
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onPlaying={() => setIsPlaying(true)}
+          onPlay={() => {
+            isPlayingRef.current = true;
+            setIsPlaying(true);
+          }}
+          onPause={() => {
+            isPlayingRef.current = false;
+            setIsPlaying(false);
+          }}
+          onPlaying={() => {
+            isPlayingRef.current = true;
+            setIsPlaying(true);
+          }}
           onError={() => {
             console.warn("Direct audio source error on element");
             triggerFallbackToThemeTrack();
