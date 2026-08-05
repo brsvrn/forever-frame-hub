@@ -4,6 +4,9 @@ import { initiatePayment } from "@/lib/payment-actions";
 import { supabase } from "@/integrations/supabase/client";
 import { getTrackingPayloadForOrder } from "@/lib/analytics/utm";
 import { trackBeginCheckout } from "@/lib/analytics/analytics";
+import { redeemAccessCode } from "@/lib/admin/codes.api";
+import { Key, Sparkles, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 
 declare global {
   interface Window {
@@ -24,12 +27,18 @@ function PaymentRoute() {
   const checkoutTracked = useRef(false);
   const navigate = useNavigate();
 
+  // Promo / VIP Code states
+  const [promoCode, setPromoCode] = useState("");
+  const [redeemingCode, setRedeemingCode] = useState(false);
+  const [invitationIdState, setInvitationIdState] = useState<string | null>(null);
+
   useEffect(() => {
     async function startPayment() {
       try {
         const params = new URLSearchParams(window.location.search);
         const invitationId = params.get("invitationId");
         const packageType = params.get("packageType");
+        setInvitationIdState(invitationId);
 
         if (!invitationId || !packageType) {
           setError("Gerekli parametreler eksik. Lütfen paket seçimine dönün.");
@@ -37,7 +46,9 @@ function PaymentRoute() {
           return;
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!session) {
           window.location.assign("/giris");
           return;
@@ -51,7 +62,7 @@ function PaymentRoute() {
             invitationId,
             idempotencyKey: idempotencyKey.current,
             tracking,
-          }
+          },
         });
 
         if (res.success && res.token) {
@@ -103,53 +114,131 @@ function PaymentRoute() {
     }
   }, [token, error, loading]);
 
+  const handleApplyPromoCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!promoCode.trim()) {
+      toast.error("Lütfen bir VIP veya promosyon kodu girin.");
+      return;
+    }
+    if (!invitationIdState) {
+      toast.error("Etkinlik bilgisi bulunamadı.");
+      return;
+    }
+
+    setRedeemingCode(true);
+    try {
+      const result = await redeemAccessCode(promoCode, invitationIdState);
+      if (result.success) {
+        toast.success(result.message);
+        setAlreadyPaid(invitationIdState);
+        setTimeout(() => {
+          window.location.href = `/panel/${invitationIdState}`;
+        }, 1500);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Kod uygulanamadı.");
+    } finally {
+      setRedeemingCode(false);
+    }
+  };
+
   return (
-    <div className="min-h-dvh overflow-y-auto overflow-x-hidden bg-background pt-24 pb-12 flex flex-col items-center justify-start p-4" style={{ WebkitOverflowScrolling: "touch" }}>
-      <div className="w-full max-w-3xl glass p-3 sm:p-8 rounded-3xl min-h-[900px] flex flex-col justify-start relative">
+    <div
+      className="min-h-dvh overflow-y-auto overflow-x-hidden bg-background pt-24 pb-12 flex flex-col items-center justify-start p-4"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
+      <div className="w-full max-w-3xl glass p-4 sm:p-8 rounded-3xl min-h-[700px] flex flex-col justify-start relative space-y-6">
+        {/* VIP / Promo Code Box */}
+        {!alreadyPaid && !error && (
+          <div className="bg-card/70 border border-gold/30 p-4 sm:p-5 rounded-2xl shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gold">
+                <Key className="w-4 h-4" />
+                <span>VIP / Tanıtım / Site Sahibi Kodu</span>
+              </div>
+              <span className="text-[11px] text-muted-foreground">Ödeme bypass & indirim</span>
+            </div>
+            <form onSubmit={handleApplyPromoCode} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Erişim kodunuzu girin (Örn: VIP-2026)"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                className="flex-1 uppercase font-mono px-3.5 py-2 bg-surface border border-border rounded-xl text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold"
+              />
+              <button
+                type="submit"
+                disabled={redeemingCode || !promoCode.trim()}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gold text-zinc-950 font-bold text-xs hover:bg-gold/90 disabled:opacity-50 transition-all shadow-md shadow-gold/20"
+              >
+                {redeemingCode ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5" />
+                )}
+                <span>Kodu Uygula</span>
+              </button>
+            </form>
+          </div>
+        )}
+
         {loading && (
-          <div className="flex flex-col items-center justify-center h-full space-y-4">
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <div className="size-10 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-muted-foreground animate-pulse">Güvenli ödeme sayfasına bağlanılıyor...</p>
+            <p className="text-muted-foreground animate-pulse text-sm">
+              Güvenli ödeme sayfasına bağlanılıyor...
+            </p>
           </div>
         )}
 
         {alreadyPaid && (
-          <div className="flex flex-col items-center justify-center h-full space-y-4 text-center">
-            <div className="size-16 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
-              <svg className="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+          <div className="flex flex-col items-center justify-center py-16 space-y-4 text-center">
+            <div className="size-16 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-2">
+              <CheckCircle2 className="size-8" />
             </div>
-            <h2 className="text-xl font-semibold">Ödeme Zaten Tamamlanmış</h2>
-            <p className="text-muted-foreground">Bu davetiye için ödeme onaylanmıştır. Yönetim paneline yönlendiriliyorsunuz...</p>
-            <a 
+            <h2 className="text-xl font-bold font-display text-foreground">
+              Paket Başarıyla Aktif Edildi!
+            </h2>
+            <p className="text-muted-foreground text-xs max-w-sm">
+              Etkinliğiniz ve tüm ayrıcalıklar hesabınıza tanımlandı. Yönetim paneline
+              yönlendiriliyorsunuz...
+            </p>
+            <a
               href={`/panel/${alreadyPaid}`}
-              className="mt-4 px-6 py-2 bg-gold text-background font-medium rounded-full hover:bg-gold/90 transition-colors"
+              className="inline-flex items-center gap-2 mt-4 px-6 py-2.5 bg-gold text-zinc-950 font-bold text-xs rounded-xl hover:bg-gold/90 transition-colors shadow-lg shadow-gold/20"
             >
-              Yönetim Paneline Git
+              <span>Yönetim Paneline Git</span>
+              <ArrowRight className="w-4 h-4" />
             </a>
           </div>
         )}
 
         {error && !alreadyPaid && (
-          <div className="flex flex-col items-center justify-center h-full space-y-4 text-center">
-            <div className="size-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center py-16 space-y-4 text-center">
+            <div className="size-16 rounded-full bg-red-100 dark:bg-rose-500/20 text-red-600 dark:text-rose-400 flex items-center justify-center mb-2">
               <svg className="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold">Hata Oluştu</h2>
-            <p className="text-muted-foreground">{error}</p>
-            <button 
+            <h2 className="text-xl font-semibold text-foreground">Hata Oluştu</h2>
+            <p className="text-muted-foreground text-xs">{error}</p>
+            <button
               onClick={() => navigate({ to: "/olustur" })}
-              className="mt-4 px-6 py-2 bg-foreground text-background rounded-full hover:bg-foreground/90 transition-colors"
+              className="mt-4 px-6 py-2 bg-foreground text-background text-xs font-semibold rounded-xl hover:bg-foreground/90 transition-colors"
             >
               Geri Dön
             </button>
           </div>
         )}
 
-        {token && !error && !loading && (
+        {token && !error && !loading && !alreadyPaid && (
           <iframe
             src={`https://www.paytr.com/odeme/guvenli/${token}`}
             id="paytriframe"
@@ -163,3 +252,4 @@ function PaymentRoute() {
     </div>
   );
 }
+
