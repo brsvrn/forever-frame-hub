@@ -124,38 +124,53 @@ export function PremiumRSVP({
               exit={{ opacity: 0, x: 20 }}
               className="p-8 text-center"
             >
-              <h3 className={`text-2xl text-white mb-2 ${theme.styles.typography.display}`}>
+              <h3 className={`text-2xl mb-2 ${theme.styles.typography.display}`}>
                 Lütfen Cevap Verin
               </h3>
-              <p className="text-white/50 text-sm mb-8">Bizimle olabilecek misiniz?</p>
+              <p className="opacity-75 text-sm mb-8">Bizimle olabilecek misiniz?</p>
 
               <div className="space-y-3">
                 <button
+                  type="button"
                   onClick={() => {
                     setStatus("yes");
                     setStep(1);
                   }}
-                  className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-medium transition-all ${status === "yes" ? theme.styles.buttons.primary : "bg-white/5 text-white hover:bg-white/10"}`}
+                  className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-medium transition-all cursor-pointer ${
+                    status === "yes"
+                      ? theme.styles.buttons.primary
+                      : "border border-current/15 bg-black/10 text-inherit hover:bg-black/20"
+                  }`}
                 >
                   <Check className="w-5 h-5" />
                   <span>Evet, Katılıyorum</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     setStatus("maybe");
                     setStep(1);
                   }}
-                  className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-medium transition-all ${status === "maybe" ? theme.styles.buttons.primary : "bg-white/5 text-white hover:bg-white/10"}`}
+                  className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-medium transition-all cursor-pointer ${
+                    status === "maybe"
+                      ? theme.styles.buttons.primary
+                      : "border border-current/15 bg-black/10 text-inherit hover:bg-black/20"
+                  }`}
                 >
                   <HelpCircle className="w-5 h-5" />
                   <span>Kararsızım</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     setStatus("no");
                     setStep(1);
                   }}
-                  className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-medium transition-all ${status === "no" ? theme.styles.buttons.primary : "bg-white/5 text-white hover:bg-white/10"}`}
+                  className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-medium transition-all cursor-pointer ${
+                    status === "no"
+                      ? theme.styles.buttons.primary
+                      : "border border-current/15 bg-black/10 text-inherit hover:bg-black/20"
+                  }`}
                 >
                   <X className="w-5 h-5" />
                   <span>Maalesef Katılamıyorum</span>
@@ -173,30 +188,33 @@ export function PremiumRSVP({
               className="p-8"
             >
               <h3
-                className={`text-2xl text-white mb-6 text-center ${theme.styles.typography.display}`}
+                className={`text-2xl mb-6 text-center ${theme.styles.typography.display}`}
               >
                 Detaylar
               </h3>
               {status !== "no" && (
                 <div className="mb-6 grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs uppercase tracking-widest text-white/70 mb-1.5">
+                    <label className="block text-xs uppercase tracking-widest opacity-75 font-semibold mb-1.5">
                       Yetişkin
                     </label>
                     <div className="flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => setPartySize((p) => Math.max(1, p - 1))}
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-lg font-bold text-white hover:bg-white/20 active:scale-95 transition-all"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-current/20 bg-black/10 text-lg font-bold text-inherit hover:bg-black/20 active:scale-95 transition-all cursor-pointer"
                         aria-label="Yetişkin sayısını azalt"
                       >
                         -
                       </button>
                       <input
                         type="number"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         min={1}
                         max={50}
                         value={partySize === 0 ? "" : partySize}
+                        onFocus={(e) => e.target.select()}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === "") {
@@ -209,12 +227,12 @@ export function PremiumRSVP({
                         onBlur={() => {
                           if (partySize < 1) setPartySize(1);
                         }}
-                        className="w-full text-center bg-white/5 border border-white/10 rounded-xl py-2.5 text-white text-base font-semibold focus:outline-none focus:border-white/30"
+                        className="w-full text-center bg-black/10 border border-current/20 rounded-xl py-2.5 text-inherit text-base font-semibold focus:outline-none focus:border-current/40"
                       />
                       <button
                         type="button"
                         onClick={() => setPartySize((p) => Math.min(50, (p || 0) + 1))}
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-lg font-bold text-white hover:bg-white/20 active:scale-95 transition-all"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-current/20 bg-black/10 text-lg font-bold text-inherit hover:bg-black/20 active:scale-95 transition-all cursor-pointer"
                         aria-label="Yetişkin sayısını artır"
                       >
                         +
@@ -224,24 +242,27 @@ export function PremiumRSVP({
 
                   {form?.settings?.collect_child_count !== false && (
                     <div>
-                      <label className="block text-xs uppercase tracking-widest text-white/70 mb-1.5">
+                      <label className="block text-xs uppercase tracking-widest opacity-75 font-semibold mb-1.5">
                         Çocuk
                       </label>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => setChildCount((c) => Math.max(0, c - 1))}
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-lg font-bold text-white hover:bg-white/20 active:scale-95 transition-all"
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-current/20 bg-black/10 text-lg font-bold text-inherit hover:bg-black/20 active:scale-95 transition-all cursor-pointer"
                           aria-label="Çocuk sayısını azalt"
                         >
                           -
                         </button>
                         <input
                           type="number"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           min={0}
                           max={50}
                           value={childCount === 0 ? "" : childCount}
                           placeholder="0"
+                          onFocus={(e) => e.target.select()}
                           onChange={(e) => {
                             const val = e.target.value;
                             if (val === "") {
@@ -251,12 +272,12 @@ export function PremiumRSVP({
                               if (!isNaN(num)) setChildCount(Math.min(50, Math.max(0, num)));
                             }
                           }}
-                          className="w-full text-center bg-white/5 border border-white/10 rounded-xl py-2.5 text-white text-base font-semibold focus:outline-none focus:border-white/30"
+                          className="w-full text-center bg-black/10 border border-current/20 rounded-xl py-2.5 text-inherit text-base font-semibold focus:outline-none focus:border-current/40"
                         />
                         <button
                           type="button"
                           onClick={() => setChildCount((c) => Math.min(50, c + 1))}
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-lg font-bold text-white hover:bg-white/20 active:scale-95 transition-all"
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-current/20 bg-black/10 text-lg font-bold text-inherit hover:bg-black/20 active:scale-95 transition-all cursor-pointer"
                           aria-label="Çocuk sayısını artır"
                         >
                           +
@@ -267,58 +288,58 @@ export function PremiumRSVP({
                 </div>
               )}
               <div className="mb-6">
-                <label className="block text-xs uppercase tracking-widest text-white/50 mb-2">
+                <label className="block text-xs uppercase tracking-widest opacity-75 font-semibold mb-2">
                   İsminiz
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30"
+                  className="w-full bg-black/10 border border-current/20 rounded-xl px-4 py-3 text-inherit focus:outline-none focus:border-current/40"
                 />
               </div>
 
               {status !== "no" && form?.settings?.collect_phone && (
-                <label className="mb-4 block text-xs uppercase tracking-widest text-white/50">
+                <label className="mb-4 block text-xs uppercase tracking-widest opacity-75 font-semibold">
                   Telefon
                   <input
                     type="tel"
                     value={phone}
                     required
                     onChange={(event) => setPhone(event.target.value)}
-                    className="mt-2 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30"
+                    className="mt-2 w-full bg-black/10 border border-current/20 rounded-xl px-4 py-3 text-inherit focus:outline-none focus:border-current/40"
                   />
                 </label>
               )}
               {status !== "no" && form?.settings?.collect_email && (
-                <label className="mb-4 block text-xs uppercase tracking-widest text-white/50">
+                <label className="mb-4 block text-xs uppercase tracking-widest opacity-75 font-semibold">
                   E-posta
                   <input
                     type="email"
                     value={email}
                     required
                     onChange={(event) => setEmail(event.target.value)}
-                    className="mt-2 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30"
+                    className="mt-2 w-full bg-black/10 border border-current/20 rounded-xl px-4 py-3 text-inherit focus:outline-none focus:border-current/40"
                   />
                 </label>
               )}
               {status !== "no" && form?.settings?.event_level_attendance && (
                 <fieldset className="mb-5 space-y-2">
-                  <legend className="mb-2 text-xs uppercase tracking-widest text-white/70">
+                  <legend className="mb-2 text-xs uppercase tracking-widest opacity-80 font-semibold">
                     Katılacağınız etkinlikler
                   </legend>
                   {form.schedules.map((schedule) => (
                     <label
                       key={schedule.id}
-                      className={`flex min-h-11 items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium text-white transition-colors cursor-pointer ${
+                      className={`flex min-h-11 items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
                         scheduleSelections[schedule.id] === true
-                          ? "border-white/30 bg-white/15"
-                          : "border-white/10 bg-white/5 hover:bg-white/10"
+                          ? "border-current/40 bg-black/20 font-semibold"
+                          : "border-current/15 bg-black/5 hover:bg-black/10"
                       }`}
                     >
                       <input
                         type="checkbox"
-                        className="size-4 rounded accent-rose-400 text-rose-500"
+                        className="size-4 rounded accent-rose-500 text-rose-500"
                         checked={scheduleSelections[schedule.id] === true}
                         onChange={(event) =>
                           setScheduleSelections((current) => ({
@@ -327,35 +348,36 @@ export function PremiumRSVP({
                           }))
                         }
                       />
-                      <span className="text-white text-sm font-medium leading-snug">{schedule.title}</span>
+                      <span className="text-inherit text-sm font-medium leading-snug">{schedule.title}</span>
                     </label>
                   ))}
                 </fieldset>
               )}
               {status !== "no" && form?.settings?.collect_meal_preference && (
-                <label className="mb-4 block text-xs uppercase tracking-widest text-white/50">
+                <label className="mb-4 block text-xs uppercase tracking-widest opacity-75 font-semibold">
                   Yemek tercihi
                   <input
                     value={mealPreference}
                     onChange={(event) => setMealPreference(event.target.value)}
-                    className="mt-2 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30"
+                    className="mt-2 w-full bg-black/10 border border-current/20 rounded-xl px-4 py-3 text-inherit focus:outline-none focus:border-current/40"
                   />
                 </label>
               )}
               {status !== "no" && form?.settings?.collect_allergy_info && (
-                <label className="mb-4 block text-xs uppercase tracking-widest text-white/50">
+                <label className="mb-4 block text-xs uppercase tracking-widest opacity-75 font-semibold">
                   Alerji bilgisi
                   <textarea
                     value={allergyInfo}
                     onChange={(event) => setAllergyInfo(event.target.value)}
-                    className="mt-2 w-full resize-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30"
+                    className="mt-2 w-full resize-none bg-black/10 border border-current/20 rounded-xl px-4 py-3 text-inherit focus:outline-none focus:border-current/40"
                   />
                 </label>
               )}
               {status !== "no" && form?.settings?.collect_transport_need && (
-                <label className="mb-4 flex min-h-11 items-center gap-3 text-sm text-white/75">
+                <label className="mb-4 flex min-h-11 items-center gap-3 text-sm opacity-90 cursor-pointer">
                   <input
                     type="checkbox"
+                    className="size-4 rounded accent-rose-500 text-rose-500"
                     checked={transportRequired}
                     onChange={(event) => setTransportRequired(event.target.checked)}
                   />
@@ -374,7 +396,7 @@ export function PremiumRSVP({
                   return (
                     <label
                       key={question.id}
-                      className="mb-4 block text-xs uppercase tracking-widest text-white/50"
+                      className="mb-4 block text-xs uppercase tracking-widest opacity-75 font-semibold"
                     >
                       {question.label}
                       {question.question_type === "multiple_choice" ? (
@@ -386,10 +408,11 @@ export function PremiumRSVP({
                             return (
                               <span
                                 key={option}
-                                className="flex min-h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 normal-case tracking-normal"
+                                className="flex min-h-11 items-center gap-3 rounded-xl border border-current/20 bg-black/10 px-4 normal-case tracking-normal text-inherit cursor-pointer"
                               >
                                 <input
                                   type="checkbox"
+                                  className="size-4 rounded accent-rose-500 text-rose-500"
                                   checked={selected}
                                   onChange={(event) =>
                                     setAnswers((current) => {
@@ -405,7 +428,7 @@ export function PremiumRSVP({
                                     })
                                   }
                                 />
-                                {option}
+                                <span className="text-inherit text-sm font-medium">{option}</span>
                               </span>
                             );
                           })}
@@ -422,7 +445,7 @@ export function PremiumRSVP({
                               : event.target.value;
                             setAnswers((current) => ({ ...current, [question.id]: value }));
                           }}
-                          className="mt-2 w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white"
+                          className="mt-2 w-full bg-black/30 border border-current/20 rounded-xl px-4 py-3 text-inherit"
                         >
                           <option value="">Seçin</option>
                           {question.question_type === "yes_no" ||
@@ -433,7 +456,7 @@ export function PremiumRSVP({
                             </>
                           ) : (
                             options.map((option) => (
-                              <option key={option} value={option}>
+                              <option key={option} value={option} className="text-black">
                                 {option}
                               </option>
                             ))
@@ -450,7 +473,7 @@ export function PremiumRSVP({
                               [question.id]: event.target.value,
                             }))
                           }
-                          className="mt-2 min-h-28 w-full resize-y bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white"
+                          className="mt-2 min-h-28 w-full resize-y bg-black/10 border border-current/20 rounded-xl px-4 py-3 text-inherit focus:outline-none focus:border-current/40"
                         />
                       ) : (
                         <input
@@ -472,19 +495,19 @@ export function PremiumRSVP({
                                   : event.target.value,
                             }))
                           }
-                          className="mt-2 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white"
+                          className="mt-2 w-full bg-black/10 border border-current/20 rounded-xl px-4 py-3 text-inherit focus:outline-none focus:border-current/40"
                         />
                       )}
                     </label>
                   );
                 })}
               {status !== "no" && form?.settings?.collect_special_note && (
-                <label className="mb-4 block text-xs uppercase tracking-widest text-white/50">
+                <label className="mb-4 block text-xs uppercase tracking-widest opacity-75 font-semibold">
                   Özel not
                   <textarea
                     value={specialNote}
                     onChange={(event) => setSpecialNote(event.target.value)}
-                    className="mt-2 w-full resize-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white"
+                    className="mt-2 w-full resize-none bg-black/10 border border-current/20 rounded-xl px-4 py-3 text-inherit focus:outline-none focus:border-current/40"
                   />
                 </label>
               )}
@@ -492,9 +515,12 @@ export function PremiumRSVP({
               {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting || (!form && invitationId !== "demo-id")}
-                className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-medium transition-all ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""} ${theme.styles.buttons.primary}`}
+                className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-medium transition-all cursor-pointer ${
+                  isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                } ${theme.styles.buttons.primary}`}
               >
                 {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -518,10 +544,10 @@ export function PremiumRSVP({
               <div className="w-16 h-16 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center mx-auto mb-6">
                 <Check className="w-8 h-8" />
               </div>
-              <h3 className={`text-2xl text-white mb-2 ${theme.styles.typography.display}`}>
+              <h3 className={`text-2xl mb-2 ${theme.styles.typography.display}`}>
                 Teşekkürler
               </h3>
-              <p className="text-white/70">Yanıtınız başarıyla iletildi.</p>
+              <p className="opacity-80">Yanıtınız başarıyla iletildi.</p>
             </motion.div>
           )}
         </AnimatePresence>

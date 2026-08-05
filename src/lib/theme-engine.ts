@@ -116,7 +116,15 @@ export interface ThemeConfig {
   };
   styles: {
     overlay: string;
-    typography: { display: string; sans: string };
+    typography: {
+      display: string;
+      sans: string;
+      subheading?: string;
+      ampersand?: string;
+    };
+    textColor?: string;
+    mutedTextColor?: string;
+    accentColor?: string;
     motion: string;
     buttons: { primary: string; secondary: string };
     cards: { wrapper: string };
@@ -157,7 +165,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#EAFDFC",
     secondaryColor: "#073F4D",
     coverVideoUrl: "/videos/turquoise-cove.mp4",
-    font: "Cormorant Garamond",
+    font: "Montserrat",
     qr: {
       accent: "#58D6D2",
       ink: "#073F4D",
@@ -170,15 +178,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 1.8, style: "fade" },
     styles: {
       overlay: "bg-cyan-950/35",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-montserrat font-light tracking-[0.22em] uppercase text-[#E0F7FA]",
+        sans: "font-sans",
+        subheading: "font-montserrat uppercase tracking-[0.35em] text-[#80DEEA] text-xs font-semibold",
+        ampersand: "font-pinyon text-[#4DD0E1] text-[1.1em] font-normal mx-2 opacity-95",
+      },
+      textColor: "text-[#E0F7FA]",
+      mutedTextColor: "text-[#B2EBF2]/80",
+      accentColor: "text-[#26C6DA]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-cyan-100 text-cyan-950 hover:bg-white",
+        primary: "bg-[#E0F7FA] text-cyan-950 font-semibold tracking-wider hover:bg-white",
         secondary: "bg-white/15 text-white hover:bg-white/25",
       },
-      cards: { wrapper: "bg-cyan-950/45 backdrop-blur-xl border-white/15" },
+      cards: { wrapper: "bg-cyan-950/45 backdrop-blur-xl border-cyan-300/25" },
       gallery: { gridStyle: "masonry" },
-      icons: { color: "text-cyan-100" },
+      icons: { color: "text-[#80DEEA]" },
     },
   },
   "golden-sunset": {
@@ -191,7 +207,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFF4DE",
     secondaryColor: "#6B2F2A",
     coverVideoUrl: "/videos/golden-sunset.mp4",
-    font: "Cormorant Garamond",
+    font: "Alex Brush",
     qr: {
       accent: "#FFBE7C",
       ink: "#5A2825",
@@ -204,15 +220,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.1, style: "blur" },
     styles: {
       overlay: "bg-orange-950/35",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-script text-[#FFF0D4] font-normal tracking-wide text-[1.1em] leading-[1.05] drop-shadow-md",
+        sans: "font-sans",
+        subheading: "font-serif uppercase tracking-[0.3em] text-[#FFD79A]/90 text-xs font-medium",
+        ampersand: "font-parisienne text-[#FFC06E] text-[1.1em] font-normal mx-2 opacity-95",
+      },
+      textColor: "text-[#FFFDF7]",
+      mutedTextColor: "text-[#FFE3B8]/85",
+      accentColor: "text-[#FFA726]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-orange-100 text-orange-950 hover:bg-white",
+        primary: "bg-[#FFE8C2] text-amber-950 font-medium tracking-wide hover:bg-white",
         secondary: "bg-white/15 text-white hover:bg-white/25",
       },
-      cards: { wrapper: "bg-orange-950/45 backdrop-blur-xl border-orange-100/20" },
+      cards: { wrapper: "bg-orange-950/45 backdrop-blur-xl border-amber-200/25" },
       gallery: { gridStyle: "portrait" },
-      icons: { color: "text-orange-200" },
+      icons: { color: "text-[#FFD79A]" },
     },
   },
   "tropical-lagoon": {
@@ -225,7 +249,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#F5FFFC",
     secondaryColor: "#07565A",
     coverVideoUrl: "/videos/tropical-lagoon.mp4",
-    font: "Manrope",
+    font: "Montserrat",
     qr: {
       accent: "#7DE3D4",
       ink: "#064B4E",
@@ -238,15 +262,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2, style: "scale" },
     styles: {
       overlay: "bg-teal-950/30",
-      typography: { display: "font-sans tracking-tight", sans: "font-sans" },
+      typography: {
+        display: "font-montserrat font-bold tracking-[0.14em] uppercase text-[#E6FFFA]",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.35em] text-[#4FD1C5] text-xs font-bold",
+        ampersand: "font-cursive text-[#81E6D9] text-[0.95em] mx-2 font-normal",
+      },
+      textColor: "text-[#F0FDF4]",
+      mutedTextColor: "text-[#99F6E4]/85",
+      accentColor: "text-[#2DD4BF]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-emerald-100 text-teal-950 hover:bg-white",
+        primary: "bg-[#99F6E4] text-teal-950 font-bold tracking-wider hover:bg-white",
         secondary: "bg-white/15 text-white hover:bg-white/25",
       },
-      cards: { wrapper: "bg-teal-950/40 backdrop-blur-xl border-white/15" },
+      cards: { wrapper: "bg-teal-950/45 backdrop-blur-xl border-emerald-400/25" },
       gallery: { gridStyle: "square" },
-      icons: { color: "text-emerald-100" },
+      icons: { color: "text-[#4FD1C5]" },
     },
   },
   "moonlit-shore": {
@@ -259,7 +291,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#EEF4FF",
     secondaryColor: "#07162F",
     coverVideoUrl: "/videos/moonlit-shore.mp4",
-    font: "Cormorant Garamond",
+    font: "Cinzel",
     qr: {
       accent: "#C8D8F3",
       ink: "#0A1730",
@@ -272,15 +304,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.4, style: "blur" },
     styles: {
       overlay: "bg-slate-950/45",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-cinzel font-normal tracking-[0.24em] uppercase text-[#EDF2F7]",
+        sans: "font-sans",
+        subheading: "font-cinzel tracking-[0.35em] uppercase text-[#A0AEC0] text-xs font-semibold",
+        ampersand: "font-bodoni italic text-[#CBD5E0] text-[0.85em] font-light mx-2",
+      },
+      textColor: "text-[#F7FAFC]",
+      mutedTextColor: "text-[#CBD5E0]/80",
+      accentColor: "text-[#90CDF4]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-slate-100 text-slate-950 hover:bg-white",
+        primary: "bg-[#E2E8F0] text-slate-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/10 text-white hover:bg-white/20",
       },
-      cards: { wrapper: "bg-slate-950/55 backdrop-blur-xl border-slate-100/15" },
+      cards: { wrapper: "bg-slate-950/55 backdrop-blur-xl border-indigo-300/25" },
       gallery: { gridStyle: "masonry" },
-      icons: { color: "text-slate-200" },
+      icons: { color: "text-[#A0AEC0]" },
     },
   },
   "aegean-morning": {
@@ -293,7 +333,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#F8FCFF",
     secondaryColor: "#073D76",
     coverVideoUrl: "/videos/aegean-morning.mp4",
-    font: "Cormorant Garamond",
+    font: "Great Vibes",
     qr: {
       accent: "#E1479B",
       ink: "#073B73",
@@ -306,15 +346,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.2, style: "slideUp" },
     styles: {
       overlay: "bg-blue-950/25",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-cursive text-[#FFF1F2] font-normal tracking-wide text-[1.15em] leading-[1.08]",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.3em] text-[#FBCFE8] text-xs font-bold",
+        ampersand: "font-pinyon text-[#F472B6] text-[1.1em] mx-2 font-normal",
+      },
+      textColor: "text-[#FFF5F7]",
+      mutedTextColor: "text-[#FCE7F3]/85",
+      accentColor: "text-[#FB7185]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-white text-blue-950 hover:bg-blue-50",
+        primary: "bg-[#FCE7F3] text-blue-950 font-bold tracking-wide hover:bg-white",
         secondary: "bg-white/15 text-white hover:bg-white/25",
       },
-      cards: { wrapper: "bg-blue-950/40 backdrop-blur-xl border-white/20" },
+      cards: { wrapper: "bg-blue-950/45 backdrop-blur-xl border-pink-300/30" },
       gallery: { gridStyle: "portrait" },
-      icons: { color: "text-fuchsia-200" },
+      icons: { color: "text-[#F472B6]" },
     },
   },
   "soft-sand-dunes": {
@@ -327,7 +375,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#4C4034",
     secondaryColor: "#F4E8D4",
     coverVideoUrl: "/videos/soft-sand-dunes.mp4",
-    font: "Cormorant Garamond",
+    font: "Bodoni Moda",
     qr: {
       accent: "#D8B988",
       ink: "#463A30",
@@ -340,15 +388,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.4, style: "fade" },
     styles: {
       overlay: "bg-stone-900/10",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-bodoni italic font-medium tracking-wide text-[#FAF5EF]",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.35em] text-[#D8C7B5] text-xs font-semibold",
+        ampersand: "font-pinyon text-[#E2C799] text-[1.1em] font-normal mx-2",
+      },
+      textColor: "text-[#FFFBF5]",
+      mutedTextColor: "text-[#E8DAC8]/85",
+      accentColor: "text-[#D4A373]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-stone-100 text-stone-900 hover:bg-white",
+        primary: "bg-[#EEDBBE] text-stone-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/20 text-white hover:bg-white/30",
       },
-      cards: { wrapper: "bg-stone-900/28 backdrop-blur-xl border-white/25" },
+      cards: { wrapper: "bg-stone-900/32 backdrop-blur-xl border-[#D8B988]/35" },
       gallery: { gridStyle: "portrait" },
-      icons: { color: "text-amber-100" },
+      icons: { color: "text-[#E2C799]" },
     },
   },
 
@@ -362,7 +418,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#F2F7E8",
     secondaryColor: "#173A2A",
     coverVideoUrl: "/videos/emerald-forest.mp4",
-    font: "Cormorant Garamond",
+    font: "Marcellus",
     qr: {
       accent: "#BFD69B",
       ink: "#173A2A",
@@ -375,15 +431,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.1, style: "fade" },
     styles: {
       overlay: "bg-emerald-950/18",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-marcellus font-normal tracking-[0.2em] uppercase text-[#F2FBE0]",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.32em] text-[#BEF264] text-xs font-semibold",
+        ampersand: "font-script text-[#A3E635] text-[0.95em] mx-2 font-normal",
+      },
+      textColor: "text-[#F7FEE7]",
+      mutedTextColor: "text-[#D9F99D]/85",
+      accentColor: "text-[#84CC16]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-lime-100 text-emerald-950 hover:bg-white",
+        primary: "bg-[#D9F99D] text-emerald-950 font-bold tracking-wider hover:bg-white",
         secondary: "bg-white/15 text-white hover:bg-white/25",
       },
-      cards: { wrapper: "bg-emerald-950/38 backdrop-blur-xl border-lime-100/20" },
+      cards: { wrapper: "bg-emerald-950/42 backdrop-blur-xl border-lime-200/25" },
       gallery: { gridStyle: "masonry" },
-      icons: { color: "text-lime-100" },
+      icons: { color: "text-[#BEF264]" },
     },
   },
   "wildflower-meadow": {
@@ -396,7 +460,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFF9F0",
     secondaryColor: "#4E5131",
     coverVideoUrl: "/videos/wildflower-meadow.mp4",
-    font: "Cormorant Garamond",
+    font: "Parisienne",
     qr: {
       accent: "#D6B1CC",
       ink: "#4A4B2D",
@@ -409,15 +473,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.2, style: "slideUp" },
     styles: {
       overlay: "bg-stone-900/24",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-parisienne text-[#FFF0F5] font-normal tracking-wider text-[1.1em] leading-[1.05]",
+        sans: "font-sans",
+        subheading: "font-serif uppercase tracking-[0.3em] text-[#F9A8D4] text-xs font-medium",
+        ampersand: "font-pinyon text-[#F472B6] text-[1.15em] font-normal mx-2",
+      },
+      textColor: "text-[#FFF1F2]",
+      mutedTextColor: "text-[#FCE7F3]/85",
+      accentColor: "text-[#EC4899]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-rose-50 text-stone-800 hover:bg-white",
+        primary: "bg-[#FCE7F3] text-stone-900 font-medium tracking-wide hover:bg-white",
         secondary: "bg-white/25 text-white hover:bg-white/35",
       },
-      cards: { wrapper: "bg-stone-900/32 backdrop-blur-xl border-white/28" },
+      cards: { wrapper: "bg-stone-900/36 backdrop-blur-xl border-rose-200/30" },
       gallery: { gridStyle: "portrait" },
-      icons: { color: "text-rose-100" },
+      icons: { color: "text-[#F9A8D4]" },
     },
   },
   "alpine-mist": {
@@ -430,7 +502,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#F1F6F3",
     secondaryColor: "#173330",
     coverVideoUrl: "/videos/alpine-mist.mp4",
-    font: "Manrope",
+    font: "Montserrat",
     qr: {
       accent: "#AFC7C0",
       ink: "#173330",
@@ -443,15 +515,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.3, style: "blur" },
     styles: {
       overlay: "bg-slate-950/20",
-      typography: { display: "font-sans tracking-tight", sans: "font-sans" },
+      typography: {
+        display: "font-montserrat font-extralight tracking-[0.35em] uppercase text-[#F0FDF4]",
+        sans: "font-sans",
+        subheading: "font-montserrat uppercase tracking-[0.45em] text-[#CCFBF1] text-xs font-light",
+        ampersand: "font-display italic text-[#99F6E4] font-light opacity-80 mx-2 text-[0.8em]",
+      },
+      textColor: "text-[#F8FAFC]",
+      mutedTextColor: "text-[#E2E8F0]/80",
+      accentColor: "text-[#5EEAD4]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-slate-100 text-emerald-950 hover:bg-white",
+        primary: "bg-[#F1F5F9] text-slate-900 font-light tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/12 text-white hover:bg-white/22",
       },
-      cards: { wrapper: "bg-emerald-950/42 backdrop-blur-xl border-slate-100/18" },
+      cards: { wrapper: "bg-emerald-950/45 backdrop-blur-xl border-slate-100/22" },
       gallery: { gridStyle: "square" },
-      icons: { color: "text-slate-100" },
+      icons: { color: "text-[#CCFBF1]" },
     },
   },
 
@@ -465,7 +545,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFFBE9",
     secondaryColor: "#164D59",
     coverVideoUrl: "/videos/amalfi-lemon-terrace.mp4",
-    font: "Cormorant Garamond",
+    font: "Italiana",
     qr: {
       accent: "#F2D45C",
       ink: "#164D59",
@@ -478,15 +558,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.1, style: "fade" },
     styles: {
       overlay: "bg-cyan-950/16",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-italiana font-normal tracking-[0.16em] uppercase text-[#FEF9C3]",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.32em] text-[#FDE047] text-xs font-bold",
+        ampersand: "font-script text-[#FACC15] text-[1.05em] mx-2 font-normal",
+      },
+      textColor: "text-[#FEFCE8]",
+      mutedTextColor: "text-[#FEF08A]/85",
+      accentColor: "text-[#EAB308]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-yellow-100 text-cyan-950 hover:bg-white",
+        primary: "bg-[#FEF08A] text-cyan-950 font-bold tracking-wider hover:bg-white",
         secondary: "bg-white/18 text-white hover:bg-white/28",
       },
-      cards: { wrapper: "bg-cyan-950/38 backdrop-blur-xl border-yellow-100/20" },
+      cards: { wrapper: "bg-cyan-950/42 backdrop-blur-xl border-yellow-200/25" },
       gallery: { gridStyle: "portrait" },
-      icons: { color: "text-yellow-100" },
+      icons: { color: "text-[#FDE047]" },
     },
   },
   "tuscan-golden-hills": {
@@ -499,7 +587,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFF4D9",
     secondaryColor: "#4C3B24",
     coverVideoUrl: "/videos/tuscan-golden-hills.mp4",
-    font: "Cormorant Garamond",
+    font: "Playfair Display",
     qr: {
       accent: "#D9A94A",
       ink: "#493820",
@@ -512,15 +600,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.3, style: "blur" },
     styles: {
       overlay: "bg-amber-950/16",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-playfair italic font-medium tracking-normal text-[#FEF3C7]",
+        sans: "font-sans",
+        subheading: "font-serif uppercase tracking-[0.3em] text-[#FCD34D] text-xs font-semibold",
+        ampersand: "font-pinyon text-[#F59E0B] text-[1.15em] font-normal mx-2",
+      },
+      textColor: "text-[#FFFBEB]",
+      mutedTextColor: "text-[#FDE68A]/85",
+      accentColor: "text-[#D97706]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-amber-100 text-stone-900 hover:bg-white",
+        primary: "bg-[#FDE68A] text-stone-950 font-semibold tracking-wide hover:bg-white",
         secondary: "bg-white/18 text-white hover:bg-white/28",
       },
-      cards: { wrapper: "bg-stone-950/36 backdrop-blur-xl border-amber-100/22" },
+      cards: { wrapper: "bg-stone-950/40 backdrop-blur-xl border-amber-200/25" },
       gallery: { gridStyle: "masonry" },
-      icons: { color: "text-amber-100" },
+      icons: { color: "text-[#FCD34D]" },
     },
   },
   "lake-como-garden": {
@@ -533,7 +629,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#F7F5EC",
     secondaryColor: "#183D48",
     coverVideoUrl: "/videos/lake-como-garden.mp4",
-    font: "Cormorant Garamond",
+    font: "Cinzel",
     qr: {
       accent: "#C9C7B0",
       ink: "#183D48",
@@ -546,15 +642,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.4, style: "slideUp" },
     styles: {
       overlay: "bg-slate-950/16",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-cinzel font-normal tracking-[0.18em] uppercase text-[#F8FAFC]",
+        sans: "font-sans",
+        subheading: "font-cinzel tracking-[0.32em] uppercase text-[#CBD5E0] text-xs font-medium",
+        ampersand: "font-bodoni italic text-[#E2E8F0] font-light opacity-90 mx-2 text-[0.85em]",
+      },
+      textColor: "text-[#F8FAFC]",
+      mutedTextColor: "text-[#CBD5E0]/80",
+      accentColor: "text-[#E2E8F0]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-stone-100 text-slate-900 hover:bg-white",
+        primary: "bg-[#E2E8F0] text-slate-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/16 text-white hover:bg-white/26",
       },
-      cards: { wrapper: "bg-slate-950/38 backdrop-blur-xl border-stone-100/20" },
+      cards: { wrapper: "bg-slate-950/42 backdrop-blur-xl border-stone-100/22" },
       gallery: { gridStyle: "square" },
-      icons: { color: "text-stone-100" },
+      icons: { color: "text-[#CBD5E0]" },
     },
   },
 
@@ -568,7 +672,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFF9EE",
     secondaryColor: "#5B4934",
     coverVideoUrl: "/videos/grand-ballroom.mp4",
-    font: "Cormorant Garamond",
+    font: "Cinzel Decorative",
     qr: {
       accent: "#D8B878",
       ink: "#4D3C29",
@@ -581,15 +685,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.4, style: "scale" },
     styles: {
       overlay: "bg-stone-950/20",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-cinzel-decorative font-bold tracking-wide text-[#FDE68A] drop-shadow-md",
+        sans: "font-sans",
+        subheading: "font-cinzel tracking-[0.35em] uppercase text-[#FCD34D] text-xs font-bold",
+        ampersand: "font-pinyon text-[#F59E0B] text-[1.2em] font-normal mx-2",
+      },
+      textColor: "text-[#FFFBEB]",
+      mutedTextColor: "text-[#FEF3C7]/90",
+      accentColor: "text-[#EAB308]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-[#fff8e9] text-stone-900 hover:bg-white",
+        primary: "bg-gradient-to-r from-[#FDE68A] to-[#F59E0B] text-stone-950 font-bold tracking-wider hover:from-white hover:to-[#FDE68A]",
         secondary: "bg-white/18 text-white hover:bg-white/28",
       },
-      cards: { wrapper: "bg-stone-950/30 backdrop-blur-xl border-[#f4dfb4]/25" },
+      cards: { wrapper: "bg-stone-950/40 backdrop-blur-xl border-[#FDE68A]/30" },
       gallery: { gridStyle: "portrait" },
-      icons: { color: "text-[#f8e8c7]" },
+      icons: { color: "text-[#FCD34D]" },
     },
   },
 
@@ -602,7 +714,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     selectable: true,
     primaryColor: "#FFFFFF",
     secondaryColor: "#000000",
-    font: "Manrope",
+    font: "Montserrat",
     qr: {
       accent: "#E5E5E5",
       ink: "#1A1A1A",
@@ -615,13 +727,21 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.0, style: "fade" },
     styles: {
       overlay: "bg-black/40",
-      typography: { display: "font-sans font-light", sans: "font-sans" },
+      typography: {
+        display: "font-montserrat font-black tracking-[0.25em] uppercase text-white drop-shadow-lg",
+        sans: "font-sans",
+        subheading: "font-montserrat uppercase tracking-[0.45em] text-white/80 text-xs font-black",
+        ampersand: "font-montserrat font-extralight opacity-70 text-white mx-2 text-[0.75em]",
+      },
+      textColor: "text-white",
+      mutedTextColor: "text-white/75",
+      accentColor: "text-white",
       motion: "ease-out",
       buttons: {
-        primary: "bg-white text-black hover:bg-white/90",
+        primary: "bg-white text-black font-black tracking-widest uppercase text-xs hover:bg-white/90",
         secondary: "bg-white/10 text-white hover:bg-white/20",
       },
-      cards: { wrapper: "bg-black/50 backdrop-blur-xl border-white/10" },
+      cards: { wrapper: "bg-black/55 backdrop-blur-xl border-white/15" },
       gallery: { gridStyle: "masonry" },
       icons: { color: "text-white" },
     },
@@ -636,7 +756,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FAF3E0",
     secondaryColor: "#5C4A3D",
     coverVideoUrl: "/videos/boho-motion.mp4",
-    font: "Cormorant Garamond",
+    font: "Alex Brush",
     qr: {
       accent: "#D4A373",
       ink: "#5C4A3D",
@@ -649,15 +769,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.0, style: "fade" },
     styles: {
       overlay: "bg-[#2B221C]/30",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-script text-[#FFEDD5] font-normal tracking-wide text-[1.1em] leading-[1.05]",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.32em] text-[#FDBA74] text-xs font-bold",
+        ampersand: "font-parisienne text-[#FB923C] text-[1.1em] font-normal mx-2",
+      },
+      textColor: "text-[#FFF7ED]",
+      mutedTextColor: "text-[#FED7AA]/85",
+      accentColor: "text-[#F97316]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-[#D4A373] text-white hover:bg-[#C29262]",
+        primary: "bg-[#FDBA74] text-stone-950 font-bold tracking-wide hover:bg-[#FED7AA]",
         secondary: "bg-white/15 text-white hover:bg-white/25",
       },
-      cards: { wrapper: "bg-[#2B221C]/50 backdrop-blur-xl border-[#D4A373]/20" },
+      cards: { wrapper: "bg-[#2B221C]/55 backdrop-blur-xl border-[#D4A373]/25" },
       gallery: { gridStyle: "masonry" },
-      icons: { color: "text-[#FAF3E0]" },
+      icons: { color: "text-[#FDBA74]" },
     },
   },
   "ethereal-light": {
@@ -670,7 +798,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     primaryColor: "#FFFFFF",
     secondaryColor: "#333333",
     coverVideoUrl: "/videos/ethereal-light.mp4",
-    font: "Playfair Display",
+    font: "Prata",
     qr: {
       accent: "#B8C5B3",
       ink: "#222222",
@@ -683,15 +811,23 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     openingAnimation: { duration: 2.0, style: "fade" },
     styles: {
       overlay: "bg-black/20",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-prata font-normal tracking-wide text-[#FFFFFF] drop-shadow-sm",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.38em] text-[#E2E8F0] text-xs font-medium",
+        ampersand: "font-pinyon text-[#FFFFFF] text-[1.15em] font-normal mx-2 opacity-90",
+      },
+      textColor: "text-[#FFFFFF]",
+      mutedTextColor: "text-[#F1F5F9]/85",
+      accentColor: "text-[#FFFFFF]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-white/90 text-black hover:bg-white",
+        primary: "bg-white/95 text-black font-semibold tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/20 text-white hover:bg-white/30",
       },
-      cards: { wrapper: "bg-black/30 backdrop-blur-xl border-white/20" },
+      cards: { wrapper: "bg-black/35 backdrop-blur-xl border-white/25" },
       gallery: { gridStyle: "masonry" },
-      icons: { color: "text-white" },
+      icons: { color: "text-[#FFFFFF]" },
     },
   },
 
@@ -731,7 +867,15 @@ function legacyTheme(
     openingAnimation: { duration: 2, style: "fade" },
     styles: {
       overlay: "bg-black/45",
-      typography: { display: "font-serif", sans: "font-sans" },
+      typography: {
+        display: "font-serif text-white",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-widest text-white/70 text-xs",
+        ampersand: "font-serif italic text-white/70 mx-2",
+      },
+      textColor: "text-white",
+      mutedTextColor: "text-white/70",
+      accentColor: "text-white",
       motion: "ease-out",
       buttons: {
         primary: "bg-white text-slate-950 hover:bg-slate-100",

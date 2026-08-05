@@ -273,7 +273,7 @@ function PremiumInvitePage() {
               </>
             ) : null}
             {eventFeatures?.gift_enabled !== false && advanced?.gift ? (
-              <GiftSection settings={advanced.gift} />
+              <GiftSection settings={advanced.gift} theme={theme} />
             ) : null}
 
             <InvitationFooter draft={draft} theme={theme} lang={lang} />

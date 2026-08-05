@@ -9,7 +9,7 @@ import themeEmerald from "@/assets/theme-emerald-forest.png";
 import themeComo from "@/assets/theme-lake-como-garden.png";
 import { supabase } from "@/integrations/supabase/client";
 import type { ThemeConfig } from "@/lib/theme-engine";
-import { getGuestUploadViewUrl } from "@/lib/r2-actions";
+import { getBatchGuestUploadViewUrls, getGuestUploadViewUrl } from "@/lib/r2-actions";
 
 type MemoryPhoto = {
   id: string;
@@ -98,19 +98,40 @@ export function MemoryWall({
             upload.file_type?.startsWith("image/") &&
             (!upload.status || upload.status === "active" || upload.status === "approved"),
         );
-        const photosWithAccess = await Promise.all(
-          activePhotos.map(async (photo) => {
-            try {
-              const res = await getGuestUploadViewUrl({ data: { uploadId: photo.id } });
-              return {
-                ...photo,
-                file_url: res.url || photo.file_url,
-              };
-            } catch {
-              return photo;
+
+        if (activePhotos.length === 0) {
+          setPhotos([]);
+          return;
+        }
+
+        const uploadIds = activePhotos.map((p) => p.id);
+        const urlMap: Record<string, string> = {};
+
+        try {
+          const chunkSize = 50;
+          for (let i = 0; i < uploadIds.length; i += chunkSize) {
+            const chunk = uploadIds.slice(i, i + chunkSize);
+            const res = await getBatchGuestUploadViewUrls({
+              data: { invitationId, uploadIds: chunk },
+            });
+            if (res?.urls) {
+              Object.assign(urlMap, res.urls);
             }
-          }),
-        );
+          }
+        } catch (err) {
+          console.warn("Batch URL load error in MemoryWall:", err);
+        }
+
+        const photosWithAccess = activePhotos
+          .map((photo) => {
+            const resolvedUrl = urlMap[photo.id] || photo.file_url;
+            return {
+              ...photo,
+              file_url: resolvedUrl,
+            };
+          })
+          .filter((photo) => !photo.file_url.startsWith("protected://"));
+
         setPhotos(photosWithAccess);
       }
     } catch (err) {

@@ -32,7 +32,7 @@ export function MultiEventDetails({
   return (
     <section className="relative flex min-h-dvh snap-center flex-col items-center px-6 py-24">
       <div className="w-full max-w-3xl">
-        <h3 className={`mb-10 text-center text-3xl text-white ${theme.styles.typography.display}`}>
+        <h3 className={`mb-10 text-center text-3xl ${theme.styles.typography.display}`}>
           {lang === "tr" ? "Etkinlikler ve Program" : "Events & Schedule"}
         </h3>
         <div className="space-y-5">
@@ -41,13 +41,13 @@ export function MultiEventDetails({
               key={schedule.id}
               className={`${theme.styles.cards.wrapper} rounded-3xl p-6 shadow-2xl sm:p-8`}
             >
-              <h4 className={`text-2xl text-white ${theme.styles.typography.display}`}>
+              <h4 className={`text-2xl ${theme.styles.typography.display}`}>
                 {schedule.title}
               </h4>
               {schedule.description ? (
-                <p className="mt-2 text-sm leading-relaxed text-white/65">{schedule.description}</p>
+                <p className={`mt-2 text-sm leading-relaxed ${theme.styles.mutedTextColor || "text-white/65"}`}>{schedule.description}</p>
               ) : null}
-              <div className="mt-6 grid gap-4 text-sm text-white/80 sm:grid-cols-3">
+              <div className={`mt-6 grid gap-4 text-sm ${theme.styles.textColor || "text-white/80"} sm:grid-cols-3`}>
                 <p className="flex items-start gap-2">
                   <CalendarDays className={`mt-0.5 size-4 shrink-0 ${theme.styles.icons.color}`} />
                   {schedule.event_date
@@ -70,13 +70,13 @@ export function MultiEventDetails({
                   <span>
                     {schedule.venue_name}
                     {schedule.address ? (
-                      <span className="mt-1 block text-white/55">{schedule.address}</span>
+                      <span className={`mt-1 block text-xs ${theme.styles.mutedTextColor || "text-white/55"}`}>{schedule.address}</span>
                     ) : null}
                   </span>
                 </p>
               </div>
               {schedule.dress_code || schedule.parking_info || schedule.transport_info ? (
-                <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs leading-relaxed text-white/65">
+                <div className={`mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs leading-relaxed ${theme.styles.mutedTextColor || "text-white/65"}`}>
                   {[schedule.dress_code, schedule.parking_info, schedule.transport_info]
                     .filter(Boolean)
                     .join(" · ")}

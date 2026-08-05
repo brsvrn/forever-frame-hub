@@ -19,7 +19,7 @@ export function PremiumQRExperience({
           <Camera className={`w-8 h-8 ${theme.styles.icons.color}`} />
         </div>
 
-        <h3 className={`text-3xl text-white mb-4 ${theme.styles.typography.display}`}>
+        <h3 className={`text-3xl mb-4 ${theme.styles.typography.display}`}>
           Anıları Paylaşın
         </h3>
         <p className="text-white/70 text-sm mb-10 leading-relaxed">

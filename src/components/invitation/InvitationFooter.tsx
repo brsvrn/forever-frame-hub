@@ -32,31 +32,38 @@ export function InvitationFooter({
 
   const handleShareStory = async () => {
     const shareUrl = window.location.href;
-    const shareText = `${coupleTitle ? `${coupleTitle} - ` : ""}${
-      lang === "tr"
-        ? "Düğün Davetiyemiz sizleri bekliyor! 💌"
-        : "You are invited to our wedding celebration! 💌"
-    }\n${shareUrl}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: coupleTitle || "Düğün Davetiyesi",
-          text: shareText,
-          url: shareUrl,
-        });
-        return;
-      } catch (err) {
-        // Fall back to copy if user cancelled or unsupported
-      }
-    }
-
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopiedStory(true);
-      setTimeout(() => setCopiedStory(false), 3000);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
     } catch {
       // Ignore
+    }
+
+    setCopiedStory(true);
+    setTimeout(() => setCopiedStory(false), 3500);
+
+    const isMobile =
+      typeof navigator !== "undefined" &&
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+
+    if (isMobile) {
+      // Attempt direct Instagram Story Camera / App deep links
+      const startTime = Date.now();
+      window.location.href = "instagram://story-camera";
+
+      setTimeout(() => {
+        if (Date.now() - startTime < 1500 && !document.hidden) {
+          window.location.href = "instagram://app";
+          setTimeout(() => {
+            if (Date.now() - startTime < 2500 && !document.hidden) {
+              window.open("https://www.instagram.com", "_blank", "noopener,noreferrer");
+            }
+          }, 1000);
+        }
+      }, 750);
+    } else {
+      window.open("https://www.instagram.com", "_blank", "noopener,noreferrer");
     }
   };
 
@@ -83,14 +90,24 @@ export function InvitationFooter({
       >
         {/* Couple Names / Header */}
         <h3
-          className={`break-words text-3xl sm:text-5xl font-light text-white ${theme.styles.typography.display}`}
+          className={`break-words text-3xl sm:text-5xl ${theme.styles.typography.display}`}
         >
-          {coupleTitle || "MemoryWedding"}
+          {draft.partnerOne && draft.partnerTwo ? (
+            <>
+              <span>{draft.partnerOne}</span>
+              <span className={`mx-2 sm:mx-3 inline-block ${theme.styles.typography.ampersand || "opacity-75 font-serif"}`}>
+                &
+              </span>
+              <span>{draft.partnerTwo}</span>
+            </>
+          ) : (
+            coupleTitle || "MemoryWedding"
+          )}
         </h3>
 
         {/* Date & Location */}
         {(dateLabel || locationLabel) && (
-          <p className="mt-4 text-xs sm:text-sm font-medium tracking-[0.16em] uppercase text-white/70">
+          <p className={`mt-4 text-xs sm:text-sm font-medium tracking-[0.16em] uppercase ${theme.styles.mutedTextColor || "text-white/70"}`}>
             {[dateLabel, locationLabel].filter(Boolean).join(" · ")}
           </p>
         )}

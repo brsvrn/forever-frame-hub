@@ -26,10 +26,10 @@ export function EventProgramTimeline({
           >
             <Clock3 className="size-5" aria-hidden="true" />
           </span>
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-white/55">
+          <p className={`text-[0.65rem] font-semibold uppercase tracking-[0.32em] ${theme.styles.typography.subheading || "text-white/55"}`}>
             {lang === "tr" ? "Günün Akışı" : "Order of the Day"}
           </p>
-          <h3 className={`mt-3 text-4xl text-white sm:text-5xl ${theme.styles.typography.display}`}>
+          <h3 className={`mt-3 text-4xl sm:text-5xl ${theme.styles.typography.display}`}>
             {lang === "tr" ? "Etkinlik Programı" : "Event Program"}
           </h3>
         </div>
@@ -55,7 +55,7 @@ export function EventProgramTimeline({
                 transition={{ duration: 0.65, delay: index * 0.08 }}
                 className="grid grid-cols-[3.5rem_1fr] gap-5 py-5 sm:grid-cols-[5rem_1fr] sm:gap-7"
               >
-                <p className="pt-0.5 text-right text-sm font-semibold text-white sm:text-base">
+                <p className={`pt-0.5 text-right text-sm font-semibold sm:text-base ${theme.styles.textColor || "text-white"}`}>
                   {item.time || "—"}
                 </p>
                 <div className="relative pl-5 sm:pl-7">
@@ -64,9 +64,9 @@ export function EventProgramTimeline({
                     className="absolute -left-[1.43rem] top-1.5 size-3 rounded-full border-2 border-white/80 sm:-left-[1.86rem]"
                     style={{ backgroundColor: theme.qr.accent }}
                   />
-                  <h4 className="text-lg font-medium text-white">{item.title}</h4>
+                  <h4 className={`text-lg font-medium ${theme.styles.textColor || "text-white"}`}>{item.title}</h4>
                   {item.desc ? (
-                    <p className="mt-1 text-sm leading-relaxed text-white/65">{item.desc}</p>
+                    <p className={`mt-1 text-sm leading-relaxed ${theme.styles.mutedTextColor || "text-white/65"}`}>{item.desc}</p>
                   ) : null}
                 </div>
               </motion.article>

@@ -8,7 +8,7 @@ export function StoryTimeline({ draft, theme }: { draft: InvitationDraft; theme:
   return (
     <section className="relative flex flex-col items-center px-5 py-24 snap-center sm:px-6 sm:py-32">
       <div className="max-w-2xl w-full">
-        <h3 className={`text-3xl text-center text-white mb-16 ${theme.styles.typography.display}`}>
+        <h3 className={`text-3xl text-center mb-16 ${theme.styles.typography.display}`}>
           Hikayemiz
         </h3>
 
@@ -30,12 +30,12 @@ export function StoryTimeline({ draft, theme }: { draft: InvitationDraft; theme:
                 className={`min-w-0 flex-1 md:w-[calc(50%-3rem)] md:flex-none ${theme.styles.cards.wrapper} rounded-2xl p-5 sm:p-6`}
               >
                 <h4
-                  className={`font-medium mb-2 ${theme.id === "garden" || theme.id === "blush" ? "text-slate-900" : "text-white"}`}
+                  className={`font-medium mb-2 ${theme.styles.textColor || "text-white"}`}
                 >
                   {story.title}
                 </h4>
                 <p
-                  className={`text-sm leading-relaxed ${theme.id === "garden" || theme.id === "blush" ? "text-slate-700" : "text-white/70"}`}
+                  className={`text-sm leading-relaxed ${theme.styles.mutedTextColor || "text-white/70"}`}
                 >
                   {story.desc}
                 </p>

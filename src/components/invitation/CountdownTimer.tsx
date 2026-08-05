@@ -101,19 +101,19 @@ export function CountdownTimer({
         {/* Section Header */}
         <div className="mb-10 flex items-center justify-center gap-3 sm:mb-12">
           <span className="h-px w-10 sm:w-16 bg-white/20" aria-hidden="true" />
-          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.26em] text-white/70">
+          <p className={theme.styles.typography.subheading || "text-[11px] sm:text-xs font-semibold uppercase tracking-[0.26em] text-white/70"}>
             {sectionTitle}
           </p>
           <span className="h-px w-10 sm:w-16 bg-white/20" aria-hidden="true" />
         </div>
 
         {timeLeft.isPast ? (
-          <div className="rounded-3xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
-            <Sparkles className="mx-auto mb-3 size-8 text-amber-300 animate-pulse" />
-            <p className="font-serif text-2xl text-white sm:text-3xl">
+          <div className={`rounded-3xl p-8 shadow-2xl ${theme.styles.cards.wrapper}`}>
+            <Sparkles className={`mx-auto mb-3 size-8 ${theme.styles.accentColor || "text-amber-300"} animate-pulse`} />
+            <p className={`text-2xl sm:text-3xl ${theme.styles.typography.display}`}>
               {lang === "tr" ? "Büyük Gün Geldi!" : "The Big Day is Here!"}
             </p>
-            <p className="mt-2 text-sm text-white/70">
+            <p className={`mt-2 text-sm ${theme.styles.mutedTextColor || "text-white/70"}`}>
               {lang === "tr"
                 ? "Sizleri aramızda görmekten mutluluk duyuyoruz."
                 : "We are thrilled to celebrate with you."}
@@ -128,12 +128,12 @@ export function CountdownTimer({
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="group relative flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl border border-white/15 bg-black/30 p-3.5 sm:p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:border-white/30 hover:bg-white/10"
+                className={`group relative flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl transition-all duration-300 ${theme.styles.cards.wrapper}`}
               >
-                <span className="font-serif text-2xl sm:text-4xl lg:text-5xl font-light leading-none tracking-tight text-white tabular-nums">
+                <span className={`text-2xl sm:text-4xl lg:text-5xl font-light leading-none tracking-tight tabular-nums ${theme.styles.textColor || "text-white"}`}>
                   {unit.value}
                 </span>
-                <span className="mt-2.5 text-[9px] sm:text-[11px] uppercase tracking-[0.2em] font-medium text-white/60 group-hover:text-white/80 transition-colors">
+                <span className={`mt-2.5 text-[9px] sm:text-[11px] uppercase tracking-[0.2em] font-medium transition-colors ${theme.styles.mutedTextColor || "text-white/60"}`}>
                   {unit.label}
                 </span>
               </motion.div>

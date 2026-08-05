@@ -96,6 +96,80 @@ export const getGuestUploadViewUrl = createServerFn({ method: "GET" })
     }
   });
 
+export const getBatchGuestUploadViewUrls = createServerFn({ method: "POST" })
+  .validator((input: unknown) => uploadIdsInput.parse(input))
+  .handler(async ({ data }) => {
+    const request = requestOrThrow();
+    const { getServiceSupabase } = await import("./supabase-admin");
+    const admin = getServiceSupabase();
+
+    const { data: uploads } = await admin
+      .from("guest_uploads")
+      .select("id,invitation_id,file_path,file_url,file_type,status")
+      .eq("invitation_id", data.invitationId)
+      .in("id", data.uploadIds);
+
+    if (!uploads || uploads.length === 0) {
+      return { urls: {} as Record<string, string> };
+    }
+
+    const { data: memory } = await admin
+      .from("event_memory_settings")
+      .select("gallery_visibility")
+      .eq("invitation_id", data.invitationId)
+      .maybeSingle();
+
+    const isPublicGallery = memory?.gallery_visibility !== "private";
+    let checkedPermission = false;
+
+    let r2Client: any = null;
+    let r2Bucket: string = "";
+    const urls: Record<string, string> = {};
+
+    await Promise.all(
+      uploads.map(async (upload) => {
+        const isPublic = isPublicGallery && ["active", "approved"].includes(upload.status || "");
+        if (!isPublic && !checkedPermission) {
+          try {
+            const { requireEventPermission } = await import("./event-access.server");
+            await requireEventPermission(request, upload.invitation_id, "view_event");
+            checkedPermission = true;
+          } catch {
+            return;
+          }
+        }
+
+        if (!upload.file_path && upload.file_url && upload.file_url.startsWith("http")) {
+          urls[upload.id] = upload.file_url;
+          return;
+        }
+
+        try {
+          if (!r2Client) {
+            const { getR2Bucket, getR2Client } = await import("./r2.server");
+            r2Bucket = getR2Bucket();
+            r2Client = getR2Client();
+          }
+
+          const command = new GetObjectCommand({
+            Bucket: r2Bucket,
+            Key: upload.file_path || "",
+            ResponseContentType: upload.file_type,
+            ResponseContentDisposition: "inline",
+          });
+
+          urls[upload.id] = await getSignedUrl(r2Client, command, { expiresIn: 900 });
+        } catch (error) {
+          if (upload.file_url && upload.file_url.startsWith("http")) {
+            urls[upload.id] = upload.file_url;
+          }
+        }
+      }),
+    );
+
+    return { urls };
+  });
+
 export const deleteGuestUploads = createServerFn({ method: "POST" })
   .validator((input: unknown) => uploadIdsInput.parse(input))
   .handler(async ({ data }) => {

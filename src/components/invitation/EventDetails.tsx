@@ -45,7 +45,7 @@ export function EventDetails({
       <div
         className={`max-w-xl w-full ${theme.styles.cards.wrapper} rounded-3xl p-8 sm:p-10 shadow-2xl`}
       >
-        <h3 className={`text-2xl text-center text-white mb-10 ${theme.styles.typography.display}`}>
+        <h3 className={`text-2xl text-center mb-10 ${theme.styles.typography.display}`}>
           Etkinlik Bilgileri
         </h3>
 
@@ -57,8 +57,8 @@ export function EventDetails({
               <CalendarDays className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Tarih</p>
-              <p className="text-white font-medium">{dateLabel || "Tarih Belirlenmedi"}</p>
+              <p className={`text-xs uppercase tracking-widest mb-1 ${theme.styles.typography.subheading || "text-white/50"}`}>Tarih</p>
+              <p className={`font-medium ${theme.styles.textColor || "text-white"}`}>{dateLabel || "Tarih Belirlenmedi"}</p>
             </div>
           </div>
 
@@ -69,8 +69,8 @@ export function EventDetails({
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Saat</p>
-              <p className="text-white font-medium">{draft.time || "Saat Belirlenmedi"}</p>
+              <p className={`text-xs uppercase tracking-widest mb-1 ${theme.styles.typography.subheading || "text-white/50"}`}>Saat</p>
+              <p className={`font-medium ${theme.styles.textColor || "text-white"}`}>{draft.time || "Saat Belirlenmedi"}</p>
             </div>
           </div>
 
@@ -81,9 +81,9 @@ export function EventDetails({
               <Map className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-white/50 text-xs uppercase tracking-widest mb-1">Konum</p>
-              <p className="text-white font-medium">{draft.venue || "Mekan Belirlenmedi"}</p>
-              <p className="text-white/70 text-sm mt-1">
+              <p className={`text-xs uppercase tracking-widest mb-1 ${theme.styles.typography.subheading || "text-white/50"}`}>Konum</p>
+              <p className={`font-medium ${theme.styles.textColor || "text-white"}`}>{draft.venue || "Mekan Belirlenmedi"}</p>
+              <p className={`text-sm mt-1 ${theme.styles.mutedTextColor || "text-white/70"}`}>
                 {draft.address} {draft.city}
               </p>
             </div>
@@ -92,7 +92,7 @@ export function EventDetails({
 
         {draft.rsvpLabel?.trim() && (
           <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
-            <p className="text-xs font-medium text-white/80 leading-relaxed">{draft.rsvpLabel.trim()}</p>
+            <p className={`text-xs font-medium leading-relaxed ${theme.styles.mutedTextColor || "text-white/80"}`}>{draft.rsvpLabel.trim()}</p>
           </div>
         )}
 

@@ -15,6 +15,7 @@ import type { InvitationRow } from "@/lib/invitations.api";
 import { supabase } from "@/integrations/supabase/client";
 import {
   deleteGuestUploads,
+  getBatchGuestUploadViewUrls,
   getGuestUploadViewUrl,
   getR2DownloadUrl,
   updateGuestUpload,
@@ -35,7 +36,7 @@ export interface GuestUpload {
 
 export function DashboardGallery({ invitation }: { invitation: InvitationRow }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [filter, setFilter] = useState<"all" | "photos" | "videos" | "favorites">("all");
+  const [filter, setFilter] = useState<"all" | "photos" | "videos" | "favorites" | "pending">("all");
   const [search, setSearch] = useState("");
   const [uploads, setUploads] = useState<GuestUpload[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,18 +56,38 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
           .order("created_at", { ascending: false });
 
         if (!error && data && isMounted) {
-          const accessibleUploads = await Promise.all(
-            (data as GuestUpload[]).map(async (upload) => {
-              try {
-                const res = await getGuestUploadViewUrl({ data: { uploadId: upload.id } });
-                return { ...upload, file_url: res.url || upload.file_url };
-              } catch {
-                return upload;
+          const rawUploads = data as GuestUpload[];
+          // Set initial uploads for rapid rendering
+          setUploads(rawUploads);
+
+          // Batch fetch signed URLs for protected/r2 items
+          const uploadIds = rawUploads.map((u) => u.id);
+          if (uploadIds.length > 0) {
+            try {
+              // Batch in groups of 50
+              const chunkSize = 50;
+              const urlMap: Record<string, string> = {};
+              for (let i = 0; i < uploadIds.length; i += chunkSize) {
+                const chunk = uploadIds.slice(i, i + chunkSize);
+                const res = await getBatchGuestUploadViewUrls({
+                  data: { invitationId: invitation.id, uploadIds: chunk },
+                });
+                if (res?.urls) {
+                  Object.assign(urlMap, res.urls);
+                }
               }
-            }),
-          );
-          if (isMounted) {
-            setUploads(accessibleUploads);
+
+              if (isMounted && Object.keys(urlMap).length > 0) {
+                setUploads((current) =>
+                  current.map((u) => ({
+                    ...u,
+                    file_url: urlMap[u.id] || u.file_url,
+                  })),
+                );
+              }
+            } catch (err) {
+              console.warn("Batch URL load error:", err);
+            }
           }
         }
       } catch (err) {
@@ -207,10 +228,13 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
     else setSelectedIds(new Set(uploads.map((u) => u.id)));
   };
 
+  const pendingCount = uploads.filter((u) => u.status === "pending").length;
+
   const filteredUploads = uploads.filter((u) => {
     if (filter === "photos" && !u.file_type.startsWith("image/")) return false;
     if (filter === "videos" && !u.file_type.startsWith("video/")) return false;
     if (filter === "favorites" && !u.is_favorite) return false;
+    if (filter === "pending" && u.status !== "pending") return false;
     if (search && !u.guest_name?.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -243,7 +267,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
                   void downloadUploads(uploads.filter((upload) => selectedIds.has(upload.id)))
                 }
                 disabled={downloading}
-                className="p-2 text-foreground hover:text-foreground bg-accent/10 rounded-md transition-colors tooltip"
+                className="p-2 text-foreground hover:text-foreground bg-accent/10 rounded-md transition-colors tooltip cursor-pointer"
                 title="Seçilenleri indir"
               >
                 {downloading ? (
@@ -254,7 +278,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
               </button>
               <button
                 onClick={handleDelete}
-                className="p-2 text-foreground hover:text-rose-500 bg-accent/10 rounded-md transition-colors"
+                className="p-2 text-foreground hover:text-rose-500 bg-accent/10 rounded-md transition-colors cursor-pointer"
                 title="Sil"
               >
                 <Trash2 className="w-4 h-4" />
@@ -264,7 +288,7 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
 
           <button
             onClick={toggleSelectAll}
-            className="p-2.5 bg-card border border-border text-muted-foreground hover:text-foreground rounded-xl transition-colors"
+            className="p-2.5 bg-card border border-border text-muted-foreground hover:text-foreground rounded-xl transition-colors cursor-pointer"
             title="Tümünü Seç"
           >
             <CheckSquare className="w-5 h-5" />
@@ -284,22 +308,40 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
             className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-gold/50 transition-colors text-foreground"
           />
         </div>
-        <div className="flex bg-surface border border-border rounded-xl p-1 shrink-0">
+        <div className="flex flex-wrap bg-surface border border-border rounded-xl p-1 shrink-0 gap-1">
           {[
             { id: "all", label: "Tümü", icon: null },
             { id: "photos", label: "Fotoğraf", icon: ImageIcon },
             { id: "videos", label: "Video", icon: Video },
             { id: "favorites", label: "Favoriler", icon: Heart },
+            {
+              id: "pending",
+              label: `Onay Bekleyen (${pendingCount})`,
+              icon: Filter,
+              showBadge: pendingCount > 0,
+            },
           ].map((f) => (
             <button
               key={f.id}
               onClick={() => setFilter(f.id as any)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition-colors ${filter === f.id ? "bg-accent/10 text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer ${
+                filter === f.id
+                  ? "bg-accent/10 text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               {f.icon && (
-                <f.icon className={`w-4 h-4 ${f.id === "favorites" ? "text-rose-500" : ""}`} />
+                <f.icon
+                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+                    f.id === "favorites"
+                      ? "text-rose-500"
+                      : f.id === "pending"
+                        ? "text-amber-400"
+                        : ""
+                  }`}
+                />
               )}
-              <span className="hidden sm:inline">{f.label}</span>
+              <span>{f.label}</span>
             </button>
           ))}
         </div>
@@ -332,28 +374,33 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
                   className={`w-full h-full object-cover transition-transform duration-700 ${isSelected ? "scale-105" : "group-hover:scale-105"}`}
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/20 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" />
 
               {/* Top Icons */}
-              <div className="absolute top-3 right-3 flex items-center gap-2">
+              <div className="absolute top-3 right-3 flex items-center gap-2 z-10">
                 <button
+                  type="button"
                   onClick={(e) => toggleFavorite(e, upload.id, upload.is_favorite)}
-                  className={`p-1.5 rounded-full backdrop-blur-md transition-colors ${upload.is_favorite ? "bg-rose-500/20 text-rose-500" : "bg-background/40 text-foreground/70 hover:text-foreground opacity-0 group-hover:opacity-100"}`}
+                  className={`p-1.5 rounded-full backdrop-blur-md transition-colors cursor-pointer ${
+                    upload.is_favorite
+                      ? "bg-rose-500/20 text-rose-500"
+                      : "bg-background/40 text-foreground/70 hover:text-foreground opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
+                  }`}
                 >
                   <Heart className="w-4 h-4" fill={upload.is_favorite ? "currentColor" : "none"} />
                 </button>
               </div>
 
               {upload.status === "pending" ? (
-                <div className="absolute left-3 top-3 rounded-full bg-amber-400 px-2.5 py-1 text-[0.65rem] font-semibold text-black">
+                <div className="absolute left-3 top-3 z-10 rounded-full bg-amber-400 px-2.5 py-1 text-[0.65rem] font-semibold text-black shadow">
                   Onay bekliyor
                 </div>
               ) : null}
 
               {/* Selection Indicator */}
               <div
-                className={`absolute top-3 left-3 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? "bg-gold border-gold text-black" : "border-border0 bg-background/20 opacity-0 group-hover:opacity-100"}`}
-                style={upload.status === "pending" ? { top: "3.25rem" } : undefined}
+                className={`absolute top-3 left-3 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? "bg-gold border-gold text-black" : "border-white/40 bg-background/20 opacity-80 sm:opacity-0 sm:group-hover:opacity-100"}`}
+                style={upload.status === "pending" ? { top: "2.25rem" } : undefined}
               >
                 {isSelected && <CheckSquare className="w-3 h-3" />}
               </div>
@@ -368,10 +415,12 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
               )}
 
               {/* Bottom Info */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                <p className="text-foreground text-sm font-medium truncate">{upload.guest_name}</p>
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 translate-y-0 sm:translate-y-4 opacity-100 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition-all duration-300 z-10">
+                <p className="text-white text-xs sm:text-sm font-medium truncate drop-shadow">
+                  {upload.guest_name}
+                </p>
                 <div className="flex items-center justify-between mt-1">
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-white/70 text-[11px] sm:text-xs">
                     {(upload.file_size / (1024 * 1024)).toFixed(1)} MB
                   </p>
                   <button
@@ -381,24 +430,24 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
                       void downloadUploads([upload]);
                     }}
                     disabled={downloading}
-                    className="text-gold text-xs font-medium hover:underline disabled:opacity-50"
+                    className="text-gold text-xs font-medium hover:underline disabled:opacity-50 cursor-pointer"
                   >
                     İndir
                   </button>
                 </div>
                 {upload.status === "pending" ? (
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-2 sm:mt-3 grid grid-cols-2 gap-1.5 sm:gap-2">
                     <button
                       type="button"
                       onClick={(event) => void moderateUpload(event, upload.id, "approved")}
-                      className="rounded-lg bg-emerald-500 px-2 py-2 text-xs font-medium text-white"
+                      className="rounded-lg bg-emerald-500 px-2 py-1.5 text-[11px] sm:text-xs font-medium text-white shadow active:scale-95 transition-all cursor-pointer"
                     >
                       Onayla
                     </button>
                     <button
                       type="button"
                       onClick={(event) => void moderateUpload(event, upload.id, "rejected")}
-                      className="rounded-lg bg-rose-500 px-2 py-2 text-xs font-medium text-white"
+                      className="rounded-lg bg-rose-500 px-2 py-1.5 text-[11px] sm:text-xs font-medium text-white shadow active:scale-95 transition-all cursor-pointer"
                     >
                       Reddet
                     </button>

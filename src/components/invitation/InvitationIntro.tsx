@@ -150,7 +150,17 @@ export function InvitationIntro({
                       : "0 3px 20px rgba(0,0,0,.48)",
                 }}
               >
-                {names}
+                {partnerOne && partnerTwo ? (
+                  <>
+                    <span>{partnerOne}</span>
+                    <span className={`mx-2 sm:mx-4 inline-block ${theme.styles.typography.ampersand || "opacity-75 font-serif"}`}>
+                      &
+                    </span>
+                    <span>{partnerTwo}</span>
+                  </>
+                ) : (
+                  names
+                )}
               </h1>
               <motion.div
                 initial={{ opacity: 0 }}
