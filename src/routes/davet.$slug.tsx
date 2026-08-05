@@ -280,6 +280,7 @@ function PremiumInvitePage() {
 
       {features.music !== false && eventFeatures?.music_enabled !== false ? (
         <PremiumAudioPlayer
+          key={theme.id}
           theme={theme}
           autoPlay={hasOpened || !openingEnabled || features.digital_invitation === false}
           hideUI={!hasOpened && openingEnabled}

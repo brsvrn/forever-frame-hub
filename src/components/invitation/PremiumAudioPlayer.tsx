@@ -321,17 +321,17 @@ export function PremiumAudioPlayer({
           setIsPlaying(true);
         } catch {}
       } else if (audioRef.current) {
-        // Ensure the audio element has a src loaded before playing
+        // Always call play() synchronously inside the click handler.
+        // iOS Safari accepts the play request even if audio isn't loaded yet —
+        // the browser queues the intent as long as it is within the gesture.
         const el = audioRef.current;
-        if (el.readyState >= 2) {
-          // HAVE_CURRENT_DATA or better — can play immediately
-          el.play()
-            .then(() => setIsPlaying(true))
-            .catch((e) => console.warn("play audio helper error", e));
-        } else {
-          // Not loaded yet — set pending; the onCanPlay handler will fire play()
-          el.load();
-        }
+        el.play()
+          .then(() => setIsPlaying(true))
+          .catch((e) => {
+            console.warn("play audio helper error", e);
+            // If failed because not loaded, trigger load; onCanPlay will retry
+            if (el.readyState === 0) el.load();
+          });
       }
     };
     return () => {
@@ -356,20 +356,18 @@ export function PremiumAudioPlayer({
           console.warn("Play on open error:", e);
         }
       } else if (audioRef.current) {
-        const el = audioRef.current;
-        if (el.readyState >= 2) {
-          el.play()
-            .then(() => {
-              setIsPlaying(true);
-              trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
-            })
-            .catch((err) => {
-              console.warn("Direct audio play on open error:", err);
-            });
-        } else {
-          el.load();
-          // onCanPlay will pick up pendingPlayRef and start playback
-        }
+        // Always attempt play() synchronously — browser queues the gesture intent
+        audioRef.current
+          .play()
+          .then(() => {
+            setIsPlaying(true);
+            trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
+          })
+          .catch((err) => {
+            console.warn("Direct audio play on open error:", err);
+            // Trigger load; onCanPlay will pick up pendingPlayRef
+            if (audioRef.current?.readyState === 0) audioRef.current.load();
+          });
       }
     };
 

@@ -142,7 +142,7 @@ export function InvitationIntro({
                 />
               ) : null}
               <h1
-                className={`max-w-[min(64rem,92vw)] break-words text-3xl font-light leading-[1.05] sm:text-5xl md:text-7xl lg:text-8xl ${theme.styles.typography.display}`}
+                className={`max-w-[min(64rem,96vw)] break-words text-5xl font-light leading-[1.0] sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl ${theme.styles.typography.display}`}
                 style={{
                   textShadow:
                     theme.category === "luxury"
