@@ -55,35 +55,45 @@ export const getGuestUploadViewUrl = createServerFn({ method: "GET" })
     const admin = getServiceSupabase();
     const { data: upload } = await admin
       .from("guest_uploads")
-      .select("id,invitation_id,file_path,file_type,status")
+      .select("id,invitation_id,file_path,file_url,file_type,status")
       .eq("id", data.uploadId)
       .maybeSingle();
     if (!upload) throw new Error("Dosya bulunamadı.");
-    const [{ data: invitation }, { data: memory }] = await Promise.all([
-      admin.from("invitations").select("is_published").eq("id", upload.invitation_id).maybeSingle(),
-      admin
-        .from("event_memory_settings")
-        .select("gallery_visibility")
-        .eq("invitation_id", upload.invitation_id)
-        .maybeSingle(),
-    ]);
+
+    if (!upload.file_path && upload.file_url && upload.file_url.startsWith("http")) {
+      return { url: upload.file_url };
+    }
+
+    const { data: memory } = await admin
+      .from("event_memory_settings")
+      .select("gallery_visibility")
+      .eq("invitation_id", upload.invitation_id)
+      .maybeSingle();
+
     const isPublic =
-      invitation?.is_published === true &&
-      memory?.gallery_visibility === "public_after_approval" &&
+      memory?.gallery_visibility !== "private" &&
       ["active", "approved"].includes(upload.status || "");
     if (!isPublic) {
       const { requireEventPermission } = await import("./event-access.server");
       await requireEventPermission(request, upload.invitation_id, "view_event");
     }
-    const { getR2Bucket, getR2Client } = await import("./r2.server");
-    const bucket = getR2Bucket();
-    const command = new GetObjectCommand({
-      Bucket: bucket,
-      Key: upload.file_path,
-      ResponseContentType: upload.file_type,
-      ResponseContentDisposition: "inline",
-    });
-    return { url: await getSignedUrl(getR2Client(), command, { expiresIn: 900 }) };
+
+    try {
+      const { getR2Bucket, getR2Client } = await import("./r2.server");
+      const bucket = getR2Bucket();
+      const command = new GetObjectCommand({
+        Bucket: bucket,
+        Key: upload.file_path || "",
+        ResponseContentType: upload.file_type,
+        ResponseContentDisposition: "inline",
+      });
+      return { url: await getSignedUrl(getR2Client(), command, { expiresIn: 900 }) };
+    } catch (error) {
+      if (upload.file_url && upload.file_url.startsWith("http")) {
+        return { url: upload.file_url };
+      }
+      throw error;
+    }
   });
 
 export const deleteGuestUploads = createServerFn({ method: "POST" })

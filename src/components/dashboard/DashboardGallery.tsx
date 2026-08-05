@@ -42,32 +42,47 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    async function fetchUploads() {
-      const { data, error } = await supabase
-        .from("guest_uploads")
-        .select(
-          "id,guest_name,file_url,file_type,file_size,is_favorite,created_at,status,note,invitation_id",
-        )
-        .eq("invitation_id", invitation.id)
-        .order("created_at", { ascending: false });
+    let isMounted = true;
 
-      if (!error && data) {
-        const accessibleUploads = await Promise.all(
-          (data as GuestUpload[]).map(async (upload) => ({
-            ...upload,
-            file_url: (await getGuestUploadViewUrl({ data: { uploadId: upload.id } })).url,
-          })),
-        );
-        setUploads(accessibleUploads);
+    async function fetchUploads() {
+      try {
+        const { data, error } = await supabase
+          .from("guest_uploads")
+          .select(
+            "id,guest_name,file_url,file_type,file_size,is_favorite,created_at,status,note,invitation_id",
+          )
+          .eq("invitation_id", invitation.id)
+          .order("created_at", { ascending: false });
+
+        if (!error && data && isMounted) {
+          const accessibleUploads = await Promise.all(
+            (data as GuestUpload[]).map(async (upload) => {
+              try {
+                const res = await getGuestUploadViewUrl({ data: { uploadId: upload.id } });
+                return { ...upload, file_url: res.url || upload.file_url };
+              } catch {
+                return upload;
+              }
+            }),
+          );
+          if (isMounted) {
+            setUploads(accessibleUploads);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching gallery uploads:", err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     }
 
     fetchUploads();
 
     // Subscribe to realtime changes
     const channel = supabase
-      .channel("schema-db-changes")
+      .channel(`gallery-${invitation.id}`)
       .on(
         "postgres_changes",
         {
@@ -78,16 +93,20 @@ export function DashboardGallery({ invitation }: { invitation: InvitationRow }) 
         },
         async (payload) => {
           const newUpload = payload.new as GuestUpload;
-          const accessibleUpload = {
-            ...newUpload,
-            file_url: (await getGuestUploadViewUrl({ data: { uploadId: newUpload.id } })).url,
-          };
-          setUploads((prev) => [accessibleUpload, ...prev]);
+          let file_url = newUpload.file_url;
+          try {
+            const res = await getGuestUploadViewUrl({ data: { uploadId: newUpload.id } });
+            if (res.url) file_url = res.url;
+          } catch {}
+          if (isMounted) {
+            setUploads((prev) => [{ ...newUpload, file_url }, ...prev]);
+          }
         },
       )
       .subscribe();
 
     return () => {
+      isMounted = false;
       supabase.removeChannel(channel);
     };
   }, [invitation.id]);

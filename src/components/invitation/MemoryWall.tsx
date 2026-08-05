@@ -74,38 +74,50 @@ export function MemoryWall({
       return;
     }
 
-    let { data, error } = await supabase
-      .from("guest_uploads")
-      .select("id,file_url,file_type,guest_name,note,created_at,status")
-      .eq("invitation_id", invitationId)
-      .order("created_at", { ascending: false });
-
-    // Eski kurulumlarda note alanı henüz eklenmemiş olabilir; duvar yine de çalışsın.
-    if (error?.message.toLowerCase().includes("note")) {
-      const fallback = await supabase
+    try {
+      let { data, error } = await supabase
         .from("guest_uploads")
-        .select("id,file_url,file_type,guest_name,created_at,status")
+        .select("id,file_url,file_type,guest_name,note,created_at,status")
         .eq("invitation_id", invitationId)
         .order("created_at", { ascending: false });
-      data = fallback.data?.map((photo) => ({ ...photo, note: null })) ?? null;
-      error = fallback.error;
-    }
 
-    if (!error && data) {
-      const activePhotos = data.filter(
-        (upload) =>
-          upload.file_type.startsWith("image/") &&
-          (!upload.status || upload.status === "active" || upload.status === "approved"),
-      );
-      const photosWithAccess = await Promise.all(
-        activePhotos.map(async (photo) => ({
-          ...photo,
-          file_url: (await getGuestUploadViewUrl({ data: { uploadId: photo.id } })).url,
-        })),
-      );
-      setPhotos(photosWithAccess);
+      // Eski kurulumlarda note alanı henüz eklenmemiş olabilir; duvar yine de çalışsın.
+      if (error?.message.toLowerCase().includes("note")) {
+        const fallback = await supabase
+          .from("guest_uploads")
+          .select("id,file_url,file_type,guest_name,created_at,status")
+          .eq("invitation_id", invitationId)
+          .order("created_at", { ascending: false });
+        data = fallback.data?.map((photo) => ({ ...photo, note: null })) ?? null;
+        error = fallback.error;
+      }
+
+      if (!error && data) {
+        const activePhotos = data.filter(
+          (upload) =>
+            upload.file_type?.startsWith("image/") &&
+            (!upload.status || upload.status === "active" || upload.status === "approved"),
+        );
+        const photosWithAccess = await Promise.all(
+          activePhotos.map(async (photo) => {
+            try {
+              const res = await getGuestUploadViewUrl({ data: { uploadId: photo.id } });
+              return {
+                ...photo,
+                file_url: res.url || photo.file_url,
+              };
+            } catch {
+              return photo;
+            }
+          }),
+        );
+        setPhotos(photosWithAccess);
+      }
+    } catch (err) {
+      console.error("Error loading memory wall photos:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [invitationId, isDemo]);
 
   useEffect(() => {

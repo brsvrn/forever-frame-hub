@@ -46,6 +46,8 @@ export function PremiumAudioPlayer({
   const ytContainerId = useRef(`yt-audio-${Math.random().toString(36).slice(2, 9)}`);
   const resumeAfterVoiceRef = useRef(false);
   const pendingPlayRef = useRef(autoPlay);
+  const userExplicitPausedRef = useRef(false);
+  const hasFirstInteractionRef = useRef(false);
 
   // Fetch YouTube video title via oEmbed
   useEffect(() => {
@@ -98,7 +100,7 @@ export function PremiumAudioPlayer({
               setIsReady(true);
               const safeVol = Math.round(Math.max(0, Math.min(1, volume)) * 100);
               event.target.setVolume(safeVol);
-              if (pendingPlayRef.current || autoPlay) {
+              if ((pendingPlayRef.current || autoPlay) && !userExplicitPausedRef.current) {
                 try {
                   event.target.playVideo();
                   setIsPlaying(true);
@@ -117,7 +119,9 @@ export function PremiumAudioPlayer({
                 setIsPlaying(false);
               } else if (event.data === 0) {
                 // YT.PlayerState.ENDED -> Loop
-                event.target.playVideo();
+                if (!userExplicitPausedRef.current) {
+                  event.target.playVideo();
+                }
               }
             },
             onError: (err: any) => {
@@ -161,22 +165,28 @@ export function PremiumAudioPlayer({
     if (videoId) {
       if (ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         if (isPlaying) {
+          userExplicitPausedRef.current = true;
           ytPlayerRef.current.pauseVideo();
           setIsPlaying(false);
         } else {
+          userExplicitPausedRef.current = false;
           ytPlayerRef.current.playVideo();
           setIsPlaying(true);
           trackMusicPlay(customTitle || dynamicTitle || undefined);
         }
       } else {
-        pendingPlayRef.current = !isPlaying;
-        setIsPlaying(!isPlaying);
+        const nextState = !isPlaying;
+        userExplicitPausedRef.current = !nextState;
+        pendingPlayRef.current = nextState;
+        setIsPlaying(nextState);
       }
     } else if (audioRef.current) {
       if (isPlaying) {
+        userExplicitPausedRef.current = true;
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
+        userExplicitPausedRef.current = false;
         audioRef.current
           .play()
           .then(() => {
@@ -194,6 +204,7 @@ export function PremiumAudioPlayer({
   // Listen for immediate "Davetiyeyi Aç" user gesture event
   useEffect(() => {
     const handleUserOpen = () => {
+      userExplicitPausedRef.current = false;
       pendingPlayRef.current = true;
       if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         try {
@@ -227,7 +238,7 @@ export function PremiumAudioPlayer({
 
   // Handle Autoplay prop change
   useEffect(() => {
-    if (autoPlay) {
+    if (autoPlay && !userExplicitPausedRef.current) {
       pendingPlayRef.current = true;
       if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         try {
@@ -247,10 +258,14 @@ export function PremiumAudioPlayer({
     }
   }, [autoPlay, videoId, directAudioUrl]);
 
-  // Fallback: start music on first user touch anywhere if autoplay was requested but blocked
+  // Fallback: start music on first user touch anywhere if autoplay was requested but blocked by browser policy
   useEffect(() => {
-    if (!autoPlay || isPlaying) return;
+    if (!autoPlay || hasFirstInteractionRef.current) return;
     const handleFirstTouch = () => {
+      if (hasFirstInteractionRef.current) return;
+      hasFirstInteractionRef.current = true;
+      if (userExplicitPausedRef.current) return;
+
       if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === "function") {
         try {
           ytPlayerRef.current.playVideo();
@@ -266,7 +281,7 @@ export function PremiumAudioPlayer({
       window.removeEventListener("touchstart", handleFirstTouch);
       window.removeEventListener("click", handleFirstTouch);
     };
-  }, [autoPlay, isPlaying, videoId]);
+  }, [autoPlay, videoId]);
 
   // Synchronize Mute
   useEffect(() => {

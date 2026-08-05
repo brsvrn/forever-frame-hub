@@ -179,29 +179,90 @@ export function PremiumRSVP({
               </h3>
               {status !== "no" && (
                 <div className="mb-6 grid grid-cols-2 gap-3">
-                  <label className="block text-xs uppercase tracking-widest text-white/50">
-                    Yetişkin
-                    <input
-                      type="number"
-                      min={1}
-                      max={50}
-                      value={partySize}
-                      onChange={(e) => setPartySize(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="mt-2 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30"
-                    />
-                  </label>
-                  {form?.settings?.collect_child_count !== false && (
-                    <label className="block text-xs uppercase tracking-widest text-white/50">
-                      Çocuk
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest text-white/70 mb-1.5">
+                      Yetişkin
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setPartySize((p) => Math.max(1, p - 1))}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-lg font-bold text-white hover:bg-white/20 active:scale-95 transition-all"
+                        aria-label="Yetişkin sayısını azalt"
+                      >
+                        -
+                      </button>
                       <input
                         type="number"
-                        min={0}
+                        min={1}
                         max={50}
-                        value={childCount}
-                        onChange={(e) => setChildCount(Math.max(0, parseInt(e.target.value) || 0))}
-                        className="mt-2 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30"
+                        value={partySize === 0 ? "" : partySize}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "") {
+                            setPartySize(0);
+                          } else {
+                            const num = parseInt(val, 10);
+                            if (!isNaN(num)) setPartySize(Math.min(50, Math.max(0, num)));
+                          }
+                        }}
+                        onBlur={() => {
+                          if (partySize < 1) setPartySize(1);
+                        }}
+                        className="w-full text-center bg-white/5 border border-white/10 rounded-xl py-2.5 text-white text-base font-semibold focus:outline-none focus:border-white/30"
                       />
-                    </label>
+                      <button
+                        type="button"
+                        onClick={() => setPartySize((p) => Math.min(50, (p || 0) + 1))}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-lg font-bold text-white hover:bg-white/20 active:scale-95 transition-all"
+                        aria-label="Yetişkin sayısını artır"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {form?.settings?.collect_child_count !== false && (
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest text-white/70 mb-1.5">
+                        Çocuk
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setChildCount((c) => Math.max(0, c - 1))}
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-lg font-bold text-white hover:bg-white/20 active:scale-95 transition-all"
+                          aria-label="Çocuk sayısını azalt"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          min={0}
+                          max={50}
+                          value={childCount === 0 ? "" : childCount}
+                          placeholder="0"
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "") {
+                              setChildCount(0);
+                            } else {
+                              const num = parseInt(val, 10);
+                              if (!isNaN(num)) setChildCount(Math.min(50, Math.max(0, num)));
+                            }
+                          }}
+                          className="w-full text-center bg-white/5 border border-white/10 rounded-xl py-2.5 text-white text-base font-semibold focus:outline-none focus:border-white/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setChildCount((c) => Math.min(50, c + 1))}
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-lg font-bold text-white hover:bg-white/20 active:scale-95 transition-all"
+                          aria-label="Çocuk sayısını artır"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -243,16 +304,21 @@ export function PremiumRSVP({
               )}
               {status !== "no" && form?.settings?.event_level_attendance && (
                 <fieldset className="mb-5 space-y-2">
-                  <legend className="mb-2 text-xs uppercase tracking-widest text-white/50">
+                  <legend className="mb-2 text-xs uppercase tracking-widest text-white/70">
                     Katılacağınız etkinlikler
                   </legend>
                   {form.schedules.map((schedule) => (
                     <label
                       key={schedule.id}
-                      className="flex min-h-11 items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-sm"
+                      className={`flex min-h-11 items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium text-white transition-colors cursor-pointer ${
+                        scheduleSelections[schedule.id] === true
+                          ? "border-white/30 bg-white/15"
+                          : "border-white/10 bg-white/5 hover:bg-white/10"
+                      }`}
                     >
                       <input
                         type="checkbox"
+                        className="size-4 rounded accent-rose-400 text-rose-500"
                         checked={scheduleSelections[schedule.id] === true}
                         onChange={(event) =>
                           setScheduleSelections((current) => ({
@@ -261,7 +327,7 @@ export function PremiumRSVP({
                           }))
                         }
                       />
-                      <span>{schedule.title}</span>
+                      <span className="text-white text-sm font-medium leading-snug">{schedule.title}</span>
                     </label>
                   ))}
                 </fieldset>
