@@ -43,9 +43,9 @@ export function EventDetails({
   return (
     <section className="relative py-24 px-6 flex flex-col items-center snap-center">
       <div
-        className={`max-w-xl w-full ${theme.styles.cards.wrapper} rounded-3xl p-8 sm:p-10 shadow-2xl`}
+        className={`max-w-xl w-full ${theme.styles.cards.wrapper} text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/20`}
       >
-        <h3 className={`text-2xl text-center mb-10 font-sans font-bold tracking-tight ${theme.styles.textColor || "text-white"}`}>
+        <h3 className="text-2xl text-center mb-10 font-sans font-bold tracking-tight text-white">
           {lang === "tr" ? "Etkinlik Bilgileri" : "Event Details"}
         </h3>
 
@@ -57,10 +57,10 @@ export function EventDetails({
               <CalendarDays className="w-5 h-5" />
             </div>
             <div>
-              <p className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
+              <p className="text-[11px] uppercase tracking-widest mb-1 font-bold text-white/70">
                 {lang === "tr" ? "Tarih" : "Date"}
               </p>
-              <p className={`font-semibold text-base ${theme.styles.textColor || "text-white"}`}>{dateLabel || "Tarih Belirlenmedi"}</p>
+              <p className="font-semibold text-base text-white">{dateLabel || "Tarih Belirlenmedi"}</p>
             </div>
           </div>
 
@@ -71,10 +71,10 @@ export function EventDetails({
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <p className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
+              <p className="text-[11px] uppercase tracking-widest mb-1 font-bold text-white/70">
                 {lang === "tr" ? "Saat" : "Time"}
               </p>
-              <p className={`font-semibold text-base ${theme.styles.textColor || "text-white"}`}>{draft.time || "Saat Belirlenmedi"}</p>
+              <p className="font-semibold text-base text-white">{draft.time || "Saat Belirlenmedi"}</p>
             </div>
           </div>
 
@@ -85,11 +85,11 @@ export function EventDetails({
               <Map className="w-5 h-5" />
             </div>
             <div>
-              <p className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
+              <p className="text-[11px] uppercase tracking-widest mb-1 font-bold text-white/70">
                 {lang === "tr" ? "Konum" : "Location"}
               </p>
-              <p className={`font-semibold text-base ${theme.styles.textColor || "text-white"}`}>{draft.venue || "Mekan Belirlenmedi"}</p>
-              <p className={`text-sm mt-1 font-medium ${theme.styles.mutedTextColor || "text-white/75"}`}>
+              <p className="font-semibold text-base text-white">{draft.venue || "Mekan Belirlenmedi"}</p>
+              <p className="text-sm mt-1 font-medium text-white/80">
                 {draft.address} {draft.city}
               </p>
             </div>
@@ -98,7 +98,7 @@ export function EventDetails({
 
         {draft.rsvpLabel?.trim() && (
           <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 text-center font-sans">
-            <p className={`text-xs font-medium leading-relaxed ${theme.styles.mutedTextColor || "text-white/85"}`}>{draft.rsvpLabel.trim()}</p>
+            <p className="text-xs font-medium leading-relaxed text-white/90">{draft.rsvpLabel.trim()}</p>
           </div>
         )}
 

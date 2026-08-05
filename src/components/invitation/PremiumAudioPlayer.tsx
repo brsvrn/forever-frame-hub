@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX, Music, Loader2 } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { extractYouTubeVideoId } from "@/lib/music-library";
 import { trackMusicPlay } from "@/lib/analytics/analytics";
@@ -10,6 +10,7 @@ declare global {
     YT?: any;
     onYouTubeIframeAPIReady?: () => void;
     __ytApiLoadingPromise?: Promise<void>;
+    __MW_PLAY_AUDIO__?: () => void;
   }
 }
 
@@ -65,8 +66,6 @@ export function PremiumAudioPlayer({
   customTitle,
   hideUI = false,
   volume = 0.65,
-  licenseName,
-  licenseUrl,
 }: {
   theme: ThemeConfig;
   autoPlay?: boolean;
@@ -86,18 +85,15 @@ export function PremiumAudioPlayer({
     !initialVideoId ? rawUrl : null,
   );
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [hasAutoplayBlocked, setHasAutoplayBlocked] = useState(false);
-  const [dynamicTitle, setDynamicTitle] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
   const ytContainerId = useRef(`yt-audio-${Math.random().toString(36).slice(2, 9)}`);
   const ytReadyRef = useRef(false);
 
-  const playPromiseRef = useRef<Promise<void> | null>(null);
-  const userExplicitPausedRef = useRef(false);
+  const userExplicitMutedRef = useRef(false);
+  const wasPlayingBeforeHiddenRef = useRef(false);
   const resumeAfterVoiceRef = useRef(false);
   const isMutedRef = useRef(isMuted);
   isMutedRef.current = isMuted;
@@ -155,24 +151,6 @@ export function PremiumAudioPlayer({
     applyAudioLevels(isMutedRef.current);
   }, [volume, applyAudioLevels]);
 
-  // Fetch YouTube title via oEmbed
-  useEffect(() => {
-    if (activeVideoId && !customTitle) {
-      let active = true;
-      fetch(`https://noembed.com/embed?dataType=json&url=https://www.youtube.com/watch?v=${activeVideoId}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (active && data && data.title) {
-            setDynamicTitle(data.title);
-          }
-        })
-        .catch(() => {});
-      return () => {
-        active = false;
-      };
-    }
-  }, [activeVideoId, customTitle]);
-
   /** Fallback to default theme MP3 track if custom audio or YouTube fails */
   const triggerFallbackToThemeTrack = useCallback(() => {
     if (hasFallenBackRef.current) return;
@@ -222,14 +200,11 @@ export function PremiumAudioPlayer({
               ytReadyRef.current = true;
               applyAudioLevels(isMutedRef.current);
 
-              if (autoPlay && !userExplicitPausedRef.current) {
+              if (autoPlay && !userExplicitMutedRef.current) {
                 try {
                   event.target.playVideo();
                   setIsPlaying(true);
-                  setHasAutoplayBlocked(false);
-                } catch {
-                  setHasAutoplayBlocked(true);
-                }
+                } catch {}
               }
             },
             onStateChange: (event: any) => {
@@ -237,15 +212,10 @@ export function PremiumAudioPlayer({
               // 1 = playing, 2 = paused, 3 = buffering, 0 = ended
               if (event.data === 1) {
                 setIsPlaying(true);
-                setIsBuffering(false);
-                setHasAutoplayBlocked(false);
               } else if (event.data === 2) {
                 setIsPlaying(false);
-                setIsBuffering(false);
-              } else if (event.data === 3) {
-                setIsBuffering(true);
               } else if (event.data === 0) {
-                if (!userExplicitPausedRef.current) {
+                if (!userExplicitMutedRef.current) {
                   try {
                     event.target.playVideo();
                   } catch {}
@@ -282,8 +252,9 @@ export function PremiumAudioPlayer({
     async (isUserGesture: boolean = false): Promise<boolean> => {
       if (isUserGesture) {
         unlockAudioContext();
-        userExplicitPausedRef.current = false;
-        setHasAutoplayBlocked(false);
+        userExplicitMutedRef.current = false;
+        setIsMuted(false);
+        isMutedRef.current = false;
       }
 
       applyAudioLevels(isMutedRef.current);
@@ -294,12 +265,10 @@ export function PremiumAudioPlayer({
           try {
             ytPlayerRef.current.playVideo();
             setIsPlaying(true);
-            setHasAutoplayBlocked(false);
-            trackMusicPlay(customTitle || dynamicTitle || undefined);
+            trackMusicPlay(customTitle || theme.music.title);
             return true;
           } catch (e) {
             console.warn("YouTube play failed:", e);
-            if (!isUserGesture) setHasAutoplayBlocked(true);
             return false;
           }
         }
@@ -311,33 +280,14 @@ export function PremiumAudioPlayer({
       if (!el) return false;
 
       try {
-        // If already playing without pause, avoid duplicate call
         if (!el.paused && isPlaying) return true;
-
-        setIsBuffering(true);
-        const promise = el.play();
-        playPromiseRef.current = promise;
-
-        await promise;
-        playPromiseRef.current = null;
+        await el.play();
         setIsPlaying(true);
-        setIsBuffering(false);
-        setHasAutoplayBlocked(false);
-        trackMusicPlay(customTitle || dynamicTitle || theme.music.title);
+        trackMusicPlay(customTitle || theme.music.title);
         return true;
       } catch (err: any) {
-        playPromiseRef.current = null;
-        setIsBuffering(false);
-
-        if (err?.name === "NotAllowedError") {
-          // Autoplay policy prevented playback until user interaction
-          if (!isUserGesture) {
-            setHasAutoplayBlocked(true);
-            setIsPlaying(false);
-          }
-        } else if (err?.name !== "AbortError") {
+        if (err?.name !== "AbortError" && err?.name !== "NotAllowedError") {
           console.warn("Direct audio playback error:", err);
-          // If custom URL broke, trigger theme fallback
           if (activeDirectUrl !== theme.music.defaultTrack) {
             triggerFallbackToThemeTrack();
           }
@@ -351,7 +301,6 @@ export function PremiumAudioPlayer({
       isPlaying,
       applyAudioLevels,
       customTitle,
-      dynamicTitle,
       theme.music.title,
       theme.music.defaultTrack,
       triggerFallbackToThemeTrack,
@@ -359,104 +308,149 @@ export function PremiumAudioPlayer({
   );
 
   /** Core Pause Engine: Pauses playback cleanly */
-  const pauseAudio = useCallback((isUserExplicit: boolean = true) => {
-    if (isUserExplicit) {
-      userExplicitPausedRef.current = true;
-    }
+  const pauseAudio = useCallback(
+    (isUserExplicit: boolean = false) => {
+      if (isUserExplicit) {
+        userExplicitMutedRef.current = true;
+      }
 
-    if (activeVideoId && ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === "function") {
-      try {
-        ytPlayerRef.current.pauseVideo();
-      } catch {}
-    }
+      if (activeVideoId && ytPlayerRef.current && typeof ytPlayerRef.current.pauseVideo === "function") {
+        try {
+          ytPlayerRef.current.pauseVideo();
+        } catch {}
+      }
 
-    if (audioRef.current && !audioRef.current.paused) {
-      audioRef.current.pause();
-    }
+      if (audioRef.current && !audioRef.current.paused) {
+        audioRef.current.pause();
+      }
 
-    setIsPlaying(false);
-    setIsBuffering(false);
-  }, [activeVideoId]);
+      setIsPlaying(false);
+    },
+    [activeVideoId],
+  );
 
-  // ── Global trigger for "Davetiyeyi Aç" button ─────────────────────────────
+  // ── Global trigger for "Davetiyeyi Aç" button & Envelope Opening ─────────
   useEffect(() => {
-    (window as any).__MW_PLAY_AUDIO__ = () => {
+    window.__MW_PLAY_AUDIO__ = () => {
+      userExplicitMutedRef.current = false;
+      setIsMuted(false);
+      isMutedRef.current = false;
       void playAudio(true);
     };
 
     const handleUserOpen = () => {
+      userExplicitMutedRef.current = false;
+      setIsMuted(false);
+      isMutedRef.current = false;
       void playAudio(true);
     };
 
     window.addEventListener("memorywedding:user-opened-invitation", handleUserOpen);
     return () => {
-      delete (window as any).__MW_PLAY_AUDIO__;
+      delete window.__MW_PLAY_AUDIO__;
       window.removeEventListener("memorywedding:user-opened-invitation", handleUserOpen);
     };
   }, [playAudio]);
 
-  // ── Handle Autoplay prop changes & initial mount ───────────────────────────
+  // ── Autoplay on mount or state change ──────────────────────────────────────
   useEffect(() => {
-    if (autoPlay && !userExplicitPausedRef.current) {
+    if (autoPlay && !userExplicitMutedRef.current) {
       void playAudio(false);
     }
   }, [autoPlay, playAudio]);
 
-  // ── Handle Autoplay Blocked Fallback (unlock on first user touch anywhere) ───
+  // ── Unlock audio on first user touch anywhere if blocked ───────────────────
   useEffect(() => {
-    if (!hasAutoplayBlocked || userExplicitPausedRef.current) return;
-
-    const handleFirstUserTouch = (e: Event) => {
-      const target = e.target as HTMLElement | null;
-      if (target?.closest?.(".premium-audio-player-ui")) return;
-
-      if (!userExplicitPausedRef.current) {
+    const handleFirstTouch = () => {
+      if (!userExplicitMutedRef.current && (!isPlaying || isMutedRef.current)) {
         void playAudio(true);
       }
     };
 
-    window.addEventListener("pointerdown", handleFirstUserTouch, { once: true, passive: true });
+    window.addEventListener("pointerdown", handleFirstTouch, { once: true, passive: true });
     return () => {
-      window.removeEventListener("pointerdown", handleFirstUserTouch);
+      window.removeEventListener("pointerdown", handleFirstTouch);
     };
-  }, [hasAutoplayBlocked, playAudio]);
+  }, [isPlaying, playAudio]);
 
-  // ── Toggle Play / Pause Button ─────────────────────────────────────────────
-  const handleTogglePlay = useCallback(
+  // ── Page Visibility / Mobile Background Audio Handling ────────────────────
+  // When user minimizes browser, switches tab, or locks screen, audio pauses.
+  // When returning to the page, audio resumes automatically.
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden || document.visibilityState === "hidden") {
+        // Page is hidden / minimized / switched to home screen
+        if (isPlaying && !userExplicitMutedRef.current && !isMutedRef.current) {
+          wasPlayingBeforeHiddenRef.current = true;
+        } else {
+          wasPlayingBeforeHiddenRef.current = false;
+        }
+        pauseAudio(false);
+      } else if (document.visibilityState === "visible") {
+        // Page is visible again / user returned to browser
+        if (wasPlayingBeforeHiddenRef.current && !userExplicitMutedRef.current) {
+          void playAudio(false);
+        }
+      }
+    };
+
+    const handlePageHide = () => {
+      if (isPlaying && !userExplicitMutedRef.current && !isMutedRef.current) {
+        wasPlayingBeforeHiddenRef.current = true;
+      }
+      pauseAudio(false);
+    };
+
+    const handlePageShow = () => {
+      if (wasPlayingBeforeHiddenRef.current && !userExplicitMutedRef.current) {
+        void playAudio(false);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("pageshow", handlePageShow);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, [isPlaying, pauseAudio, playAudio]);
+
+  // ── Toggle Sound (Ses Aç / Kapat) Button ──────────────────────────────────
+  const handleToggleSound = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (isPlaying) {
+      if (!isMuted && isPlaying) {
+        // Sound is ON -> Turn Sound OFF (Mute & Pause)
+        setIsMuted(true);
+        isMutedRef.current = true;
+        userExplicitMutedRef.current = true;
+        wasPlayingBeforeHiddenRef.current = false;
+        applyAudioLevels(true);
         pauseAudio(true);
       } else {
+        // Sound is OFF -> Turn Sound ON (Unmute & Play)
+        setIsMuted(false);
+        isMutedRef.current = false;
+        userExplicitMutedRef.current = false;
+        applyAudioLevels(false);
         void playAudio(true);
       }
     },
-    [isPlaying, pauseAudio, playAudio],
-  );
-
-  // ── Toggle Mute / Unmute Button ────────────────────────────────────────────
-  const handleToggleMute = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setIsMuted((prev) => {
-        const next = !prev;
-        isMutedRef.current = next;
-        applyAudioLevels(next);
-        return next;
-      });
-    },
-    [applyAudioLevels],
+    [isMuted, isPlaying, applyAudioLevels, pauseAudio, playAudio],
   );
 
   // ── Voice-over Pause & Resume Handling ─────────────────────────────────────
   useEffect(() => {
     const handleVoiceStart = () => {
-      resumeAfterVoiceRef.current = isPlaying;
+      resumeAfterVoiceRef.current = isPlaying && !isMutedRef.current;
       pauseAudio(false);
     };
 
     const handleVoiceEnd = () => {
-      if (resumeAfterVoiceRef.current && !userExplicitPausedRef.current) {
+      if (resumeAfterVoiceRef.current && !userExplicitMutedRef.current) {
         void playAudio(false);
       }
       resumeAfterVoiceRef.current = false;
@@ -470,10 +464,10 @@ export function PremiumAudioPlayer({
     };
   }, [isPlaying, pauseAudio, playAudio]);
 
-  const displayTitle = customTitle || dynamicTitle || theme.music.title || "Düğün Müziği";
+  const isSoundActive = isPlaying && !isMuted;
 
   return (
-    <div className="premium-audio-player-ui fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 sm:left-6 sm:translate-x-0">
+    <div className="premium-audio-player-ui fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-6 z-50">
       {/* Hidden YouTube Container */}
       {activeVideoId ? (
         <div
@@ -492,20 +486,9 @@ export function PremiumAudioPlayer({
           loop
           preload="auto"
           playsInline
-          onPlay={() => {
-            setIsPlaying(true);
-            setIsBuffering(false);
-            setHasAutoplayBlocked(false);
-          }}
-          onPause={() => {
-            setIsPlaying(false);
-            setIsBuffering(false);
-          }}
-          onWaiting={() => setIsBuffering(true)}
-          onPlaying={() => {
-            setIsPlaying(true);
-            setIsBuffering(false);
-          }}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onPlaying={() => setIsPlaying(true)}
           onError={() => {
             console.warn("Direct audio source error on element");
             triggerFallbackToThemeTrack();
@@ -513,92 +496,33 @@ export function PremiumAudioPlayer({
         />
       ) : null}
 
-      {/* Floating Audio Controller */}
+      {/* Floating Sound Toggle Button (Ses Açma ve Kapama) */}
       <AnimatePresence>
         {!hideUI && (
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className={`flex w-full items-center gap-3 rounded-full border border-white/15 bg-slate-950/80 p-2 pr-4 shadow-2xl backdrop-blur-xl transition-all ${
-              hasAutoplayBlocked ? "ring-2 ring-rose-400/50 shadow-rose-500/20" : ""
+          <motion.button
+            type="button"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            onClick={handleToggleSound}
+            aria-label={isSoundActive ? "Sesi Kapat" : "Sesi Aç"}
+            title={isSoundActive ? "Sesi Kapat" : "Sesi Aç"}
+            className={`group relative flex h-12 w-12 items-center justify-center rounded-full border shadow-2xl backdrop-blur-xl transition-all duration-300 active:scale-95 cursor-pointer ${
+              isSoundActive
+                ? "border-white/30 bg-slate-950/85 text-white hover:bg-slate-900 shadow-rose-500/10 hover:border-white/50"
+                : "border-white/20 bg-slate-950/75 text-white/70 hover:bg-slate-900 hover:text-white"
             }`}
           >
-            {/* Play/Pause Button */}
-            <button
-              type="button"
-              onClick={handleTogglePlay}
-              aria-label={isPlaying ? "Müziği duraklat" : "Müziği oynat"}
-              className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white transition-all active:scale-95 cursor-pointer ${
-                isPlaying
-                  ? "bg-white/20 hover:bg-white/30"
-                  : hasAutoplayBlocked
-                    ? "bg-rose-500 hover:bg-rose-600 shadow-lg shadow-rose-500/40 animate-pulse"
-                    : "bg-white/25 hover:bg-white/35"
-              }`}
-            >
-              {isBuffering ? (
-                <Loader2 className="h-4 w-4 animate-spin text-white" />
-              ) : isPlaying ? (
-                <Pause className="h-4 w-4" />
-              ) : (
-                <Play className="ml-0.5 h-4 w-4 fill-current" />
-              )}
-            </button>
-
-            {/* Track Info */}
-            <div className="flex min-w-0 flex-1 flex-col mr-1">
-              <div className="flex items-center gap-1.5">
-                {isPlaying ? (
-                  <span className="flex items-end gap-0.5 h-3 w-3 shrink-0">
-                    <span className="w-0.5 bg-rose-400 rounded-full animate-[bounce_1s_infinite_100ms] h-2" />
-                    <span className="w-0.5 bg-rose-400 rounded-full animate-[bounce_1s_infinite_300ms] h-3" />
-                    <span className="w-0.5 bg-rose-400 rounded-full animate-[bounce_1s_infinite_200ms] h-1.5" />
-                  </span>
-                ) : (
-                  <Music className="h-3 w-3 shrink-0 text-white/50" />
-                )}
-                <span className="truncate text-xs font-medium text-white/95">
-                  {displayTitle}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[10px] uppercase tracking-widest text-white/60">
-                  {isBuffering
-                    ? "Yükleniyor..."
-                    : isPlaying
-                      ? "Oynatılıyor"
-                      : hasAutoplayBlocked
-                        ? "Başlatmak için dokunun"
-                        : "Duraklatıldı"}
-                </span>
-                {licenseName ? (
-                  <a
-                    href={licenseUrl || undefined}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="max-w-[120px] truncate text-[9px] text-white/40 underline hover:text-white/60"
-                  >
-                    {licenseName}
-                  </a>
-                ) : null}
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="h-6 w-px bg-white/15 mx-1 shrink-0" />
-
-            {/* Mute/Unmute Button */}
-            <button
-              type="button"
-              onClick={handleToggleMute}
-              aria-label={isMuted ? "Sesi aç" : "Sesi kapat"}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/80 transition-colors hover:text-white active:scale-95 cursor-pointer"
-            >
-              {isMuted ? <VolumeX className="h-4 w-4 text-rose-300" /> : <Volume2 className="h-4 w-4" />}
-            </button>
-          </motion.div>
+            {isSoundActive ? (
+              <>
+                <span className="absolute inset-0 -z-10 rounded-full bg-rose-500/20 animate-ping opacity-60 pointer-events-none" />
+                <Volume2 className="h-5 w-5 text-white group-hover:scale-110 transition-transform" />
+              </>
+            ) : (
+              <VolumeX className="h-5 w-5 text-rose-300/90 group-hover:scale-110 transition-transform" />
+            )}
+          </motion.button>
         )}
       </AnimatePresence>
     </div>
