@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, Heart } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { easeSilk } from "./motion-primitives";
@@ -40,17 +41,7 @@ export function Navbar() {
             scrolled ? "glass-strong shadow-elevated" : "border border-transparent",
           )}
         >
-          <a
-            href="#top"
-            className="flex min-w-0 items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-rose to-gold">
-              <Heart className="size-4 text-background" aria-hidden="true" />
-            </span>
-            <span className="truncate font-display text-xl tracking-tight">
-              Memory<span className="text-gradient-gold font-medium">Wedding</span>
-            </span>
-          </a>
+          <BrandLogo />
 
           <ul className="hidden items-center justify-center gap-1 lg:flex">
             {t.nav.links.map((link) => (

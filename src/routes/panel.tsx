@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   CalendarDays,
   ExternalLink,
-  Heart,
   Loader2,
   LogOut,
   Plus,
@@ -13,6 +12,7 @@ import {
   LayoutDashboard,
   Pencil,
 } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { appContent } from "@/lib/app-content";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { AuthProvider, useAuth } from "@/lib/auth";
@@ -94,14 +94,7 @@ function Dashboard({ email }: { email: string }) {
       />
 
       <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
-        <Link to="/" className="flex min-w-0 items-center gap-2.5">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-rose to-gold">
-            <Heart className="size-4 text-background" aria-hidden="true" />
-          </span>
-          <span className="truncate font-display text-xl tracking-tight">
-            Memory<span className="text-gradient-gold font-medium">Wedding</span>
-          </span>
-        </Link>
+        <BrandLogo />
         <div className="flex items-center gap-3">
           <span className="hidden max-w-[16rem] truncate text-sm text-muted-foreground sm:block">
             {email}

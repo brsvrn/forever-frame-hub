@@ -1,4 +1,5 @@
-import { Heart, Instagram, Linkedin, Twitter } from "lucide-react";
+import { Instagram, Linkedin, Twitter } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useI18n } from "@/lib/i18n";
 
 const socials = [
@@ -16,14 +17,7 @@ export function Footer() {
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="max-w-xs">
-            <div className="flex items-center gap-2.5">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-rose to-gold">
-                <Heart className="size-4 text-background" aria-hidden="true" />
-              </span>
-              <span className="font-display text-xl">
-                Memory<span className="text-gradient-gold font-medium">Wedding</span>
-              </span>
-            </div>
+            <BrandLogo />
             <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{t.footer.tagline}</p>
             <ul className="mt-6 flex items-center gap-2">
               {socials.map(({ Icon, label }) => (

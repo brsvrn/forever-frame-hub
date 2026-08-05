@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useEffect } from "react";
 import { XCircle } from "lucide-react";
 
@@ -21,6 +22,9 @@ function ErrorRoute() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center">
+      <div className="mb-8">
+        <BrandLogo />
+      </div>
       <div className="size-20 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-6">
         <XCircle className="size-10" />
       </div>

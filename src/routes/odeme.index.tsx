@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useEffect, useRef, useState } from "react";
 import { initiatePayment } from "@/lib/payment-actions";
 import { supabase } from "@/integrations/supabase/client";
@@ -146,9 +147,12 @@ function PaymentRoute() {
 
   return (
     <div
-      className="min-h-dvh overflow-y-auto overflow-x-hidden bg-background pt-24 pb-12 flex flex-col items-center justify-start p-4"
+      className="min-h-dvh overflow-y-auto overflow-x-hidden bg-background pt-12 pb-12 flex flex-col items-center justify-start p-4"
       style={{ WebkitOverflowScrolling: "touch" }}
     >
+      <div className="mb-6">
+        <BrandLogo />
+      </div>
       <div className="w-full max-w-3xl glass p-4 sm:p-8 rounded-3xl min-h-[700px] flex flex-col justify-start relative space-y-6">
         {/* VIP / Promo Code Box */}
         {!alreadyPaid && !error && (

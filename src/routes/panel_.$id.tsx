@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import type { InvitationRow } from "@/lib/invitations.api";
 import { getEventDashboardAccess } from "@/lib/event-team.functions";
@@ -167,6 +168,9 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
       {/* Sidebar */}
       <aside className="w-full border-r border-border bg-background md:sticky md:top-0 md:h-dvh md:w-72 md:shrink-0 flex flex-col">
         <div className="p-7 border-b border-border">
+          <div className="mb-4 pb-4 border-b border-border/50">
+            <BrandLogo size="sm" />
+          </div>
           <Link
             to="/panel"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"

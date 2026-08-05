@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Heart, Loader2, Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { supabase } from "@/integrations/supabase/client";
 
 import { appContent } from "@/lib/app-content";
@@ -105,14 +106,7 @@ function AuthPage() {
       />
 
       <header className="relative z-10 mx-auto w-full max-w-7xl px-4 py-5 sm:px-6">
-        <Link to="/" className="inline-flex items-center gap-2.5">
-          <span className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-rose to-gold">
-            <Heart className="size-4 text-background" aria-hidden="true" />
-          </span>
-          <span className="font-display text-xl tracking-tight text-foreground">
-            Memory<span className="text-gradient-gold font-medium">Wedding</span>
-          </span>
-        </Link>
+        <BrandLogo />
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 items-center px-4 pb-20 sm:px-6">

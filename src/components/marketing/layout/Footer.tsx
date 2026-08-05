@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function Footer() {
   return (
@@ -7,13 +8,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2 space-y-6">
-            <Link
-              to="/"
-              className="font-bold text-2xl text-white tracking-tight flex items-center gap-2"
-            >
-              <img src="/logo.jpg" alt="MemoryWedding Logo" className="w-8 h-8 rounded-lg object-cover" />
-              <span>MemoryWedding</span>
-            </Link>
+            <BrandLogo size="lg" textClassName="text-white" />
             <p className="text-muted-foreground max-w-sm leading-relaxed text-sm">
               Düğün gününüzü unutulmaz kılan premium dijital davetiye, LCV yönetimi ve misafir
               etkileşim platformu. Apple, Spotify ve WhatsApp kalitesinde pürüzsüz bir deneyim.

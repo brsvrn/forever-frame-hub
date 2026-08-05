@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -50,10 +51,7 @@ export function Navbar() {
       )}
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="font-bold text-xl tracking-tight flex items-center gap-2">
-          <img src="/logo.jpg" alt="MemoryWedding Logo" className="w-8 h-8 rounded-lg object-cover" />
-          <span>MemoryWedding</span>
-        </Link>
+        <BrandLogo />
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
           <a href="#demo" className="hover:text-foreground transition-colors">
             Deneyim

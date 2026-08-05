@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { consumeAuthReturnTo } from "@/lib/auth-helpers";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -69,6 +70,9 @@ function AuthCallbackPage() {
       </div>
 
       <div className="max-w-md w-full text-center glass rounded-4xl p-8 space-y-6 relative z-10 shadow-2xl">
+        <div className="flex justify-center mb-2">
+          <BrandLogo />
+        </div>
         {status === "loading" && (
           <div className="flex flex-col items-center gap-5">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />

@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { setAuthReturnTo } from "@/lib/auth-helpers";
@@ -136,6 +137,9 @@ function InvitationShell({ children }: { children: ReactNode }) {
   return (
     <main className="grid min-h-dvh place-items-center bg-background px-4 py-12 text-foreground">
       <section className="glass w-full max-w-lg rounded-3xl p-7 text-center sm:p-10">
+        <div className="flex justify-center mb-6">
+          <BrandLogo />
+        </div>
         {children}
       </section>
     </main>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import {
   Loader2,
@@ -171,16 +172,15 @@ function AdminDashboard({ email }: { email: string }) {
 
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-surface border-b border-border sticky top-0 z-40">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="font-display font-bold text-sm text-foreground">Super Admin</span>
-            <span className="text-[10px] text-muted-foreground block truncate max-w-[150px]">
-              {email}
-            </span>
-          </div>
+        <div className="flex items-center gap-3">
+          <BrandLogo
+            size="sm"
+            badge={
+              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">
+                Admin
+              </span>
+            }
+          />
         </div>
 
         <div className="flex items-center gap-2">
@@ -209,14 +209,14 @@ function AdminDashboard({ email }: { email: string }) {
         {/* Sidebar Header */}
         <div className="p-6 border-b border-border flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <h1 className="text-base font-display font-bold text-foreground tracking-tight">
-                Super Admin
-              </h1>
-            </div>
+            <BrandLogo
+              size="sm"
+              badge={
+                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">
+                  Admin
+                </span>
+              }
+            />
             <p className="text-[11px] text-muted-foreground mt-1 truncate max-w-[180px]">
               {email}
             </p>

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Eraser, Heart, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eraser, Sparkles } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { builderContent } from "@/lib/builder-content";
 import { useInvitationDraft } from "@/lib/invitation";
@@ -586,17 +587,7 @@ function BuilderPage() {
       />
 
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
-        <Link
-          to="/"
-          className="flex min-w-0 items-center gap-2.5 rounded-full text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-rose to-gold">
-            <Heart className="size-4 text-background" aria-hidden="true" />
-          </span>
-          <span className="truncate font-display text-xl tracking-tight text-foreground">
-            Memory<span className="text-gradient-gold font-medium">Wedding</span>
-          </span>
-        </Link>
+        <BrandLogo />
 
         <div className="flex items-center gap-2">
           <div

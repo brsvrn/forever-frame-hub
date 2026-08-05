@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useEffect, useRef } from "react";
 import { CheckCircle } from "lucide-react";
 import { trackPurchase } from "@/lib/analytics/analytics";
@@ -54,6 +55,9 @@ function SuccessRoute() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center">
+      <div className="mb-8">
+        <BrandLogo />
+      </div>
       <div className="size-20 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-6 shadow-sm">
         <CheckCircle className="size-10" />
       </div>
