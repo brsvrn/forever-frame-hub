@@ -26,8 +26,11 @@ export function LueurOpening({
     onComplete();
   }, [onComplete]);
 
-  const panelDuration = reduceMotion ? 0.12 : 1.75;
-  const coverFadeDelay = reduceMotion ? 0 : 1.58;
+  // The in-app preview reports reduced motion by default. Keep that path
+  // gentler, but long enough for the envelope reveal to remain perceptible.
+  const panelDuration = reduceMotion ? 0.85 : 1.75;
+  const coverFadeDelay = reduceMotion ? 0.68 : 1.58;
+  const panelTilt = reduceMotion ? 42 : 92;
 
   return (
     <motion.div
@@ -35,14 +38,14 @@ export function LueurOpening({
       animate={{ opacity: 1 }}
       exit={{
         opacity: 0,
-        transition: { duration: reduceMotion ? 0.12 : 0.24, delay: coverFadeDelay },
+        transition: { duration: reduceMotion ? 0.18 : 0.24, delay: coverFadeDelay },
       }}
       className="fixed inset-0 z-50 overflow-hidden bg-[#07152f] text-[#f8f5ee]"
       style={{ perspective: "1400px" }}
     >
       <motion.div
         initial={{ rotateX: 0, y: "0%", opacity: 1 }}
-        exit={{ rotateX: -92, y: "-12%", opacity: 0.12 }}
+        exit={{ rotateX: -panelTilt, y: reduceMotion ? "-7%" : "-12%", opacity: 0.12 }}
         transition={{ duration: panelDuration, ease: [0.7, 0, 0.2, 1] }}
         className="absolute inset-x-0 top-0 z-20 h-1/2 overflow-hidden border-b border-[#ead39d]/70 bg-gradient-to-b from-[#183662] via-[#0c2347] to-[#07152f] shadow-[0_22px_55px_rgba(0,4,14,.72)]"
         style={{ transformOrigin: "50% 100%", backfaceVisibility: "hidden" }}
@@ -52,7 +55,7 @@ export function LueurOpening({
       </motion.div>
       <motion.div
         initial={{ rotateX: 0, y: "0%", opacity: 1 }}
-        exit={{ rotateX: 92, y: "12%", opacity: 0.12 }}
+        exit={{ rotateX: panelTilt, y: reduceMotion ? "7%" : "12%", opacity: 0.12 }}
         transition={{ duration: panelDuration, ease: [0.7, 0, 0.2, 1] }}
         className="absolute inset-x-0 bottom-0 z-20 h-1/2 overflow-hidden border-t border-[#ead39d]/70 bg-gradient-to-t from-[#020817] via-[#06152d] to-[#0b2448] shadow-[0_-22px_55px_rgba(0,4,14,.62)]"
         style={{ transformOrigin: "50% 0%", backfaceVisibility: "hidden" }}
@@ -64,7 +67,7 @@ export function LueurOpening({
       <motion.div
         initial={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.88 }}
-        transition={{ duration: reduceMotion ? 0.1 : 0.48, ease: "easeOut" }}
+        transition={{ duration: reduceMotion ? 0.35 : 0.48, ease: "easeOut" }}
         className="relative z-30 flex min-h-dvh flex-col items-center justify-between px-6 py-10 text-center"
       >
         <div>
@@ -86,7 +89,7 @@ export function LueurOpening({
               scale: 1.75,
               rotate: 10,
               opacity: 0,
-              transition: { duration: reduceMotion ? 0.1 : 0.48, ease: "easeOut" },
+              transition: { duration: reduceMotion ? 0.35 : 0.48, ease: "easeOut" },
             }}
             transition={{ duration: 2.8, repeat: Infinity }}
             className="relative h-52 w-64 drop-shadow-[0_22px_20px_rgba(0,0,0,.58)] sm:h-64 sm:w-80"
