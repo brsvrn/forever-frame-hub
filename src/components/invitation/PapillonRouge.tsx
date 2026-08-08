@@ -40,7 +40,7 @@ export function LueurOpening({
         opacity: 0,
         transition: { duration: 0.18, delay: coverFadeDelay },
       }}
-      className="fixed inset-0 z-50 overflow-hidden bg-[#07152f] text-[#f8f5ee]"
+      className="fixed inset-0 z-50 overflow-hidden text-[#f8f5ee]"
       style={{ perspective: "1400px" }}
     >
       <motion.div
