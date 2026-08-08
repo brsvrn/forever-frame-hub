@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { formatInviteDate, type InvitationDraft } from "@/lib/invitation";
@@ -13,49 +13,58 @@ export function LueurOpening({
   partnerTwo: string;
   onComplete: () => void;
 }) {
-  const [opening, setOpening] = useState(false);
   const completed = useRef(false);
-  const timerRef = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
 
   const open = useCallback(() => {
     if (completed.current) return;
     completed.current = true;
-    setOpening(true);
     window.dispatchEvent(new CustomEvent("memorywedding:user-opened-invitation"));
-    timerRef.current = window.setTimeout(onComplete, reduceMotion ? 150 : 1850);
-  }, [onComplete, reduceMotion]);
+    // Mount the invitation immediately behind this overlay. AnimatePresence
+    // keeps the cover mounted while its two halves fold away, revealing the
+    // real invitation instead of cutting to it after the animation.
+    onComplete();
+  }, [onComplete]);
 
-  useEffect(
-    () => () => {
-      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-    },
-    [],
-  );
+  const panelDuration = reduceMotion ? 0.12 : 1.75;
+  const coverFadeDelay = reduceMotion ? 0 : 1.58;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.2 } }}
+      exit={{
+        opacity: 0,
+        transition: { duration: reduceMotion ? 0.12 : 0.24, delay: coverFadeDelay },
+      }}
       className="fixed inset-0 z-50 overflow-hidden bg-[#07152f] text-[#f8f5ee]"
+      style={{ perspective: "1400px" }}
     >
-      <div className="lueur-pearl absolute inset-0" />
-      <div className="lueur-emboss absolute inset-0 opacity-35" />
       <motion.div
-        animate={opening ? { y: "-102%" } : { y: "0%" }}
-        transition={{ duration: 1.65, ease: [0.76, 0, 0.24, 1] }}
-        className="absolute inset-x-0 top-0 z-20 h-1/2 border-b border-[#d6b878]/45 bg-gradient-to-b from-[#142c55] to-[#07152f] shadow-[0_18px_45px_rgba(0,4,14,.6)]"
-      />
+        initial={{ rotateX: 0, y: "0%", opacity: 1 }}
+        exit={{ rotateX: -92, y: "-12%", opacity: 0.12 }}
+        transition={{ duration: panelDuration, ease: [0.7, 0, 0.2, 1] }}
+        className="absolute inset-x-0 top-0 z-20 h-1/2 overflow-hidden border-b border-[#ead39d]/70 bg-gradient-to-b from-[#183662] via-[#0c2347] to-[#07152f] shadow-[0_22px_55px_rgba(0,4,14,.72)]"
+        style={{ transformOrigin: "50% 100%", backfaceVisibility: "hidden" }}
+      >
+        <div className="lueur-emboss absolute inset-0 opacity-25" />
+        <div className="absolute inset-x-[-15%] bottom-[-42%] h-[70%] rotate-6 border border-[#d6b878]/20 bg-[#0a1d3b]/35" />
+      </motion.div>
       <motion.div
-        animate={opening ? { y: "102%" } : { y: "0%" }}
-        transition={{ duration: 1.65, ease: [0.76, 0, 0.24, 1] }}
-        className="absolute inset-x-0 bottom-0 z-20 h-1/2 border-t border-[#d6b878]/45 bg-gradient-to-t from-[#020817] to-[#0b1e3d] shadow-[0_-18px_45px_rgba(0,4,14,.45)]"
-      />
+        initial={{ rotateX: 0, y: "0%", opacity: 1 }}
+        exit={{ rotateX: 92, y: "12%", opacity: 0.12 }}
+        transition={{ duration: panelDuration, ease: [0.7, 0, 0.2, 1] }}
+        className="absolute inset-x-0 bottom-0 z-20 h-1/2 overflow-hidden border-t border-[#ead39d]/70 bg-gradient-to-t from-[#020817] via-[#06152d] to-[#0b2448] shadow-[0_-22px_55px_rgba(0,4,14,.62)]"
+        style={{ transformOrigin: "50% 0%", backfaceVisibility: "hidden" }}
+      >
+        <div className="lueur-emboss absolute inset-0 opacity-20" />
+        <div className="absolute inset-x-[-15%] top-[-42%] h-[70%] -rotate-6 border border-[#d6b878]/20 bg-[#081a36]/35" />
+      </motion.div>
 
       <motion.div
-        animate={opening ? { opacity: 0, scale: 0.94 } : { opacity: 1, scale: 1 }}
-        transition={{ duration: 0.55, ease: "easeOut" }}
+        initial={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.88 }}
+        transition={{ duration: reduceMotion ? 0.1 : 0.48, ease: "easeOut" }}
         className="relative z-30 flex min-h-dvh flex-col items-center justify-between px-6 py-10 text-center"
       >
         <div>
@@ -72,8 +81,14 @@ export function LueurOpening({
           aria-label="Davetiyeyi aç"
         >
           <motion.div
-            animate={opening ? { scale: 1.8, rotate: 9, opacity: 0 } : { y: [0, -6, 0] }}
-            transition={opening ? { duration: 0.8 } : { duration: 2.8, repeat: Infinity }}
+            animate={{ y: [0, -6, 0] }}
+            exit={{
+              scale: 1.75,
+              rotate: 10,
+              opacity: 0,
+              transition: { duration: reduceMotion ? 0.1 : 0.48, ease: "easeOut" },
+            }}
+            transition={{ duration: 2.8, repeat: Infinity }}
             className="relative h-52 w-64 drop-shadow-[0_22px_20px_rgba(0,0,0,.58)] sm:h-64 sm:w-80"
           >
             <img src={lueurButterfly} alt="" className="h-full w-full object-contain" />

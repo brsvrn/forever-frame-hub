@@ -17,8 +17,11 @@ export function EventDetails({
   calendarEnabled?: boolean;
 }) {
   const dateLabel = formatInviteDate(draft.date, lang);
+  const isLueur = theme.id === "lueur-de-minuit";
   const textColor = theme.styles.textColor || "text-white";
   const mutedTextColor = theme.styles.mutedTextColor || "text-white/70";
+  const lueurTextStyle = isLueur ? { color: "#07152f" } : undefined;
+  const lueurMutedStyle = isLueur ? { color: "#526176" } : undefined;
   const calendarSchedule: CalendarSchedule | null = draft.date
     ? {
         id: draft.slug || "memorywedding",
@@ -46,9 +49,19 @@ export function EventDetails({
     <section className="relative py-24 px-6 flex flex-col items-center snap-center">
       <div
         className={`max-w-xl w-full ${theme.styles.cards.wrapper} ${textColor} rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/20`}
+        style={
+          isLueur
+            ? {
+                color: "#07152f",
+                backgroundColor: "rgba(248, 245, 238, 0.97)",
+                borderColor: "rgba(183, 154, 93, 0.35)",
+              }
+            : undefined
+        }
       >
         <h3
           className={`text-2xl text-center mb-10 font-sans font-bold tracking-tight ${textColor}`}
+          style={lueurTextStyle}
         >
           {lang === "tr" ? "Etkinlik Bilgileri" : "Event Details"}
         </h3>
@@ -63,10 +76,11 @@ export function EventDetails({
             <div>
               <p
                 className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${mutedTextColor}`}
+                style={lueurMutedStyle}
               >
                 {lang === "tr" ? "Tarih" : "Date"}
               </p>
-              <p className={`font-semibold text-base ${textColor}`}>
+              <p className={`font-semibold text-base ${textColor}`} style={lueurTextStyle}>
                 {dateLabel || "Tarih Belirlenmedi"}
               </p>
             </div>
@@ -81,10 +95,11 @@ export function EventDetails({
             <div>
               <p
                 className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${mutedTextColor}`}
+                style={lueurMutedStyle}
               >
                 {lang === "tr" ? "Saat" : "Time"}
               </p>
-              <p className={`font-semibold text-base ${textColor}`}>
+              <p className={`font-semibold text-base ${textColor}`} style={lueurTextStyle}>
                 {draft.time || "Saat Belirlenmedi"}
               </p>
             </div>
@@ -99,13 +114,14 @@ export function EventDetails({
             <div>
               <p
                 className={`text-[11px] uppercase tracking-widest mb-1 font-bold ${mutedTextColor}`}
+                style={lueurMutedStyle}
               >
                 {lang === "tr" ? "Konum" : "Location"}
               </p>
-              <p className={`font-semibold text-base ${textColor}`}>
+              <p className={`font-semibold text-base ${textColor}`} style={lueurTextStyle}>
                 {draft.venue || "Mekan Belirlenmedi"}
               </p>
-              <p className={`text-sm mt-1 font-medium ${mutedTextColor}`}>
+              <p className={`text-sm mt-1 font-medium ${mutedTextColor}`} style={lueurMutedStyle}>
                 {draft.address} {draft.city}
               </p>
             </div>
@@ -114,7 +130,10 @@ export function EventDetails({
 
         {draft.rsvpLabel?.trim() && (
           <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 text-center font-sans">
-            <p className={`text-xs font-medium leading-relaxed ${mutedTextColor}`}>
+            <p
+              className={`text-xs font-medium leading-relaxed ${mutedTextColor}`}
+              style={lueurMutedStyle}
+            >
               {draft.rsvpLabel.trim()}
             </p>
           </div>
@@ -136,8 +155,13 @@ export function EventDetails({
                   <Map className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className={`${textColor} font-semibold text-lg`}>{draft.venue || "Konum"}</p>
-                  <p className={`${mutedTextColor} text-sm mt-1 font-medium`}>
+                  <p className={`${textColor} font-semibold text-lg`} style={lueurTextStyle}>
+                    {draft.venue || "Konum"}
+                  </p>
+                  <p
+                    className={`${mutedTextColor} text-sm mt-1 font-medium`}
+                    style={lueurMutedStyle}
+                  >
                     {lang === "tr" ? "Haritada Görüntüle" : "View on Map"}
                   </p>
                 </div>
