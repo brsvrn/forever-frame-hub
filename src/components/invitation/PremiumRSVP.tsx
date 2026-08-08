@@ -22,6 +22,7 @@ export function PremiumRSVP({
   invitationId: string;
   guestToken?: string;
 }) {
+  const isLueur = theme.id === "lueur-de-minuit";
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<"yes" | "no" | "maybe" | null>(null);
   const [name, setName] = useState("");
@@ -113,7 +114,9 @@ export function PremiumRSVP({
   return (
     <section className="relative py-24 px-6 flex flex-col items-center snap-center font-sans text-white">
       <div
-        className={`max-w-md w-full font-sans ${theme.styles.cards.wrapper} text-white rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 border border-white/20`}
+        className={`max-w-md w-full font-sans ${theme.styles.cards.wrapper} rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 border ${
+          isLueur ? "lueur-rsvp border-[#d6b878]/35" : "border-white/20 text-white"
+        }`}
       >
         <AnimatePresence mode="wait">
           {step === 0 && (
@@ -127,7 +130,9 @@ export function PremiumRSVP({
               <h3 className="font-sans font-bold text-2xl mb-2 tracking-tight text-white">
                 Lütfen Cevap Verin
               </h3>
-              <p className="font-sans text-sm mb-8 font-medium text-white/80">Bizimle olabilecek misiniz?</p>
+              <p className="font-sans text-sm mb-8 font-medium text-white/80">
+                Bizimle olabilecek misiniz?
+              </p>
 
               <div className="space-y-3 font-sans">
                 <button
@@ -346,7 +351,9 @@ export function PremiumRSVP({
                           }))
                         }
                       />
-                      <span className="text-white text-sm font-semibold leading-snug">{schedule.title}</span>
+                      <span className="text-white text-sm font-semibold leading-snug">
+                        {schedule.title}
+                      </span>
                     </label>
                   ))}
                 </fieldset>
@@ -445,16 +452,26 @@ export function PremiumRSVP({
                           }}
                           className="mt-2 w-full bg-slate-900 border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium focus:outline-none focus:border-white/50"
                         >
-                          <option value="" className="bg-slate-900 text-white">Seçin</option>
+                          <option value="" className="bg-slate-900 text-white">
+                            Seçin
+                          </option>
                           {question.question_type === "yes_no" ||
                           question.question_type === "transport_need" ? (
                             <>
-                              <option value="true" className="bg-slate-900 text-white">Evet</option>
-                              <option value="false" className="bg-slate-900 text-white">Hayır</option>
+                              <option value="true" className="bg-slate-900 text-white">
+                                Evet
+                              </option>
+                              <option value="false" className="bg-slate-900 text-white">
+                                Hayır
+                              </option>
                             </>
                           ) : (
                             options.map((option) => (
-                              <option key={option} value={option} className="bg-slate-900 text-white py-1">
+                              <option
+                                key={option}
+                                value={option}
+                                className="bg-slate-900 text-white py-1"
+                              >
                                 {option}
                               </option>
                             ))
@@ -517,7 +534,9 @@ export function PremiumRSVP({
                 onClick={handleSubmit}
                 disabled={isSubmitting || (!form && invitationId !== "demo-id")}
                 className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all cursor-pointer ${
-                  isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:brightness-110 active:scale-[0.99]"
+                  isSubmitting
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:brightness-110 active:scale-[0.99]"
                 } ${theme.styles.buttons.primary}`}
               >
                 {isSubmitting ? (
