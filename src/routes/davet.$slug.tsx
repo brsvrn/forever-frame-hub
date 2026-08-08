@@ -26,6 +26,7 @@ import { VoiceGreeting } from "@/components/invitation/VoiceGreeting";
 import { GiftSection } from "@/components/invitation/GiftSection";
 import { CountdownTimer } from "@/components/invitation/CountdownTimer";
 import { InvitationFooter } from "@/components/invitation/InvitationFooter";
+import { LueurHero, LueurOpening, LueurSection } from "@/components/invitation/PapillonRouge";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
 import {
   resolveTheme,
@@ -164,6 +165,7 @@ function PremiumInvitePage() {
   const [hasOpened, setHasOpened] = useState(false);
   const [personalGuestToken, setPersonalGuestToken] = useState<string | undefined>();
   const openingEnabled = eventFeatures?.opening_enabled !== false;
+  const isLueur = theme.id === "lueur-de-minuit";
 
   useEffect(() => {
     const receivePersonalGuest = (event: MessageEvent) => {
@@ -196,68 +198,66 @@ function PremiumInvitePage() {
 
       <AnimatePresence>
         {!hasOpened && features.digital_invitation !== false && openingEnabled ? (
-          <InvitationIntro
-            key={`intro-${theme.id}`}
-            theme={theme}
-            partnerOne={draft.partnerOne}
-            partnerTwo={draft.partnerTwo}
-            onComplete={() => setHasOpened(true)}
-          />
+          isLueur ? (
+            <LueurOpening key={`intro-${theme.id}`} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
+          ) : (
+            <InvitationIntro key={`intro-${theme.id}`} theme={theme} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
+          )
         ) : null}
       </AnimatePresence>
 
       {(hasOpened || !openingEnabled || features.digital_invitation === false) && (
         <div key={`invite-${theme.id}`}>
-          <LivingBackground theme={theme} />
+          {!isLueur ? <LivingBackground theme={theme} /> : null}
 
           <main className="relative z-10 h-dvh snap-y snap-mandatory overflow-y-auto scroll-smooth pb-24">
             {features.digital_invitation !== false ? (
               <>
-                <HeroExperience draft={draft} theme={theme} lang={lang} />
+                {isLueur ? <LueurHero draft={draft} lang={lang} /> : <HeroExperience draft={draft} theme={theme} lang={lang} />}
                 {eventFeatures?.audio_greeting_enabled !== false && advanced?.audio?.url ? (
-                  <VoiceGreeting
+                  <LueurSection active={isLueur}><VoiceGreeting
                     theme={theme}
                     url={advanced.audio.url}
                     title={advanced.audio.title}
                     description={advanced.audio.description}
                     alternativeText={advanced.audio.alternative_text}
-                  />
+                  /></LueurSection>
                 ) : null}
                 {eventFeatures?.story_enabled !== false ? (
-                  <StoryTimeline draft={draft} theme={theme} />
+                  <LueurSection active={isLueur} tone="wine"><StoryTimeline draft={draft} theme={theme} /></LueurSection>
                 ) : null}
-                <CountdownTimer
+                <LueurSection active={isLueur}><CountdownTimer
                   eventDate={draft.date}
                   eventTime={draft.time || (schedules.length > 0 ? schedules[0].starts_at : null)}
                   theme={theme}
                   lang={lang}
-                />
+                /></LueurSection>
                 {eventFeatures?.schedule_enabled !== false ? (
                   <>
-                    <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
+                    <LueurSection active={isLueur}><EventProgramTimeline draft={draft} theme={theme} lang={lang} /></LueurSection>
                     {schedules.length > 0 ? (
-                      <MultiEventDetails
+                      <LueurSection active={isLueur}><MultiEventDetails
                         schedules={schedules}
                         theme={theme}
                         lang={lang}
                         calendarEnabled={eventFeatures?.calendar_enabled !== false}
-                      />
+                      /></LueurSection>
                     ) : (
-                      <EventDetails
+                      <LueurSection active={isLueur}><EventDetails
                         draft={draft}
                         theme={theme}
                         lang={lang}
                         calendarEnabled={eventFeatures?.calendar_enabled !== false}
-                      />
+                      /></LueurSection>
                     )}
                   </>
                 ) : null}
                 {eventFeatures?.rsvp_enabled !== false ? (
-                  <PremiumRSVP
+                  <LueurSection active={isLueur} tone="wine"><PremiumRSVP
                     theme={theme}
                     invitationId={invitation.id}
                     guestToken={personalGuestToken}
-                  />
+                  /></LueurSection>
                 ) : null}
               </>
             ) : null}
@@ -265,18 +265,18 @@ function PremiumInvitePage() {
             {features.qr_gallery !== false ? (
               <>
                 {eventFeatures?.memory_box_enabled !== false ? (
-                  <MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} />
+                  <LueurSection active={isLueur} tone="wine"><MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} /></LueurSection>
                 ) : null}
                 {eventFeatures?.qr_upload_enabled !== false ? (
-                  <PremiumQRExperience theme={theme} invitationId={invitation.id} />
+                  <LueurSection active={isLueur}><PremiumQRExperience theme={theme} invitationId={invitation.id} /></LueurSection>
                 ) : null}
               </>
             ) : null}
             {eventFeatures?.gift_enabled !== false && advanced?.gift ? (
-              <GiftSection settings={advanced.gift} theme={theme} />
+              <LueurSection active={isLueur}><GiftSection settings={advanced.gift} theme={theme} /></LueurSection>
             ) : null}
 
-            <InvitationFooter draft={draft} theme={theme} lang={lang} />
+            <LueurSection active={isLueur} tone="wine"><InvitationFooter draft={draft} theme={theme} lang={lang} /></LueurSection>
           </main>
         </div>
       )}

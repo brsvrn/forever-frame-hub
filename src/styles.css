@@ -446,3 +446,8 @@
     scroll-behavior: auto;
   }
 }
+/* Lueur de Minuit — midnight navy, pearl and champagne-gold invitation */
+.lueur-night{background-color:#07152f;background-image:radial-gradient(ellipse at 25% 12%,rgba(81,111,162,.28),transparent 38%),radial-gradient(ellipse at 75% 82%,rgba(0,0,0,.55),transparent 52%),repeating-linear-gradient(104deg,transparent 0 18px,rgba(255,255,255,.016) 19px 20px)}
+.lueur-pearl{background-color:#f5f1e8;background-image:radial-gradient(circle at 22% 12%,rgba(255,255,255,.95),transparent 35%),linear-gradient(135deg,rgba(214,184,120,.06),transparent 48%)}
+.lueur-emboss{background-image:repeating-radial-gradient(ellipse at 0 100%,transparent 0 26px,rgba(7,21,47,.08) 27px 28px,transparent 29px 43px);filter:blur(.2px)}
+.papillon-line-butterfly{display:block;width:74px;height:48px;position:relative}.papillon-line-butterfly:before,.papillon-line-butterfly:after{content:"";position:absolute;top:4px;width:36px;height:38px;border:1px solid #b79a5d}.papillon-line-butterfly:before{left:2px;border-radius:70% 30% 60% 40%;transform:rotate(-12deg)}.papillon-line-butterfly:after{right:2px;border-radius:30% 70% 40% 60%;transform:rotate(12deg)}
