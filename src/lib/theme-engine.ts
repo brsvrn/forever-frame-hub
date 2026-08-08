@@ -47,7 +47,7 @@ export type CoastalThemeId =
 export type NatureThemeId = "emerald-forest" | "wildflower-meadow" | "alpine-mist";
 export type ItalianThemeId = "amalfi-lemon-terrace" | "tuscan-golden-hills" | "lake-como-garden";
 export type LuxuryThemeId = "grand-ballroom";
-export type CinematicThemeId = "cinematic-flow" | "boho-motion" | "ethereal-light";
+export type CinematicThemeId = "cinematic-flow" | "boho-motion" | "ethereal-light" | "lueur-de-minuit";
 export type ThemeCategory = "coastal" | "nature" | "italy" | "luxury" | "cinematic" | "classic";
 export type InviteThemeId =
   | CoastalThemeId
@@ -155,6 +155,47 @@ const gentleWaltzMusic = {
 
 
 const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
+  "lueur-de-minuit": {
+    id: "lueur-de-minuit",
+    name: "Lueur de Minuit",
+    category: "cinematic",
+    tag: { tr: "Kelebeğe dokun", en: "Touch the butterfly" },
+    image: themeBlush,
+    selectable: true,
+    primaryColor: "#07152f",
+    secondaryColor: "#f5f1e8",
+    font: "Plus Jakarta Sans",
+    qr: {
+      accent: "#d6b878",
+      ink: "#07152f",
+      paper: "#f8f5ee",
+      overlay: "linear-gradient(180deg, rgba(7,21,47,.08), rgba(3,10,25,.88))",
+      imagePosition: "center",
+    },
+    music: romanticPianoMusic,
+    ambientEffect: { type: "shimmer", intensity: "light" },
+    openingAnimation: { duration: 2.2, style: "scale" },
+    styles: {
+      overlay: "bg-[#07152f]/35",
+      typography: {
+        display: "font-bodoni text-[#07152f] font-normal tracking-tight",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.3em] text-[#24395f] text-xs font-semibold",
+        ampersand: "font-pinyon text-[#b79a5d] text-[1.05em] font-normal mx-2",
+      },
+      textColor: "text-[#07152f]",
+      mutedTextColor: "text-[#647086]",
+      accentColor: "text-[#a88b50]",
+      motion: "ease-out",
+      buttons: {
+        primary: "bg-[#07152f] text-[#f8f5ee] font-semibold tracking-wide hover:bg-[#10264c]",
+        secondary: "border border-[#07152f]/20 bg-white/65 text-[#07152f] hover:bg-white",
+      },
+      cards: { wrapper: "bg-[#f8f5ee]/92 backdrop-blur-xl border-[#d6b878]/25" },
+      gallery: { gridStyle: "portrait" },
+      icons: { color: "text-[#a88b50]" },
+    },
+  },
   "turquoise-cove": {
     id: "turquoise-cove",
     name: "Turquoise Cove",
