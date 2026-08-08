@@ -29,28 +29,56 @@ export function MultiEventDetails({
   lang: "tr" | "en";
   calendarEnabled?: boolean;
 }) {
+  const isLueur = theme.id === "lueur-de-minuit";
+  const textColor = theme.styles.textColor || "text-white";
+  const mutedTextColor = theme.styles.mutedTextColor || "text-white/75";
+  const lueurTextStyle = isLueur ? { color: "#07152f" } : undefined;
+  const lueurMutedStyle = isLueur ? { color: "#526176" } : undefined;
+
   return (
     <section className="relative flex min-h-dvh snap-center flex-col items-center px-6 py-24">
       <div className="w-full max-w-3xl">
-        <h3 className="mb-10 text-center text-2xl sm:text-3xl font-sans font-bold tracking-tight text-white">
+        <h3
+          className={`mb-10 text-center text-2xl sm:text-3xl font-sans font-bold tracking-tight ${textColor}`}
+          style={lueurTextStyle}
+        >
           {lang === "tr" ? "Etkinlikler ve Program" : "Events & Schedule"}
         </h3>
         <div className="space-y-5">
           {schedules.map((schedule) => (
             <article
               key={schedule.id}
-              className={`${theme.styles.cards.wrapper} text-white rounded-3xl p-6 shadow-2xl sm:p-8 border border-white/20`}
+              className={`${theme.styles.cards.wrapper} ${textColor} rounded-3xl p-6 shadow-2xl sm:p-8 border border-white/20`}
+              style={
+                isLueur
+                  ? {
+                      color: "#07152f",
+                      backgroundColor: "rgba(248, 245, 238, 0.97)",
+                      borderColor: "rgba(183, 154, 93, 0.35)",
+                    }
+                  : undefined
+              }
             >
-              <h4 className="font-sans font-bold text-xl sm:text-2xl tracking-tight text-white">
+              <h4
+                className={`font-sans font-bold text-xl sm:text-2xl tracking-tight ${textColor}`}
+                style={lueurTextStyle}
+              >
                 {schedule.title}
               </h4>
               {schedule.description ? (
-                <p className="mt-2 font-sans text-sm leading-relaxed text-white/80">{schedule.description}</p>
+                <p
+                  className={`mt-2 font-sans text-sm leading-relaxed ${mutedTextColor}`}
+                  style={lueurMutedStyle}
+                >
+                  {schedule.description}
+                </p>
               ) : null}
-              <div className="mt-6 grid gap-4 font-sans text-sm font-medium text-white sm:grid-cols-3">
+              <div
+                className={`mt-6 grid gap-4 font-sans text-sm font-medium ${textColor} sm:grid-cols-3`}
+              >
                 <p className="flex items-start gap-2">
                   <CalendarDays className={`mt-0.5 size-4 shrink-0 ${theme.styles.icons.color}`} />
-                  <span className="font-sans text-white">
+                  <span className={`font-sans ${textColor}`} style={lueurTextStyle}>
                     {schedule.event_date
                       ? new Date(`${schedule.event_date}T12:00:00`).toLocaleDateString(
                           lang === "tr" ? "tr-TR" : "en-US",
@@ -63,7 +91,7 @@ export function MultiEventDetails({
                 </p>
                 <p className="flex items-start gap-2">
                   <Clock className={`mt-0.5 size-4 shrink-0 ${theme.styles.icons.color}`} />
-                  <span className="font-sans text-white">
+                  <span className={`font-sans ${textColor}`} style={lueurTextStyle}>
                     {[schedule.starts_at?.slice(0, 5), schedule.ends_at?.slice(0, 5)]
                       .filter(Boolean)
                       .join(" – ") || (lang === "tr" ? "Saat daha sonra açıklanacak" : "Time TBA")}
@@ -71,16 +99,26 @@ export function MultiEventDetails({
                 </p>
                 <p className="flex items-start gap-2">
                   <Map className={`mt-0.5 size-4 shrink-0 ${theme.styles.icons.color}`} />
-                  <span className="font-sans text-white">
-                    <strong className="font-semibold block text-white">{schedule.venue_name}</strong>
+                  <span className={`font-sans ${textColor}`} style={lueurTextStyle}>
+                    <strong className={`font-semibold block ${textColor}`} style={lueurTextStyle}>
+                      {schedule.venue_name}
+                    </strong>
                     {schedule.address ? (
-                      <span className="mt-1 block font-sans text-xs text-white/75">{schedule.address}</span>
+                      <span
+                        className={`mt-1 block font-sans text-xs ${mutedTextColor}`}
+                        style={lueurMutedStyle}
+                      >
+                        {schedule.address}
+                      </span>
                     ) : null}
                   </span>
                 </p>
               </div>
               {schedule.dress_code || schedule.parking_info || schedule.transport_info ? (
-                <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 font-sans text-xs leading-relaxed text-white/80">
+                <div
+                  className={`mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 font-sans text-xs leading-relaxed ${mutedTextColor}`}
+                  style={lueurMutedStyle}
+                >
                   {[schedule.dress_code, schedule.parking_info, schedule.transport_info]
                     .filter(Boolean)
                     .join(" · ")}

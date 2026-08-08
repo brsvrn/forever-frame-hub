@@ -451,3 +451,13 @@
 .lueur-pearl{background-color:#f5f1e8;background-image:radial-gradient(circle at 22% 12%,rgba(255,255,255,.95),transparent 35%),linear-gradient(135deg,rgba(214,184,120,.06),transparent 48%)}
 .lueur-emboss{background-image:repeating-radial-gradient(ellipse at 0 100%,transparent 0 26px,rgba(7,21,47,.08) 27px 28px,transparent 29px 43px);filter:blur(.2px)}
 .papillon-line-butterfly{display:block;width:74px;height:48px;position:relative}.papillon-line-butterfly:before,.papillon-line-butterfly:after{content:"";position:absolute;top:4px;width:36px;height:38px;border:1px solid #b79a5d}.papillon-line-butterfly:before{left:2px;border-radius:70% 30% 60% 40%;transform:rotate(-12deg)}.papillon-line-butterfly:after{right:2px;border-radius:30% 70% 40% 60%;transform:rotate(12deg)}
+
+/* Lueur uses pearl RSVP cards even inside its navy section. The shared RSVP
+   component defaults to white-on-dark controls, so scope the light-card
+   contrast correction to this theme without changing the other themes. */
+.lueur-rsvp [class*="text-white"]{color:#07152f!important}
+.lueur-rsvp [class*="border-white"]{border-color:rgba(183,154,93,.35)!important}
+.lueur-rsvp [class*="bg-white/10"],.lueur-rsvp [class*="bg-black/20"],.lueur-rsvp [class*="bg-black/30"]{background-color:rgba(7,21,47,.055)!important}
+.lueur-rsvp input:not([type="checkbox"]),.lueur-rsvp textarea,.lueur-rsvp select{color:#07152f!important;background-color:rgba(7,21,47,.055)!important;border-color:rgba(183,154,93,.4)!important}
+.lueur-rsvp input::placeholder,.lueur-rsvp textarea::placeholder{color:rgba(82,97,118,.65)!important}
+.lueur-rsvp option{background:#f8f5ee;color:#07152f}
