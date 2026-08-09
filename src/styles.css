@@ -326,6 +326,16 @@
   --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
 }
 
+[data-invite-theme="evergreen-vows"] {
+  --invite-bg: #0b3528;
+  --invite-panel: #f7f0e3;
+  --invite-ink: #f7f0e3;
+  --invite-soft: #d8dfd4;
+  --invite-accent: #c9a96e;
+  --invite-accent-ink: #0b3528;
+  --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+}
+
 [data-invite-theme="wildflower-meadow"] {
   --invite-bg: oklch(0.92 0.035 88);
   --invite-panel: oklch(0.96 0.022 88);

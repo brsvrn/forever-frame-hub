@@ -18,6 +18,7 @@ import grandBallroom from "@/assets/theme-grand-ballroom.png";
 import themeBohoChic from "@/assets/theme-boho-chic.jpg";
 import themeEtherealLight from "@/assets/theme-ethereal-light.jpg";
 import midnightConservatory from "@/assets/theme-midnight-conservatory.webp";
+import evergreenVows from "@/assets/theme-evergreen-vows.webp";
 import {
   buildThemeCapabilities,
   type ThemeCapabilities,
@@ -47,7 +48,7 @@ export type CoastalThemeId =
 
 export type NatureThemeId = "emerald-forest" | "wildflower-meadow" | "alpine-mist";
 export type ItalianThemeId = "amalfi-lemon-terrace" | "tuscan-golden-hills" | "lake-como-garden";
-export type LuxuryThemeId = "grand-ballroom" | "midnight-conservatory";
+export type LuxuryThemeId = "grand-ballroom" | "midnight-conservatory" | "evergreen-vows";
 export type CinematicThemeId =
   "cinematic-flow" | "boho-motion" | "ethereal-light" | "lueur-de-minuit";
 export type ThemeCategory = "coastal" | "nature" | "italy" | "luxury" | "cinematic" | "classic";
@@ -157,6 +158,50 @@ const gentleWaltzMusic = {
 };
 
 const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
+  "evergreen-vows": {
+    id: "evergreen-vows",
+    name: "Evergreen Vows",
+    category: "luxury",
+    tag: { tr: "Daima yeşil, daima birlikte", en: "Evergreen, ever after" },
+    image: evergreenVows,
+    selectable: true,
+    primaryColor: "#C9A96E",
+    secondaryColor: "#0B3528",
+    font: "Cormorant Garamond",
+    qr: {
+      accent: "#C9A96E",
+      ink: "#0B3528",
+      paper: "#F7F0E3",
+      overlay: "linear-gradient(180deg, rgba(11,53,40,.08), rgba(6,35,26,.76))",
+      imagePosition: "center",
+    },
+    music: gentleWaltzMusic,
+    ambientEffect: { type: "leaves", intensity: "light" },
+    openingAnimation: { duration: 2.2, style: "scale" },
+    styles: {
+      overlay: "bg-[#0B3528]/30",
+      typography: {
+        display:
+          "font-playfair font-normal tracking-tight text-[#F7F0E3] drop-shadow-[0_3px_18px_rgba(4,25,18,.45)]",
+        sans: "font-sans",
+        subheading:
+          "font-cinzel uppercase tracking-[0.34em] text-[#C9A96E] text-[10px] font-semibold",
+        ampersand: "font-pinyon text-[#D7BC87] text-[1.15em] font-normal mx-2",
+      },
+      textColor: "text-[#F7F0E3]",
+      mutedTextColor: "text-[#DDE4D8]/85",
+      accentColor: "text-[#C9A96E]",
+      motion: "ease-out",
+      buttons: {
+        primary: "bg-[#C9A96E] text-[#0B3528] font-bold tracking-wide hover:bg-[#DFC692]",
+        secondary:
+          "border border-[#C9A96E]/40 bg-[#F7F0E3]/10 text-[#F7F0E3] hover:bg-[#F7F0E3]/20",
+      },
+      cards: { wrapper: "bg-[#F7F0E3]/94 backdrop-blur-xl border-[#C9A96E]/35 text-[#0B3528]" },
+      gallery: { gridStyle: "portrait" },
+      icons: { color: "text-[#C9A96E]" },
+    },
+  },
   "midnight-conservatory": {
     id: "midnight-conservatory",
     name: "Midnight Conservatory",
