@@ -336,6 +336,22 @@
   --invite-display: "Cormorant Garamond", ui-serif, Georgia, serif;
 }
 
+/* Evergreen Vows presents copy directly on the emerald canvas. Keep inherited
+   section typography readable without restoring the shared frosted cards. */
+.evergreen-vows-theme section { color: #f7f0e3; }
+.evergreen-vows-theme section [class*="text-slate"],
+.evergreen-vows-theme section [class*="text-stone"],
+.evergreen-vows-theme section [class*="text-gray"] { color: #d8dfd4; }
+.evergreen-vows-theme section input,
+.evergreen-vows-theme section textarea,
+.evergreen-vows-theme section select {
+  color: #f7f0e3;
+  background-color: rgba(4, 31, 23, .62);
+  border-color: rgba(201, 169, 110, .45);
+}
+.evergreen-vows-theme section input::placeholder,
+.evergreen-vows-theme section textarea::placeholder { color: rgba(247, 240, 227, .62); }
+
 [data-invite-theme="wildflower-meadow"] {
   --invite-bg: oklch(0.92 0.035 88);
   --invite-panel: oklch(0.96 0.022 88);

@@ -197,7 +197,10 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
         secondary:
           "border border-[#C9A96E]/40 bg-[#F7F0E3]/10 text-[#F7F0E3] hover:bg-[#F7F0E3]/20",
       },
-      cards: { wrapper: "bg-[#F7F0E3]/94 backdrop-blur-xl border-[#C9A96E]/35 text-[#0B3528]" },
+      cards: {
+        wrapper:
+          "!bg-transparent !border-transparent !shadow-none !backdrop-blur-none !text-[#F7F0E3]",
+      },
       gallery: { gridStyle: "portrait" },
       icons: { color: "text-[#C9A96E]" },
     },
