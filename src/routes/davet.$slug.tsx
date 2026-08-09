@@ -33,6 +33,7 @@ import {
   MidnightConservatorySection,
   type MidnightScene,
 } from "@/components/invitation/MidnightConservatory";
+import { EvergreenVowsHero, EvergreenVowsOpening } from "@/components/invitation/EvergreenVows";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
 import {
   resolveTheme,
@@ -173,6 +174,7 @@ function PremiumInvitePage() {
   const openingEnabled = eventFeatures?.opening_enabled !== false;
   const isLueur = theme.id === "lueur-de-minuit";
   const isConservatory = theme.id === "midnight-conservatory";
+  const isEvergreen = theme.id === "evergreen-vows";
 
   useEffect(() => {
     const receivePersonalGuest = (event: MessageEvent) => {
@@ -219,6 +221,13 @@ function PremiumInvitePage() {
               partnerTwo={draft.partnerTwo}
               onComplete={() => setHasOpened(true)}
             />
+          ) : isEvergreen ? (
+            <EvergreenVowsOpening
+              key={`intro-${theme.id}`}
+              partnerOne={draft.partnerOne}
+              partnerTwo={draft.partnerTwo}
+              onComplete={() => setHasOpened(true)}
+            />
           ) : (
             <InvitationIntro
               key={`intro-${theme.id}`}
@@ -233,12 +242,12 @@ function PremiumInvitePage() {
 
       {(hasOpened || !openingEnabled || features.digital_invitation === false) && (
         <div key={`invite-${theme.id}`}>
-          {!isLueur && !isConservatory ? <LivingBackground theme={theme} /> : null}
+          {!isLueur && !isConservatory && !isEvergreen ? <LivingBackground theme={theme} /> : null}
 
           <main
             className={`relative z-10 h-dvh overflow-y-auto scroll-smooth pb-24 ${
               isConservatory ? "" : "snap-y snap-mandatory"
-            }`}
+            } ${isEvergreen ? "bg-[#0B3528] text-[#F7F0E3]" : ""}`}
           >
             {features.digital_invitation !== false ? (
               <>
@@ -246,6 +255,8 @@ function PremiumInvitePage() {
                   <LueurHero draft={draft} lang={lang} />
                 ) : isConservatory ? (
                   <MidnightConservatoryHero draft={draft} lang={lang} />
+                ) : isEvergreen ? (
+                  <EvergreenVowsHero draft={draft} lang={lang} />
                 ) : (
                   <HeroExperience draft={draft} theme={theme} lang={lang} />
                 )}
