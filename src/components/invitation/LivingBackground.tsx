@@ -4,6 +4,7 @@ import type { ThemeConfig } from "@/lib/theme-engine";
 export function LivingBackground({ theme }: { theme: ThemeConfig }) {
   const reduceMotion = useReducedMotion();
   const isLightTheme = theme.id === "soft-sand-dunes" || theme.id === "wildflower-meadow";
+  const isConservatory = theme.id === "midnight-conservatory";
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black">
@@ -23,6 +24,13 @@ export function LivingBackground({ theme }: { theme: ThemeConfig }) {
       <div
         className={isLightTheme ? "absolute inset-0 bg-black/12" : "absolute inset-0 bg-black/18"}
       />
+
+      {isConservatory ? (
+        <>
+          <div className="absolute inset-3 rounded-[2.5rem] border border-[#d6b96f]/25 shadow-[inset_0_0_50px_rgba(214,185,111,.06)]" />
+          <div className="absolute inset-6 rounded-[2rem] border border-[#d6b96f]/10" />
+        </>
+      ) : null}
 
       {!reduceMotion ? <AmbientMotion theme={theme} /> : null}
     </div>
@@ -56,9 +64,42 @@ function AmbientMotion({ theme }: { theme: ThemeConfig }) {
       return <SunGlow accent={theme.qr.accent} />;
     case "lakeShimmer":
       return <LakeShimmer accent={theme.qr.accent} />;
+    case "fireflies":
+      return <Fireflies accent={theme.qr.accent} />;
     default:
       return null;
   }
+}
+
+function Fireflies({ accent }: { accent: string }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {[9, 18, 31, 47, 62, 74, 87, 94].map((left, index) => (
+        <motion.span
+          key={left}
+          className="absolute size-1.5 rounded-full blur-[0.5px]"
+          style={{
+            left: `${left}%`,
+            top: `${20 + ((index * 13) % 65)}%`,
+            backgroundColor: accent,
+            boxShadow: `0 0 14px 3px ${accent}66`,
+          }}
+          animate={{
+            x: [0, index % 2 ? 18 : -16, 4, 0],
+            y: [0, -28, 12, 0],
+            opacity: [0.18, 0.9, 0.35, 0.18],
+            scale: [0.7, 1.35, 0.85, 0.7],
+          }}
+          transition={{
+            duration: 5.5 + (index % 4),
+            delay: index * 0.35,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 function SeaFoam({ accent }: { accent: string }) {
