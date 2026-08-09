@@ -17,6 +17,7 @@ import lakeComoGarden from "@/assets/theme-lake-como-garden.png";
 import grandBallroom from "@/assets/theme-grand-ballroom.png";
 import themeBohoChic from "@/assets/theme-boho-chic.jpg";
 import themeEtherealLight from "@/assets/theme-ethereal-light.jpg";
+import midnightConservatory from "@/assets/theme-midnight-conservatory.webp";
 import {
   buildThemeCapabilities,
   type ThemeCapabilities,
@@ -46,8 +47,9 @@ export type CoastalThemeId =
 
 export type NatureThemeId = "emerald-forest" | "wildflower-meadow" | "alpine-mist";
 export type ItalianThemeId = "amalfi-lemon-terrace" | "tuscan-golden-hills" | "lake-como-garden";
-export type LuxuryThemeId = "grand-ballroom";
-export type CinematicThemeId = "cinematic-flow" | "boho-motion" | "ethereal-light" | "lueur-de-minuit";
+export type LuxuryThemeId = "grand-ballroom" | "midnight-conservatory";
+export type CinematicThemeId =
+  "cinematic-flow" | "boho-motion" | "ethereal-light" | "lueur-de-minuit";
 export type ThemeCategory = "coastal" | "nature" | "italy" | "luxury" | "cinematic" | "classic";
 export type InviteThemeId =
   | CoastalThemeId
@@ -107,6 +109,7 @@ export interface ThemeConfig {
       | "lemonBreeze"
       | "tuscanGlow"
       | "lakeShimmer"
+      | "fireflies"
       | "none";
     intensity: "light" | "medium" | "heavy";
   };
@@ -153,8 +156,55 @@ const gentleWaltzMusic = {
   title: "Water Lily",
 };
 
-
 const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
+  "midnight-conservatory": {
+    id: "midnight-conservatory",
+    name: "Midnight Conservatory",
+    category: "luxury",
+    tag: { tr: "Gece bahçesine adım atın", en: "Enter the midnight garden" },
+    image: midnightConservatory,
+    selectable: true,
+    primaryColor: "#D6B96F",
+    secondaryColor: "#061A17",
+    font: "Cinzel",
+    qr: {
+      accent: "#D6B96F",
+      ink: "#071A17",
+      paper: "#EFF3E9",
+      overlay: "linear-gradient(180deg, rgba(2,19,18,.12), rgba(1,10,14,.7) 58%, rgba(1,8,11,.94))",
+      imagePosition: "center",
+    },
+    music: gentleWaltzMusic,
+    ambientEffect: { type: "fireflies", intensity: "medium" },
+    openingAnimation: { duration: 2.4, style: "blur" },
+    styles: {
+      overlay: "bg-[radial-gradient(circle_at_center,rgba(5,39,32,.06),rgba(1,10,14,.72))]",
+      typography: {
+        display:
+          "font-cinzel-decorative font-normal tracking-[0.025em] text-[#F4E9CF] drop-shadow-[0_4px_24px_rgba(0,0,0,.75)]",
+        sans: "font-sans",
+        subheading:
+          "font-cinzel uppercase tracking-[0.38em] text-[#D6B96F] text-[10px] font-semibold",
+        ampersand: "font-pinyon text-[#D6B96F] text-[1.05em] font-normal mx-2",
+      },
+      textColor: "text-[#F4E9CF]",
+      mutedTextColor: "text-[#C9D6CA]/80",
+      accentColor: "text-[#D6B96F]",
+      motion: "ease-out",
+      buttons: {
+        primary:
+          "bg-[#D6B96F] text-[#071A17] font-bold tracking-wide hover:bg-[#E6CC88] shadow-[0_12px_35px_rgba(214,185,111,.2)]",
+        secondary:
+          "border border-[#D6B96F]/40 bg-[#061A17]/55 text-[#F4E9CF] hover:bg-[#0B2B24]/75",
+      },
+      cards: {
+        wrapper:
+          "bg-[#041A17]/72 backdrop-blur-2xl border-[#D6B96F]/30 shadow-[0_24px_80px_rgba(0,0,0,.46)]",
+      },
+      gallery: { gridStyle: "portrait" },
+      icons: { color: "text-[#D6B96F]" },
+    },
+  },
   "lueur-de-minuit": {
     id: "lueur-de-minuit",
     name: "Lueur de Minuit",
@@ -222,7 +272,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       typography: {
         display: "font-montserrat font-light tracking-[0.22em] uppercase text-[#E0F7FA]",
         sans: "font-sans",
-        subheading: "font-montserrat uppercase tracking-[0.35em] text-[#80DEEA] text-xs font-semibold",
+        subheading:
+          "font-montserrat uppercase tracking-[0.35em] text-[#80DEEA] text-xs font-semibold",
         ampersand: "font-pinyon text-[#4DD0E1] text-[1.1em] font-normal mx-2 opacity-95",
       },
       textColor: "text-[#E0F7FA]",
@@ -262,7 +313,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     styles: {
       overlay: "bg-orange-950/35",
       typography: {
-        display: "font-script text-[#FFF0D4] font-normal tracking-wide text-[1.1em] leading-[1.05] drop-shadow-md",
+        display:
+          "font-script text-[#FFF0D4] font-normal tracking-wide text-[1.1em] leading-[1.05] drop-shadow-md",
         sans: "font-sans",
         subheading: "font-sans uppercase tracking-[0.3em] text-[#FFD79A] text-xs font-semibold",
         ampersand: "font-parisienne text-[#FFC06E] text-[1.1em] font-normal mx-2 opacity-95",
@@ -356,7 +408,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       accentColor: "text-[#90CDF4]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-[#E2E8F0] text-slate-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
+        primary:
+          "bg-[#E2E8F0] text-slate-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/10 text-white hover:bg-white/20",
       },
       cards: { wrapper: "bg-slate-950/55 backdrop-blur-xl border-indigo-300/25" },
@@ -388,7 +441,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     styles: {
       overlay: "bg-blue-950/25",
       typography: {
-        display: "font-pinyon text-[#FFF1F2] font-normal tracking-wide text-[1.15em] leading-[1.08]",
+        display:
+          "font-pinyon text-[#FFF1F2] font-normal tracking-wide text-[1.15em] leading-[1.08]",
         sans: "font-sans",
         subheading: "font-sans uppercase tracking-[0.3em] text-[#FBCFE8] text-xs font-bold",
         ampersand: "font-pinyon text-[#F472B6] text-[1.1em] mx-2 font-normal",
@@ -440,7 +494,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       accentColor: "text-[#D4A373]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-[#EEDBBE] text-stone-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
+        primary:
+          "bg-[#EEDBBE] text-stone-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/20 text-white hover:bg-white/30",
       },
       cards: { wrapper: "bg-stone-900/32 backdrop-blur-xl border-[#D8B988]/35" },
@@ -514,7 +569,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     styles: {
       overlay: "bg-stone-900/24",
       typography: {
-        display: "font-parisienne text-[#FFF0F5] font-normal tracking-wider text-[1.1em] leading-[1.05]",
+        display:
+          "font-parisienne text-[#FFF0F5] font-normal tracking-wider text-[1.1em] leading-[1.05]",
         sans: "font-sans",
         subheading: "font-sans uppercase tracking-[0.3em] text-[#F9A8D4] text-xs font-semibold",
         ampersand: "font-pinyon text-[#F472B6] text-[1.15em] font-normal mx-2",
@@ -566,7 +622,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       accentColor: "text-[#5EEAD4]",
       motion: "ease-in-out",
       buttons: {
-        primary: "bg-[#F1F5F9] text-slate-900 font-light tracking-widest uppercase text-xs hover:bg-white",
+        primary:
+          "bg-[#F1F5F9] text-slate-900 font-light tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/12 text-white hover:bg-white/22",
       },
       cards: { wrapper: "bg-emerald-950/45 backdrop-blur-xl border-slate-100/22" },
@@ -693,7 +750,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       accentColor: "text-[#E2E8F0]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-[#E2E8F0] text-slate-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
+        primary:
+          "bg-[#E2E8F0] text-slate-950 font-medium tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/16 text-white hover:bg-white/26",
       },
       cards: { wrapper: "bg-slate-950/42 backdrop-blur-xl border-stone-100/22" },
@@ -736,7 +794,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       accentColor: "text-[#EAB308]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-gradient-to-r from-[#FDE68A] to-[#F59E0B] text-stone-950 font-bold tracking-wider hover:from-white hover:to-[#FDE68A]",
+        primary:
+          "bg-gradient-to-r from-[#FDE68A] to-[#F59E0B] text-stone-950 font-bold tracking-wider hover:from-white hover:to-[#FDE68A]",
         secondary: "bg-white/18 text-white hover:bg-white/28",
       },
       cards: { wrapper: "bg-stone-950/40 backdrop-blur-xl border-[#FDE68A]/30" },
@@ -778,7 +837,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       accentColor: "text-white",
       motion: "ease-out",
       buttons: {
-        primary: "bg-white text-black font-black tracking-widest uppercase text-xs hover:bg-white/90",
+        primary:
+          "bg-white text-black font-black tracking-widest uppercase text-xs hover:bg-white/90",
         secondary: "bg-white/10 text-white hover:bg-white/20",
       },
       cards: { wrapper: "bg-black/55 backdrop-blur-xl border-white/15" },
@@ -862,7 +922,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       accentColor: "text-[#FFFFFF]",
       motion: "ease-out",
       buttons: {
-        primary: "bg-white/95 text-black font-semibold tracking-widest uppercase text-xs hover:bg-white",
+        primary:
+          "bg-white/95 text-black font-semibold tracking-widest uppercase text-xs hover:bg-white",
         secondary: "bg-white/20 text-white hover:bg-white/30",
       },
       cards: { wrapper: "bg-black/35 backdrop-blur-xl border-white/25" },
