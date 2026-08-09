@@ -235,7 +235,11 @@ function PremiumInvitePage() {
         <div key={`invite-${theme.id}`}>
           {!isLueur && !isConservatory ? <LivingBackground theme={theme} /> : null}
 
-          <main className="relative z-10 h-dvh snap-y snap-mandatory overflow-y-auto scroll-smooth pb-24">
+          <main
+            className={`relative z-10 h-dvh overflow-y-auto scroll-smooth pb-24 ${
+              isConservatory ? "" : "snap-y snap-mandatory"
+            }`}
+          >
             {features.digital_invitation !== false ? (
               <>
                 {isLueur ? (
