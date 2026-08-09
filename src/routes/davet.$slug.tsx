@@ -247,7 +247,7 @@ function PremiumInvitePage() {
           <main
             className={`relative z-10 h-dvh overflow-y-auto scroll-smooth pb-24 ${
               isConservatory ? "" : "snap-y snap-mandatory"
-            } ${isEvergreen ? "bg-[#0B3528] text-[#F7F0E3]" : ""}`}
+            } ${isEvergreen ? "evergreen-vows-theme bg-[#0B3528] text-[#F7F0E3]" : ""}`}
           >
             {features.digital_invitation !== false ? (
               <>
