@@ -980,6 +980,48 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     },
   },
 
+  "royal-envelope": {
+    id: "royal-envelope",
+    name: "Royal Envelope",
+    category: "luxury",
+    tag: { tr: "Lüks zarf açılışı", en: "Royal envelope" },
+    image: evergreenVows,
+    selectable: true,
+    primaryColor: "#0A1F18",
+    secondaryColor: "#C9A96E",
+    font: "Cormorant Garamond",
+    qr: {
+      accent: "#C9A96E",
+      ink: "#0A1F18",
+      paper: "#F7F0E3",
+      overlay: "linear-gradient(180deg, rgba(10,31,24,.12), rgba(5,15,12,.8))",
+      imagePosition: "center",
+    },
+    music: gentleWaltzMusic,
+    ambientEffect: { type: "shimmer", intensity: "light" },
+    openingAnimation: { duration: 3.8, style: "fade" },
+    styles: {
+      overlay: "bg-[#0A1F18]/40",
+      typography: {
+        display: "font-playfair font-normal tracking-tight text-[#F7F0E3] drop-shadow-[0_4px_16px_rgba(0,0,0,.6)]",
+        sans: "font-sans",
+        subheading: "font-cinzel uppercase tracking-[0.3em] text-[#C9A96E] text-xs font-semibold",
+        ampersand: "font-pinyon text-[#C9A96E] text-[1.15em] font-normal mx-2",
+      },
+      textColor: "text-[#F7F0E3]",
+      mutedTextColor: "text-[#F7F0E3]/70",
+      accentColor: "text-[#C9A96E]",
+      motion: "ease-in-out",
+      buttons: {
+        primary: "bg-[#C9A96E] text-[#0A1F18] font-bold tracking-wide hover:bg-[#E5CB96]",
+        secondary: "border border-[#C9A96E]/30 bg-[#F7F0E3]/5 text-[#F7F0E3] hover:bg-[#F7F0E3]/15",
+      },
+      cards: { wrapper: "bg-[#0A1F18]/60 backdrop-blur-xl border-[#C9A96E]/20" },
+      gallery: { gridStyle: "portrait" },
+      icons: { color: "text-[#C9A96E]" },
+    },
+  },
+
   // Legacy themes stay available so previously published invitations keep working.
   midnight: legacyTheme("midnight", "Midnight Bloom", heroCouple, "#F2C879", "#0E1220"),
   blush: legacyTheme("blush", "Blush Atelier", themeBlush, "#F6B4C0", "#4A252D"),
