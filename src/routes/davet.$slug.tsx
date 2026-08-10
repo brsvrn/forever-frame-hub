@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AnimatePresence } from "framer-motion";
 import { z } from "zod";
-import { House, Palette, RotateCcw } from "lucide-react";
+import { House, Palette, RotateCcw, Sparkles } from "lucide-react";
 import {
   getPublicInvitation,
   getPublicFeatureSettings,
@@ -43,7 +43,7 @@ import {
 } from "@/lib/theme-engine";
 
 export const Route = createFileRoute("/davet/$slug")({
-  validateSearch: z.object({ theme: z.string().optional(), embed: z.coerce.string().optional() }),
+  validateSearch: z.object({ theme: z.string().optional() }),
   loader: async ({ params }) => {
     if (params.slug === "demo") {
       return {
@@ -195,7 +195,7 @@ function PremiumInvitePage() {
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30">
-      {isDemo && search.embed !== "1" ? (
+      {isDemo ? (
         <DemoThemeSwitcher
           value={previewThemeId}
           lang={lang}
@@ -497,6 +497,15 @@ function DemoThemeSwitcher({
           ))}
         </select>
       </label>
+      <a
+        href={`/olustur?theme=${encodeURIComponent(value)}&step=basic-info`}
+        className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-white px-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+      >
+        <Sparkles className="size-4" aria-hidden="true" />
+        <span className="hidden md:inline">
+          {lang === "tr" ? "Bu temayla oluştur" : "Use this theme"}
+        </span>
+      </a>
       <button
         type="button"
         onClick={onReplay}

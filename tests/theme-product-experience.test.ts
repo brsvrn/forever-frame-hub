@@ -5,24 +5,25 @@ import { describe, expect, it } from "vitest";
 const read = (path: string) => readFileSync(resolve(path), "utf8");
 
 describe("theme discovery and builder journey", () => {
-  it("offers category filters and a direct full-screen preview from theme pages", () => {
+  it("offers category filters and a direct full-screen demo from theme pages", () => {
     const themeIndex = read("src/routes/temalar.index.tsx");
     const themeDetail = read("src/routes/temalar.$slug.tsx");
 
     expect(themeIndex).toContain("themeCategoryOrder");
     expect(themeIndex).toContain("filterThemesByCategory");
     expect(themeIndex).toContain("Tema koleksiyonu filtresi");
-    expect(themeDetail).toContain('to="/temalar/$slug/onizleme"');
+    expect(themeDetail).toContain("/davet/demo?theme=");
+    expect(themeDetail).toContain('step: "basic-info"');
   });
 
-  it("keeps preview URLs shareable and embeds the actual invitation demo", () => {
+  it("redirects legacy preview URLs to the actual invitation demo", () => {
     const preview = read("src/routes/temalar.$slug.onizleme.tsx");
     const invitation = read("src/routes/davet.$slug.tsx");
 
-    expect(preview).toContain("navigator.share");
-    expect(preview).toContain("navigator.clipboard.writeText");
+    expect(preview).toContain("throw redirect");
     expect(preview).toContain("/davet/demo?theme=");
-    expect(invitation).toContain("embed: z.coerce.string().optional()");
+    expect(invitation).toContain("/olustur?theme=");
+    expect(invitation).toContain("step=basic-info");
   });
 
   it("presents the detailed builder as four customer-facing stages", () => {
