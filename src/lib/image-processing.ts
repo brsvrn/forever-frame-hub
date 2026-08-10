@@ -61,28 +61,59 @@ type LoadedImage = {
   dispose: () => void;
 };
 
-async function loadImage(file: File): Promise<LoadedImage> {
-  if (typeof createImageBitmap === "function") {
-    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-    return {
-      source: bitmap,
-      width: bitmap.width,
-      height: bitmap.height,
-      dispose: () => bitmap.close(),
-    };
-  }
+function loadedBitmap(bitmap: ImageBitmap): LoadedImage {
+  return {
+    source: bitmap,
+    width: bitmap.width,
+    height: bitmap.height,
+    dispose: () => bitmap.close(),
+  };
+}
 
+async function loadImageElement(file: File): Promise<LoadedImage> {
   const objectUrl = URL.createObjectURL(file);
   const image = new Image();
   image.decoding = "async";
-  image.src = objectUrl;
-  await image.decode();
-  return {
-    source: image,
-    width: image.naturalWidth,
-    height: image.naturalHeight,
-    dispose: () => URL.revokeObjectURL(objectUrl),
-  };
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("Image element could not decode the source."));
+      image.src = objectUrl;
+    });
+
+    if (!image.naturalWidth || !image.naturalHeight) {
+      throw new Error("Decoded image has no dimensions.");
+    }
+
+    return {
+      source: image,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      dispose: () => URL.revokeObjectURL(objectUrl),
+    };
+  } catch {
+    URL.revokeObjectURL(objectUrl);
+    throw new Error(
+      "Fotoğraf bu cihazda okunamadı. Lütfen JPG, PNG veya WebP olarak yeniden kaydedip tekrar deneyin.",
+    );
+  }
+}
+
+export async function loadImageSource(file: File): Promise<LoadedImage> {
+  if (typeof createImageBitmap === "function") {
+    try {
+      return loadedBitmap(await createImageBitmap(file, { imageOrientation: "from-image" }));
+    } catch {
+      try {
+        return loadedBitmap(await createImageBitmap(file));
+      } catch {
+        // Some mobile JPEGs fail createImageBitmap but still decode in an image element.
+      }
+    }
+  }
+
+  return loadImageElement(file);
 }
 
 function canvasToWebp(canvas: HTMLCanvasElement, quality: number) {
@@ -96,7 +127,7 @@ function canvasToWebp(canvas: HTMLCanvasElement, quality: number) {
 }
 
 export async function optimizeCoverImage(file: File, crop: CoverCrop) {
-  const loaded = await loadImage(file);
+  const loaded = await loadImageSource(file);
   try {
     const width = 1600;
     const height = 1000;
@@ -124,7 +155,7 @@ export async function optimizeCoverImage(file: File, crop: CoverCrop) {
 }
 
 export async function optimizeGalleryImage(file: File) {
-  const loaded = await loadImage(file);
+  const loaded = await loadImageSource(file);
   try {
     const dimensions = calculateContainedSize(loaded.width, loaded.height);
     const canvas = document.createElement("canvas");
