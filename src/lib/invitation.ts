@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { selectableThemes, type InviteThemeId, type ThemeConfig } from "./theme-engine";
 import { defaultThemeCustomization, type ThemeCustomization } from "./theme-customization";
+import type { InvitationGalleryImage } from "./invitation-media";
 
 export type { InviteThemeId };
 export type InviteTheme = ThemeConfig;
@@ -23,6 +24,7 @@ export type InvitationDraft = {
   mapUrl: string;
   musicUrl: string;
   coverPhoto: string;
+  galleryImages: InvitationGalleryImage[];
   rsvpLabel: string;
   slug: string;
   eventProgram: Array<{ time: string; title: string; desc: string }>;
@@ -52,6 +54,7 @@ export const emptyDraft: InvitationDraft = {
   mapUrl: "",
   musicUrl: "",
   coverPhoto: "",
+  galleryImages: [],
   rsvpLabel: "",
   slug: "",
   eventProgram: [],
@@ -84,6 +87,7 @@ export const sampleDraft: InvitationDraft = {
   mapUrl: "https://maps.app.goo.gl/example",
   musicUrl: "https://youtube.com/watch?v=example",
   coverPhoto: "",
+  galleryImages: [],
   rsvpLabel: "Katılıyorum",
   slug: "elif-kaan",
   eventProgram: [

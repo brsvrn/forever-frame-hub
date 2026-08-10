@@ -1,4 +1,4 @@
-import { Check, Image, Palette, RotateCcw, Save, Type } from "lucide-react";
+import { Check, Palette, RotateCcw, Save, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveTheme } from "@/lib/theme-engine";
 import {
@@ -9,7 +9,7 @@ import {
   type ThemeCustomization,
 } from "@/lib/theme-customization";
 import type { InvitationDraft } from "@/lib/invitation";
-import { Field, TextInput } from "./Field";
+import { Field } from "./Field";
 
 type StudioProps = {
   draft: InvitationDraft;
@@ -189,29 +189,6 @@ export function ThemeCustomizationStudio({ draft, update, lang, compact = false 
             </div>
           )}
         </Field>
-
-        <Field
-          label={lang === "tr" ? "Kapak fotoğrafı bağlantısı" : "Cover image URL"}
-          hint={
-            lang === "tr"
-              ? "Boş bırakırsanız tema görseli kullanılır."
-              : "Leave blank to use the theme image."
-          }
-        >
-          {(id) => (
-            <div className="flex items-center gap-3 rounded-2xl border border-input bg-background/60 px-3">
-              <Image className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <TextInput
-                id={id}
-                type="url"
-                value={draft.coverPhoto}
-                placeholder="https://..."
-                onChange={(event) => update("coverPhoto", event.target.value)}
-                className="border-0 bg-transparent px-0 focus:ring-0"
-              />
-            </div>
-          )}
-        </Field>
       </div>
 
       <div className="mt-6">
@@ -248,7 +225,6 @@ export function ThemeCustomizationStudio({ draft, update, lang, compact = false 
         type="button"
         onClick={() => {
           update("themeCustomization", defaultThemeCustomization);
-          update("coverPhoto", "");
         }}
         className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-4 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
