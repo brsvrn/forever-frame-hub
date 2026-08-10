@@ -14,22 +14,33 @@ export function Footer() {
             </p>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-6">Platform Özellikleri</h4>
+            <h4 className="text-white font-semibold mb-6">Ürünü Keşfedin</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
               <li>
-                <a href="/davet/demo" className="hover:text-white transition-colors">
-                  Canlı Davetiye Demosu
-                </a>
+                <Link to="/nasil-calisir" className="hover:text-white transition-colors">
+                  Nasıl Çalışır?
+                </Link>
               </li>
               <li>
-                <a href="/#features" className="hover:text-white transition-colors">
-                  QR ile Fotoğraf ve Video Toplama
-                </a>
+                <Link
+                  to="/ozellikler/dijital-davetiye"
+                  className="hover:text-white transition-colors"
+                >
+                  Dijital Davetiye
+                </Link>
               </li>
               <li>
-                <a href="/#features" className="hover:text-white transition-colors">
-                  LCV (RSVP) Takibi
-                </a>
+                <Link
+                  to="/ozellikler/lcv-davetli-yonetimi"
+                  className="hover:text-white transition-colors"
+                >
+                  LCV ve Davetli Yönetimi
+                </Link>
+              </li>
+              <li>
+                <Link to="/ozellikler/qr-ani-albumu" className="hover:text-white transition-colors">
+                  QR Anı Albümü
+                </Link>
               </li>
               <li>
                 <Link to="/temalar" className="hover:text-white transition-colors">
@@ -37,9 +48,9 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="/#pricing" className="hover:text-white transition-colors">
+                <Link to="/fiyatlar" className="hover:text-white transition-colors">
                   Paketler ve Fiyatlar
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

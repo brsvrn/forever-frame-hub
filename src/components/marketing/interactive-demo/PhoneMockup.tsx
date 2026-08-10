@@ -2,7 +2,18 @@ import { usePhone } from "@/contexts/PhoneContext";
 import { resolveTheme } from "@/lib/theme-engine";
 import { type CSSProperties, type ReactNode, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music, MapPin, Camera, Image as ImageIcon, Send, ArrowLeft, Volume2, VolumeX } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  Download,
+  Film,
+  Image as ImageIcon,
+  MapPin,
+  Music,
+  Send,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 
 interface PhoneMockupProps {
   className?: string;
@@ -45,13 +56,7 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
       className={`relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[600px] w-[300px] shadow-[0_0_50px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(0,0,0,0.3)] overflow-hidden ${className}`}
     >
       {/* Hidden audio element for interactive demo */}
-      <audio
-        ref={audioRef}
-        src={themeConfig.music.defaultTrack}
-        loop
-        preload="auto"
-        playsInline
-      />
+      <audio ref={audioRef} src={themeConfig.music.defaultTrack} loop preload="auto" playsInline />
 
       {/* Dynamic Island / Notch */}
       <div className="absolute top-0 inset-x-0 h-7 flex justify-center z-50">
@@ -125,7 +130,12 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                   className="absolute top-0 inset-x-0 h-[55%] bg-stone-50 origin-top border-b border-stone-200 z-10 shadow-sm"
                   style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
                 ></div>
-                <span className={`text-2xl z-0 mt-8 tracking-widest ${theme.font}`} style={{ color: themeConfig.qr.ink }}>A & E</span>
+                <span
+                  className={`text-2xl z-0 mt-8 tracking-widest ${theme.font}`}
+                  style={{ color: themeConfig.qr.ink }}
+                >
+                  A & E
+                </span>
               </motion.div>
               <p className="relative z-10 mt-8 animate-pulse text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-600">
                 Zarfı Açmak İçin Dokunun
@@ -179,7 +189,9 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                     Davetlisiniz
                   </span>
                   <h2 className={`text-3xl mb-1 ${theme.font} ${theme.textColor}`}>Ayşe</h2>
-                  <span className={`text-lg mb-1 block py-0.5 opacity-70 ${theme.textColor}`}>&</span>
+                  <span className={`text-lg mb-1 block py-0.5 opacity-70 ${theme.textColor}`}>
+                    &
+                  </span>
                   <h2 className={`text-3xl mb-6 ${theme.font} ${theme.textColor}`}>Emre</h2>
 
                   <div
@@ -349,6 +361,77 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                     Masadaki QR kodu okutarak çektiğiniz fotoğrafları anında yükleyebilirsiniz.
                   </p>
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeScreen === "album" && (
+            <motion.div
+              key="album"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="absolute inset-0 z-30 flex flex-col bg-stone-950 text-white"
+            >
+              <div className="mt-6 flex items-center border-b border-white/10 px-4 py-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveScreen("gallery")}
+                  className="-ml-2 rounded-full p-2 transition-colors hover:bg-white/10"
+                  aria-label="Canlı galeriye dön"
+                >
+                  <ArrowLeft className="size-5 text-white/70" />
+                </button>
+                <div className="ml-1">
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-white/45">Demo albüm</p>
+                  <h3 className="text-sm font-semibold">Düğünden sonra</h3>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5 no-scrollbar">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-white/45">
+                    Toplanan anılar
+                  </p>
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-white/10 p-4">
+                      <ImageIcon className="size-5 text-primary" aria-hidden="true" />
+                      <p className="mt-3 text-2xl font-semibold">184</p>
+                      <p className="text-[10px] text-white/55">Demo fotoğraf</p>
+                    </div>
+                    <div className="rounded-xl bg-white/10 p-4">
+                      <Film className="size-5 text-primary" aria-hidden="true" />
+                      <p className="mt-3 text-2xl font-semibold">12</p>
+                      <p className="text-[10px] text-white/55">Demo video</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5 grid grid-cols-3 gap-2">
+                  {[1, 2, 3, 4, 5, 6].map((item) => (
+                    <div
+                      key={item}
+                      className="aspect-square overflow-hidden rounded-lg bg-white/10"
+                    >
+                      <img
+                        src={`https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=70&w=180&sig=${item}`}
+                        alt="Demo düğün albümü karesi"
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-900"
+                >
+                  <Download className="size-4" aria-hidden="true" />
+                  Albümü indir
+                </button>
+                <p className="mt-3 text-center text-[9px] leading-4 text-white/45">
+                  Görülen sayılar ve görseller demo amaçlıdır. Gerçek içerik etkinliğinize göre
+                  oluşur.
+                </p>
               </div>
             </motion.div>
           )}

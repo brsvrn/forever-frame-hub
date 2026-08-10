@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BakimRouteImport } from './routes/bakim'
+import { Route as FiyatlarRouteImport } from './routes/fiyatlar'
 import { Route as GirisRouteImport } from './routes/giris'
 import { Route as IletisimRouteImport } from './routes/iletisim'
+import { Route as NasilCalisirRouteImport } from './routes/nasil-calisir'
 import { Route as OlusturRouteImport } from './routes/olustur'
 import { Route as PanelRouteImport } from './routes/panel'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -23,6 +25,10 @@ import { Route as EkipDavetiTokenRouteImport } from './routes/ekip-daveti.$token
 import { Route as OdemeIndexRouteImport } from './routes/odeme.index'
 import { Route as OdemeBasariliRouteImport } from './routes/odeme.basarili'
 import { Route as OdemeHataRouteImport } from './routes/odeme.hata'
+import { Route as OzelliklerIndexRouteImport } from './routes/ozellikler.index'
+import { Route as OzelliklerDijitalDavetiyeRouteImport } from './routes/ozellikler.dijital-davetiye'
+import { Route as OzelliklerLcvDavetliYonetimiRouteImport } from './routes/ozellikler.lcv-davetli-yonetimi'
+import { Route as OzelliklerQrAniAlbumuRouteImport } from './routes/ozellikler.qr-ani-albumu'
 import { Route as PanelIdRouteImport } from './routes/panel_.$id'
 import { Route as SozlesmelerGizlilikRouteImport } from './routes/sozlesmeler.gizlilik'
 import { Route as SozlesmelerIptalIadeRouteImport } from './routes/sozlesmeler.iptal-iade'
@@ -51,6 +57,11 @@ const BakimRoute = BakimRouteImport.update({
   path: '/bakim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FiyatlarRoute = FiyatlarRouteImport.update({
+  id: '/fiyatlar',
+  path: '/fiyatlar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GirisRoute = GirisRouteImport.update({
   id: '/giris',
   path: '/giris',
@@ -59,6 +70,11 @@ const GirisRoute = GirisRouteImport.update({
 const IletisimRoute = IletisimRouteImport.update({
   id: '/iletisim',
   path: '/iletisim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NasilCalisirRoute = NasilCalisirRouteImport.update({
+  id: '/nasil-calisir',
+  path: '/nasil-calisir',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OlusturRoute = OlusturRouteImport.update({
@@ -104,6 +120,28 @@ const OdemeBasariliRoute = OdemeBasariliRouteImport.update({
 const OdemeHataRoute = OdemeHataRouteImport.update({
   id: '/odeme/hata',
   path: '/odeme/hata',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OzelliklerIndexRoute = OzelliklerIndexRouteImport.update({
+  id: '/ozellikler/',
+  path: '/ozellikler/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OzelliklerDijitalDavetiyeRoute =
+  OzelliklerDijitalDavetiyeRouteImport.update({
+    id: '/ozellikler/dijital-davetiye',
+    path: '/ozellikler/dijital-davetiye',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OzelliklerLcvDavetliYonetimiRoute =
+  OzelliklerLcvDavetliYonetimiRouteImport.update({
+    id: '/ozellikler/lcv-davetli-yonetimi',
+    path: '/ozellikler/lcv-davetli-yonetimi',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OzelliklerQrAniAlbumuRoute = OzelliklerQrAniAlbumuRouteImport.update({
+  id: '/ozellikler/qr-ani-albumu',
+  path: '/ozellikler/qr-ani-albumu',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PanelIdRoute = PanelIdRouteImport.update({
@@ -173,8 +211,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/bakim': typeof BakimRoute
+  '/fiyatlar': typeof FiyatlarRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
+  '/nasil-calisir': typeof NasilCalisirRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -183,6 +223,9 @@ export interface FileRoutesByFullPath {
   '/ekip-daveti/$token': typeof EkipDavetiTokenRoute
   '/odeme/basarili': typeof OdemeBasariliRoute
   '/odeme/hata': typeof OdemeHataRoute
+  '/ozellikler/dijital-davetiye': typeof OzelliklerDijitalDavetiyeRoute
+  '/ozellikler/lcv-davetli-yonetimi': typeof OzelliklerLcvDavetliYonetimiRoute
+  '/ozellikler/qr-ani-albumu': typeof OzelliklerQrAniAlbumuRoute
   '/panel/$id': typeof PanelIdRoute
   '/sozlesmeler/gizlilik': typeof SozlesmelerGizlilikRoute
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
@@ -190,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
   '/temalar/$slug': typeof TemalarSlugRoute
   '/odeme/': typeof OdemeIndexRoute
+  '/ozellikler/': typeof OzelliklerIndexRoute
   '/temalar/': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
@@ -201,8 +245,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/bakim': typeof BakimRoute
+  '/fiyatlar': typeof FiyatlarRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
+  '/nasil-calisir': typeof NasilCalisirRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -211,6 +257,9 @@ export interface FileRoutesByTo {
   '/ekip-daveti/$token': typeof EkipDavetiTokenRoute
   '/odeme/basarili': typeof OdemeBasariliRoute
   '/odeme/hata': typeof OdemeHataRoute
+  '/ozellikler/dijital-davetiye': typeof OzelliklerDijitalDavetiyeRoute
+  '/ozellikler/lcv-davetli-yonetimi': typeof OzelliklerLcvDavetliYonetimiRoute
+  '/ozellikler/qr-ani-albumu': typeof OzelliklerQrAniAlbumuRoute
   '/panel/$id': typeof PanelIdRoute
   '/sozlesmeler/gizlilik': typeof SozlesmelerGizlilikRoute
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
@@ -218,6 +267,7 @@ export interface FileRoutesByTo {
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
   '/temalar/$slug': typeof TemalarSlugRoute
   '/odeme': typeof OdemeIndexRoute
+  '/ozellikler': typeof OzelliklerIndexRoute
   '/temalar': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
@@ -230,8 +280,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/bakim': typeof BakimRoute
+  '/fiyatlar': typeof FiyatlarRoute
   '/giris': typeof GirisRoute
   '/iletisim': typeof IletisimRoute
+  '/nasil-calisir': typeof NasilCalisirRoute
   '/olustur': typeof OlusturRoute
   '/panel': typeof PanelRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -240,6 +292,9 @@ export interface FileRoutesById {
   '/ekip-daveti/$token': typeof EkipDavetiTokenRoute
   '/odeme/basarili': typeof OdemeBasariliRoute
   '/odeme/hata': typeof OdemeHataRoute
+  '/ozellikler/dijital-davetiye': typeof OzelliklerDijitalDavetiyeRoute
+  '/ozellikler/lcv-davetli-yonetimi': typeof OzelliklerLcvDavetliYonetimiRoute
+  '/ozellikler/qr-ani-albumu': typeof OzelliklerQrAniAlbumuRoute
   '/panel_/$id': typeof PanelIdRoute
   '/sozlesmeler/gizlilik': typeof SozlesmelerGizlilikRoute
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
@@ -247,6 +302,7 @@ export interface FileRoutesById {
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
   '/temalar/$slug': typeof TemalarSlugRoute
   '/odeme/': typeof OdemeIndexRoute
+  '/ozellikler/': typeof OzelliklerIndexRoute
   '/temalar/': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
@@ -260,8 +316,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/bakim'
+    | '/fiyatlar'
     | '/giris'
     | '/iletisim'
+    | '/nasil-calisir'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
@@ -270,6 +328,9 @@ export interface FileRouteTypes {
     | '/ekip-daveti/$token'
     | '/odeme/basarili'
     | '/odeme/hata'
+    | '/ozellikler/dijital-davetiye'
+    | '/ozellikler/lcv-davetli-yonetimi'
+    | '/ozellikler/qr-ani-albumu'
     | '/panel/$id'
     | '/sozlesmeler/gizlilik'
     | '/sozlesmeler/iptal-iade'
@@ -277,6 +338,7 @@ export interface FileRouteTypes {
     | '/sozlesmeler/teslimat'
     | '/temalar/$slug'
     | '/odeme/'
+    | '/ozellikler/'
     | '/temalar/'
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
@@ -288,8 +350,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/bakim'
+    | '/fiyatlar'
     | '/giris'
     | '/iletisim'
+    | '/nasil-calisir'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
@@ -298,6 +362,9 @@ export interface FileRouteTypes {
     | '/ekip-daveti/$token'
     | '/odeme/basarili'
     | '/odeme/hata'
+    | '/ozellikler/dijital-davetiye'
+    | '/ozellikler/lcv-davetli-yonetimi'
+    | '/ozellikler/qr-ani-albumu'
     | '/panel/$id'
     | '/sozlesmeler/gizlilik'
     | '/sozlesmeler/iptal-iade'
@@ -305,6 +372,7 @@ export interface FileRouteTypes {
     | '/sozlesmeler/teslimat'
     | '/temalar/$slug'
     | '/odeme'
+    | '/ozellikler'
     | '/temalar'
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
@@ -316,8 +384,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/bakim'
+    | '/fiyatlar'
     | '/giris'
     | '/iletisim'
+    | '/nasil-calisir'
     | '/olustur'
     | '/panel'
     | '/sitemap.xml'
@@ -326,6 +396,9 @@ export interface FileRouteTypes {
     | '/ekip-daveti/$token'
     | '/odeme/basarili'
     | '/odeme/hata'
+    | '/ozellikler/dijital-davetiye'
+    | '/ozellikler/lcv-davetli-yonetimi'
+    | '/ozellikler/qr-ani-albumu'
     | '/panel_/$id'
     | '/sozlesmeler/gizlilik'
     | '/sozlesmeler/iptal-iade'
@@ -333,6 +406,7 @@ export interface FileRouteTypes {
     | '/sozlesmeler/teslimat'
     | '/temalar/$slug'
     | '/odeme/'
+    | '/ozellikler/'
     | '/temalar/'
     | '/api/admin/maintenance-bypass'
     | '/api/admin/system-settings'
@@ -345,8 +419,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   BakimRoute: typeof BakimRoute
+  FiyatlarRoute: typeof FiyatlarRoute
   GirisRoute: typeof GirisRoute
   IletisimRoute: typeof IletisimRoute
+  NasilCalisirRoute: typeof NasilCalisirRoute
   OlusturRoute: typeof OlusturRoute
   PanelRoute: typeof PanelRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -355,6 +431,9 @@ export interface RootRouteChildren {
   EkipDavetiTokenRoute: typeof EkipDavetiTokenRoute
   OdemeBasariliRoute: typeof OdemeBasariliRoute
   OdemeHataRoute: typeof OdemeHataRoute
+  OzelliklerDijitalDavetiyeRoute: typeof OzelliklerDijitalDavetiyeRoute
+  OzelliklerLcvDavetliYonetimiRoute: typeof OzelliklerLcvDavetliYonetimiRoute
+  OzelliklerQrAniAlbumuRoute: typeof OzelliklerQrAniAlbumuRoute
   PanelIdRoute: typeof PanelIdRoute
   SozlesmelerGizlilikRoute: typeof SozlesmelerGizlilikRoute
   SozlesmelerIptalIadeRoute: typeof SozlesmelerIptalIadeRoute
@@ -362,6 +441,7 @@ export interface RootRouteChildren {
   SozlesmelerTeslimatRoute: typeof SozlesmelerTeslimatRoute
   TemalarSlugRoute: typeof TemalarSlugRoute
   OdemeIndexRoute: typeof OdemeIndexRoute
+  OzelliklerIndexRoute: typeof OzelliklerIndexRoute
   TemalarIndexRoute: typeof TemalarIndexRoute
   ApiAdminMaintenanceBypassRoute: typeof ApiAdminMaintenanceBypassRoute
   ApiAdminSystemSettingsRoute: typeof ApiAdminSystemSettingsRoute
@@ -393,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BakimRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fiyatlar': {
+      id: '/fiyatlar'
+      path: '/fiyatlar'
+      fullPath: '/fiyatlar'
+      preLoaderRoute: typeof FiyatlarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/giris': {
       id: '/giris'
       path: '/giris'
@@ -405,6 +492,13 @@ declare module '@tanstack/react-router' {
       path: '/iletisim'
       fullPath: '/iletisim'
       preLoaderRoute: typeof IletisimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nasil-calisir': {
+      id: '/nasil-calisir'
+      path: '/nasil-calisir'
+      fullPath: '/nasil-calisir'
+      preLoaderRoute: typeof NasilCalisirRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/olustur': {
@@ -468,6 +562,34 @@ declare module '@tanstack/react-router' {
       path: '/odeme/hata'
       fullPath: '/odeme/hata'
       preLoaderRoute: typeof OdemeHataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ozellikler/': {
+      id: '/ozellikler/'
+      path: '/ozellikler'
+      fullPath: '/ozellikler/'
+      preLoaderRoute: typeof OzelliklerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ozellikler/dijital-davetiye': {
+      id: '/ozellikler/dijital-davetiye'
+      path: '/ozellikler/dijital-davetiye'
+      fullPath: '/ozellikler/dijital-davetiye'
+      preLoaderRoute: typeof OzelliklerDijitalDavetiyeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ozellikler/lcv-davetli-yonetimi': {
+      id: '/ozellikler/lcv-davetli-yonetimi'
+      path: '/ozellikler/lcv-davetli-yonetimi'
+      fullPath: '/ozellikler/lcv-davetli-yonetimi'
+      preLoaderRoute: typeof OzelliklerLcvDavetliYonetimiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ozellikler/qr-ani-albumu': {
+      id: '/ozellikler/qr-ani-albumu'
+      path: '/ozellikler/qr-ani-albumu'
+      fullPath: '/ozellikler/qr-ani-albumu'
+      preLoaderRoute: typeof OzelliklerQrAniAlbumuRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/panel_/$id': {
@@ -561,8 +683,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   BakimRoute: BakimRoute,
+  FiyatlarRoute: FiyatlarRoute,
   GirisRoute: GirisRoute,
   IletisimRoute: IletisimRoute,
+  NasilCalisirRoute: NasilCalisirRoute,
   OlusturRoute: OlusturRoute,
   PanelRoute: PanelRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
@@ -571,6 +695,9 @@ const rootRouteChildren: RootRouteChildren = {
   EkipDavetiTokenRoute: EkipDavetiTokenRoute,
   OdemeBasariliRoute: OdemeBasariliRoute,
   OdemeHataRoute: OdemeHataRoute,
+  OzelliklerDijitalDavetiyeRoute: OzelliklerDijitalDavetiyeRoute,
+  OzelliklerLcvDavetliYonetimiRoute: OzelliklerLcvDavetliYonetimiRoute,
+  OzelliklerQrAniAlbumuRoute: OzelliklerQrAniAlbumuRoute,
   PanelIdRoute: PanelIdRoute,
   SozlesmelerGizlilikRoute: SozlesmelerGizlilikRoute,
   SozlesmelerIptalIadeRoute: SozlesmelerIptalIadeRoute,
@@ -578,6 +705,7 @@ const rootRouteChildren: RootRouteChildren = {
   SozlesmelerTeslimatRoute: SozlesmelerTeslimatRoute,
   TemalarSlugRoute: TemalarSlugRoute,
   OdemeIndexRoute: OdemeIndexRoute,
+  OzelliklerIndexRoute: OzelliklerIndexRoute,
   TemalarIndexRoute: TemalarIndexRoute,
   ApiAdminMaintenanceBypassRoute: ApiAdminMaintenanceBypassRoute,
   ApiAdminSystemSettingsRoute: ApiAdminSystemSettingsRoute,

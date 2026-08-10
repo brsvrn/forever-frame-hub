@@ -4,42 +4,56 @@ export const ANALYTICS_CONFIG = {
   get gtmId() {
     return (
       import.meta.env.VITE_GTM_ID ||
-      (typeof process !== "undefined" ? process.env?.VITE_GTM_ID || process.env?.NEXT_PUBLIC_GTM_ID : undefined) ||
+      (typeof process !== "undefined"
+        ? process.env?.VITE_GTM_ID || process.env?.NEXT_PUBLIC_GTM_ID
+        : undefined) ||
       "GTM-KSV2TJVL"
     );
   },
   get gaMeasurementId() {
     return (
       import.meta.env.VITE_GA4_MEASUREMENT_ID ||
-      (typeof process !== "undefined" ? process.env?.VITE_GA4_MEASUREMENT_ID || process.env?.NEXT_PUBLIC_GA_MEASUREMENT_ID : undefined) ||
+      (typeof process !== "undefined"
+        ? process.env?.VITE_GA4_MEASUREMENT_ID || process.env?.NEXT_PUBLIC_GA_MEASUREMENT_ID
+        : undefined) ||
       ""
     );
   },
   get metaPixelId() {
     return (
       import.meta.env.VITE_META_PIXEL_ID ||
-      (typeof process !== "undefined" ? process.env?.VITE_META_PIXEL_ID || process.env?.NEXT_PUBLIC_META_PIXEL_ID : undefined) ||
+      (typeof process !== "undefined"
+        ? process.env?.VITE_META_PIXEL_ID || process.env?.NEXT_PUBLIC_META_PIXEL_ID
+        : undefined) ||
       ""
     );
   },
   get googleAdsId() {
     return (
       import.meta.env.VITE_GOOGLE_ADS_ID ||
-      (typeof process !== "undefined" ? process.env?.VITE_GOOGLE_ADS_ID || process.env?.NEXT_PUBLIC_GOOGLE_ADS_ID : undefined) ||
+      (typeof process !== "undefined"
+        ? process.env?.VITE_GOOGLE_ADS_ID || process.env?.NEXT_PUBLIC_GOOGLE_ADS_ID
+        : undefined) ||
       ""
     );
   },
   get googleAdsPurchaseLabel() {
     return (
       import.meta.env.VITE_GOOGLE_ADS_PURCHASE_LABEL ||
-      (typeof process !== "undefined" ? process.env?.VITE_GOOGLE_ADS_PURCHASE_LABEL || process.env?.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL : undefined) ||
+      (typeof process !== "undefined"
+        ? process.env?.VITE_GOOGLE_ADS_PURCHASE_LABEL ||
+          process.env?.NEXT_PUBLIC_GOOGLE_ADS_PURCHASE_LABEL
+        : undefined) ||
       ""
     );
   },
   get googleAdsBeginCheckoutLabel() {
     return (
       import.meta.env.VITE_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL ||
-      (typeof process !== "undefined" ? process.env?.VITE_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL || process.env?.NEXT_PUBLIC_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL : undefined) ||
+      (typeof process !== "undefined"
+        ? process.env?.VITE_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL ||
+          process.env?.NEXT_PUBLIC_GOOGLE_ADS_BEGIN_CHECKOUT_LABEL
+        : undefined) ||
       ""
     );
   },
@@ -48,8 +62,7 @@ export const ANALYTICS_CONFIG = {
 function isDebugMode(): boolean {
   if (typeof window === "undefined") return false;
   return (
-    window.location.search.includes("debug_analytics=1") ||
-    (import.meta as any).env?.DEV === true
+    window.location.search.includes("debug_analytics=1") || (import.meta as any).env?.DEV === true
   );
 }
 
@@ -58,7 +71,7 @@ function logDebug(eventName: string, data: any) {
     console.log(
       `%c[Analytics Event] ${eventName}`,
       "background: #2563eb; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold;",
-      data
+      data,
     );
   }
 }
@@ -137,6 +150,45 @@ export function trackViewDemo(demoId: string, demoTitle: string) {
       content_ids: [demoId],
       content_type: "product",
     });
+  }
+}
+
+export type MarketingCtaAction = "free_preview" | "live_demo" | "final_preview";
+
+export function trackMarketingCta(location: string, action: MarketingCtaAction) {
+  if (typeof window === "undefined") return;
+
+  const eventData = {
+    cta_location: location,
+    cta_action: action,
+  };
+
+  logDebug("marketing_cta_click", eventData);
+
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({
+      event: "marketing_cta_click",
+      ...eventData,
+    });
+  }
+
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "marketing_cta_click", eventData);
+  }
+}
+
+export function trackProductMoment(moment: "before" | "wedding_day" | "after") {
+  if (typeof window === "undefined") return;
+
+  const eventData = { product_moment: moment };
+  logDebug("product_moment_view", eventData);
+
+  if (Array.isArray((window as any).dataLayer)) {
+    (window as any).dataLayer.push({ event: "product_moment_view", ...eventData });
+  }
+
+  if (typeof (window as any).gtag === "function") {
+    (window as any).gtag("event", "product_moment_view", eventData);
   }
 }
 
@@ -320,7 +372,7 @@ export function trackBeginCheckout(payload: CheckoutPayload) {
         value: payload.price,
         currency,
       },
-      { eventID: eventId }
+      { eventID: eventId },
     );
   }
 }
@@ -413,7 +465,7 @@ export function trackPurchase(payload: PurchasePayload) {
         currency,
         order_id: payload.transactionId,
       },
-      { eventID: eventId }
+      { eventID: eventId },
     );
   }
 }
@@ -545,4 +597,3 @@ export function trackShareClick(platform: "whatsapp" | "copy_link" | "qr" | "soc
     (window as any).gtag("event", "share_invitation", eventData);
   }
 }
-

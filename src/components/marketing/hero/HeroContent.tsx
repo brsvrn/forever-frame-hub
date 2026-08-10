@@ -6,6 +6,7 @@ import { useInView, motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useEffect } from "react";
 import { usePhone } from "@/contexts/PhoneContext";
 import { PhoneMockup } from "../interactive-demo/PhoneMockup";
+import { trackMarketingCta, trackViewDemo } from "@/lib/analytics/analytics";
 
 export function HeroContent() {
   const { activeSection, setActiveSection } = usePhone();
@@ -45,24 +46,25 @@ export function HeroContent() {
             <FadeIn delay={0.1}>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8 backdrop-blur-md">
                 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.8)]"></span>
-                Düğün organizasyonunda yeni standart
+                Davetiye, LCV ve QR anıları tek bağlantıda
               </div>
             </FadeIn>
 
             <SlideUp delay={0.2}>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-[1.15]">
-                Düğününüz, <br className="hidden lg:block" />
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-[1.08]">
+                Davetiyenizi gönderin. <br className="hidden lg:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/50 drop-shadow-sm">
-                  Kusursuz
+                  Tüm anıları
                 </span>{" "}
-                Bir Deneyim.
+                tek QR’da toplayın.
               </h1>
             </SlideUp>
 
             <SlideUp delay={0.3}>
               <p className="text-lg md:text-xl text-foreground/90 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-light">
-                Misafirleriniz için büyüleyici bir dijital davetiye, sizin için stressiz bir LCV
-                yönetimi ve masalardaki QR kartlarla anında fotoğraf toplama sistemi.
+                Düğünden önce davetiyenizi paylaşın ve LCV yanıtlarını yönetin. Düğün günü
+                misafirlerinizin fotoğraf ve videolarını uygulama gerektirmeden aynı özel galeride
+                biriktirin.
               </p>
             </SlideUp>
 
@@ -73,6 +75,20 @@ export function HeroContent() {
               <MagneticButton intensity={0.1}>
                 <Button
                   size="lg"
+                  asChild
+                  className="rounded-full w-full sm:w-auto h-14 px-8 text-base shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all group"
+                >
+                  <Link
+                    to="/olustur"
+                    onClick={() => trackMarketingCta("homepage_hero", "free_preview")}
+                  >
+                    Ücretsiz Önizle
+                  </Link>
+                </Button>
+              </MagneticButton>
+              <MagneticButton intensity={0.1}>
+                <Button
+                  size="lg"
                   variant="outline"
                   asChild
                   className="rounded-full w-full sm:w-auto h-14 px-8 text-base bg-background/50 backdrop-blur-md hover:bg-muted/80 transition-all group border-border shadow-sm"
@@ -80,10 +96,14 @@ export function HeroContent() {
                   <Link
                     to="/davet/$slug"
                     params={{ slug: "demo" }}
+                    onClick={() => {
+                      trackMarketingCta("homepage_hero", "live_demo");
+                      trackViewDemo("demo", "MemoryWedding canlı davetiye");
+                    }}
                     className="flex items-center cursor-pointer"
                   >
                     <PlayCircle className="mr-2 w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                    Davetiyeyi Demo Olarak İncele
+                    Canlı Örneği Gör
                   </Link>
                 </Button>
               </MagneticButton>
