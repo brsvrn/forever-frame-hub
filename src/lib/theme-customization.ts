@@ -101,7 +101,7 @@ export function getThemeStylePresets(theme: ThemeConfig) {
     ...preset,
     previewAccent: preset.accentColor || theme.primaryColor || theme.qr.accent,
     previewBackground: preset.backgroundColor || theme.secondaryColor || theme.qr.ink,
-    customization: normalizeThemeCustomization(preset),
+    customization: normalizeThemeCustomization({ ...preset, presetId: preset.id }),
   }));
 }
 

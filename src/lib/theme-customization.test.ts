@@ -24,6 +24,11 @@ describe("theme customization", () => {
   it("offers three style presets for every theme", () => {
     const presets = getThemeStylePresets(resolveCustomizedTheme("turquoise-cove"));
     expect(presets.map((preset) => preset.id)).toEqual(["original", "romantic", "modern"]);
+    expect(presets.map((preset) => preset.customization.presetId)).toEqual([
+      "original",
+      "romantic",
+      "modern",
+    ]);
   });
 
   it("stores customization without removing existing custom sections", () => {
