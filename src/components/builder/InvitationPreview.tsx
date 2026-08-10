@@ -135,6 +135,31 @@ export function InvitationPreview({
           />
         </div>
 
+        {draft.galleryImages.length > 0 ? (
+          <div
+            className="grid grid-cols-3 gap-2"
+            aria-label={lang === "tr" ? "Galeri önizlemesi" : "Gallery preview"}
+          >
+            {draft.galleryImages.slice(0, 3).map((image, index) => (
+              <div key={image.id} className="relative overflow-hidden rounded-xl">
+                <img
+                  src={image.url}
+                  alt={
+                    image.alt ||
+                    `${lang === "tr" ? "Galeri fotoğrafı" : "Gallery photo"} ${index + 1}`
+                  }
+                  className="aspect-square size-full object-cover"
+                />
+                {index === 2 && draft.galleryImages.length > 3 ? (
+                  <span className="absolute inset-0 grid place-items-center bg-black/55 text-sm font-semibold text-white">
+                    +{draft.galleryImages.length - 3}
+                  </span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
+
         {days !== null ? (
           <p className="invite-accent-text flex items-center justify-center gap-2 text-xs uppercase tracking-[0.24em]">
             <Clock className="size-3.5" aria-hidden="true" />

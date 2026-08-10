@@ -3,6 +3,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { emptyDraft, slugify, type InvitationDraft, type InviteThemeId } from "./invitation";
 import { selectableThemes } from "./theme-engine";
 import { extractThemeCustomization, storeThemeCustomization } from "./theme-customization";
+import { extractInvitationGallery, storeInvitationGallery } from "./invitation-media";
 import { getGuestUploadViewUrl } from "./r2-actions";
 
 export type InvitationRow = Tables<"invitations">;
@@ -39,6 +40,7 @@ export function rowToDraft(row: InvitationRow): InvitationDraft {
     mapUrl: row.map_url ?? "",
     musicUrl: row.music_url ?? "",
     coverPhoto: row.cover_photo ?? "",
+    galleryImages: extractInvitationGallery(row.custom_sections),
     rsvpLabel: row.rsvp_label ?? "",
     slug: row.slug,
     eventProgram: (row.event_program as any[]) ?? [],
@@ -70,7 +72,10 @@ function draftToRow(draft: InvitationDraft, slug: string) {
     event_program: draft.eventProgram,
     our_story: draft.ourStory,
     family_info: draft.familyInfo,
-    custom_sections: storeThemeCustomization(draft.customSections, draft.themeCustomization),
+    custom_sections: storeInvitationGallery(
+      storeThemeCustomization(draft.customSections, draft.themeCustomization),
+      draft.galleryImages,
+    ),
   };
 }
 

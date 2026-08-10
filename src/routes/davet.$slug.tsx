@@ -25,6 +25,7 @@ import { MemoryWall } from "@/components/invitation/MemoryWall";
 import { VoiceGreeting } from "@/components/invitation/VoiceGreeting";
 import { GiftSection } from "@/components/invitation/GiftSection";
 import { CountdownTimer } from "@/components/invitation/CountdownTimer";
+import { InvitationPhotoGallery } from "@/components/invitation/InvitationPhotoGallery";
 import { InvitationFooter } from "@/components/invitation/InvitationFooter";
 import { LueurHero, LueurOpening, LueurSection } from "@/components/invitation/PapillonRouge";
 import {
@@ -291,6 +292,20 @@ function PremiumInvitePage() {
                     scene="aisle"
                   >
                     <StoryTimeline draft={draft} theme={theme} />
+                  </SpecialThemeSection>
+                ) : null}
+                {draft.galleryImages.length > 0 ? (
+                  <SpecialThemeSection
+                    isLueur={isLueur}
+                    isConservatory={isConservatory}
+                    lueurTone="wine"
+                    scene="hero"
+                  >
+                    <InvitationPhotoGallery
+                      images={draft.galleryImages}
+                      theme={theme}
+                      lang={lang}
+                    />
                   </SpecialThemeSection>
                 ) : null}
                 <SpecialThemeSection

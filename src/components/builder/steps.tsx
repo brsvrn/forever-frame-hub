@@ -30,6 +30,7 @@ import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
 import { QrGalleryPreview } from "./QrGalleryPreview";
 import { ThemeCustomizationStudio } from "./ThemeCustomizationStudio";
+import { MediaUploadStudio } from "./MediaUploadStudio";
 import { trackBeginCheckout, trackSelectItem } from "@/lib/analytics/analytics";
 
 type StepProps = {
@@ -507,6 +508,7 @@ export function StepTexts({
       {mode === "basic" ? (
         <>
           <ThemeCustomizationStudio draft={draft} update={update} lang={lang} compact />
+          <MediaUploadStudio draft={draft} update={update} lang={lang} />
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-accent/15 px-4 py-3">
             <p className="text-sm font-medium">
               {lang === "tr" ? "Bu bölümün zorunlu alanları" : "Required in this section"}

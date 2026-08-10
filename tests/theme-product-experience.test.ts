@@ -51,4 +51,24 @@ describe("theme discovery and builder journey", () => {
     expect(preview).toContain("resolveCustomizedTheme");
     expect(invitation).toContain("resolveCustomizedTheme");
   });
+
+  it("connects optimized owner media to drafts, previews and public invitations", () => {
+    const steps = read("src/components/builder/steps.tsx");
+    const mediaStudio = read("src/components/builder/MediaUploadStudio.tsx");
+    const invitationApi = read("src/lib/invitations.api.ts");
+    const preview = read("src/components/builder/InvitationPreview.tsx");
+    const invitation = read("src/routes/davet.$slug.tsx");
+    const mediaFunctions = read("src/lib/invitation-media.functions.ts");
+
+    expect(steps).toContain("MediaUploadStudio");
+    expect(mediaStudio).toContain("optimizeCoverImage");
+    expect(mediaStudio).toContain("optimizeGalleryImage");
+    expect(mediaStudio).toContain("uploadInvitationMedia");
+    expect(invitationApi).toContain("storeInvitationGallery");
+    expect(preview).toContain("draft.galleryImages");
+    expect(invitation).toContain("InvitationPhotoGallery");
+    expect(mediaFunctions).toContain("requireAuthenticatedUser");
+    expect(mediaFunctions).toContain("owner-media/${user.id}");
+    expect(mediaFunctions).toContain("createSignedUploadUrl");
+  });
 });
