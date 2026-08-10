@@ -16,6 +16,7 @@ export function RoyalEnvelopeOpening({
 }: RoyalEnvelopeOpeningProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCardRising, setIsCardRising] = useState(false);
+  const [isEnvelopeFading, setIsEnvelopeFading] = useState(false);
   const [isDone, setIsDone] = useState(false);
 
   const envelopeColor = "#0A1F18"; // Deep emerald green
@@ -27,18 +28,25 @@ export function RoyalEnvelopeOpening({
     if (isOpen) return;
     setIsOpen(true);
     
-    // Sequence timing
+    // 1. Wait for flap to open, then card rises
     setTimeout(() => {
       setIsCardRising(true);
-    }, 800); // Wait for flap to open
+    }, 600);
 
+    // 2. Fade out the envelope behind the card while card is full screen
+    setTimeout(() => {
+      setIsEnvelopeFading(true);
+    }, 1800);
+    
+    // 3. Complete the whole intro and reveal the site
     setTimeout(() => {
       setIsDone(true);
-    }, 3000); // Card has risen and scaled up, fade out envelope
+    }, 3800);
     
+    // 4. Notify parent to unmount
     setTimeout(() => {
       onComplete();
-    }, 3800); // Complete sequence
+    }, 4500);
   };
 
   if (isDone) {
@@ -62,37 +70,38 @@ export function RoyalEnvelopeOpening({
           <motion.div 
             className="w-full h-full relative"
             style={{ transformStyle: "preserve-3d" }}
-            animate={isCardRising ? { y: 200, scale: 1.1, opacity: 0 } : { y: 0, scale: 1, opacity: 1 }}
-            transition={{ delay: 1, duration: 1.5, ease: "easeInOut" }}
+            animate={isCardRising ? { y: 150 } : { y: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
           >
             {/* 1. Envelope Back (Inside) */}
-            <div 
+            <motion.div 
               className="absolute inset-0 rounded-md shadow-2xl"
               style={{ backgroundColor: envelopeLiner, zIndex: 10 }}
+              animate={{ opacity: isEnvelopeFading ? 0 : 1 }}
+              transition={{ duration: 1 }}
             />
 
-            {/* 2. The Card (Slides up) */}
+            {/* 2. The Card (Slides up and scales to front) */}
             <motion.div
-              className="absolute left-4 right-4 top-4 bottom-4 rounded-sm shadow-lg flex flex-col items-center justify-center border-2"
+              className="absolute left-4 right-4 top-4 bottom-4 rounded-sm shadow-2xl flex flex-col items-center justify-center border-2"
               style={{ 
                 backgroundColor: cardColor, 
                 borderColor: goldColor,
-                zIndex: 20 
               }}
-              initial={{ y: 0, scale: 1 }}
-              animate={isCardRising ? { y: -300, scale: 2.5 } : { y: 0, scale: 1 }}
+              initial={{ y: 0, scale: 1, zIndex: 20 }}
+              animate={isCardRising ? { y: -250, scale: 2.8, zIndex: 60 } : { y: 0, scale: 1, zIndex: 20 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}
             >
-              {/* Card Content - Visible only when rising or inside envelope slightly */}
-              <div className="text-center opacity-90 p-4 border border-[#C9A96E]/30 m-2 flex flex-col items-center justify-center w-[calc(100%-16px)] h-[calc(100%-16px)]">
-                <span className="font-cinzel text-[10px] tracking-[0.3em] text-[#C9A96E] uppercase mb-2">Davetiye</span>
-                <h2 className="font-playfair text-2xl text-[#0A1F18]">{partnerOne} & {partnerTwo}</h2>
-                <span className="font-sans text-xs text-[#0A1F18]/60 mt-4 tracking-widest">{date}</span>
+              {/* Card Content */}
+              <div className="text-center opacity-90 p-4 border border-[#C9A96E]/30 m-2 flex flex-col items-center justify-center w-[calc(100%-16px)] h-[calc(100%-16px)] bg-white/20">
+                <span className="font-cinzel text-[8px] tracking-[0.3em] text-[#C9A96E] uppercase mb-2">Davetiye</span>
+                <h2 className="font-playfair text-xl text-[#0A1F18] leading-tight">{partnerOne} <br/><span className="text-sm italic">&</span><br/> {partnerTwo}</h2>
+                <span className="font-sans text-[9px] text-[#0A1F18]/60 mt-3 tracking-widest">{date}</span>
               </div>
             </motion.div>
 
             {/* 3. Envelope Left Flap */}
-            <div 
+            <motion.div 
               className="absolute inset-0 origin-left"
               style={{ 
                 backgroundColor: envelopeColor, 
@@ -101,10 +110,12 @@ export function RoyalEnvelopeOpening({
                 zIndex: 30,
                 filter: "drop-shadow(2px 0px 3px rgba(0,0,0,0.3))"
               }}
+              animate={{ opacity: isEnvelopeFading ? 0 : 1 }}
+              transition={{ duration: 1 }}
             />
 
             {/* 4. Envelope Right Flap */}
-            <div 
+            <motion.div 
               className="absolute right-0 top-0 bottom-0 origin-right"
               style={{ 
                 backgroundColor: envelopeColor, 
@@ -113,10 +124,12 @@ export function RoyalEnvelopeOpening({
                 zIndex: 31,
                 filter: "drop-shadow(-2px 0px 3px rgba(0,0,0,0.3))"
               }}
+              animate={{ opacity: isEnvelopeFading ? 0 : 1 }}
+              transition={{ duration: 1 }}
             />
 
             {/* 5. Envelope Bottom Flap */}
-            <div 
+            <motion.div 
               className="absolute inset-0 origin-bottom"
               style={{ 
                 backgroundColor: envelopeColor, 
@@ -124,6 +137,8 @@ export function RoyalEnvelopeOpening({
                 zIndex: 32,
                 filter: "drop-shadow(0px -2px 3px rgba(0,0,0,0.2))"
               }}
+              animate={{ opacity: isEnvelopeFading ? 0 : 1 }}
+              transition={{ duration: 1 }}
             />
 
             {/* 6. Envelope Top Flap (Animated) */}
@@ -136,9 +151,9 @@ export function RoyalEnvelopeOpening({
                 // Add a slight gradient for 3D light effect
                 backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0.15))"
               }}
-              initial={{ rotateX: 0 }}
-              animate={{ rotateX: isOpen ? 180 : 0 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
+              initial={{ rotateX: 0, opacity: 1 }}
+              animate={{ rotateX: isOpen ? 180 : 0, opacity: isEnvelopeFading ? 0 : 1 }}
+              transition={{ rotateX: { duration: 0.8, ease: "easeInOut" }, opacity: { duration: 1 } }}
               onClick={handleOpen}
             >
               {/* Gold Edge on the flap */}
