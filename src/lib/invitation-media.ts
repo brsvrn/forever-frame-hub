@@ -1,4 +1,5 @@
-export const INVITATION_MEDIA_BUCKET = "guest-uploads";
+export const INVITATION_MEDIA_BUCKET = "invitation-assets";
+export const LEGACY_INVITATION_MEDIA_BUCKET = "guest-uploads";
 export const MAX_GALLERY_IMAGES = 12;
 
 const STORAGE_TYPE = "invitation-gallery";
@@ -63,17 +64,32 @@ export function storeInvitationGallery(customSections: unknown, items: Invitatio
   ];
 }
 
-export function invitationMediaPathFromPublicUrl(url: string) {
+export function invitationMediaLocationFromPublicUrl(url: string) {
   if (!url) return null;
   try {
     const parsed = new URL(url);
-    const marker = `/storage/v1/object/public/${INVITATION_MEDIA_BUCKET}/`;
+    const marker = "/storage/v1/object/public/";
     const markerIndex = parsed.pathname.indexOf(marker);
     if (markerIndex === -1) return null;
-    return decodeURIComponent(parsed.pathname.slice(markerIndex + marker.length));
+    const [bucket, ...pathParts] = parsed.pathname.slice(markerIndex + marker.length).split("/");
+    if (
+      ![INVITATION_MEDIA_BUCKET, LEGACY_INVITATION_MEDIA_BUCKET].includes(bucket) ||
+      pathParts.length === 0
+    ) {
+      return null;
+    }
+    return { bucket, path: decodeURIComponent(pathParts.join("/")) };
   } catch {
     return null;
   }
+}
+
+export function invitationMediaPathFromPublicUrl(url: string) {
+  return invitationMediaLocationFromPublicUrl(url)?.path ?? null;
+}
+
+export function isLegacyInvitationMediaUrl(url: string) {
+  return invitationMediaLocationFromPublicUrl(url)?.bucket === LEGACY_INVITATION_MEDIA_BUCKET;
 }
 
 export async function uploadInvitationMedia(blob: Blob, folder: "covers" | "gallery") {
@@ -90,6 +106,13 @@ export async function uploadInvitationMedia(blob: Blob, folder: "covers" | "gall
     });
   if (error) throw new Error(`Fotoğraf yüklenemedi: ${error.message}`);
   return { id: upload.id, path: upload.path, url: upload.url };
+}
+
+export async function repairLegacyInvitationMedia(url: string) {
+  const location = invitationMediaLocationFromPublicUrl(url);
+  if (!location || location.bucket !== LEGACY_INVITATION_MEDIA_BUCKET) return null;
+  const { repairLegacyInvitationMediaUpload } = await import("./invitation-media.functions");
+  return repairLegacyInvitationMediaUpload({ data: { path: location.path } });
 }
 
 export async function deleteInvitationMedia(path: string) {
