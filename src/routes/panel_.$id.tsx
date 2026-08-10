@@ -19,12 +19,14 @@ import {
   CalendarDays,
   UserRoundCog,
   AudioLines,
+  LayoutGrid,
 } from "lucide-react";
 
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardStorage } from "@/components/dashboard/DashboardStorage";
 import { DashboardGallery } from "@/components/dashboard/DashboardGallery";
 import { DashboardRSVP } from "@/components/dashboard/DashboardRSVP";
+import { DashboardSeating } from "@/components/dashboard/DashboardSeating";
 import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
@@ -67,6 +69,7 @@ type TabType =
   | "storage"
   | "gallery"
   | "rsvp"
+  | "seating"
   | "analytics"
   | "print"
   | "team"
@@ -88,6 +91,7 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
           "storage",
           "gallery",
           "rsvp",
+          "seating",
           "analytics",
           "print",
           "team",
@@ -142,7 +146,10 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
       ? [{ id: "gallery" as const, label: "Medya Galerisi", icon: ImageIcon }]
       : []),
     ...(roleHasPermission(role, "view_rsvp")
-      ? [{ id: "rsvp" as const, label: "Misafirler", icon: Users }]
+      ? [
+          { id: "rsvp" as const, label: "LCV & Yanıtlar", icon: FileText },
+          { id: "seating" as const, label: "Oturma Planı", icon: LayoutGrid },
+        ]
       : []),
     { id: "storage", label: "Depolama", icon: Database },
     { id: "analytics", label: "İstatistikler", icon: BarChart3 },
@@ -229,6 +236,7 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
         {activeTab === "schedule" && <DashboardSchedule invitation={invitation} />}
         {activeTab === "gallery" && <DashboardGallery invitation={invitation} />}
         {activeTab === "rsvp" && <DashboardRSVP invitation={invitation} />}
+        {activeTab === "seating" && <DashboardSeating invitation={invitation} />}
         {activeTab === "storage" && <DashboardStorage invitation={invitation} />}
         {activeTab === "analytics" && <DashboardAnalytics invitation={invitation} />}
         {activeTab === "print" && (
