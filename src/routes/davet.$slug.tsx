@@ -11,7 +11,7 @@ import {
   type InvitationRow,
 } from "@/lib/invitations.api";
 import { useI18n, I18nProvider } from "@/lib/i18n";
-import { InvitationIntro } from "@/components/invitation/InvitationIntro";
+import { AnimatedEnvelopeIntro } from "@/components/invitation/AnimatedEnvelopeIntro";
 import { LivingBackground } from "@/components/invitation/LivingBackground";
 import { PremiumAudioPlayer } from "@/components/invitation/PremiumAudioPlayer";
 import { HeroExperience } from "@/components/invitation/HeroExperience";
@@ -201,7 +201,7 @@ function PremiumInvitePage() {
           isLueur ? (
             <LueurOpening key={`intro-${theme.id}`} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
           ) : (
-            <InvitationIntro key={`intro-${theme.id}`} theme={theme} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
+            <AnimatedEnvelopeIntro key={`intro-${theme.id}`} theme={theme} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
           )
         ) : null}
       </AnimatePresence>
