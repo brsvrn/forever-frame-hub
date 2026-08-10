@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { easeSilk } from "@/components/landing/motion-primitives";
 import type { ThemeConfig } from "@/lib/theme-engine";
 import { Play } from "lucide-react";
+import envelopeTexture from "@/assets/envelope-texture.png";
 
 export function AnimatedEnvelopeIntro({
   theme,
@@ -121,7 +122,13 @@ export function AnimatedEnvelopeIntro({
         {/* Envelope Back */}
         <div
           className="absolute inset-0 rounded-md shadow-2xl"
-          style={{ backgroundColor: envColor, border: `1px solid ${envBorder}` }}
+          style={{ 
+            backgroundColor: envColor, 
+            backgroundImage: `url(${envelopeTexture})`,
+            backgroundBlendMode: 'multiply',
+            backgroundSize: 'cover',
+            border: `1px solid ${envBorder}` 
+          }}
         />
 
         {/* The Invitation Card (Inside) */}
@@ -145,15 +152,18 @@ export function AnimatedEnvelopeIntro({
 
         {/* Envelope Front Flaps (Left, Right, Bottom) */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none drop-shadow-md"
           style={{
             zIndex: 20,
             background: `
               linear-gradient(to right, rgba(0,0,0,0.1), transparent 50%),
               linear-gradient(to left, rgba(0,0,0,0.1), transparent 50%),
-              linear-gradient(to top, rgba(0,0,0,0.15), transparent 40%)
+              linear-gradient(to top, rgba(0,0,0,0.25), transparent 40%),
+              url(${envelopeTexture})
             `,
+            backgroundBlendMode: 'normal, normal, normal, multiply',
             backgroundColor: envColor,
+            backgroundSize: 'cover',
             clipPath: "polygon(0 0, 0 100%, 100% 100%, 100% 0, 50% 50%)"
           }}
         >
@@ -174,15 +184,19 @@ export function AnimatedEnvelopeIntro({
         >
           {/* Flap Front (Visible when closed) */}
           <div
-            className="absolute top-0 left-0 w-full h-full"
+            className="absolute top-0 left-0 w-full h-full drop-shadow-xl"
             style={{
               backgroundColor: envColor,
+              backgroundImage: `url(${envelopeTexture})`,
+              backgroundBlendMode: 'multiply',
+              backgroundSize: 'cover',
               clipPath: "polygon(0 0, 100% 0, 50% 55%)",
               backfaceVisibility: "hidden"
             }}
           >
-             {/* Drop shadow hack for the flap edge */}
-             <div className="absolute top-0 left-0 w-full h-[60%] bg-gradient-to-b from-black/5 to-transparent" />
+             {/* Edge highlighting and shadow */}
+             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/10 to-transparent" />
+             <div className="absolute top-0 left-0 w-full h-[60%] bg-gradient-to-b from-black/10 to-transparent" />
           </div>
 
           {/* Flap Back (Visible when opened - Inside of the envelope) */}
@@ -190,10 +204,13 @@ export function AnimatedEnvelopeIntro({
             className="absolute top-0 left-0 w-full h-full"
             style={{
               backgroundColor: envColor,
+              backgroundImage: `url(${envelopeTexture})`,
+              backgroundBlendMode: 'multiply',
+              backgroundSize: 'cover',
               clipPath: "polygon(0 0, 100% 0, 50% 55%)",
               transform: "rotateX(180deg)",
               backfaceVisibility: "hidden",
-              filter: "brightness(0.95)"
+              filter: "brightness(0.85)"
             }}
           />
 
