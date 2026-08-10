@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { AuthProvider, useAuth } from "@/lib/auth";
@@ -27,7 +27,7 @@ import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardStorage } from "@/components/dashboard/DashboardStorage";
 import { DashboardGallery } from "@/components/dashboard/DashboardGallery";
 import { DashboardRSVP } from "@/components/dashboard/DashboardRSVP";
-import { DashboardSeating } from "@/components/dashboard/DashboardSeating";
+const DashboardSeating = lazy(() => import("@/components/dashboard/DashboardSeating").then(m => ({ default: m.DashboardSeating })));
 import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
@@ -237,7 +237,11 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
         {activeTab === "schedule" && <DashboardSchedule invitation={invitation} />}
         {activeTab === "gallery" && <DashboardGallery invitation={invitation} />}
         {activeTab === "rsvp" && <DashboardRSVP invitation={invitation} />}
-        {activeTab === "seating" && <DashboardSeating invitation={invitation} />}
+        {activeTab === "seating" && (
+          <Suspense fallback={<div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-gold" /></div>}>
+            <DashboardSeating invitation={invitation} />
+          </Suspense>
+        )}
         {activeTab === "storage" && <DashboardStorage invitation={invitation} />}
         {activeTab === "analytics" && <DashboardAnalytics invitation={invitation} />}
         {activeTab === "print" && (
