@@ -13,7 +13,8 @@ export function PricingCards() {
               Şeffaf ve Net Fiyatlandırma
             </h2>
             <p className="text-lg text-foreground/80 font-light leading-relaxed">
-              İhtiyacınıza uygun olan paketi seçin. Gizli ücret yok, sürpriz yok. Düğün bütçenizi zorlamadan premium deneyimi yaşayın.
+              Önizlemenizi ücretsiz hazırlayın, yalnızca yayınlamaya hazır olduğunuzda paketinizi
+              seçin. Abonelik ve gizli ücret yok.
             </p>
           </SlideUp>
         </div>
@@ -32,13 +33,13 @@ export function PricingCards() {
                 <span className="text-4xl font-bold tracking-tight text-foreground">₺500</span>
                 <span className="text-foreground/80 font-medium text-sm">/ Tek Seferlik</span>
               </div>
-              <Link 
-                to="/olustur" 
-                search={{ pkg: "digital_only" }} 
+              <Link
+                to="/olustur"
+                search={{ pkg: "digital_only" }}
                 onClick={() => trackSelectItem("digital_only", "Dijital Davetiye", 500)}
                 className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8"
               >
-                Seç
+                Ücretsiz Önizle
               </Link>
               <ul className="space-y-4 mt-auto">
                 <PricingFeature text="Özel Tasarım Dijital Davetiye" />
@@ -63,13 +64,13 @@ export function PricingCards() {
                 <span className="text-4xl font-bold tracking-tight text-foreground">₺750</span>
                 <span className="text-foreground/80 font-medium text-sm">/ Tek Seferlik</span>
               </div>
-              <Link 
-                to="/olustur" 
-                search={{ pkg: "qr_only" }} 
+              <Link
+                to="/olustur"
+                search={{ pkg: "qr_only" }}
                 onClick={() => trackSelectItem("qr_only", "QR Paket", 750)}
                 className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8"
               >
-                Seç
+                Ücretsiz Önizle
               </Link>
               <ul className="space-y-4 mt-auto">
                 <PricingFeature text="Masalar İçin Tasarımlı QR Kartlar" />
@@ -102,13 +103,13 @@ export function PricingCards() {
                 <span className="text-5xl font-bold tracking-tight">₺1.000</span>
                 <span className="text-neutral-300 font-medium text-sm">/ Tek Seferlik</span>
               </div>
-              <Link 
-                to="/olustur" 
-                search={{ pkg: "full" }} 
+              <Link
+                to="/olustur"
+                search={{ pkg: "full" }}
                 onClick={() => trackSelectItem("full", "2'si Bir Arada", 1000)}
                 className="block text-center w-full py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors mb-8 shadow-[0_0_20px_rgba(var(--primary),0.3)]"
               >
-                Tam Paket ile Başla
+                Tam Paketi Önizle
               </Link>
               <ul className="space-y-4 mt-auto">
                 <PricingFeature text="Dijital Davetiye'deki Her Şey" dark />
@@ -122,7 +123,8 @@ export function PricingCards() {
 
         <div className="max-w-3xl mx-auto mt-12 text-center text-sm text-muted-foreground">
           <p>
-            * İptal ve iade koşulları için Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi’ni inceleyiniz. Fotoğraf ve videolar paket kapsamında belirtilen süre boyunca korunur.
+            * İptal ve iade koşulları için Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi’ni
+            inceleyiniz. Fotoğraf ve videolar paket kapsamında belirtilen süre boyunca korunur.
           </p>
         </div>
       </div>
@@ -140,10 +142,10 @@ function PricingFeature({
   missing?: boolean;
 }) {
   return (
-    <li className={`flex items-start gap-3 ${missing ? 'opacity-50' : ''}`}>
+    <li className={`flex items-start gap-3 ${missing ? "opacity-50" : ""}`}>
       <span
         className={`mt-1 shrink-0 rounded-full p-0.5 ${
-          missing 
+          missing
             ? "bg-muted text-muted-foreground"
             : dark
               ? "bg-primary/20 text-primary"
@@ -156,7 +158,9 @@ function PricingFeature({
           <Check className="size-3.5" strokeWidth={3} />
         )}
       </span>
-      <span className={`text-sm ${dark ? "text-neutral-200" : "text-foreground/80"} ${missing ? 'line-through' : ''}`}>
+      <span
+        className={`text-sm ${dark ? "text-neutral-200" : "text-foreground/80"} ${missing ? "line-through" : ""}`}
+      >
         {text}
       </span>
     </li>

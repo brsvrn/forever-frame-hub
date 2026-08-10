@@ -187,7 +187,7 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
             rel="noreferrer"
             className="text-xs text-gold mt-1 hover:underline block truncate"
           >
-            memorywedding.com/davet/{invitation.slug}
+            www.memory-wedding.com/davet/{invitation.slug}
           </a>
           {roleHasPermission(role, "edit_content") ? (
             <a

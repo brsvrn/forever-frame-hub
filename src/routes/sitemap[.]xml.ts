@@ -17,6 +17,12 @@ export const Route = createFileRoute("/sitemap.xml")({
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/temalar", changefreq: "weekly", priority: "0.9" },
+          { path: "/olustur", changefreq: "weekly", priority: "0.9" },
+          { path: "/iletisim", changefreq: "monthly", priority: "0.5" },
+          { path: "/sozlesmeler/gizlilik", changefreq: "yearly", priority: "0.3" },
+          { path: "/sozlesmeler/mesafeli-satis", changefreq: "yearly", priority: "0.3" },
+          { path: "/sozlesmeler/teslimat", changefreq: "yearly", priority: "0.3" },
+          { path: "/sozlesmeler/iptal-iade", changefreq: "yearly", priority: "0.3" },
           ...selectableThemes.map((theme) => ({
             path: `/temalar/${theme.id}`,
             changefreq: "monthly" as const,

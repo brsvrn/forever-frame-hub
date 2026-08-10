@@ -19,6 +19,11 @@ import { ANALYTICS_CONFIG, trackPageView } from "@/lib/analytics/analytics";
 import { captureUTMParams } from "@/lib/analytics/utm";
 import { getStoredConsent, applyConsentToThirdParties } from "@/lib/analytics/consent";
 
+const googleSiteVerification =
+  (typeof process !== "undefined"
+    ? process.env?.GOOGLE_SITE_VERIFICATION || process.env?.VITE_GOOGLE_SITE_VERIFICATION
+    : undefined) || import.meta.env.VITE_GOOGLE_SITE_VERIFICATION;
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -57,9 +62,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <div className="mb-6">
           <BrandLogo />
         </div>
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Sayfa Yüklenemedi
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Sayfa Yüklenemedi</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Bir sorun oluştu. Sayfayı yenileyebilir veya ana sayfaya dönebilirsiniz.
         </p>
@@ -102,17 +105,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://www.memory-wedding.com/logo.jpg" },
       { property: "og:image:secure_url", content: "https://www.memory-wedding.com/logo.jpg" },
       { property: "og:image:type", content: "image/jpeg" },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
+      { property: "og:image:width", content: "1024" },
+      { property: "og:image:height", content: "1024" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: "https://www.memory-wedding.com/logo.jpg" },
-      {
-        name: "google-site-verification",
-        content:
-          (typeof process !== "undefined" ? process.env?.GOOGLE_SITE_VERIFICATION || process.env?.VITE_GOOGLE_SITE_VERIFICATION : undefined) ||
-          (import.meta as any).env?.VITE_GOOGLE_SITE_VERIFICATION ||
-          "",
-      },
+      ...(googleSiteVerification
+        ? [{ name: "google-site-verification", content: googleSiteVerification }]
+        : []),
     ],
     links: [
       {
@@ -176,7 +175,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         {/* Google Analytics 4 & Google Ads */}
         {(gaId || googleAdsId) && (
           <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId || googleAdsId}`} />
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId || googleAdsId}`}
+            />
             <script
               dangerouslySetInnerHTML={{
                 __html: `

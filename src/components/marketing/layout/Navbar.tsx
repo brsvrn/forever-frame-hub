@@ -45,9 +45,7 @@ export function Navbar() {
     <header
       className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-300 border-b border-transparent",
-        scrolled
-          ? "bg-white/80  backdrop-blur-md border-border shadow-sm"
-          : "bg-transparent",
+        scrolled ? "bg-white/80  backdrop-blur-md border-border shadow-sm" : "bg-transparent",
       )}
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -59,7 +57,7 @@ export function Navbar() {
           <a href="#features" className="hover:text-foreground transition-colors">
             Özellikler
           </a>
-          <a href="#qr-flow" className="hover:text-foreground transition-colors">
+          <a href="#features" className="hover:text-foreground transition-colors">
             QR Sistem
           </a>
           <a href="#pricing" className="hover:text-foreground transition-colors">
@@ -73,7 +71,10 @@ export function Navbar() {
           >
             {isLoggedIn ? "Panel" : "Giriş"}
           </Link>
-          <Button asChild className="rounded-full px-4 sm:px-6 shadow-md hover:shadow-lg transition-all">
+          <Button
+            asChild
+            className="rounded-full px-4 sm:px-6 shadow-md hover:shadow-lg transition-all"
+          >
             <Link to="/olustur">
               <span className="sm:hidden">Başla</span>
               <span className="hidden sm:inline">Davetiyeni Oluştur</span>

@@ -63,8 +63,8 @@ export function Features() {
             </div>
             <h3 className="text-xl font-bold mb-3">Çoklu Dil Desteği</h3>
             <p className="text-foreground/80 leading-relaxed font-light">
-              Yurtdışından gelecek misafirleriniz için davetiyeniz İngilizce, Almanca ve Arapça gibi
-              dillere otomatik uyarlanır.
+              Yurtdışından gelecek misafirleriniz için davetiyenizi Türkçe veya İngilizce olarak
+              sunun.
             </p>
           </FadeIn>
 
@@ -115,13 +115,18 @@ export function Features() {
                         <img
                           src={`https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=150&h=150&sig=${i}`}
                           className="w-full h-full object-cover opacity-90"
-                          alt="Memory"
+                          alt="Düğün galerisinden örnek kare"
+                          loading="lazy"
                         />
                       </div>
                     ))}
                   </div>
                   <div className="flex flex-col justify-center">
-                    <span className="font-bold text-xl text-foreground leading-tight">Düğününüzün<br/>tüm anılarını</span>
+                    <span className="font-bold text-xl text-foreground leading-tight">
+                      Düğününüzün
+                      <br />
+                      tüm anılarını
+                    </span>
                     <span className="text-xs text-muted-foreground uppercase tracking-[0.1em] font-semibold mt-1">
                       tek yerde toplayın
                     </span>
@@ -134,14 +139,16 @@ export function Features() {
                   <img
                     src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80"
                     className="w-full h-full object-cover opacity-90"
-                    alt="Cake"
+                    alt="Düğün pastası"
+                    loading="lazy"
                   />
                 </div>
                 <div className="absolute right-28 top-32 w-56 h-72 bg-background rounded-2xl overflow-hidden border-4 border-border shadow-xl -rotate-6 group-hover:-rotate-12 transition-transform duration-700 ease-out z-10">
                   <img
                     src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80"
                     className="w-full h-full object-cover opacity-90"
-                    alt="Venue"
+                    alt="Düğün mekânı"
+                    loading="lazy"
                   />
                   <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md rounded-xl p-3 flex items-center gap-3 shadow-lg">
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">

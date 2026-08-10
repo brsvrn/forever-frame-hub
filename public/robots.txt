@@ -1,7 +1,12 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /d/
+Disallow: /ekip-daveti/
+Disallow: /giris
 Disallow: /panel/
 Disallow: /odeme/
 Disallow: /api/
 
-Sitemap: https://memory-wedding.com/sitemap.xml
+Sitemap: https://www.memory-wedding.com/sitemap.xml
