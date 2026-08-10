@@ -77,18 +77,17 @@ function ThemeDetailPage() {
             <div className="mt-10 flex flex-wrap gap-3">
               <Link
                 to="/olustur"
-                search={{ theme: theme.id, step: "theme" } as never}
+                search={{ theme: theme.id, step: "basic-info" } as never}
                 className="inline-flex min-h-12 items-center gap-2 rounded-full bg-gradient-to-r from-rose to-gold px-7 font-semibold text-background"
               >
                 Bu temayla oluştur <ArrowRight className="size-4" />
               </Link>
-              <Link
-                to="/temalar/$slug/onizleme"
-                params={{ slug: theme.id }}
+              <a
+                href={`/davet/demo?theme=${encodeURIComponent(theme.id)}`}
                 className="inline-flex min-h-12 items-center gap-2 rounded-full border border-border px-7"
               >
                 <Maximize2 className="size-4" /> Tam ekran önizle
-              </Link>
+              </a>
             </div>
           </div>
           <div className="mx-auto w-full max-w-md">
