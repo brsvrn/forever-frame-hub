@@ -4,11 +4,9 @@ import { Footer } from "@/components/marketing/layout/Footer";
 import { TrustBand } from "@/components/marketing/layout/TrustBand";
 import { ProductExperience } from "@/components/marketing/experience/ProductExperience";
 import { Features } from "@/components/marketing/features/BentoGrid";
-import { AnimatedQRFlow } from "@/components/marketing/qr-experience/AnimatedQRFlow";
-import { DashboardPreview } from "@/components/marketing/dashboard-preview/DashboardPreview";
 import { VersusTable } from "@/components/marketing/comparison/VersusTable";
 import { PricingCards } from "@/components/marketing/pricing/PricingCards";
-import { Testimonials } from "@/components/marketing/testimonials/Testimonials";
+import { ProofSection } from "@/components/marketing/testimonials/Testimonials";
 import { FAQAccordion } from "@/components/marketing/faq/FAQAccordion";
 import { PremiumCTA } from "@/components/marketing/cta/PremiumCTA";
 import { SecuritySection } from "@/components/marketing/security/SecuritySection";
@@ -17,7 +15,8 @@ import { PhoneProvider } from "@/contexts/PhoneContext";
 
 const title = "MemoryWedding — Dijital Davetiye, LCV ve Canlı Galeri";
 const description =
-  "Düğün gününüzü unutulmaz kılan premium dijital davetiye, RSVP ve misafir etkileşim platformu.";
+  "Dijital düğün davetiyesi, LCV takibi ve QR ile fotoğraf-video toplama tek platformda. Ücretsiz önizleyin; paketler ₺500'den başlar.";
+const siteUrl = "https://www.memory-wedding.com/";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,9 +26,10 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: siteUrl },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://memorywedding.com/" }],
+    links: [{ rel: "canonical", href: siteUrl }],
     scripts: [
       {
         type: "application/ld+json",
@@ -40,12 +40,14 @@ export const Route = createFileRoute("/")({
           operatingSystem: "Web",
           applicationCategory: "LifestyleApplication",
           offers: {
-            "@type": "Offer",
-            price: "1500",
+            "@type": "AggregateOffer",
+            lowPrice: "500",
+            highPrice: "1000",
+            offerCount: "3",
             priceCurrency: "TRY",
           },
           description: description,
-          url: "https://memorywedding.com/",
+          url: siteUrl,
         }),
       },
     ],
@@ -64,7 +66,7 @@ function MarketingLandingPage() {
             <Features />
             <VersusTable />
             <PricingCards />
-            <Testimonials />
+            <ProofSection />
             <FAQAccordion />
             <SecuritySection />
             <TrustBand />

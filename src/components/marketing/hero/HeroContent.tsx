@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { FadeIn, SlideUp, MagneticButton, FloatingElement } from "@/components/motion";
-import { PlayCircle, ArrowRight, Star } from "lucide-react";
+import { CheckCircle2, PlayCircle } from "lucide-react";
 import { useInView, motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useEffect } from "react";
 import { usePhone } from "@/contexts/PhoneContext";
@@ -91,32 +91,14 @@ export function HeroContent() {
 
             <FadeIn
               delay={0.6}
-              className="mt-12 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-sm text-muted-foreground"
+              className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground lg:justify-start"
             >
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full border-2 border-background bg-muted overflow-hidden shadow-sm hover:scale-110 transition-transform z-10 relative hover:z-20"
-                  >
-                    <img
-                      src={`https://api.dicebear.com/7.x/notionists/svg?seed=${i + 10}&backgroundColor=f8fafc`}
-                      alt={`Mutlu Çift ${i}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="flex flex-col items-center sm:items-start pl-2">
-                <div className="flex text-amber-400 mb-0.5">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="w-4 h-4 fill-current drop-shadow-sm" />
-                  ))}
-                </div>
-                <span>
-                  Yeni nesil dijital düğün deneyimi
+              {["Ücretsiz önizleme", "Tek seferlik ödeme", "Uygulama gerekmez"].map((label) => (
+                <span key={label} className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="size-4 text-primary" aria-hidden="true" />
+                  {label}
                 </span>
-              </div>
+              ))}
             </FadeIn>
           </div>
 

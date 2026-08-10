@@ -113,7 +113,7 @@ export function createScheduleIcs(
   if (location) lines.push(`LOCATION:${escapeIcs(location)}`);
   if (schedule.description) lines.push(`DESCRIPTION:${escapeIcs(schedule.description)}`);
   lines.push(
-    `URL:https://memorywedding.com/davet/${encodeURIComponent(invitationSlug)}`,
+    `URL:https://www.memory-wedding.com/davet/${encodeURIComponent(invitationSlug)}`,
     "END:VEVENT",
     "END:VCALENDAR",
     "",

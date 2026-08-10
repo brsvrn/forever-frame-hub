@@ -87,7 +87,7 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
     const isValid = validatePayTRCallback(
       { hash, merchant_oid, status, total_amount },
       merchant_key,
-      merchant_salt
+      merchant_salt,
     );
 
     if (!isValid) {
@@ -100,7 +100,9 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
     if (status === "success") {
       const { data: transaction } = await admin
         .from("transactions")
-        .select("invitation_id, package_type, amount, user_id, status, is_test_order, meta_purchase_sent")
+        .select(
+          "invitation_id, package_type, amount, user_id, status, is_test_order, meta_purchase_sent",
+        )
         .eq("merchant_oid", merchant_oid)
         .maybeSingle();
 
@@ -161,7 +163,7 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
               const capiRes = await sendMetaServerEvent({
                 eventName: "Purchase",
                 eventId,
-                eventSourceUrl: "https://memory-wedding.com/odeme/basarili",
+                eventSourceUrl: `${process.env.VITE_SITE_URL || "https://www.memory-wedding.com"}/odeme/basarili`,
                 userData: {
                   email: userEmail || undefined,
                   phone: userPhone || undefined,

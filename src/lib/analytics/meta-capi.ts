@@ -42,7 +42,7 @@ function normalizePhone(phone: string): string {
 }
 
 export async function sendMetaServerEvent(
-  payload: MetaCapiEventPayload
+  payload: MetaCapiEventPayload,
 ): Promise<{ success: boolean; error?: string }> {
   const pixelId = process.env.META_PIXEL_ID || process.env.VITE_META_PIXEL_ID;
   const accessToken = process.env.META_CONVERSIONS_API_TOKEN;
@@ -88,7 +88,7 @@ export async function sendMetaServerEvent(
     event_name: payload.eventName,
     event_time: payload.eventTime || Math.floor(Date.now() / 1000),
     event_id: payload.eventId,
-    event_source_url: payload.eventSourceUrl || "https://memory-wedding.com",
+    event_source_url: payload.eventSourceUrl || "https://www.memory-wedding.com",
     action_source: "website",
     user_data: formattedUserData,
     custom_data: customData,
@@ -111,7 +111,7 @@ export async function sendMetaServerEvent(
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
-      }
+      },
     );
 
     const result = await response.json();
@@ -122,7 +122,10 @@ export async function sendMetaServerEvent(
 
     return { success: true };
   } catch (err) {
-    console.error("Meta CAPI Fetch Exception:", err instanceof Error ? err.message : "Network error");
+    console.error(
+      "Meta CAPI Fetch Exception:",
+      err instanceof Error ? err.message : "Network error",
+    );
     return { success: false, error: err instanceof Error ? err.message : "Network error" };
   }
 }

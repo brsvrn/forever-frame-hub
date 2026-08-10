@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function Footer() {
@@ -10,51 +9,36 @@ export function Footer() {
           <div className="md:col-span-2 space-y-6">
             <BrandLogo size="lg" textClassName="text-white" />
             <p className="text-muted-foreground max-w-sm leading-relaxed text-sm">
-              Düğün gününüzü unutulmaz kılan premium dijital davetiye, LCV yönetimi ve misafir
-              etkileşim platformu. Apple, Spotify ve WhatsApp kalitesinde pürüzsüz bir deneyim.
+              Dijital davetiye, LCV yönetimi ve QR ile fotoğraf-video toplama özelliklerini tek
+              bağlantıda bir araya getiren düğün platformu.
             </p>
-            <div className="flex gap-4 pt-2">
-              <a
-                href="#"
-                className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-              >
-                <span className="sr-only">Instagram</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.476 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </a>
-            </div>
           </div>
           <div>
             <h4 className="text-white font-semibold mb-6">Platform Özellikleri</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Dijital Davetiye (Web & Mobil)
+                <a href="/davet/demo" className="hover:text-white transition-colors">
+                  Canlı Davetiye Demosu
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  QR Okut, Fotoğraf Yükle
+                <a href="/#features" className="hover:text-white transition-colors">
+                  QR ile Fotoğraf ve Video Toplama
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Gelişmiş LCV (RSVP) Takibi
+                <a href="/#features" className="hover:text-white transition-colors">
+                  LCV (RSVP) Takibi
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link to="/temalar" className="hover:text-white transition-colors">
                   Kişiselleştirilebilir Temalar
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Davetli Yönetim Paneli (SaaS)
+                <a href="/#pricing" className="hover:text-white transition-colors">
+                  Paketler ve Fiyatlar
                 </a>
               </li>
             </ul>
@@ -68,7 +52,10 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/sozlesmeler/mesafeli-satis" className="hover:text-white transition-colors">
+                <Link
+                  to="/sozlesmeler/mesafeli-satis"
+                  className="hover:text-white transition-colors"
+                >
                   Mesafeli Satış Sözleşmesi
                 </Link>
               </li>
@@ -90,19 +77,31 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        
+
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-8 text-sm text-muted-foreground">
           <div className="max-w-md">
             <h5 className="font-semibold text-white mb-2">Firma Bilgileri</h5>
-            <p><strong>Unvan:</strong> Barış Savrun</p>
-            <p><strong>Adres:</strong> Bursa / Türkiye</p>
-            <p><strong>E-posta:</strong> brsvrn@gmail.com | <strong>Telefon:</strong> 0530 381 1155</p>
+            <p>
+              <strong>Unvan:</strong> Barış Savrun
+            </p>
+            <p>
+              <strong>Adres:</strong> Bursa / Türkiye
+            </p>
+            <p>
+              <strong>E-posta:</strong>{" "}
+              <a className="hover:text-white" href="mailto:brsvrn@gmail.com">
+                brsvrn@gmail.com
+              </a>
+              {" · "}
+              <strong>Telefon:</strong>{" "}
+              <a className="hover:text-white" href="tel:+905303811155">
+                0530 381 1155
+              </a>
+            </p>
           </div>
         </div>
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
-          <p>
-            © {new Date().getFullYear()} MemoryWedding. Tüm hakları saklıdır.
-          </p>
+          <p>© {new Date().getFullYear()} MemoryWedding. Tüm hakları saklıdır.</p>
         </div>
       </div>
     </footer>

@@ -61,6 +61,8 @@ export const Route = createFileRoute("/davet/$slug")({
           venue: "Çırağan Sarayı",
           address: "Yıldız, Çırağan Cd. No:32, Beşiktaş/İstanbul",
           city: "İstanbul",
+          map_url:
+            "https://www.google.com/maps/search/?api=1&query=%C3%87%C4%B1ra%C4%9Fan+Saray%C4%B1+Be%C5%9Fikta%C5%9F+%C4%B0stanbul",
           event_program: [
             { time: "18:30", title: "Karşılama", desc: "Kokteyl ve hoş geldiniz ikramları" },
             { time: "19:00", title: "Nikâh Töreni", desc: "Mutluluğumuza evet diyoruz" },

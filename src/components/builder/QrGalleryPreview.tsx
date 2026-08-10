@@ -8,7 +8,7 @@ export function getGalleryUrl(draft: InvitationDraft) {
   const slug =
     draft.slug || slugify(`${draft.partnerOne}-${draft.partnerTwo}`) || "etkinlik-galerisi";
   const origin =
-    typeof window !== "undefined" ? window.location.origin : "https://memorywedding.com";
+    typeof window !== "undefined" ? window.location.origin : "https://www.memory-wedding.com";
   return `${origin}/davet/${slug}`;
 }
 
@@ -40,7 +40,10 @@ export function QrGalleryPreview({
       }}
     >
       <div aria-hidden="true" className="absolute inset-0" style={{ background: overlay }} />
-      <div aria-hidden="true" className="absolute inset-3 rounded-[1.25rem] border border-white/30" />
+      <div
+        aria-hidden="true"
+        className="absolute inset-3 rounded-[1.25rem] border border-white/30"
+      />
 
       <div className="relative z-10">
         <div

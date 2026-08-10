@@ -1,78 +1,71 @@
+import { Eye, MousePointerClick, ShieldCheck } from "lucide-react";
 import { FadeIn, SlideUp } from "@/components/motion";
-import { Star } from "lucide-react";
 
-const TESTIMONIALS = [
+const PROOF_POINTS = [
   {
-    name: "Zeynep & Ahmet",
-    role: "Ağustos 2025, İzmir",
-    image:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=100&h=100",
-    text: "Matbaaya vereceğimiz paranın yarısına harika bir dijital deneyim satın aldık. Özellikle masalardaki QR sistemi sayesinde düğünümüzden elimizde yüzlerce amatör ama çok samimi fotoğraf kaldı. Kesinlikle tavsiye ediyoruz.",
+    title: "Gerçek davetiye akışını görün",
+    text: "Zarf açılışından LCV formuna, takvimden QR galerisine kadar misafir deneyimini canlı demoda inceleyin.",
+    icon: Eye,
+    cta: "Canlı demoyu aç",
+    href: "/davet/demo",
   },
   {
-    name: "Burcu & Can",
-    role: "Eylül 2025, İstanbul",
-    image:
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=100&h=100",
-    text: "Yurtdışından çok fazla misafirimiz vardı. İngilizce ve Almanca dil seçeneklerinin otomatik çıkması inanılmaz pratikti. LCV takibini Excel'de yapmaktan kurtulmak bile bu fiyatı hak ediyor.",
+    title: "Ödeme yapmadan hazırlayın",
+    text: "Bilgilerinizi girin, temanızı seçin ve davetiyenizin önizlemesini yayınlamadan önce kontrol edin.",
+    icon: MousePointerClick,
+    cta: "Ücretsiz önizleme oluştur",
+    href: "/olustur",
   },
   {
-    name: "Elif & Mert",
-    role: "Temmuz 2025, Antalya",
-    image:
-      "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=100&h=100",
-    text: "Davetiyenin zarf açılma animasyonu o kadar şıktı ki herkes nasıl yaptığımızı sordu. Premium bir deneyim olduğu her detayından belli oluyor. Tasarımlar harika.",
+    title: "Kapsamı baştan bilin",
+    text: "Tek seferlik paket fiyatlarını, davetiye aktiflik süresini ve galeri saklama koşullarını satın almadan önce görün.",
+    icon: ShieldCheck,
+    cta: "Paketleri karşılaştır",
+    href: "/#pricing",
   },
 ];
 
-export function Testimonials() {
+export function ProofSection() {
   return (
-    <section className="py-24 bg-neutral-50  relative overflow-hidden border-t">
+    <section className="relative overflow-hidden border-t bg-neutral-50 py-24">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <SlideUp>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-              MemoryWedding İle
-              <br />
-              Yaşayabileceğiniz Deneyim
+              Karar Vermeden Önce
+              <br /> Her Şeyi Deneyin
             </h2>
             <p className="text-lg text-foreground/80 font-light leading-relaxed">
-              Çiftlerimizin en özel gününü stresten uzak ve unutulmaz kılmayı hedefliyoruz.
+              Temsili yorumlar yerine ürünü doğrudan deneyin; ne satın aldığınızı açıkça görün.
             </p>
           </SlideUp>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {TESTIMONIALS.map((t, idx) => (
-            <FadeIn
-              key={idx}
-              delay={0.1 * (idx + 1)}
-              className="bg-white  rounded-[2rem] p-8 border border-border shadow-sm flex flex-col h-full hover:shadow-lg transition-shadow"
-            >
-              <div className="flex text-amber-400 mb-6">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="w-5 h-5 fill-current" />
-                ))}
-              </div>
-              <p className="text-foreground/80 leading-relaxed flex-1 italic mb-8 font-light">
-                "{t.text}"
-              </p>
-              <div className="flex items-center gap-4 mt-auto">
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
-                  <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+          {PROOF_POINTS.map((point, idx) => {
+            const Icon = point.icon;
+            return (
+              <FadeIn
+                key={point.title}
+                delay={0.1 * (idx + 1)}
+                className="flex h-full flex-col rounded-[2rem] border border-border bg-white p-8 shadow-sm transition-shadow hover:shadow-lg"
+              >
+                <div className="mb-6 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Icon className="size-6" aria-hidden="true" />
                 </div>
-                <div>
-                  <h4 className="font-bold text-foreground text-sm">{t.name}</h4>
-                  <p className="text-xs text-foreground/70 uppercase tracking-wider mt-0.5">
-                    {t.role}
-                  </p>
-                </div>
-                <div className="ml-auto text-[10px] text-muted-foreground border bg-muted px-2 py-0.5 rounded-full whitespace-nowrap">
-                  (Temsili Yorum)
-                </div>
-              </div>
-            </FadeIn>
-          ))}
+                <h3 className="text-xl font-bold text-foreground">{point.title}</h3>
+                <p className="mb-8 mt-3 flex-1 font-light leading-relaxed text-foreground/80">
+                  {point.text}
+                </p>
+                <a
+                  href={point.href}
+                  className="mt-auto inline-flex min-h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+                >
+                  {point.cta}
+                </a>
+              </FadeIn>
+            );
+          })}
         </div>
       </div>
     </section>
