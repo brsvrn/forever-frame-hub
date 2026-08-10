@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AnimatePresence } from "framer-motion";
 import { z } from "zod";
-import { House, Palette, RotateCcw, Sparkles } from "lucide-react";
+import { House, Palette, RotateCcw } from "lucide-react";
 import {
   getPublicInvitation,
   getPublicFeatureSettings,
@@ -11,7 +11,7 @@ import {
   type InvitationRow,
 } from "@/lib/invitations.api";
 import { useI18n, I18nProvider } from "@/lib/i18n";
-import { InvitationIntro } from "@/components/invitation/InvitationIntro";
+import { AnimatedEnvelopeIntro } from "@/components/invitation/AnimatedEnvelopeIntro";
 import { LivingBackground } from "@/components/invitation/LivingBackground";
 import { PremiumAudioPlayer } from "@/components/invitation/PremiumAudioPlayer";
 import { HeroExperience } from "@/components/invitation/HeroExperience";
@@ -25,19 +25,15 @@ import { MemoryWall } from "@/components/invitation/MemoryWall";
 import { VoiceGreeting } from "@/components/invitation/VoiceGreeting";
 import { GiftSection } from "@/components/invitation/GiftSection";
 import { CountdownTimer } from "@/components/invitation/CountdownTimer";
-import { InvitationPhotoGallery } from "@/components/invitation/InvitationPhotoGallery";
 import { InvitationFooter } from "@/components/invitation/InvitationFooter";
 import { LueurHero, LueurOpening, LueurSection } from "@/components/invitation/PapillonRouge";
-import {
-  MidnightConservatoryHero,
-  MidnightConservatoryOpening,
-  MidnightConservatorySection,
-  type MidnightScene,
-} from "@/components/invitation/MidnightConservatory";
-import { EvergreenVowsHero, EvergreenVowsOpening } from "@/components/invitation/EvergreenVows";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
-import { selectableThemes, type InviteThemeId, type ThemeCategory } from "@/lib/theme-engine";
-import { resolveCustomizedTheme } from "@/lib/theme-customization";
+import {
+  resolveTheme,
+  selectableThemes,
+  type InviteThemeId,
+  type ThemeCategory,
+} from "@/lib/theme-engine";
 
 export const Route = createFileRoute("/davet/$slug")({
   validateSearch: z.object({ theme: z.string().optional() }),
@@ -58,8 +54,6 @@ export const Route = createFileRoute("/davet/$slug")({
           venue: "Çırağan Sarayı",
           address: "Yıldız, Çırağan Cd. No:32, Beşiktaş/İstanbul",
           city: "İstanbul",
-          map_url:
-            "https://www.google.com/maps/search/?api=1&query=%C3%87%C4%B1ra%C4%9Fan+Saray%C4%B1+Be%C5%9Fikta%C5%9F+%C4%B0stanbul",
           event_program: [
             { time: "18:30", title: "Karşılama", desc: "Kokteyl ve hoş geldiniz ikramları" },
             { time: "19:00", title: "Nikâh Töreni", desc: "Mutluluğumuza evet diyoruz" },
@@ -160,11 +154,7 @@ function PremiumInvitePage() {
     ? (search.theme as InviteThemeId)
     : draft.theme;
   const [previewThemeId, setPreviewThemeId] = useState<InviteThemeId>(initialDemoTheme);
-  const theme = resolveCustomizedTheme(
-    isDemo ? previewThemeId : draft.theme,
-    isDemo ? undefined : draft.themeCustomization,
-    isDemo ? undefined : draft.coverPhoto,
-  );
+  const theme = resolveTheme(isDemo ? previewThemeId : draft.theme);
   const pkg = (invitation as InvitationRow & { package?: { features?: Record<string, boolean> } })
     .package;
   const features = pkg?.features || {
@@ -176,8 +166,6 @@ function PremiumInvitePage() {
   const [personalGuestToken, setPersonalGuestToken] = useState<string | undefined>();
   const openingEnabled = eventFeatures?.opening_enabled !== false;
   const isLueur = theme.id === "lueur-de-minuit";
-  const isConservatory = theme.id === "midnight-conservatory";
-  const isEvergreen = theme.id === "evergreen-vows";
 
   useEffect(() => {
     const receivePersonalGuest = (event: MessageEvent) => {
@@ -195,13 +183,7 @@ function PremiumInvitePage() {
   }, []);
 
   return (
-    <div
-      className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30"
-      style={{
-        backgroundColor: theme.secondaryColor,
-        fontFamily: theme.font ? `"${theme.font}", sans-serif` : undefined,
-      }}
-    >
+    <div className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30">
       {isDemo ? (
         <DemoThemeSwitcher
           value={previewThemeId}
@@ -217,160 +199,65 @@ function PremiumInvitePage() {
       <AnimatePresence>
         {!hasOpened && features.digital_invitation !== false && openingEnabled ? (
           isLueur ? (
-            <LueurOpening
-              key={`intro-${theme.id}`}
-              partnerOne={draft.partnerOne}
-              partnerTwo={draft.partnerTwo}
-              onComplete={() => setHasOpened(true)}
-            />
-          ) : isConservatory ? (
-            <MidnightConservatoryOpening
-              key={`intro-${theme.id}`}
-              partnerOne={draft.partnerOne}
-              partnerTwo={draft.partnerTwo}
-              onComplete={() => setHasOpened(true)}
-            />
-          ) : isEvergreen ? (
-            <EvergreenVowsOpening
-              key={`intro-${theme.id}`}
-              partnerOne={draft.partnerOne}
-              partnerTwo={draft.partnerTwo}
-              onComplete={() => setHasOpened(true)}
-            />
+            <LueurOpening key={`intro-${theme.id}`} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
           ) : (
-            <InvitationIntro
-              key={`intro-${theme.id}`}
-              theme={theme}
-              partnerOne={draft.partnerOne}
-              partnerTwo={draft.partnerTwo}
-              onComplete={() => setHasOpened(true)}
-            />
+            <AnimatedEnvelopeIntro key={`intro-${theme.id}`} theme={theme} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
           )
         ) : null}
       </AnimatePresence>
 
       {(hasOpened || !openingEnabled || features.digital_invitation === false) && (
         <div key={`invite-${theme.id}`}>
-          {!isLueur && !isConservatory && !isEvergreen ? <LivingBackground theme={theme} /> : null}
+          {!isLueur ? <LivingBackground theme={theme} /> : null}
 
-          <main
-            className={`relative z-10 h-dvh overflow-y-auto scroll-smooth pb-24 ${
-              isConservatory ? "" : "snap-y snap-mandatory"
-            } ${isEvergreen ? "evergreen-vows-theme bg-[#0B3528] text-[#F7F0E3]" : ""}`}
-          >
+          <main className="relative z-10 h-dvh snap-y snap-mandatory overflow-y-auto scroll-smooth pb-24">
             {features.digital_invitation !== false ? (
               <>
-                {isLueur ? (
-                  <LueurHero draft={draft} lang={lang} />
-                ) : isConservatory ? (
-                  <MidnightConservatoryHero draft={draft} lang={lang} />
-                ) : isEvergreen ? (
-                  <EvergreenVowsHero draft={draft} lang={lang} />
-                ) : (
-                  <HeroExperience draft={draft} theme={theme} lang={lang} />
-                )}
+                {isLueur ? <LueurHero draft={draft} lang={lang} /> : <HeroExperience draft={draft} theme={theme} lang={lang} />}
                 {eventFeatures?.audio_greeting_enabled !== false && advanced?.audio?.url ? (
-                  <SpecialThemeSection
-                    isLueur={isLueur}
-                    isConservatory={isConservatory}
-                    scene="hero"
-                  >
-                    <VoiceGreeting
-                      theme={theme}
-                      url={advanced.audio.url}
-                      title={advanced.audio.title}
-                      description={advanced.audio.description}
-                      alternativeText={advanced.audio.alternative_text}
-                    />
-                  </SpecialThemeSection>
+                  <LueurSection active={isLueur}><VoiceGreeting
+                    theme={theme}
+                    url={advanced.audio.url}
+                    title={advanced.audio.title}
+                    description={advanced.audio.description}
+                    alternativeText={advanced.audio.alternative_text}
+                  /></LueurSection>
                 ) : null}
                 {eventFeatures?.story_enabled !== false ? (
-                  <SpecialThemeSection
-                    isLueur={isLueur}
-                    isConservatory={isConservatory}
-                    lueurTone="wine"
-                    scene="aisle"
-                  >
-                    <StoryTimeline draft={draft} theme={theme} />
-                  </SpecialThemeSection>
+                  <LueurSection active={isLueur} tone="wine"><StoryTimeline draft={draft} theme={theme} /></LueurSection>
                 ) : null}
-                {draft.galleryImages.length > 0 ? (
-                  <SpecialThemeSection
-                    isLueur={isLueur}
-                    isConservatory={isConservatory}
-                    lueurTone="wine"
-                    scene="hero"
-                  >
-                    <InvitationPhotoGallery
-                      images={draft.galleryImages}
-                      theme={theme}
-                      lang={lang}
-                    />
-                  </SpecialThemeSection>
-                ) : null}
-                <SpecialThemeSection
-                  isLueur={isLueur}
-                  isConservatory={isConservatory}
-                  scene="aisle"
-                >
-                  <CountdownTimer
-                    eventDate={draft.date}
-                    eventTime={draft.time || (schedules.length > 0 ? schedules[0].starts_at : null)}
-                    theme={theme}
-                    lang={lang}
-                  />
-                </SpecialThemeSection>
+                <LueurSection active={isLueur}><CountdownTimer
+                  eventDate={draft.date}
+                  eventTime={draft.time || (schedules.length > 0 ? schedules[0].starts_at : null)}
+                  theme={theme}
+                  lang={lang}
+                /></LueurSection>
                 {eventFeatures?.schedule_enabled !== false ? (
                   <>
-                    <SpecialThemeSection
-                      isLueur={isLueur}
-                      isConservatory={isConservatory}
-                      scene="aisle"
-                    >
-                      <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
-                    </SpecialThemeSection>
+                    <LueurSection active={isLueur}><EventProgramTimeline draft={draft} theme={theme} lang={lang} /></LueurSection>
                     {schedules.length > 0 ? (
-                      <SpecialThemeSection
-                        isLueur={isLueur}
-                        isConservatory={isConservatory}
-                        scene="dinner"
-                      >
-                        <MultiEventDetails
-                          schedules={schedules}
-                          theme={theme}
-                          lang={lang}
-                          calendarEnabled={eventFeatures?.calendar_enabled !== false}
-                        />
-                      </SpecialThemeSection>
+                      <LueurSection active={isLueur}><MultiEventDetails
+                        schedules={schedules}
+                        theme={theme}
+                        lang={lang}
+                        calendarEnabled={eventFeatures?.calendar_enabled !== false}
+                      /></LueurSection>
                     ) : (
-                      <SpecialThemeSection
-                        isLueur={isLueur}
-                        isConservatory={isConservatory}
-                        scene="dinner"
-                      >
-                        <EventDetails
-                          draft={draft}
-                          theme={theme}
-                          lang={lang}
-                          calendarEnabled={eventFeatures?.calendar_enabled !== false}
-                        />
-                      </SpecialThemeSection>
+                      <LueurSection active={isLueur}><EventDetails
+                        draft={draft}
+                        theme={theme}
+                        lang={lang}
+                        calendarEnabled={eventFeatures?.calendar_enabled !== false}
+                      /></LueurSection>
                     )}
                   </>
                 ) : null}
                 {eventFeatures?.rsvp_enabled !== false ? (
-                  <SpecialThemeSection
-                    isLueur={isLueur}
-                    isConservatory={isConservatory}
-                    lueurTone="wine"
-                    scene="dinner"
-                  >
-                    <PremiumRSVP
-                      theme={theme}
-                      invitationId={invitation.id}
-                      guestToken={personalGuestToken}
-                    />
-                  </SpecialThemeSection>
+                  <LueurSection active={isLueur} tone="wine"><PremiumRSVP
+                    theme={theme}
+                    invitationId={invitation.id}
+                    guestToken={personalGuestToken}
+                  /></LueurSection>
                 ) : null}
               </>
             ) : null}
@@ -378,40 +265,18 @@ function PremiumInvitePage() {
             {features.qr_gallery !== false ? (
               <>
                 {eventFeatures?.memory_box_enabled !== false ? (
-                  <SpecialThemeSection
-                    isLueur={isLueur}
-                    isConservatory={isConservatory}
-                    lueurTone="wine"
-                    scene="hero"
-                  >
-                    <MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} />
-                  </SpecialThemeSection>
+                  <LueurSection active={isLueur} tone="wine"><MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} /></LueurSection>
                 ) : null}
                 {eventFeatures?.qr_upload_enabled !== false ? (
-                  <SpecialThemeSection
-                    isLueur={isLueur}
-                    isConservatory={isConservatory}
-                    scene="aisle"
-                  >
-                    <PremiumQRExperience theme={theme} invitationId={invitation.id} />
-                  </SpecialThemeSection>
+                  <LueurSection active={isLueur}><PremiumQRExperience theme={theme} invitationId={invitation.id} /></LueurSection>
                 ) : null}
               </>
             ) : null}
             {eventFeatures?.gift_enabled !== false && advanced?.gift ? (
-              <SpecialThemeSection isLueur={isLueur} isConservatory={isConservatory} scene="aisle">
-                <GiftSection settings={advanced.gift} theme={theme} />
-              </SpecialThemeSection>
+              <LueurSection active={isLueur}><GiftSection settings={advanced.gift} theme={theme} /></LueurSection>
             ) : null}
 
-            <SpecialThemeSection
-              isLueur={isLueur}
-              isConservatory={isConservatory}
-              lueurTone="wine"
-              scene="dinner"
-            >
-              <InvitationFooter draft={draft} theme={theme} lang={lang} />
-            </SpecialThemeSection>
+            <LueurSection active={isLueur} tone="wine"><InvitationFooter draft={draft} theme={theme} lang={lang} /></LueurSection>
           </main>
         </div>
       )}
@@ -434,34 +299,6 @@ function PremiumInvitePage() {
         />
       ) : null}
     </div>
-  );
-}
-
-function SpecialThemeSection({
-  isLueur,
-  isConservatory,
-  lueurTone = "paper",
-  scene,
-  children,
-}: {
-  isLueur: boolean;
-  isConservatory: boolean;
-  lueurTone?: "paper" | "wine";
-  scene: MidnightScene;
-  children: React.ReactNode;
-}) {
-  if (isLueur) {
-    return (
-      <LueurSection active tone={lueurTone}>
-        {children}
-      </LueurSection>
-    );
-  }
-
-  return (
-    <MidnightConservatorySection active={isConservatory} scene={scene}>
-      {children}
-    </MidnightConservatorySection>
   );
 }
 
@@ -518,15 +355,6 @@ function DemoThemeSwitcher({
           ))}
         </select>
       </label>
-      <a
-        href={`/olustur?theme=${encodeURIComponent(value)}&step=basic-info`}
-        className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-white px-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
-      >
-        <Sparkles className="size-4" aria-hidden="true" />
-        <span className="hidden md:inline">
-          {lang === "tr" ? "Bu temayla oluştur" : "Use this theme"}
-        </span>
-      </a>
       <button
         type="button"
         onClick={onReplay}
