@@ -79,6 +79,8 @@ export function isMaintenanceBypassPath(pathname: string) {
     "/admin",
     "/api/admin/system-settings",
     "/api/admin/maintenance-bypass",
+    "/api/admin/social-content",
+    "/api/cron/instagram-publish",
     "/api/paytr-webhook",
     "/api/paytr",
     "/api/webhooks",
