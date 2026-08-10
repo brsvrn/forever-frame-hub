@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { emptyDraft, slugify, type InvitationDraft, type InviteThemeId } from "./invitation";
 import { selectableThemes } from "./theme-engine";
+import { extractThemeCustomization, storeThemeCustomization } from "./theme-customization";
 import { getGuestUploadViewUrl } from "./r2-actions";
 
 export type InvitationRow = Tables<"invitations">;
@@ -24,6 +25,7 @@ export function rowToDraft(row: InvitationRow): InvitationDraft {
   return {
     packageId: row.package_id ?? "",
     theme: (row.theme as InviteThemeId) ?? emptyDraft.theme,
+    themeCustomization: extractThemeCustomization(row.custom_sections),
     category: (row.event_type as any) ?? emptyDraft.category,
     partnerOne: row.partner_one ?? "",
     partnerTwo: row.partner_two ?? "",
@@ -68,7 +70,7 @@ function draftToRow(draft: InvitationDraft, slug: string) {
     event_program: draft.eventProgram,
     our_story: draft.ourStory,
     family_info: draft.familyInfo,
-    custom_sections: draft.customSections,
+    custom_sections: storeThemeCustomization(draft.customSections, draft.themeCustomization),
   };
 }
 

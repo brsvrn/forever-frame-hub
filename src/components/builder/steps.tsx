@@ -29,6 +29,7 @@ import {
 import { Field, TextArea, TextInput } from "./Field";
 import { InvitationPreview } from "./InvitationPreview";
 import { QrGalleryPreview } from "./QrGalleryPreview";
+import { ThemeCustomizationStudio } from "./ThemeCustomizationStudio";
 import { trackBeginCheckout, trackSelectItem } from "@/lib/analytics/analytics";
 
 type StepProps = {
@@ -131,8 +132,8 @@ export function StepTheme({
         }
       />
 
-      {mode !== "theme" && (
-        isPaid ? (
+      {mode !== "theme" &&
+        (isPaid ? (
           <div className="mb-8 rounded-3xl border border-gold/40 bg-gold/5 p-6 backdrop-blur-sm shadow-sm">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3.5">
@@ -182,7 +183,8 @@ export function StepTheme({
             </div>
           </div>
         ) : (
-          !packagesLoading && packages.length > 0 && (
+          !packagesLoading &&
+          packages.length > 0 && (
             <div className="mb-10">
               <h3 className="text-xl font-medium mb-4">
                 {lang === "tr" ? "Paket Seçimi" : "Package Selection"}
@@ -220,8 +222,7 @@ export function StepTheme({
               </div>
             </div>
           )
-        )
-      )}
+        ))}
 
       {mode !== "theme" &&
         (!hasInvitation ? (
@@ -328,7 +329,13 @@ export function StepTheme({
                   <button
                     key={theme.id}
                     type="button"
-                    onClick={() => update("theme", theme.theme_id as InviteThemeId)}
+                    onClick={() => {
+                      update("theme", theme.theme_id as InviteThemeId);
+                      update("themeCustomization", {
+                        presetId: "original",
+                        coverStyle: "immersive",
+                      });
+                    }}
                     aria-pressed={active}
                     className={cn(
                       "group relative overflow-hidden rounded-3xl border text-left transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -387,6 +394,11 @@ export function StepTheme({
               })
             )}
           </div>
+          {hasInvitation ? (
+            <div className="mt-8">
+              <ThemeCustomizationStudio draft={draft} update={update} lang={lang} />
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -452,6 +464,19 @@ export function StepTexts({
       ? `${c.family} (İsteğe bağlı)`
       : `${c.family} (Optional)`
     : c.family;
+  const basicRequirements = [
+    {
+      label: lang === "tr" ? "İsimler" : "Names",
+      done: Boolean(
+        draft.partnerOne.trim() &&
+        (!showPartnerTwo || isHenna || isOther || draft.partnerTwo.trim()),
+      ),
+    },
+    {
+      label: lang === "tr" ? "Üst başlık" : "Headline",
+      done: Boolean(draft.headline.trim()),
+    },
+  ];
 
   return (
     <div className="space-y-8">
@@ -479,6 +504,32 @@ export function StepTexts({
               : c.desc
         }
       />
+      {mode === "basic" ? (
+        <>
+          <ThemeCustomizationStudio draft={draft} update={update} lang={lang} compact />
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-accent/15 px-4 py-3">
+            <p className="text-sm font-medium">
+              {lang === "tr" ? "Bu bölümün zorunlu alanları" : "Required in this section"}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {basicRequirements.map((requirement) => (
+                <span
+                  key={requirement.label}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs",
+                    requirement.done
+                      ? "bg-emerald-500/10 text-emerald-600"
+                      : "bg-amber-500/10 text-amber-600",
+                  )}
+                >
+                  {requirement.done ? <Check className="size-3" aria-hidden="true" /> : "•"}
+                  {requirement.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
       {(mode === "all" || mode === "invitation") && textTemplates.length > 0 ? (
         <section>
           <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -536,16 +587,6 @@ export function StepTexts({
                   maxLength={40}
                   placeholder={c.headlinePh}
                   onChange={(e) => update("headline", e.target.value)}
-                />
-              )}
-            </Field>
-            <Field label={copy.premium.cover} className="sm:col-span-2">
-              {(id) => (
-                <TextInput
-                  id={id}
-                  value={draft.coverPhoto}
-                  placeholder="https://..."
-                  onChange={(e) => update("coverPhoto", e.target.value)}
                 />
               )}
             </Field>

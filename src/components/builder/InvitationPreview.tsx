@@ -2,13 +2,9 @@ import { CalendarDays, Heart, MapPin, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { BuilderContent } from "@/lib/builder-content";
-import {
-  countdownDays,
-  formatInviteDate,
-  type InvitationDraft,
-} from "@/lib/invitation";
+import { countdownDays, formatInviteDate, type InvitationDraft } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
-import { resolveTheme } from "@/lib/theme-engine";
+import { resolveCustomizedTheme } from "@/lib/theme-customization";
 
 export function InvitationPreview({
   draft,
@@ -25,10 +21,16 @@ export function InvitationPreview({
 }) {
   const c = copy.inviteCard;
 
-  const themeConfig = resolveTheme(draft.theme);
+  const themeConfig = resolveCustomizedTheme(
+    draft.theme,
+    draft.themeCustomization,
+    draft.coverPhoto,
+  );
 
-  const showAmpersand = draft.partnerTwo || (draft.category !== "birthday" && draft.category !== "henna" && draft.category !== "other");
-  
+  const showAmpersand =
+    draft.partnerTwo ||
+    (draft.category !== "birthday" && draft.category !== "henna" && draft.category !== "other");
+
   const names =
     draft.partnerOne || draft.partnerTwo
       ? showAmpersand
@@ -66,11 +68,20 @@ export function InvitationPreview({
         themeConfig.styles?.typography?.sans,
         className,
       )}
-      style={{
-        fontFamily: `"${themeConfig.font || "Cormorant Garamond"}", sans-serif`,
-        backgroundColor: themeConfig.secondaryColor,
-        color: themeConfig.primaryColor,
-      }}
+      style={
+        {
+          fontFamily: `"${themeConfig.font || "Cormorant Garamond"}", sans-serif`,
+          backgroundColor: themeConfig.secondaryColor,
+          color: themeConfig.primaryColor,
+          "--invite-bg": themeConfig.secondaryColor || themeConfig.qr.ink,
+          "--invite-panel": themeConfig.secondaryColor || themeConfig.qr.ink,
+          "--invite-ink": themeConfig.primaryColor || themeConfig.qr.paper,
+          "--invite-soft": themeConfig.primaryColor || themeConfig.qr.paper,
+          "--invite-accent": themeConfig.primaryColor || themeConfig.qr.accent,
+          "--invite-accent-ink": themeConfig.secondaryColor || themeConfig.qr.ink,
+          "--invite-display": `"${themeConfig.font || "Cormorant Garamond"}", serif`,
+        } as React.CSSProperties & Record<string, string>
+      }
     >
       <div className="relative">
         <img

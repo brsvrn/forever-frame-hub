@@ -7,7 +7,10 @@ export function LivingBackground({ theme }: { theme: ThemeConfig }) {
   const isConservatory = theme.id === "midnight-conservatory";
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black">
+    <div
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black"
+      style={{ backgroundColor: theme.secondaryColor }}
+    >
       <motion.div
         className="absolute -inset-6 bg-cover bg-center bg-no-repeat"
         style={{
@@ -21,6 +24,12 @@ export function LivingBackground({ theme }: { theme: ThemeConfig }) {
 
       {/* Okunabilirlik katmanları sabittir; parlaklık/kararma animasyonu uygulanmaz. */}
       <div className={`absolute inset-0 ${theme.styles.overlay}`} />
+      {theme.secondaryColor ? (
+        <div
+          className="absolute inset-0 opacity-20 mix-blend-color"
+          style={{ backgroundColor: theme.secondaryColor }}
+        />
+      ) : null}
       <div
         className={isLightTheme ? "absolute inset-0 bg-black/12" : "absolute inset-0 bg-black/18"}
       />
