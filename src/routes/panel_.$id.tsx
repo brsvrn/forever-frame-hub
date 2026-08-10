@@ -20,6 +20,7 @@ import {
   UserRoundCog,
   AudioLines,
   LayoutGrid,
+  FileText,
 } from "lucide-react";
 
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
