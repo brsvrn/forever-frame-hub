@@ -8,13 +8,17 @@ export const Route = createFileRoute("/api/share-image/$slug")({
   server: {
     handlers: {
       GET: async ({ params, request }) => {
-        const [{ getServiceSupabase }, { resolveTheme }, shareImage, sharpModule] =
-          await Promise.all([
-            import("@/lib/supabase-admin"),
-            import("@/lib/theme-engine"),
-            import("@/lib/share-image"),
-            import("sharp"),
-          ]);
+        const [
+          { getServiceSupabase },
+          { extractThemeCustomization, resolveCustomizedTheme },
+          shareImage,
+          sharpModule,
+        ] = await Promise.all([
+          import("@/lib/supabase-admin"),
+          import("@/lib/theme-customization"),
+          import("@/lib/share-image"),
+          import("sharp"),
+        ]);
 
         let partnerOne = "Elif";
         let partnerTwo = "Kaan";
@@ -23,6 +27,7 @@ export const Route = createFileRoute("/api/share-image/$slug")({
         let coverPhoto: string | null = null;
         let shareCoverUrl: string | null = null;
         let useThemeImage: boolean | null = true;
+        let customSections: unknown = [];
 
         if (params.slug !== "demo") {
           try {
@@ -30,7 +35,7 @@ export const Route = createFileRoute("/api/share-image/$slug")({
             const { data: invitation } = await admin
               .from("invitations")
               .select(
-                "id,slug,is_published,is_paid,partner_one,partner_two,event_date,theme,cover_photo,updated_at",
+                "id,slug,is_published,is_paid,partner_one,partner_two,event_date,theme,cover_photo,custom_sections,updated_at",
               )
               .eq("slug", params.slug)
               .maybeSingle();
@@ -41,6 +46,7 @@ export const Route = createFileRoute("/api/share-image/$slug")({
               eventDate = invitation.event_date || null;
               themeId = invitation.theme || themeId;
               coverPhoto = invitation.cover_photo;
+              customSections = invitation.custom_sections;
 
               const { data: share } = await admin
                 .from("event_share_settings")
@@ -57,7 +63,9 @@ export const Route = createFileRoute("/api/share-image/$slug")({
               const parts = params.slug.split("-").filter(Boolean);
               if (parts.length >= 2) {
                 partnerOne = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-                partnerTwo = parts.slice(1).join(" ").charAt(0).toUpperCase() + parts.slice(1).join(" ").slice(1);
+                partnerTwo =
+                  parts.slice(1).join(" ").charAt(0).toUpperCase() +
+                  parts.slice(1).join(" ").slice(1);
               }
             }
           } catch {
@@ -65,7 +73,11 @@ export const Route = createFileRoute("/api/share-image/$slug")({
           }
         }
 
-        const theme = resolveTheme(themeId);
+        const theme = resolveCustomizedTheme(
+          themeId,
+          extractThemeCustomization(customSections),
+          coverPhoto || undefined,
+        );
         const candidates = [
           shareCoverUrl,
           coverPhoto,

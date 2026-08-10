@@ -2,7 +2,7 @@ import { ImagePlus, QrCode } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
 import { slugify, type InvitationDraft } from "@/lib/invitation";
-import { resolveTheme } from "@/lib/theme-engine";
+import { resolveCustomizedTheme } from "@/lib/theme-customization";
 
 export function getGalleryUrl(draft: InvitationDraft) {
   const slug =
@@ -23,7 +23,7 @@ export function QrGalleryPreview({
 }) {
   const url = getGalleryUrl(draft);
   const names = [draft.partnerOne, draft.partnerTwo].filter(Boolean).join(" & ");
-  const theme = resolveTheme(draft.theme);
+  const theme = resolveCustomizedTheme(draft.theme, draft.themeCustomization, draft.coverPhoto);
   const { accent, ink, paper, overlay, imagePosition = "center" } = theme.qr;
 
   return (

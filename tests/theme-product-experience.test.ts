@@ -37,4 +37,18 @@ describe("theme discovery and builder journey", () => {
     expect(builder).toContain("builderJourneyStages");
     expect(builder).toContain("currentJourneyStage");
   });
+
+  it("keeps the customization studio in the basic-info flow and live previews", () => {
+    const steps = read("src/components/builder/steps.tsx");
+    const studio = read("src/components/builder/ThemeCustomizationStudio.tsx");
+    const preview = read("src/components/builder/InvitationPreview.tsx");
+    const invitation = read("src/routes/davet.$slug.tsx");
+
+    expect(steps).toContain('mode === "basic"');
+    expect(steps).toContain("ThemeCustomizationStudio");
+    expect(studio).toContain("Otomatik kayıt açık");
+    expect(studio).toContain("getThemeStylePresets");
+    expect(preview).toContain("resolveCustomizedTheme");
+    expect(invitation).toContain("resolveCustomizedTheme");
+  });
 });

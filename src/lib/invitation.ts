@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { selectableThemes, type InviteThemeId, type ThemeConfig } from "./theme-engine";
+import { defaultThemeCustomization, type ThemeCustomization } from "./theme-customization";
 
 export type { InviteThemeId };
 export type InviteTheme = ThemeConfig;
@@ -8,6 +9,7 @@ export const inviteThemes: InviteTheme[] = selectableThemes;
 
 export type InvitationDraft = {
   theme: InviteThemeId;
+  themeCustomization: ThemeCustomization;
   category: "wedding" | "engagement" | "henna" | "birthday" | "other";
   partnerOne: string;
   partnerTwo: string;
@@ -36,6 +38,7 @@ export type InvitationDraft = {
 export const emptyDraft: InvitationDraft = {
   packageId: "",
   theme: "turquoise-cove",
+  themeCustomization: defaultThemeCustomization,
   category: "wedding",
   partnerOne: "",
   partnerTwo: "",
@@ -66,6 +69,7 @@ function getThreeMonthsAhead(): string {
 export const sampleDraft: InvitationDraft = {
   packageId: "",
   theme: "turquoise-cove",
+  themeCustomization: defaultThemeCustomization,
   category: "wedding",
   partnerOne: "Elif",
   partnerTwo: "Kaan",

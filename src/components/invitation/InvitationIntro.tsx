@@ -25,15 +25,21 @@ export function InvitationIntro({
   // Fast and smooth entrance so guests never wait 8-10 seconds
   useEffect(() => {
     // Show names quickly (300ms)
-    const namesTimer = window.setTimeout(() => {
-      setShowNames(true);
-      setIsReady(true);
-    }, reduceMotion ? 100 : 400);
+    const namesTimer = window.setTimeout(
+      () => {
+        setShowNames(true);
+        setIsReady(true);
+      },
+      reduceMotion ? 100 : 400,
+    );
 
     // Show the "Davetiyeyi aç" CTA button shortly after (700ms)
-    const actionTimer = window.setTimeout(() => {
-      setShowAction(true);
-    }, reduceMotion ? 300 : 700);
+    const actionTimer = window.setTimeout(
+      () => {
+        setShowAction(true);
+      },
+      reduceMotion ? 300 : 700,
+    );
 
     if (theme.coverVideoUrl) {
       const video = videoRef.current;
@@ -57,9 +63,7 @@ export function InvitationIntro({
 
     try {
       // Unlock Web Audio Context synchronously inside the user gesture handler
-      const ACtx =
-        window.AudioContext ||
-        (window as any).webkitAudioContext;
+      const ACtx = window.AudioContext || (window as any).webkitAudioContext;
       if (ACtx) {
         try {
           const ctx = new ACtx();
@@ -70,7 +74,9 @@ export function InvitationIntro({
           src.start(0);
           src.stop(0);
           if (ctx.state === "suspended") ctx.resume().catch(() => {});
-        } catch {}
+        } catch {
+          /* Audio unlock is optional on unsupported browsers. */
+        }
       }
 
       // Trigger global audio player if ready
@@ -95,6 +101,10 @@ export function InvitationIntro({
       exit={{ opacity: 0, scale: 1.03, filter: "blur(12px)" }}
       transition={{ duration: 0.8, ease: easeSilk }}
       className="fixed inset-0 z-50 overflow-hidden bg-black text-white"
+      style={{
+        backgroundColor: theme.secondaryColor,
+        fontFamily: theme.font ? `"${theme.font}", serif` : undefined,
+      }}
     >
       {/* Background Media */}
       <div className="absolute inset-0 select-none pointer-events-none">
@@ -167,6 +177,8 @@ export function InvitationIntro({
                 <h1
                   className={`max-w-[min(60rem,92vw)] break-words text-3xl font-light leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl ${theme.styles.typography.display}`}
                   style={{
+                    color: theme.primaryColor,
+                    fontFamily: theme.font ? `"${theme.font}", serif` : undefined,
                     textShadow:
                       theme.category === "luxury"
                         ? `0 0 30px ${theme.qr.accent}88, 0 3px 18px rgba(0,0,0,.55)`
@@ -176,7 +188,9 @@ export function InvitationIntro({
                   {partnerOne && partnerTwo ? (
                     <>
                       <span>{partnerOne}</span>
-                      <span className={`mx-2 sm:mx-4 inline-block ${theme.styles.typography.ampersand || "opacity-75 font-serif"}`}>
+                      <span
+                        className={`mx-2 sm:mx-4 inline-block ${theme.styles.typography.ampersand || "opacity-75 font-serif"}`}
+                      >
                         &
                       </span>
                       <span>{partnerTwo}</span>

@@ -34,6 +34,10 @@ export function HeroExperience({
 
         <h2
           className={`break-words text-[clamp(2.75rem,15vw,7rem)] leading-[0.94] ${theme.styles.typography.display}`}
+          style={{
+            color: theme.primaryColor,
+            fontFamily: theme.font ? `"${theme.font}", serif` : undefined,
+          }}
         >
           <span>{draft.partnerOne || "…"}</span>
           <span
@@ -68,14 +72,20 @@ export function HeroExperience({
 
         {/* Aile Bilgileri */}
         {draft.familyInfo && (
-          <div className={`mt-8 flex flex-col items-center justify-center gap-5 font-sans text-sm ${theme.styles.mutedTextColor || "text-white/70"} sm:mt-12 sm:flex-row sm:gap-8`}>
+          <div
+            className={`mt-8 flex flex-col items-center justify-center gap-5 font-sans text-sm ${theme.styles.mutedTextColor || "text-white/70"} sm:mt-12 sm:flex-row sm:gap-8`}
+          >
             {draft.familyInfo.bride &&
               (draft.familyInfo.bride.mother || draft.familyInfo.bride.father) && (
                 <div className="text-center">
-                  <p className={`font-sans tracking-widest uppercase text-[11px] sm:text-xs mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
+                  <p
+                    className={`font-sans tracking-widest uppercase text-[11px] sm:text-xs mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}
+                  >
                     {lang === "tr" ? "Kız Tarafı" : "Bride's Family"}
                   </p>
-                  <p className={`font-sans font-semibold text-sm sm:text-base ${theme.styles.textColor || "text-white"}`}>
+                  <p
+                    className={`font-sans font-semibold text-sm sm:text-base ${theme.styles.textColor || "text-white"}`}
+                  >
                     {[draft.familyInfo.bride.mother, draft.familyInfo.bride.father]
                       .filter(Boolean)
                       .join(" & ")}
@@ -85,10 +95,14 @@ export function HeroExperience({
             {draft.familyInfo.groom &&
               (draft.familyInfo.groom.mother || draft.familyInfo.groom.father) && (
                 <div className="text-center">
-                  <p className={`font-sans tracking-widest uppercase text-[11px] sm:text-xs mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}>
+                  <p
+                    className={`font-sans tracking-widest uppercase text-[11px] sm:text-xs mb-1 font-bold ${theme.styles.typography.subheading || "text-white/60"}`}
+                  >
                     {lang === "tr" ? "Erkek Tarafı" : "Groom's Family"}
                   </p>
-                  <p className={`font-sans font-semibold text-sm sm:text-base ${theme.styles.textColor || "text-white"}`}>
+                  <p
+                    className={`font-sans font-semibold text-sm sm:text-base ${theme.styles.textColor || "text-white"}`}
+                  >
                     {[draft.familyInfo.groom.mother, draft.familyInfo.groom.father]
                       .filter(Boolean)
                       .join(" & ")}
@@ -106,10 +120,14 @@ export function HeroExperience({
             transition={{ duration: 0.8, delay: 0.6 }}
             className={`mx-auto mt-8 max-w-xl rounded-2xl p-6 text-center shadow-xl sm:mt-10 sm:p-8 ${theme.styles.cards.wrapper}`}
           >
-            <p className={`mb-2 font-sans text-[11px] font-bold uppercase tracking-[0.24em] ${theme.styles.typography.subheading || "text-white/60"}`}>
+            <p
+              className={`mb-2 font-sans text-[11px] font-bold uppercase tracking-[0.24em] ${theme.styles.typography.subheading || "text-white/60"}`}
+            >
               {lang === "tr" ? "Davetiye Notumuz" : "Our Message"}
             </p>
-            <p className={`font-sans italic text-base leading-relaxed sm:text-lg ${theme.styles.textColor || "text-white"}`}>
+            <p
+              className={`font-sans italic text-base leading-relaxed sm:text-lg ${theme.styles.textColor || "text-white"}`}
+            >
               “{draft.message.trim()}”
             </p>
           </motion.div>

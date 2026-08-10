@@ -35,12 +35,8 @@ import {
 } from "@/components/invitation/MidnightConservatory";
 import { EvergreenVowsHero, EvergreenVowsOpening } from "@/components/invitation/EvergreenVows";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
-import {
-  resolveTheme,
-  selectableThemes,
-  type InviteThemeId,
-  type ThemeCategory,
-} from "@/lib/theme-engine";
+import { selectableThemes, type InviteThemeId, type ThemeCategory } from "@/lib/theme-engine";
+import { resolveCustomizedTheme } from "@/lib/theme-customization";
 
 export const Route = createFileRoute("/davet/$slug")({
   validateSearch: z.object({ theme: z.string().optional() }),
@@ -163,7 +159,11 @@ function PremiumInvitePage() {
     ? (search.theme as InviteThemeId)
     : draft.theme;
   const [previewThemeId, setPreviewThemeId] = useState<InviteThemeId>(initialDemoTheme);
-  const theme = resolveTheme(isDemo ? previewThemeId : draft.theme);
+  const theme = resolveCustomizedTheme(
+    isDemo ? previewThemeId : draft.theme,
+    isDemo ? undefined : draft.themeCustomization,
+    isDemo ? undefined : draft.coverPhoto,
+  );
   const pkg = (invitation as InvitationRow & { package?: { features?: Record<string, boolean> } })
     .package;
   const features = pkg?.features || {
@@ -194,7 +194,13 @@ function PremiumInvitePage() {
   }, []);
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30">
+    <div
+      className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30"
+      style={{
+        backgroundColor: theme.secondaryColor,
+        fontFamily: theme.font ? `"${theme.font}", sans-serif` : undefined,
+      }}
+    >
       {isDemo ? (
         <DemoThemeSwitcher
           value={previewThemeId}
