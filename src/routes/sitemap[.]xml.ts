@@ -16,6 +16,12 @@ export const Route = createFileRoute("/sitemap.xml")({
         const { selectableThemes } = await import("@/lib/theme-engine");
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
+          { path: "/nasil-calisir", changefreq: "monthly", priority: "0.9" },
+          { path: "/ozellikler", changefreq: "monthly", priority: "0.9" },
+          { path: "/ozellikler/dijital-davetiye", changefreq: "monthly", priority: "0.9" },
+          { path: "/ozellikler/lcv-davetli-yonetimi", changefreq: "monthly", priority: "0.9" },
+          { path: "/ozellikler/qr-ani-albumu", changefreq: "monthly", priority: "0.9" },
+          { path: "/fiyatlar", changefreq: "weekly", priority: "0.9" },
           { path: "/temalar", changefreq: "weekly", priority: "0.9" },
           { path: "/olustur", changefreq: "weekly", priority: "0.9" },
           { path: "/iletisim", changefreq: "monthly", priority: "0.5" },

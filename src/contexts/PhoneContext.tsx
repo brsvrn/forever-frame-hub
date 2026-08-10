@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type ActiveScreen = "envelope" | "invite" | "rsvp" | "gallery" | "map";
+type ActiveScreen = "envelope" | "invite" | "rsvp" | "gallery" | "album" | "map";
 
 export type ActiveSection = "hero" | "demo" | "gallery" | "qr" | "dashboard";
 

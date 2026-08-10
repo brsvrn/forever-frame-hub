@@ -1,18 +1,27 @@
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Menu, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { cn } from "@/lib/utils";
+import { trackMarketingCta } from "@/lib/analytics/analytics";
+
+const navigation = [
+  { to: "/nasil-calisir", label: "Nasıl Çalışır" },
+  { to: "/ozellikler", label: "Özellikler" },
+  { to: "/temalar", label: "Temalar" },
+  { to: "/fiyatlar", label: "Fiyatlar" },
+] as const;
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     try {
       const auth = supabase.auth;
-
       auth
         .getSession()
         .then(({ data }) => setIsLoggedIn(!!data.session))
@@ -20,23 +29,17 @@ export function Navbar() {
 
       const {
         data: { subscription },
-      } = auth.onAuthStateChange((_event, session) => {
-        setIsLoggedIn(!!session);
-      });
+      } = auth.onAuthStateChange((_event, session) => setIsLoggedIn(!!session));
 
       return () => subscription.unsubscribe();
     } catch (error) {
-      // The public landing page should remain usable even when local auth
-      // configuration is missing or temporarily unavailable.
       console.warn("Authentication is unavailable on the landing page:", error);
       return undefined;
     }
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -44,44 +47,79 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-all duration-300 border-b border-transparent",
-        scrolled ? "bg-white/80  backdrop-blur-md border-border shadow-sm" : "bg-transparent",
+        "fixed inset-x-0 top-0 z-50 border-b border-transparent transition-all duration-300",
+        scrolled || mobileOpen
+          ? "border-border bg-white/90 shadow-sm backdrop-blur-md"
+          : "bg-transparent",
       )}
     >
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <BrandLogo />
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-          <a href="#demo" className="hover:text-foreground transition-colors">
-            Deneyim
-          </a>
-          <a href="#features" className="hover:text-foreground transition-colors">
-            Özellikler
-          </a>
-          <a href="#features" className="hover:text-foreground transition-colors">
-            QR Sistem
-          </a>
-          <a href="#pricing" className="hover:text-foreground transition-colors">
-            Fiyatlar
-          </a>
+        <nav
+          className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex"
+          aria-label="Ana menü"
+        >
+          {navigation.map((item) => (
+            <Link key={item.to} to={item.to} className="transition-colors hover:text-foreground">
+              {item.label}
+            </Link>
+          ))}
         </nav>
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Link
             to={isLoggedIn ? "/panel" : "/giris"}
-            className="text-sm font-medium hover:underline text-muted-foreground hover:text-foreground transition-colors"
+            className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline"
           >
             {isLoggedIn ? "Panel" : "Giriş"}
           </Link>
           <Button
             asChild
-            className="rounded-full px-4 sm:px-6 shadow-md hover:shadow-lg transition-all"
+            className="rounded-full px-4 shadow-md transition-all hover:shadow-lg sm:px-6"
           >
-            <Link to="/olustur">
-              <span className="sm:hidden">Başla</span>
-              <span className="hidden sm:inline">Davetiyeni Oluştur</span>
+            <Link to="/olustur" onClick={() => trackMarketingCta("navbar", "free_preview")}>
+              <span className="sm:hidden">Önizle</span>
+              <span className="hidden sm:inline">Ücretsiz Önizle</span>
             </Link>
           </Button>
+          <button
+            type="button"
+            className="inline-flex size-10 items-center justify-center rounded-full border bg-background text-foreground md:hidden"
+            aria-label={mobileOpen ? "Menüyü kapat" : "Menüyü aç"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setMobileOpen((open) => !open)}
+          >
+            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
         </div>
       </div>
+      {mobileOpen ? (
+        <nav
+          id="mobile-navigation"
+          className="border-t bg-background px-4 py-4 md:hidden"
+          aria-label="Mobil menü"
+        >
+          <div className="container mx-auto grid gap-1">
+            {navigation.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setMobileOpen(false)}
+                className="rounded-xl px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              to={isLoggedIn ? "/panel" : "/giris"}
+              onClick={() => setMobileOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted sm:hidden"
+            >
+              {isLoggedIn ? "Panel" : "Giriş"}
+            </Link>
+          </div>
+        </nav>
+      ) : null}
     </header>
   );
 }

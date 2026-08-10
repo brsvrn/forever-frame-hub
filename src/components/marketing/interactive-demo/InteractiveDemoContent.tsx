@@ -1,161 +1,144 @@
 import { FadeIn, SlideUp } from "@/components/motion";
 import { usePhone } from "@/contexts/PhoneContext";
-import { useInView, motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { trackProductMoment } from "@/lib/analytics/analytics";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { PhoneMockup } from "./PhoneMockup";
 
+type ProductMoment = "before" | "wedding_day" | "after";
+
+const moments = [
+  {
+    id: "before" as const,
+    label: "Düğünden önce",
+    title: "Davet et ve LCV topla",
+    description:
+      "Temanızı seçin, bağlantınızı paylaşın; misafirler programı ve konumu görüp katılım yanıtını versin.",
+    screen: "invite" as const,
+  },
+  {
+    id: "wedding_day" as const,
+    label: "Düğün günü",
+    title: "QR ile anıları biriktir",
+    description:
+      "Misafirler masa kartındaki QR kodu okutup fotoğraf ve videolarını uygulama indirmeden yüklesin.",
+    screen: "gallery" as const,
+  },
+  {
+    id: "after" as const,
+    label: "Düğünden sonra",
+    title: "Albümü yönet ve indir",
+    description:
+      "Toplanan içerikleri tek panelde görüntüleyin, görünürlüğünü yönetin ve paket kapsamına göre indirin.",
+    screen: "album" as const,
+  },
+];
+
 export function InteractiveDemoContent() {
-  const { activeScreen, setActiveScreen, activeSection, setActiveSection } = usePhone();
+  const { setActiveScreen, setActiveSection } = usePhone();
+  const [activeMoment, setActiveMoment] = useState<ProductMoment>("before");
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
-  // Parallax effect
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
   useEffect(() => {
     if (isInView) setActiveSection("demo");
   }, [isInView, setActiveSection]);
 
+  const chooseMoment = (moment: (typeof moments)[number]) => {
+    setActiveMoment(moment.id);
+    setActiveScreen(moment.screen);
+    trackProductMoment(moment.id);
+  };
+
   return (
     <section
       id="demo"
       ref={ref}
-      className="py-24 lg:py-32 relative overflow-hidden min-h-[100dvh] flex flex-col justify-center"
+      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden py-24 lg:py-32"
     >
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24">
+      <div className="container relative z-10 mx-auto px-4">
+        <div className="mx-auto mb-16 max-w-3xl text-center lg:mb-24">
           <SlideUp>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-              Misafirlerinizin Gözünden
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+              Aynı link, üç an
+            </p>
+            <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
+              Düğünden önce başlar,
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
-                Deneyimi Yaşayın
+              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                son fotoğrafa kadar devam eder.
               </span>
             </h2>
-            <p className="text-lg text-muted-foreground font-light max-w-2xl mx-auto leading-relaxed">
-              MemoryWedding sadece bir link değil, uçtan uca düşünülmüş bir deneyimdir. Şarkı çalın,
-              fotoğraf yükleyin, LCV gönderin.
+            <p className="mx-auto mt-6 max-w-2xl text-lg font-light leading-relaxed text-foreground/75">
+              Üç ayrı araç yerine davetiye, LCV ve QR anı albümünü tek bir etkinlik deneyiminde
+              kullanın.
             </p>
           </SlideUp>
         </div>
 
-        <div className="relative max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24">
-          {/* Left Context Controls (Desktop) */}
-          <div className="hidden lg:flex flex-col gap-6 w-80 shrink-0 relative z-20">
-            <FadeIn
-              delay={0.1}
-              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "envelope" ? "bg-white/80  backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40  backdrop-blur-sm border-transparent"}`}
-              onClick={() => setActiveScreen("envelope")}
-            >
-              <h3 className="font-semibold text-foreground flex items-center gap-3">
-                <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${activeScreen === "envelope" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"}`}
+        <div className="relative mx-auto flex max-w-6xl flex-col items-center justify-between gap-12 lg:flex-row lg:gap-24">
+          <div className="hidden w-[28rem] shrink-0 flex-col gap-5 lg:flex">
+            {moments.map((moment, index) => {
+              const selected = activeMoment === moment.id;
+              return (
+                <FadeIn
+                  key={moment.id}
+                  delay={0.1 * (index + 1)}
+                  className={`cursor-pointer rounded-2xl border p-6 transition-all ${
+                    selected
+                      ? "scale-[1.02] border-primary/30 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-md"
+                      : "border-transparent hover:bg-white/45"
+                  }`}
+                  onClick={() => chooseMoment(moment)}
                 >
-                  1
-                </span>
-                Dijital Zarf
-              </h3>
-              <p className="text-sm text-foreground/70 mt-3 leading-relaxed pl-11">
-                Misafiriniz linke tıkladığında zarif bir açılış animasyonuyla karşılaşır.
-              </p>
-            </FadeIn>
-
-            <FadeIn
-              delay={0.2}
-              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "invite" ? "bg-white/80  backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40  backdrop-blur-sm border-transparent"}`}
-              onClick={() => setActiveScreen("invite")}
-            >
-              <h3 className="font-semibold text-foreground flex items-center gap-3">
-                <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${activeScreen === "invite" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"}`}
-                >
-                  2
-                </span>
-                Davetiye & Müzik
-              </h3>
-              <p className="text-sm text-foreground/70 mt-3 leading-relaxed pl-11">
-                Arka planda çalan müziğiniz eşliğinde düğün mekanını ve saatini inceler.
-              </p>
-            </FadeIn>
-
-            <FadeIn
-              delay={0.3}
-              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "rsvp" ? "bg-white/80  backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40  backdrop-blur-sm border-transparent"}`}
-              onClick={() => setActiveScreen("rsvp")}
-            >
-              <h3 className="font-semibold text-foreground flex items-center gap-3">
-                <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${activeScreen === "rsvp" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"}`}
-                >
-                  3
-                </span>
-                Hızlı LCV (RSVP)
-              </h3>
-              <p className="text-sm text-foreground/70 mt-3 leading-relaxed pl-11">
-                Tek tıklamayla katılım durumunu size bildirir, admin panelinize anında düşer.
-              </p>
-            </FadeIn>
-
-            <FadeIn
-              delay={0.4}
-              className={`p-6 rounded-2xl cursor-pointer transition-all border group ${activeScreen === "gallery" ? "bg-white/80  backdrop-blur-md border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-white/40  backdrop-blur-sm border-transparent"}`}
-              onClick={() => setActiveScreen("gallery")}
-            >
-              <h3 className="font-semibold text-foreground flex items-center gap-3">
-                <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${activeScreen === "gallery" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"}`}
-                >
-                  4
-                </span>
-                Canlı Galeri
-              </h3>
-              <p className="text-sm text-foreground/70 mt-3 leading-relaxed pl-11">
-                Düğün günü masadaki QR'ı okutarak çektiği fotoğrafları anında yükler.
-              </p>
-            </FadeIn>
+                  <div className="flex items-start gap-4">
+                    <span
+                      className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                        selected
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                        {moment.label}
+                      </p>
+                      <h3 className="mt-2 text-xl font-semibold">{moment.title}</h3>
+                      <p className="mt-3 text-sm leading-6 text-foreground/70">
+                        {moment.description}
+                      </p>
+                    </div>
+                  </div>
+                </FadeIn>
+              );
+            })}
           </div>
 
-          {/* Phone Mockup space for desktop & mobile */}
-          <div className="flex items-center justify-center w-full lg:w-[350px] shrink-0 relative mt-8 lg:mt-0">
-            <motion.div
-              style={{ y }}
-              className="w-[300px] h-[600px] z-30"
-            >
+          <div className="relative mt-8 flex w-full shrink-0 items-center justify-center lg:mt-0 lg:w-[350px]">
+            <motion.div style={{ y }} className="z-30 h-[600px] w-[300px]">
               <PhoneMockup />
             </motion.div>
           </div>
 
-          {/* Mobile Context Controls */}
-          <div className="flex lg:hidden flex-wrap justify-center gap-2 mt-8 px-4 relative z-20 pb-16">
-            <button
-              onClick={() => setActiveScreen("envelope")}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold border transition-all ${activeScreen === "envelope" ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105" : "bg-background border-border text-muted-foreground hover:bg-muted"}`}
-            >
-              Zarf
-            </button>
-            <button
-              onClick={() => setActiveScreen("invite")}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold border transition-all ${activeScreen === "invite" ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105" : "bg-background border-border text-muted-foreground hover:bg-muted"}`}
-            >
-              Davetiye
-            </button>
-            <button
-              onClick={() => setActiveScreen("rsvp")}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold border transition-all ${activeScreen === "rsvp" ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105" : "bg-background border-border text-muted-foreground hover:bg-muted"}`}
-            >
-              LCV
-            </button>
-            <button
-              onClick={() => setActiveScreen("gallery")}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold border transition-all ${activeScreen === "gallery" ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105" : "bg-background border-border text-muted-foreground hover:bg-muted"}`}
-            >
-              Galeri
-            </button>
+          <div className="relative z-20 flex flex-wrap justify-center gap-2 px-4 pb-16 lg:hidden">
+            {moments.map((moment) => (
+              <button
+                key={moment.id}
+                type="button"
+                onClick={() => chooseMoment(moment)}
+                className={`rounded-full border px-5 py-2.5 text-sm font-semibold transition-all ${
+                  activeMoment === moment.id
+                    ? "scale-105 border-primary bg-primary text-primary-foreground shadow-lg"
+                    : "border-border bg-background text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {moment.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>

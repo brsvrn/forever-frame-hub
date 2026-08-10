@@ -24,7 +24,7 @@ export function PricingCards() {
           <FadeIn delay={0.1} className="relative">
             <div className="bg-white border border-border rounded-[2rem] p-8 shadow-sm hover:shadow-lg transition-shadow h-full flex flex-col">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-foreground mb-2">Dijital Davetiye</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Davetiye</h3>
                 <p className="text-foreground/80 text-sm font-light">
                   Sadece dijital davetiye ve LCV takibi isteyenler için.
                 </p>
@@ -36,7 +36,7 @@ export function PricingCards() {
               <Link
                 to="/olustur"
                 search={{ pkg: "digital_only" }}
-                onClick={() => trackSelectItem("digital_only", "Dijital Davetiye", 500)}
+                onClick={() => trackSelectItem("digital_only", "Davetiye", 500)}
                 className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8"
               >
                 Ücretsiz Önizle
@@ -55,7 +55,7 @@ export function PricingCards() {
           <FadeIn delay={0.2} className="relative">
             <div className="bg-white border border-border rounded-[2rem] p-8 shadow-sm hover:shadow-lg transition-shadow h-full flex flex-col">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-foreground mb-2">QR Paket</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Anı</h3>
                 <p className="text-foreground/80 text-sm font-light">
                   Sadece masalara koymak için QR kod ve fotoğraf/video galerisi isteyenler için.
                 </p>
@@ -67,7 +67,7 @@ export function PricingCards() {
               <Link
                 to="/olustur"
                 search={{ pkg: "qr_only" }}
-                onClick={() => trackSelectItem("qr_only", "QR Paket", 750)}
+                onClick={() => trackSelectItem("qr_only", "Anı", 750)}
                 className="block text-center w-full py-3.5 rounded-xl border-2 border-border text-foreground font-semibold hover:bg-muted transition-colors mb-8"
               >
                 Ücretsiz Önizle
@@ -94,7 +94,7 @@ export function PricingCards() {
                 </div>
               </div>
               <div className="mb-6">
-                <h3 className="text-2xl font-bold mb-2">2'si Bir Arada</h3>
+                <h3 className="text-2xl font-bold mb-2">Düğün Deneyimi</h3>
                 <p className="text-neutral-300 text-sm font-light">
                   Dijital davetiye, LCV ve Canlı QR Galeri deneyiminin tamamı.
                 </p>
@@ -106,7 +106,7 @@ export function PricingCards() {
               <Link
                 to="/olustur"
                 search={{ pkg: "full" }}
-                onClick={() => trackSelectItem("full", "2'si Bir Arada", 1000)}
+                onClick={() => trackSelectItem("full", "Düğün Deneyimi", 1000)}
                 className="block text-center w-full py-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors mb-8 shadow-[0_0_20px_rgba(var(--primary),0.3)]"
               >
                 Tam Paketi Önizle
