@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { InvitationRow, RsvpRow } from "@/lib/invitations.api";
 import { getRsvpResults } from "@/lib/rsvp.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { saveSeatingConfig } from "@/lib/seating.functions";
 
 import {
   DndContext,
@@ -85,22 +86,16 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Keep existing admin_notes data if any, just inject seating
-      const existingData = invitation.admin_notes ? JSON.parse(invitation.admin_notes) : {};
-      const newConfig = {
-        ...existingData,
-        seating: {
-          tables,
-          assignments
+      await saveSeatingConfig({
+        data: {
+          invitationId: invitation.id,
+          config: {
+            tables,
+            assignments
+          }
         }
-      };
-      
-      const { error } = await supabase
-        .from("invitations")
-        .update({ admin_notes: JSON.stringify(newConfig) })
-        .eq("id", invitation.id);
+      });
 
-      if (error) throw error;
       toast.success("Oturma planı başarıyla kaydedildi.");
     } catch (e) {
       console.error(e);
