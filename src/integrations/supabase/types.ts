@@ -334,6 +334,96 @@ export type Database = {
         };
         Relationships: [];
       };
+      social_content_queue: {
+        Row: {
+          id: string;
+          content_key: string;
+          platform: "instagram";
+          account_handle: string;
+          content_type: "image" | "carousel" | "reel";
+          status:
+            | "draft"
+            | "pending_approval"
+            | "approved"
+            | "publishing"
+            | "published"
+            | "rejected"
+            | "failed";
+          title: string;
+          caption: string;
+          media_urls: string[];
+          thumbnail_url: string | null;
+          publish_at: string;
+          notes: string | null;
+          approved_by: string | null;
+          approved_at: string | null;
+          published_at: string | null;
+          platform_media_id: string | null;
+          last_error: string | null;
+          attempt_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          content_key: string;
+          platform?: "instagram";
+          account_handle?: string;
+          content_type: "image" | "carousel" | "reel";
+          status?:
+            | "draft"
+            | "pending_approval"
+            | "approved"
+            | "publishing"
+            | "published"
+            | "rejected"
+            | "failed";
+          title: string;
+          caption: string;
+          media_urls?: string[];
+          thumbnail_url?: string | null;
+          publish_at: string;
+          notes?: string | null;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          published_at?: string | null;
+          platform_media_id?: string | null;
+          last_error?: string | null;
+          attempt_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          content_key?: string;
+          platform?: "instagram";
+          account_handle?: string;
+          content_type?: "image" | "carousel" | "reel";
+          status?:
+            | "draft"
+            | "pending_approval"
+            | "approved"
+            | "publishing"
+            | "published"
+            | "rejected"
+            | "failed";
+          title?: string;
+          caption?: string;
+          media_urls?: string[];
+          thumbnail_url?: string | null;
+          publish_at?: string;
+          notes?: string | null;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          published_at?: string | null;
+          platform_media_id?: string | null;
+          last_error?: string | null;
+          attempt_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       system_settings: {
         Row: {
           allow_admin_access: boolean;

@@ -31,8 +31,10 @@ import { Route as SozlesmelerTeslimatRouteImport } from './routes/sozlesmeler.te
 import { Route as TemalarIndexRouteImport } from './routes/temalar.index'
 import { Route as TemalarSlugRouteImport } from './routes/temalar.$slug'
 import { Route as ApiAdminMaintenanceBypassRouteImport } from './routes/api.admin.maintenance-bypass'
+import { Route as ApiAdminSocialContentRouteImport } from './routes/api.admin.social-content'
 import { Route as ApiAdminSystemSettingsRouteImport } from './routes/api.admin.system-settings'
 import { Route as ApiCalendarScheduleIdRouteImport } from './routes/api.calendar.$scheduleId'
+import { Route as ApiCronInstagramPublishRouteImport } from './routes/api.cron.instagram-publish'
 import { Route as ApiShareImageSlugRouteImport } from './routes/api.share-image.$slug'
 import { Route as DSlugTokenRouteImport } from './routes/d.$slug.$token'
 
@@ -148,6 +150,11 @@ const ApiAdminMaintenanceBypassRoute =
     path: '/api/admin/maintenance-bypass',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminSocialContentRoute = ApiAdminSocialContentRouteImport.update({
+  id: '/api/admin/social-content',
+  path: '/api/admin/social-content',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminSystemSettingsRoute = ApiAdminSystemSettingsRouteImport.update({
   id: '/api/admin/system-settings',
   path: '/api/admin/system-settings',
@@ -156,6 +163,11 @@ const ApiAdminSystemSettingsRoute = ApiAdminSystemSettingsRouteImport.update({
 const ApiCalendarScheduleIdRoute = ApiCalendarScheduleIdRouteImport.update({
   id: '/api/calendar/$scheduleId',
   path: '/api/calendar/$scheduleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronInstagramPublishRoute = ApiCronInstagramPublishRouteImport.update({
+  id: '/api/cron/instagram-publish',
+  path: '/api/cron/instagram-publish',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiShareImageSlugRoute = ApiShareImageSlugRouteImport.update({
@@ -192,8 +204,10 @@ export interface FileRoutesByFullPath {
   '/odeme/': typeof OdemeIndexRoute
   '/temalar/': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/social-content': typeof ApiAdminSocialContentRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/api/cron/instagram-publish': typeof ApiCronInstagramPublishRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
 }
@@ -220,8 +234,10 @@ export interface FileRoutesByTo {
   '/odeme': typeof OdemeIndexRoute
   '/temalar': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/social-content': typeof ApiAdminSocialContentRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/api/cron/instagram-publish': typeof ApiCronInstagramPublishRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
 }
@@ -249,8 +265,10 @@ export interface FileRoutesById {
   '/odeme/': typeof OdemeIndexRoute
   '/temalar/': typeof TemalarIndexRoute
   '/api/admin/maintenance-bypass': typeof ApiAdminMaintenanceBypassRoute
+  '/api/admin/social-content': typeof ApiAdminSocialContentRoute
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
+  '/api/cron/instagram-publish': typeof ApiCronInstagramPublishRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
 }
@@ -279,8 +297,10 @@ export interface FileRouteTypes {
     | '/odeme/'
     | '/temalar/'
     | '/api/admin/maintenance-bypass'
+    | '/api/admin/social-content'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/api/cron/instagram-publish'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
   fileRoutesByTo: FileRoutesByTo
@@ -307,8 +327,10 @@ export interface FileRouteTypes {
     | '/odeme'
     | '/temalar'
     | '/api/admin/maintenance-bypass'
+    | '/api/admin/social-content'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/api/cron/instagram-publish'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
   id:
@@ -335,8 +357,10 @@ export interface FileRouteTypes {
     | '/odeme/'
     | '/temalar/'
     | '/api/admin/maintenance-bypass'
+    | '/api/admin/social-content'
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
+    | '/api/cron/instagram-publish'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
   fileRoutesById: FileRoutesById
@@ -364,8 +388,10 @@ export interface RootRouteChildren {
   OdemeIndexRoute: typeof OdemeIndexRoute
   TemalarIndexRoute: typeof TemalarIndexRoute
   ApiAdminMaintenanceBypassRoute: typeof ApiAdminMaintenanceBypassRoute
+  ApiAdminSocialContentRoute: typeof ApiAdminSocialContentRoute
   ApiAdminSystemSettingsRoute: typeof ApiAdminSystemSettingsRoute
   ApiCalendarScheduleIdRoute: typeof ApiCalendarScheduleIdRoute
+  ApiCronInstagramPublishRoute: typeof ApiCronInstagramPublishRoute
   ApiShareImageSlugRoute: typeof ApiShareImageSlugRoute
   DSlugTokenRoute: typeof DSlugTokenRoute
 }
@@ -526,6 +552,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminMaintenanceBypassRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/social-content': {
+      id: '/api/admin/social-content'
+      path: '/api/admin/social-content'
+      fullPath: '/api/admin/social-content'
+      preLoaderRoute: typeof ApiAdminSocialContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/system-settings': {
       id: '/api/admin/system-settings'
       path: '/api/admin/system-settings'
@@ -538,6 +571,13 @@ declare module '@tanstack/react-router' {
       path: '/api/calendar/$scheduleId'
       fullPath: '/api/calendar/$scheduleId'
       preLoaderRoute: typeof ApiCalendarScheduleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/instagram-publish': {
+      id: '/api/cron/instagram-publish'
+      path: '/api/cron/instagram-publish'
+      fullPath: '/api/cron/instagram-publish'
+      preLoaderRoute: typeof ApiCronInstagramPublishRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/share-image/$slug': {
@@ -580,8 +620,10 @@ const rootRouteChildren: RootRouteChildren = {
   OdemeIndexRoute: OdemeIndexRoute,
   TemalarIndexRoute: TemalarIndexRoute,
   ApiAdminMaintenanceBypassRoute: ApiAdminMaintenanceBypassRoute,
+  ApiAdminSocialContentRoute: ApiAdminSocialContentRoute,
   ApiAdminSystemSettingsRoute: ApiAdminSystemSettingsRoute,
   ApiCalendarScheduleIdRoute: ApiCalendarScheduleIdRoute,
+  ApiCronInstagramPublishRoute: ApiCronInstagramPublishRoute,
   ApiShareImageSlugRoute: ApiShareImageSlugRoute,
   DSlugTokenRoute: DSlugTokenRoute,
 }

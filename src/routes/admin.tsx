@@ -20,6 +20,7 @@ import {
   X,
   ShieldCheck,
   ExternalLink,
+  Instagram,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { clearAdminMaintenanceBypass, enableAdminMaintenanceBypass } from "@/lib/maintenance-admin";
@@ -35,6 +36,7 @@ import { AdminRetentionManager } from "@/components/admin/AdminRetentionManager"
 import { ThemeManager } from "@/components/admin/ThemeManager";
 import { PackageManager } from "@/components/admin/PackageManager";
 import { SystemSettings } from "@/components/admin/SystemSettings";
+import { AdminSocialContentManager } from "@/components/admin/AdminSocialContentManager";
 import { getAuditLogs } from "@/lib/admin.api";
 import { AdminUserGuideModal } from "@/components/admin/AdminUserGuideModal";
 import { BookOpen } from "lucide-react";
@@ -63,11 +65,9 @@ function AdminGate() {
     }
 
     let cancelled = false;
-    void supabase
-      .rpc("has_role", { _user_id: user.id, _role: "admin" })
-      .then(({ data, error }) => {
-        if (!cancelled) setIsAdmin(!error && data === true);
-      });
+    void supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data, error }) => {
+      if (!cancelled) setIsAdmin(!error && data === true);
+    });
 
     return () => {
       cancelled = true;
@@ -120,6 +120,7 @@ export type AdminTabType =
   | "packages"
   | "themes"
   | "support"
+  | "social"
   | "retention"
   | "audit"
   | "settings";
@@ -147,6 +148,7 @@ function AdminDashboard({ email }: { email: string }) {
       items: [
         { id: "packages", label: "Paketler & Fiyat", icon: Package },
         { id: "themes", label: "Temalar", icon: Palette },
+        { id: "social", label: "Instagram İçerikleri", icon: Instagram },
         { id: "support", label: "Destek Talepleri", icon: MessageSquare },
       ],
     },
@@ -217,9 +219,7 @@ function AdminDashboard({ email }: { email: string }) {
                 </span>
               }
             />
-            <p className="text-[11px] text-muted-foreground mt-1 truncate max-w-[180px]">
-              {email}
-            </p>
+            <p className="text-[11px] text-muted-foreground mt-1 truncate max-w-[180px]">{email}</p>
           </div>
 
           <button
@@ -262,7 +262,9 @@ function AdminDashboard({ email }: { email: string }) {
                           : "text-muted-foreground hover:bg-card hover:text-foreground"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${isActive ? "text-zinc-950" : "text-muted-foreground"}`} />
+                      <Icon
+                        className={`w-4 h-4 ${isActive ? "text-zinc-950" : "text-muted-foreground"}`}
+                      />
                       <span>{tab.label}</span>
                     </button>
                   );
@@ -307,6 +309,7 @@ function AdminDashboard({ email }: { email: string }) {
         {activeTab === "users" && <AdminUsersManager adminEmail={email} />}
         {activeTab === "packages" && <PackageManager adminEmail={email} />}
         {activeTab === "themes" && <ThemeManager adminEmail={email} />}
+        {activeTab === "social" && <AdminSocialContentManager />}
         {activeTab === "support" && <AdminSupportTicketsManager adminEmail={email} />}
         {activeTab === "retention" && <AdminRetentionManager adminEmail={email} />}
         {activeTab === "audit" && <AuditLogs />}
@@ -330,7 +333,9 @@ function AuditLogs() {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div>
-        <h2 className="text-2xl font-display font-bold text-foreground">İşlem Kayıtları (Audit Trail)</h2>
+        <h2 className="text-2xl font-display font-bold text-foreground">
+          İşlem Kayıtları (Audit Trail)
+        </h2>
         <p className="text-sm text-muted-foreground">
           Yöneticilerin sistem genelinde gerçekleştirdiği tüm kritik operasyonların denetim kaydı.
         </p>
