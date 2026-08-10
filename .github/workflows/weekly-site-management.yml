@@ -1,0 +1,112 @@
+name: Weekly site management
+
+on:
+  schedule:
+    # 09:00 Europe/Istanbul (UTC+3, year-round)
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: weekly-site-management
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Test, build, and production audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run TypeScript and lint checks
+        run: npm run typecheck && npm run lint
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Audit production routes and SEO files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          base_url="https://www.memory-wedding.com"
+          for path in / /davet/demo /olustur /temalar /iletisim /robots.txt /sitemap.xml; do
+            curl --fail --silent --show-error --location --retry 3 \
+              --output /dev/null "${base_url}${path}"
+          done
+
+          home_html="$(curl --fail --silent --show-error --location --retry 3 "${base_url}/")"
+          grep --fixed-strings '<link rel="canonical" href="https://www.memory-wedding.com/"' <<<"${home_html}"
+          grep --fixed-strings 'Ücretsiz önizleme' <<<"${home_html}"
+
+          robots_txt="$(curl --fail --silent --show-error --location --retry 3 "${base_url}/robots.txt")"
+          grep --fixed-strings 'Sitemap: https://www.memory-wedding.com/sitemap.xml' <<<"${robots_txt}"
+
+          sitemap_xml="$(curl --fail --silent --show-error --location --retry 3 "${base_url}/sitemap.xml")"
+          grep --fixed-strings '<loc>https://www.memory-wedding.com/</loc>' <<<"${sitemap_xml}"
+          if grep --quiet --fixed-strings 'forever-frame-hub.vercel.app' <<<"${sitemap_xml}"; then
+            echo 'Sitemap contains the Vercel fallback domain.' >&2
+            exit 1
+          fi
+          if grep --quiet --fixed-strings 'memory-wedding.com//' <<<"${sitemap_xml}"; then
+            echo 'Sitemap contains a double slash after the domain.' >&2
+            exit 1
+          fi
+
+      - name: Open or update a maintenance issue on failure
+        if: ${{ failure() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "[Otomasyon] Haftalık site denetimi başarısız";
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              "MemoryWedding haftalık site yönetimi denetimi başarısız oldu.",
+              "",
+              `Çalışma kaydı: ${runUrl}`,
+              `Commit: ${context.sha}`,
+              "",
+              "Test, build ve canlı rota/SEO kontrollerini inceleyin. Ödeme, kullanıcı verisi, kimlik doğrulama, fiyatlandırma ve hukuki metinlerde otomatik değişiklik yapılmamıştır.",
+            ].join("\n");
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100,
+            });
+            const existing = issues.find((issue) => !issue.pull_request && issue.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+              });
+            }
