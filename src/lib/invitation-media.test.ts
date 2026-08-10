@@ -2,14 +2,16 @@ import { describe, expect, it } from "vitest";
 import { calculateContainedSize, calculateCoverCrop } from "./image-processing";
 import {
   extractInvitationGallery,
+  invitationMediaLocationFromPublicUrl,
   invitationMediaPathFromPublicUrl,
+  isLegacyInvitationMediaUrl,
   storeInvitationGallery,
   type InvitationGalleryImage,
 } from "./invitation-media";
 
 const galleryImage: InvitationGalleryImage = {
   id: "photo-1",
-  url: "https://project.supabase.co/storage/v1/object/public/guest-uploads/owner-media/user/gallery/photo.webp",
+  url: "https://project.supabase.co/storage/v1/object/public/invitation-assets/owner-media/user/gallery/photo.webp",
   path: "owner-media/user/gallery/photo.webp",
   width: 1600,
   height: 1000,
@@ -38,6 +40,17 @@ describe("invitation media", () => {
       "owner-media/user/gallery/photo.webp",
     );
     expect(invitationMediaPathFromPublicUrl("https://example.com/photo.webp")).toBeNull();
+  });
+
+  it("recognizes legacy invitation media for automatic repair", () => {
+    const legacyUrl =
+      "https://project.supabase.co/storage/v1/object/public/guest-uploads/owner-media/user/covers/photo.webp";
+    expect(invitationMediaLocationFromPublicUrl(legacyUrl)).toEqual({
+      bucket: "guest-uploads",
+      path: "owner-media/user/covers/photo.webp",
+    });
+    expect(isLegacyInvitationMediaUrl(legacyUrl)).toBe(true);
+    expect(isLegacyInvitationMediaUrl(galleryImage.url)).toBe(false);
   });
 
   it("calculates a clamped 16:10 cover crop around the focal point", () => {

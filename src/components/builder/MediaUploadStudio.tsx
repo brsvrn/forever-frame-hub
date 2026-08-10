@@ -21,8 +21,10 @@ import {
 } from "@/lib/image-processing";
 import {
   deleteInvitationMedia,
+  isLegacyInvitationMediaUrl,
   invitationMediaPathFromPublicUrl,
   MAX_GALLERY_IMAGES,
+  repairLegacyInvitationMedia,
   uploadInvitationMedia,
 } from "@/lib/invitation-media";
 import type { InvitationDraft } from "@/lib/invitation";
@@ -43,6 +45,7 @@ const defaultCrop: CoverCrop = { focalX: 50, focalY: 50, zoom: 1 };
 export function MediaUploadStudio({ draft, update, lang }: MediaUploadStudioProps) {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const legacyRepairKeyRef = useRef("");
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [coverSelection, setCoverSelection] = useState<CoverSelection | null>(null);
   const [crop, setCrop] = useState<CoverCrop>(defaultCrop);
@@ -73,6 +76,57 @@ export function MediaUploadStudio({ draft, update, lang }: MediaUploadStudioProp
     },
     [coverSelection],
   );
+
+  useEffect(() => {
+    if (!authenticated) return;
+    const legacyUrls = Array.from(
+      new Set(
+        [draft.coverPhoto, ...draft.galleryImages.map((image) => image.url)].filter(
+          isLegacyInvitationMediaUrl,
+        ),
+      ),
+    );
+    if (legacyUrls.length === 0) {
+      legacyRepairKeyRef.current = "";
+      return;
+    }
+    const repairKey = legacyUrls.sort().join("|");
+    if (legacyRepairKeyRef.current === repairKey) return;
+    legacyRepairKeyRef.current = repairKey;
+
+    void Promise.all(
+      legacyUrls.map(async (url) => ({
+        oldUrl: url,
+        repaired: await repairLegacyInvitationMedia(url),
+      })),
+    )
+      .then((repairs) => {
+        const replacements = new Map(
+          repairs
+            .filter((item) => item.repaired)
+            .map((item) => [item.oldUrl, item.repaired!.url] as const),
+        );
+        const repairedCover = replacements.get(draft.coverPhoto);
+        if (repairedCover) update("coverPhoto", repairedCover);
+        if (draft.galleryImages.some((image) => replacements.has(image.url))) {
+          update(
+            "galleryImages",
+            draft.galleryImages.map((image) => ({
+              ...image,
+              url: replacements.get(image.url) ?? image.url,
+            })),
+          );
+        }
+      })
+      .catch((repairError) => {
+        legacyRepairKeyRef.current = "";
+        setError(
+          repairError instanceof Error
+            ? repairError.message
+            : "Eski fotoğraf davetiye alanına taşınamadı.",
+        );
+      });
+  }, [authenticated, draft.coverPhoto, draft.galleryImages, update]);
 
   const copy =
     lang === "tr"
