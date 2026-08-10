@@ -43,7 +43,7 @@ import {
 } from "@/lib/theme-engine";
 
 export const Route = createFileRoute("/davet/$slug")({
-  validateSearch: z.object({ theme: z.string().optional() }),
+  validateSearch: z.object({ theme: z.string().optional(), embed: z.literal("1").optional() }),
   loader: async ({ params }) => {
     if (params.slug === "demo") {
       return {
@@ -195,7 +195,7 @@ function PremiumInvitePage() {
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30">
-      {isDemo ? (
+      {isDemo && search.embed !== "1" ? (
         <DemoThemeSwitcher
           value={previewThemeId}
           lang={lang}

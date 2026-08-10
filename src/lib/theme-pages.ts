@@ -1,5 +1,16 @@
 import type { ThemeCategory, ThemeConfig } from "./theme-engine";
 
+export type ThemeCategoryFilter = "all" | ThemeCategory;
+
+export const themeCategoryOrder: readonly ThemeCategory[] = [
+  "coastal",
+  "nature",
+  "italy",
+  "luxury",
+  "cinematic",
+  "classic",
+];
+
 export const themeCategoryLabels: Record<ThemeCategory, string> = {
   coastal: "Deniz",
   nature: "Doğa",
@@ -10,12 +21,17 @@ export const themeCategoryLabels: Record<ThemeCategory, string> = {
 };
 
 const categoryDescriptions: Record<ThemeCategory, string> = {
-  coastal: "Deniz ışığı, dingin kıyılar ve ferah renklerle tasarlanan çağdaş bir davetiye deneyimi.",
+  coastal:
+    "Deniz ışığı, dingin kıyılar ve ferah renklerle tasarlanan çağdaş bir davetiye deneyimi.",
   nature: "Doğal dokuların, yeşilin ve yumuşak ışığın romantik bir anlatımla buluştuğu tasarım.",
-  italy: "İtalya'nın zamansız manzaralarından, sıcak renklerinden ve zarif yaşam stilinden ilham alır.",
-  luxury: "Gösterişli mekânlar, rafine tipografi ve sinematik ayrıntılarla güçlü bir ilk izlenim yaratır.",
-  cinematic: "Hareketli açılış, atmosferik görüntü ve sahneye uyumlu efektlerle film gibi bir karşılama sunar.",
-  classic: "Zamansız tipografi ve dengeli renk kullanımıyla her etkinliğe uyum sağlayan klasik yaklaşım.",
+  italy:
+    "İtalya'nın zamansız manzaralarından, sıcak renklerinden ve zarif yaşam stilinden ilham alır.",
+  luxury:
+    "Gösterişli mekânlar, rafine tipografi ve sinematik ayrıntılarla güçlü bir ilk izlenim yaratır.",
+  cinematic:
+    "Hareketli açılış, atmosferik görüntü ve sahneye uyumlu efektlerle film gibi bir karşılama sunar.",
+  classic:
+    "Zamansız tipografi ve dengeli renk kullanımıyla her etkinliğe uyum sağlayan klasik yaklaşım.",
 };
 
 export function themePageDescription(theme: ThemeConfig) {
@@ -33,3 +49,9 @@ export function themeFeatureLabels(theme: ThemeConfig) {
   ];
 }
 
+export function filterThemesByCategory(
+  themes: readonly ThemeConfig[],
+  category: ThemeCategoryFilter,
+) {
+  return category === "all" ? themes : themes.filter((theme) => theme.category === category);
+}
