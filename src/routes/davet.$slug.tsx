@@ -43,7 +43,7 @@ import {
 } from "@/lib/theme-engine";
 
 export const Route = createFileRoute("/davet/$slug")({
-  validateSearch: z.object({ theme: z.string().optional(), embed: z.literal("1").optional() }),
+  validateSearch: z.object({ theme: z.string().optional(), embed: z.string().optional() }),
   loader: async ({ params }) => {
     if (params.slug === "demo") {
       return {

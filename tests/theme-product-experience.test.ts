@@ -22,7 +22,7 @@ describe("theme discovery and builder journey", () => {
     expect(preview).toContain("navigator.share");
     expect(preview).toContain("navigator.clipboard.writeText");
     expect(preview).toContain("/davet/demo?theme=");
-    expect(invitation).toContain('embed: z.literal("1").optional()');
+    expect(invitation).toContain("embed: z.string().optional()");
   });
 
   it("presents the detailed builder as four customer-facing stages", () => {
