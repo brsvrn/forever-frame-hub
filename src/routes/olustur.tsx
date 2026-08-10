@@ -30,6 +30,7 @@ import {
 } from "@/lib/invitations.api";
 import { setAuthReturnTo } from "@/lib/auth-helpers";
 import {
+  builderJourneyStages,
   builderSteps,
   isBuilderStepId,
   progressForStep,
@@ -524,7 +525,13 @@ function BuilderPage() {
           if (step.id === "package-event")
             return {
               ...step,
-              label: isPaid ? (lang === "tr" ? "Etkinlik Türü" : "Event Type") : lang === "tr" ? "Paket" : "Package",
+              label: isPaid
+                ? lang === "tr"
+                  ? "Etkinlik Türü"
+                  : "Event Type"
+                : lang === "tr"
+                  ? "Paket"
+                  : "Package",
               desc: isPaid
                 ? lang === "tr"
                   ? "QR paketiniz kilitlidir"
@@ -576,6 +583,24 @@ function BuilderPage() {
     0,
     steps.findIndex((step) => step.id === stepId),
   );
+  const journeyStages = builderJourneyStages
+    .map((stage) => {
+      const activeSteps = stage.steps.filter((stageStep) =>
+        steps.some((step) => step.id === stageStep),
+      );
+      return {
+        id: stage.id,
+        label: lang === "tr" ? stage.label : stage.labelEn,
+        desc: lang === "tr" ? stage.desc : stage.descEn,
+        activeSteps,
+      };
+    })
+    .filter((stage) => stage.activeSteps.length > 0);
+  const currentJourneyStage = Math.max(
+    0,
+    journeyStages.findIndex((stage) => stage.activeSteps.some((item) => item === stepId)),
+  );
+  const currentStepLabel = steps[currentStep];
   const stepProps = { draft, update, copy, lang };
   const last = steps.length - 1;
 
@@ -663,10 +688,22 @@ function BuilderPage() {
 
         <div className="mt-8">
           <Stepper
-            steps={steps}
-            current={currentStep}
-            onSelect={(index) => setStepId(steps[index].id)}
+            steps={journeyStages}
+            current={currentJourneyStage}
+            onSelect={(index) => setStepId(journeyStages[index].activeSteps[0])}
           />
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+            <p>
+              {lang === "tr" ? "Aşama" : "Stage"} {currentJourneyStage + 1}/{journeyStages.length}
+              <span className="mx-2 text-border">•</span>
+              <strong className="font-medium text-foreground">{currentStepLabel?.label}</strong>
+            </p>
+            <p>
+              {lang === "tr" ? "Bu aşamadaki bölüm" : "Section in this stage"}{" "}
+              {journeyStages[currentJourneyStage]?.activeSteps.indexOf(stepId) + 1}/
+              {journeyStages[currentJourneyStage]?.activeSteps.length}
+            </p>
+          </div>
         </div>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">

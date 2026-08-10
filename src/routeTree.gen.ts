@@ -41,6 +41,7 @@ import { Route as ApiAdminSystemSettingsRouteImport } from './routes/api.admin.s
 import { Route as ApiCalendarScheduleIdRouteImport } from './routes/api.calendar.$scheduleId'
 import { Route as ApiShareImageSlugRouteImport } from './routes/api.share-image.$slug'
 import { Route as DSlugTokenRouteImport } from './routes/d.$slug.$token'
+import { Route as TemalarSlugOnizlemeRouteImport } from './routes/temalar.$slug.onizleme'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -206,6 +207,11 @@ const DSlugTokenRoute = DSlugTokenRouteImport.update({
   path: '/d/$slug/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TemalarSlugOnizlemeRoute = TemalarSlugOnizlemeRouteImport.update({
+  id: '/onizleme',
+  path: '/onizleme',
+  getParentRoute: () => TemalarSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -231,7 +237,7 @@ export interface FileRoutesByFullPath {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
-  '/temalar/$slug': typeof TemalarSlugRoute
+  '/temalar/$slug': typeof TemalarSlugRouteWithChildren
   '/odeme/': typeof OdemeIndexRoute
   '/ozellikler/': typeof OzelliklerIndexRoute
   '/temalar/': typeof TemalarIndexRoute
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
+  '/temalar/$slug/onizleme': typeof TemalarSlugOnizlemeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -265,7 +272,7 @@ export interface FileRoutesByTo {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
-  '/temalar/$slug': typeof TemalarSlugRoute
+  '/temalar/$slug': typeof TemalarSlugRouteWithChildren
   '/odeme': typeof OdemeIndexRoute
   '/ozellikler': typeof OzelliklerIndexRoute
   '/temalar': typeof TemalarIndexRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
+  '/temalar/$slug/onizleme': typeof TemalarSlugOnizlemeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -300,7 +308,7 @@ export interface FileRoutesById {
   '/sozlesmeler/iptal-iade': typeof SozlesmelerIptalIadeRoute
   '/sozlesmeler/mesafeli-satis': typeof SozlesmelerMesafeliSatisRoute
   '/sozlesmeler/teslimat': typeof SozlesmelerTeslimatRoute
-  '/temalar/$slug': typeof TemalarSlugRoute
+  '/temalar/$slug': typeof TemalarSlugRouteWithChildren
   '/odeme/': typeof OdemeIndexRoute
   '/ozellikler/': typeof OzelliklerIndexRoute
   '/temalar/': typeof TemalarIndexRoute
@@ -309,6 +317,7 @@ export interface FileRoutesById {
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
+  '/temalar/$slug/onizleme': typeof TemalarSlugOnizlemeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -345,6 +354,7 @@ export interface FileRouteTypes {
     | '/api/calendar/$scheduleId'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
+    | '/temalar/$slug/onizleme'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -379,6 +389,7 @@ export interface FileRouteTypes {
     | '/api/calendar/$scheduleId'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
+    | '/temalar/$slug/onizleme'
   id:
     | '__root__'
     | '/'
@@ -413,6 +424,7 @@ export interface FileRouteTypes {
     | '/api/calendar/$scheduleId'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
+    | '/temalar/$slug/onizleme'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -439,7 +451,7 @@ export interface RootRouteChildren {
   SozlesmelerIptalIadeRoute: typeof SozlesmelerIptalIadeRoute
   SozlesmelerMesafeliSatisRoute: typeof SozlesmelerMesafeliSatisRoute
   SozlesmelerTeslimatRoute: typeof SozlesmelerTeslimatRoute
-  TemalarSlugRoute: typeof TemalarSlugRoute
+  TemalarSlugRoute: typeof TemalarSlugRouteWithChildren
   OdemeIndexRoute: typeof OdemeIndexRoute
   OzelliklerIndexRoute: typeof OzelliklerIndexRoute
   TemalarIndexRoute: typeof TemalarIndexRoute
@@ -676,8 +688,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DSlugTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/temalar/$slug/onizleme': {
+      id: '/temalar/$slug/onizleme'
+      path: '/onizleme'
+      fullPath: '/temalar/$slug/onizleme'
+      preLoaderRoute: typeof TemalarSlugOnizlemeRouteImport
+      parentRoute: typeof TemalarSlugRoute
+    }
   }
 }
+
+interface TemalarSlugRouteChildren {
+  TemalarSlugOnizlemeRoute: typeof TemalarSlugOnizlemeRoute
+}
+
+const TemalarSlugRouteChildren: TemalarSlugRouteChildren = {
+  TemalarSlugOnizlemeRoute: TemalarSlugOnizlemeRoute,
+}
+
+const TemalarSlugRouteWithChildren = TemalarSlugRoute._addFileChildren(
+  TemalarSlugRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -703,7 +734,7 @@ const rootRouteChildren: RootRouteChildren = {
   SozlesmelerIptalIadeRoute: SozlesmelerIptalIadeRoute,
   SozlesmelerMesafeliSatisRoute: SozlesmelerMesafeliSatisRoute,
   SozlesmelerTeslimatRoute: SozlesmelerTeslimatRoute,
-  TemalarSlugRoute: TemalarSlugRoute,
+  TemalarSlugRoute: TemalarSlugRouteWithChildren,
   OdemeIndexRoute: OdemeIndexRoute,
   OzelliklerIndexRoute: OzelliklerIndexRoute,
   TemalarIndexRoute: TemalarIndexRoute,
