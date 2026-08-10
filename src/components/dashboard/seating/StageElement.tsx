@@ -5,10 +5,12 @@ interface StageElementProps {
   id: string;
   x: number;
   y: number;
+  rotation?: number;
+  scale?: number;
   isLayoutMode: boolean;
 }
 
-export function StageElement({ id, x, y, isLayoutMode }: StageElementProps) {
+export function StageElement({ id, x, y, rotation = 0, scale = 1, isLayoutMode }: StageElementProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id,
     data: {
@@ -19,9 +21,11 @@ export function StageElement({ id, x, y, isLayoutMode }: StageElementProps) {
 
   const style = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${scale}) rotate(${rotation}deg)`,
       }
-    : undefined;
+    : {
+        transform: `scale(${scale}) rotate(${rotation}deg)`,
+      };
 
   return (
     <div
@@ -32,6 +36,7 @@ export function StageElement({ id, x, y, isLayoutMode }: StageElementProps) {
         left: x,
         top: y,
         zIndex: transform ? 50 : 10,
+        transformOrigin: "center center",
       }}
       className={`flex h-24 w-64 items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/5 shadow-sm transition-shadow ${
         isLayoutMode ? "cursor-grab hover:border-solid hover:bg-primary/10 active:cursor-grabbing" : "cursor-default"

@@ -24,11 +24,14 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSo
 import { DraggableGuest } from "./seating/DraggableGuest";
 import { DroppableTable, type TableData } from "./seating/DroppableTable";
 import { StageElement } from "./seating/StageElement";
+import { RotateCw, ZoomIn, ZoomOut, X } from "lucide-react";
 
 type StageData = {
   id: string;
   x: number;
   y: number;
+  rotation?: number;
+  scale?: number;
 };
 
 export function DashboardSeating({ invitation }: { invitation: InvitationRow }) {
@@ -39,8 +42,9 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
   // State
   const [tables, setTables] = useState<TableData[]>([]);
   const [assignments, setAssignments] = useState<Record<string, string | null>>({});
-  const [stage, setStage] = useState<StageData>({ id: "stage-1", x: 100, y: 100 });
+  const [stage, setStage] = useState<StageData>({ id: "stage-1", x: 100, y: 100, rotation: 0, scale: 1 });
   const [isLayoutMode, setIsLayoutMode] = useState(false);
+  const [selectedElement, setSelectedElement] = useState<{ id: string, type: "table" | "stage" } | null>(null);
   
   // Dnd State
   const [activeGuest, setActiveGuest] = useState<RsvpRow | null>(null);
@@ -189,6 +193,33 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
     }
   };
 
+  const handleUpdateElement = (action: "rotate" | "zoomIn" | "zoomOut") => {
+    if (!selectedElement) return;
+
+    if (selectedElement.type === "table") {
+      setTables(prev => prev.map(t => {
+        if (t.id !== selectedElement.id) return t;
+        const currentRot = t.rotation || 0;
+        const currentScale = t.scale || 1;
+        
+        if (action === "rotate") return { ...t, rotation: (currentRot + 45) % 360 };
+        if (action === "zoomIn") return { ...t, scale: Math.min(3, currentScale + 0.1) };
+        if (action === "zoomOut") return { ...t, scale: Math.max(0.5, currentScale - 0.1) };
+        return t;
+      }));
+    } else if (selectedElement.type === "stage") {
+      setStage(prev => {
+        const currentRot = prev.rotation || 0;
+        const currentScale = prev.scale || 1;
+        
+        if (action === "rotate") return { ...prev, rotation: (currentRot + 45) % 360 };
+        if (action === "zoomIn") return { ...prev, scale: Math.min(3, currentScale + 0.1) };
+        if (action === "zoomOut") return { ...prev, scale: Math.max(0.5, currentScale - 0.1) };
+        return prev;
+      });
+    }
+  };
+
   // Derived state
   const unassignedGuests = useMemo(() => {
     return rsvps?.filter(g => !assignments[g.id]) || [];
@@ -218,7 +249,10 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
         <div className="flex items-center gap-3">
           <div className="flex items-center rounded-xl bg-accent p-1">
             <button
-              onClick={() => setIsLayoutMode(false)}
+              onClick={() => {
+                setIsLayoutMode(false);
+                setSelectedElement(null);
+              }}
               className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                 !isLayoutMode ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -311,10 +345,47 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
               </div>
             ) : (
               <div className={isLayoutMode ? "absolute inset-0 min-h-[800px] min-w-[800px]" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 pb-12"}>
-                <StageElement id={stage.id} x={stage.x} y={stage.y} isLayoutMode={isLayoutMode} />
+                
+                {isLayoutMode && selectedElement && (
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-background/95 backdrop-blur shadow-lg border border-border rounded-full px-4 py-2">
+                    <span className="text-sm font-medium mr-2 text-foreground">
+                      {selectedElement.type === "stage" ? "Sahne" : tables.find(t => t.id === selectedElement.id)?.name}
+                    </span>
+                    <button onClick={() => handleUpdateElement("zoomOut")} className="p-1.5 hover:bg-accent rounded-full transition-colors text-muted-foreground hover:text-foreground" title="Küçült">
+                      <ZoomOut className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => handleUpdateElement("zoomIn")} className="p-1.5 hover:bg-accent rounded-full transition-colors text-muted-foreground hover:text-foreground" title="Büyüt">
+                      <ZoomIn className="h-4 w-4" />
+                    </button>
+                    <div className="w-px h-4 bg-border mx-1"></div>
+                    <button onClick={() => handleUpdateElement("rotate")} className="p-1.5 hover:bg-accent rounded-full transition-colors text-muted-foreground hover:text-foreground" title="Döndür">
+                      <RotateCw className="h-4 w-4" />
+                    </button>
+                    <div className="w-px h-4 bg-border mx-1"></div>
+                    <button onClick={() => setSelectedElement(null)} className="p-1.5 hover:bg-rose/10 rounded-full transition-colors text-muted-foreground hover:text-rose" title="Kapat">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+
+                <div 
+                  onClick={() => isLayoutMode && setSelectedElement({ id: stage.id, type: "stage" })}
+                  className={isLayoutMode && selectedElement?.id === stage.id ? "ring-2 ring-gold rounded-lg ring-offset-4 ring-offset-background/50 relative z-40 transition-all duration-200" : ""}
+                >
+                  <StageElement id={stage.id} x={stage.x} y={stage.y} rotation={stage.rotation} scale={stage.scale} isLayoutMode={isLayoutMode} />
+                </div>
                 
                 {tables.map(table => (
-                  <div key={table.id} className={isLayoutMode ? "" : "h-[400px]"}>
+                  <div 
+                    key={table.id} 
+                    className={isLayoutMode ? (selectedElement?.id === table.id ? "ring-2 ring-gold rounded-2xl ring-offset-4 ring-offset-background/50 relative z-40 transition-all duration-200" : "") : "h-[400px]"}
+                    onClick={(e) => {
+                      if (isLayoutMode) {
+                        e.stopPropagation();
+                        setSelectedElement({ id: table.id, type: "table" });
+                      }
+                    }}
+                  >
                     <DroppableTable
                       table={table}
                       guests={getTableGuests(table.id)}

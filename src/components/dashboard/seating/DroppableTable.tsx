@@ -12,6 +12,8 @@ export interface TableData {
   x?: number;
   y?: number;
   shape?: "round" | "rectangle";
+  rotation?: number;
+  scale?: number;
 }
 
 interface DroppableTableProps {
@@ -64,10 +66,12 @@ export function DroppableTable({
 
   const dragStyle = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0) scale(${table.scale || 1}) rotate(${table.rotation || 0}deg)`,
         zIndex: 50,
       }
-    : undefined;
+    : {
+        transform: `scale(${table.scale || 1}) rotate(${table.rotation || 0}deg)`,
+      };
 
   if (isLayoutMode) {
     return (
@@ -78,6 +82,7 @@ export function DroppableTable({
           position: "absolute",
           left: table.x || 0,
           top: table.y || 0,
+          transformOrigin: "center center",
         }}
         className={`flex flex-col items-center justify-center border-2 border-primary/20 bg-background shadow-md transition-shadow hover:shadow-lg active:cursor-grabbing cursor-grab ${
           isRound ? "h-40 w-40 rounded-full" : "h-32 w-56 rounded-xl"
