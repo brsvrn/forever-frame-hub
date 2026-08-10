@@ -27,6 +27,7 @@ import { GiftSection } from "@/components/invitation/GiftSection";
 import { CountdownTimer } from "@/components/invitation/CountdownTimer";
 import { InvitationFooter } from "@/components/invitation/InvitationFooter";
 import { LueurHero, LueurOpening, LueurSection } from "@/components/invitation/PapillonRouge";
+import { RoyalEnvelopeOpening } from "@/components/invitation/RoyalEnvelopeOpening";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
 import {
   resolveTheme,
@@ -166,6 +167,7 @@ function PremiumInvitePage() {
   const [personalGuestToken, setPersonalGuestToken] = useState<string | undefined>();
   const openingEnabled = eventFeatures?.opening_enabled !== false;
   const isLueur = theme.id === "lueur-de-minuit";
+  const isRoyal = theme.id === "royal-envelope";
 
   useEffect(() => {
     const receivePersonalGuest = (event: MessageEvent) => {
@@ -198,7 +200,9 @@ function PremiumInvitePage() {
 
       <AnimatePresence>
         {!hasOpened && features.digital_invitation !== false && openingEnabled ? (
-          isLueur ? (
+          isRoyal ? (
+            <RoyalEnvelopeOpening key={`intro-${theme.id}`} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} date={draft.date} />
+          ) : isLueur ? (
             <LueurOpening key={`intro-${theme.id}`} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
           ) : (
             <InvitationIntro key={`intro-${theme.id}`} theme={theme} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />

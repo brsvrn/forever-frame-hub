@@ -50,7 +50,7 @@ export type NatureThemeId = "emerald-forest" | "wildflower-meadow" | "alpine-mis
 export type ItalianThemeId = "amalfi-lemon-terrace" | "tuscan-golden-hills" | "lake-como-garden";
 export type LuxuryThemeId = "grand-ballroom" | "midnight-conservatory" | "evergreen-vows";
 export type CinematicThemeId =
-  "cinematic-flow" | "boho-motion" | "ethereal-light" | "lueur-de-minuit";
+  "cinematic-flow" | "boho-motion" | "ethereal-light" | "lueur-de-minuit" | "royal-envelope";
 export type ThemeCategory = "coastal" | "nature" | "italy" | "luxury" | "cinematic" | "classic";
 export type InviteThemeId =
   | CoastalThemeId
