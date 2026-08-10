@@ -90,12 +90,22 @@ export function DroppableTable({
         {...attributes}
         {...listeners}
       >
-        <GripHorizontal className="mb-2 h-5 w-5 text-muted-foreground/50" />
+        <GripHorizontal className="mb-1 h-4 w-4 text-muted-foreground/30" />
         <span className="font-display font-medium text-foreground text-center px-2">{table.name}</span>
-        <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-          <Users className="h-3 w-3" />
-          <span>{table.capacity} Kişilik</span>
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+          <Users className="h-2.5 w-2.5" />
+          <span>{table.capacity} Kişi</span>
         </div>
+        {guests.length > 0 && (
+          <div className="flex flex-col items-center gap-0.5 mt-1 overflow-hidden w-full px-2 max-h-24">
+            {guests.map((g, idx) => (
+              <span key={g.id} className="text-[9px] text-muted-foreground/80 text-center truncate w-full" title={g.name}>
+                {g.name}
+                {idx === guests.length - 1 && guests.length > 6 ? "..." : ""}
+              </span>
+            )).slice(0, 6)}
+          </div>
+        )}
       </div>
     );
   }

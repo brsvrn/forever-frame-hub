@@ -5,6 +5,10 @@ import type { InvitationRow, RsvpRow } from "@/lib/invitations.api";
 import { getRsvpResults } from "@/lib/rsvp.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { saveSeatingConfig } from "@/lib/seating.functions";
+import { generateUShapeLayout } from "@/lib/seating-layout";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 import {
   DndContext,
@@ -45,7 +49,12 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
   const [stage, setStage] = useState<StageData>({ id: "stage-1", x: 100, y: 100, rotation: 0, scale: 1 });
   const [isLayoutMode, setIsLayoutMode] = useState(false);
   const [selectedElement, setSelectedElement] = useState<{ id: string, type: "table" | "stage" } | null>(null);
-  
+
+  // Bulk Layout State
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [bulkCount, setBulkCount] = useState(50);
+  const [bulkCapacity, setBulkCapacity] = useState(10);
+
   // Dnd State
   const [activeGuest, setActiveGuest] = useState<RsvpRow | null>(null);
 
@@ -119,6 +128,74 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
       toast.error("Oturma planı kaydedilirken bir hata oluştu.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleBulkCreate = () => {
+    const confirmClear = confirm("Mevcut masalarınız ve misafir atamalarınız silinecek. Onaylıyor musunuz?");
+    if (!confirmClear) return;
+    
+    const layout = generateUShapeLayout(bulkCount, bulkCapacity);
+    setTables(layout.tables);
+    setStage(layout.stage);
+    
+    // Clear assignments
+    const initial: Record<string, string | null> = {};
+    rsvps?.forEach(g => {
+      initial[g.id] = null;
+    });
+    setAssignments(initial);
+    
+    setBulkDialogOpen(false);
+    setIsLayoutMode(true);
+    toast.success(`${bulkCount} adet masa U-Düzeninde başarıyla oluşturuldu.`);
+  };
+
+  const handleExportPDF = async () => {
+    const canvasEl = document.getElementById("seating-canvas");
+    if (!canvasEl) return;
+    
+    toast.info("PDF hazırlanıyor, lütfen bekleyin...");
+    try {
+      // Büyütme katsayısı yüksek çözünürlük için
+      const canvas = await html2canvas(canvasEl, { scale: 2, useCORS: true, logging: false });
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4"
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate aspect ratio
+      const imgProps = pdf.getImageProperties(imgData);
+      const margin = 10;
+      const renderWidth = pdfWidth - margin * 2;
+      const renderHeight = (imgProps.height * renderWidth) / imgProps.width;
+      
+      let finalHeight = renderHeight;
+      let finalWidth = renderWidth;
+      let xOffset = margin;
+      let yOffset = margin;
+
+      // Fit inside page
+      if (renderHeight > (pdfHeight - margin * 2)) {
+        finalHeight = pdfHeight - margin * 2;
+        finalWidth = (imgProps.width * finalHeight) / imgProps.height;
+        xOffset = (pdfWidth - finalWidth) / 2;
+      }
+      
+      pdf.text("Salon Oturma Plani", pdfWidth / 2, margin + 2, { align: "center" });
+      pdf.addImage(imgData, "JPEG", xOffset, yOffset + 5, finalWidth, finalHeight - 5);
+      pdf.save("oturma-plani.pdf");
+      
+      toast.success("PDF başarıyla indirildi.");
+    } catch (e) {
+      console.error("PDF Export error:", e);
+      toast.error("PDF oluşturulurken bir hata meydana geldi.");
     }
   };
 
@@ -287,6 +364,24 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
             <Plus className="h-4 w-4" />
             Masa Ekle
           </button>
+          
+          <button
+            onClick={() => setBulkDialogOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/80"
+          >
+            <Users className="h-4 w-4" />
+            Toplu Masa (U-Düzeni)
+          </button>
+
+          {isLayoutMode && (
+            <button
+              onClick={handleExportPDF}
+              className="flex items-center gap-2 rounded-xl bg-slate-800 text-white px-4 py-2.5 text-sm font-medium transition-colors hover:bg-slate-700"
+            >
+              PDF İndir
+            </button>
+          )}
+
           <button
             onClick={handleSave}
             disabled={saving}
@@ -344,7 +439,7 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
                 </button>
               </div>
             ) : (
-              <div className={isLayoutMode ? "absolute inset-0 min-h-[800px] min-w-[800px]" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 pb-12"}>
+              <div id="seating-canvas" className={isLayoutMode ? "absolute inset-0 min-h-[800px] min-w-[800px]" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 pb-12"}>
                 
                 {isLayoutMode && selectedElement && (
                   <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-background/95 backdrop-blur shadow-lg border border-border rounded-full px-4 py-2">
@@ -417,6 +512,53 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
           {activeGuest ? <DraggableGuest guest={activeGuest} isOverlay /> : null}
         </DragOverlay>
       </DndContext>
+      
+      <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Toplu Masa Oluştur (U-Düzeni)</DialogTitle>
+            <DialogDescription>
+              Belirttiğiniz sayıda masa, sahnenin etrafında dans pisti boşluğu bırakacak şekilde U formatında otomatik olarak dizilir. 
+              <br/><br/>
+              <strong>Dikkat:</strong> Mevcut tüm masalarınız ve misafir atamalarınız silinecektir!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Masa Sayısı</label>
+              <input 
+                type="number" 
+                value={bulkCount} 
+                onChange={(e) => setBulkCount(Number(e.target.value))}
+                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Masaların Kapasitesi (Kişi)</label>
+              <input 
+                type="number" 
+                value={bulkCapacity} 
+                onChange={(e) => setBulkCapacity(Number(e.target.value))}
+                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-end">
+            <DialogClose asChild>
+              <button type="button" className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                İptal
+              </button>
+            </DialogClose>
+            <button 
+              type="button" 
+              onClick={handleBulkCreate}
+              className="inline-flex h-10 items-center justify-center rounded-md bg-gold px-4 py-2 text-sm font-medium text-black ring-offset-background transition-colors hover:bg-gold/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+            >
+              Oluştur
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
