@@ -23,6 +23,13 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSo
 
 import { DraggableGuest } from "./seating/DraggableGuest";
 import { DroppableTable, type TableData } from "./seating/DroppableTable";
+import { StageElement } from "./seating/StageElement";
+
+type StageData = {
+  id: string;
+  x: number;
+  y: number;
+};
 
 export function DashboardSeating({ invitation }: { invitation: InvitationRow }) {
   const [rsvps, setRsvps] = useState<RsvpRow[] | null>(null);
@@ -32,6 +39,8 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
   // State
   const [tables, setTables] = useState<TableData[]>([]);
   const [assignments, setAssignments] = useState<Record<string, string | null>>({});
+  const [stage, setStage] = useState<StageData>({ id: "stage-1", x: 100, y: 100 });
+  const [isLayoutMode, setIsLayoutMode] = useState(false);
   
   // Dnd State
   const [activeGuest, setActiveGuest] = useState<RsvpRow | null>(null);
@@ -49,6 +58,9 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
             const config = JSON.parse(invitation.admin_notes);
             if (config?.seating) {
               setTables(config.seating.tables || []);
+              if (config.seating.stage) {
+                setStage(config.seating.stage);
+              }
               
               // Validate assignments: Ensure all IDs exist in current RSVPs
               const validAssignments: Record<string, string | null> = {};
@@ -91,7 +103,8 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
           invitationId: invitation.id,
           config: {
             tables,
-            assignments
+            assignments,
+            stage
           }
         }
       });
@@ -148,6 +161,32 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveGuest(null);
+    const { active, delta } = event;
+    const type = active.data.current?.type;
+
+    if (type === "TableLayout") {
+      const tableId = active.data.current?.table?.id;
+      if (tableId) {
+        setTables((prev) =>
+          prev.map((t) => {
+            if (t.id === tableId) {
+              return {
+                ...t,
+                x: Math.max(0, (t.x || 0) + delta.x),
+                y: Math.max(0, (t.y || 0) + delta.y),
+              };
+            }
+            return t;
+          })
+        );
+      }
+    } else if (type === "Stage") {
+      setStage((prev) => ({
+        ...prev,
+        x: Math.max(0, prev.x + delta.x),
+        y: Math.max(0, prev.y + delta.y),
+      }));
+    }
   };
 
   // Derived state
@@ -177,14 +216,37 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex items-center rounded-xl bg-accent p-1">
+            <button
+              onClick={() => setIsLayoutMode(false)}
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+                !isLayoutMode ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Yerleştirme
+            </button>
+            <button
+              onClick={() => setIsLayoutMode(true)}
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+                isLayoutMode ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Kroki Düzeni
+            </button>
+          </div>
+          
           <button
             onClick={() => {
               const newTable: TableData = {
                 id: `table-${Date.now()}`,
                 name: `Masa ${tables.length + 1}`,
-                capacity: 10
+                capacity: 10,
+                x: 100,
+                y: 100,
+                shape: "round"
               };
               setTables([...tables, newTable]);
+              setIsLayoutMode(true); // Switch to layout mode automatically to place it
             }}
             className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/80"
           >
@@ -228,8 +290,8 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
             />
           </div>
 
-          {/* Tables Grid */}
-          <div className="lg:col-span-3 overflow-y-auto">
+          {/* Tables Grid / Canvas */}
+          <div className={`lg:col-span-3 ${isLayoutMode ? "relative bg-accent/5 overflow-hidden rounded-2xl border border-border" : "overflow-y-auto"}`}>
             {tables.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-border p-12 text-center">
                 <Users className="h-12 w-12 text-muted-foreground/30 mb-4" />
@@ -238,21 +300,28 @@ export function DashboardSeating({ invitation }: { invitation: InvitationRow }) 
                   Misafirlerinizi yerleştirmeye başlamak için yeni bir masa oluşturun.
                 </p>
                 <button
-                  onClick={() => setTables([{ id: `table-${Date.now()}`, name: "Masa 1", capacity: 10 }])}
+                  onClick={() => {
+                    setTables([{ id: `table-${Date.now()}`, name: "Masa 1", capacity: 10, x: 100, y: 100, shape: "round" }]);
+                    setIsLayoutMode(true);
+                  }}
                   className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent/80"
                 >
                   <Plus className="h-4 w-4" /> İlk Masayı Oluştur
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 pb-12">
+              <div className={isLayoutMode ? "absolute inset-0 min-h-[800px] min-w-[800px]" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 pb-12"}>
+                <StageElement id={stage.id} x={stage.x} y={stage.y} isLayoutMode={isLayoutMode} />
+                
                 {tables.map(table => (
-                  <div key={table.id} className="h-[400px]">
+                  <div key={table.id} className={isLayoutMode ? "" : "h-[400px]"}>
                     <DroppableTable
                       table={table}
                       guests={getTableGuests(table.id)}
+                      isLayoutMode={isLayoutMode}
                       onUpdateName={(id, name) => setTables(tables.map(t => t.id === id ? { ...t, name } : t))}
                       onUpdateCapacity={(id, capacity) => setTables(tables.map(t => t.id === id ? { ...t, capacity } : t))}
+                      onUpdateShape={(id, shape) => setTables(tables.map(t => t.id === id ? { ...t, shape } : t))}
                       onDelete={(id) => {
                         if (confirm("Bu masayı silmek istediğinize emin misiniz? Masadaki misafirler bekleyenlere dönecektir.")) {
                           setTables(tables.filter(t => t.id !== id));

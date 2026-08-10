@@ -1,6 +1,6 @@
-import { useDroppable } from "@dnd-kit/core";
+import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Trash2, Users } from "lucide-react";
+import { Trash2, Users, GripHorizontal } from "lucide-react";
 import type { RsvpRow } from "@/lib/invitations.api";
 import { DraggableGuest } from "./DraggableGuest";
 import { useMemo } from "react";
@@ -9,6 +9,9 @@ export interface TableData {
   id: string;
   name: string;
   capacity: number;
+  x?: number;
+  y?: number;
+  shape?: "round" | "rectangle";
 }
 
 interface DroppableTableProps {
@@ -17,6 +20,8 @@ interface DroppableTableProps {
   onDelete?: (id: string) => void;
   onUpdateName?: (id: string, name: string) => void;
   onUpdateCapacity?: (id: string, capacity: number) => void;
+  onUpdateShape?: (id: string, shape: "round" | "rectangle") => void;
+  isLayoutMode?: boolean;
 }
 
 export function DroppableTable({
@@ -25,24 +30,77 @@ export function DroppableTable({
   onDelete,
   onUpdateName,
   onUpdateCapacity,
+  onUpdateShape,
+  isLayoutMode = false,
 }: DroppableTableProps) {
-  const { setNodeRef, isOver } = useDroppable({
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: table.id,
     data: {
       type: "Table",
       table,
     },
+    disabled: isLayoutMode,
+  });
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDraggableRef,
+    transform,
+  } = useDraggable({
+    id: `draggable-table-${table.id}`,
+    data: {
+      type: "TableLayout",
+      table,
+    },
+    disabled: !isLayoutMode,
   });
 
   const guestIds = useMemo(() => guests.map((g) => g.id), [guests]);
   const currentCapacity = guests.reduce((sum, g) => sum + g.party_size, 0);
   const isOverCapacity = currentCapacity > table.capacity;
+  
+  const isRound = table.shape === "round";
+
+  const dragStyle = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: 50,
+      }
+    : undefined;
+
+  if (isLayoutMode) {
+    return (
+      <div
+        ref={setDraggableRef}
+        style={{
+          ...dragStyle,
+          position: "absolute",
+          left: table.x || 0,
+          top: table.y || 0,
+        }}
+        className={`flex flex-col items-center justify-center border-2 border-primary/20 bg-background shadow-md transition-shadow hover:shadow-lg active:cursor-grabbing cursor-grab ${
+          isRound ? "h-40 w-40 rounded-full" : "h-32 w-56 rounded-xl"
+        }`}
+        {...attributes}
+        {...listeners}
+      >
+        <GripHorizontal className="mb-2 h-5 w-5 text-muted-foreground/50" />
+        <span className="font-display font-medium text-foreground text-center px-2">{table.name}</span>
+        <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+          <Users className="h-3 w-3" />
+          <span>{table.capacity} Kişilik</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
+      ref={setDroppableRef}
       className={`flex h-full flex-col overflow-hidden rounded-2xl border transition-colors ${
         isOver ? "border-gold bg-gold/5" : "border-border bg-card"
-      }`}
+      } ${isRound ? "border-t-4 border-t-gold/50" : ""}`}
     >
       <div className="flex items-center justify-between border-b border-border bg-accent/5 px-4 py-3">
         <div className="flex-1 mr-4">
@@ -73,6 +131,15 @@ export function DroppableTable({
               />
             </span>
           </div>
+          {onUpdateShape && (
+            <button
+              onClick={() => onUpdateShape(table.id, isRound ? "rectangle" : "round")}
+              className="text-muted-foreground transition-colors hover:text-gold text-xs font-medium bg-accent/10 rounded px-2 py-1"
+              title="Şekli Değiştir"
+            >
+              {isRound ? "Yuvarlak" : "Dikdörtgen"}
+            </button>
+          )}
           {onDelete && (
             <button
               onClick={() => onDelete(table.id)}
@@ -86,7 +153,6 @@ export function DroppableTable({
       </div>
 
       <div
-        ref={setNodeRef}
         className="flex-1 overflow-y-auto p-3"
       >
         <SortableContext items={guestIds} strategy={verticalListSortingStrategy}>
