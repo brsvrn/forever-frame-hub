@@ -146,7 +146,7 @@ export function RoyalEnvelopeOpening({
               className="absolute inset-0 origin-top cursor-pointer"
               style={{ 
                 backgroundColor: envelopeColor, 
-                clipPath: "polygon(0 0, 50% 65%, 100% 0)",
+                clipPath: "polygon(0 0, 50% 50%, 100% 0)",
                 zIndex: 40,
                 // Add a slight gradient for 3D light effect
                 backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0.15))"
@@ -160,7 +160,7 @@ export function RoyalEnvelopeOpening({
               <div 
                 className="absolute w-full h-full"
                 style={{
-                  clipPath: "polygon(1% 1%, 50% 63%, 99% 1%, 100% 0, 50% 65%, 0 0)",
+                  clipPath: "polygon(1% 1%, 50% 48%, 99% 1%, 100% 0, 50% 50%, 0 0)",
                   backgroundColor: goldColor
                 }}
               />
@@ -168,7 +168,7 @@ export function RoyalEnvelopeOpening({
 
             {/* 7. Wax Seal */}
             <motion.div
-              className="absolute left-1/2 top-[65%] -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center cursor-pointer shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center cursor-pointer shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
               style={{
                 width: "60px",
                 height: "60px",
