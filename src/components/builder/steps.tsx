@@ -42,6 +42,7 @@ type StepProps = {
   update: <K extends keyof InvitationDraft>(key: K, value: InvitationDraft[K]) => void;
   copy: BuilderContent;
   lang: "tr" | "en";
+  eventIdentityLocked?: boolean;
 };
 
 type PackageStepProps = StepProps & {
@@ -124,8 +125,8 @@ export function StepTheme({
           mode === "package-event"
             ? isPaid
               ? lang === "tr"
-                ? "Etkinlik türünüzü güncelleyin. Satın aldığınız paket güvenle kilitlidir."
-                : "Update your event type. Your purchased package is securely locked."
+                ? "Satın aldığınız paket ve etkinlik kimliği bu davetiyeye bağlıdır."
+                : "Your purchased package and event identity are tied to this invitation."
               : lang === "tr"
                 ? "Paketinizi ve davetiyenin hazırlanacağı etkinlik türünü seçin."
                 : "Choose your package and the event type for this invitation."
@@ -248,8 +249,9 @@ export function StepTheme({
                 <select
                   id={id}
                   value={draft.category}
+                  disabled={isPaid}
                   onChange={(e) => update("category", e.target.value as any)}
-                  className="field-base min-h-11 w-full bg-transparent"
+                  className="field-base min-h-11 w-full bg-transparent disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <option className="bg-background text-foreground" value="wedding">
                     {lang === "tr" ? "Düğün" : "Wedding"}
@@ -415,6 +417,7 @@ export function StepTexts({
   update,
   copy,
   lang,
+  eventIdentityLocked = false,
   mode = "all",
 }: StepProps & { mode?: "all" | "basic" | "family" | "invitation" }) {
   const c = copy.texts;
@@ -566,6 +569,7 @@ export function StepTexts({
                 <TextInput
                   id={id}
                   value={draft.partnerOne}
+                  disabled={eventIdentityLocked}
                   maxLength={24}
                   placeholder={isBirthday ? (lang === "tr" ? "Can" : "Alex") : "Elif"}
                   onChange={(e) => update("partnerOne", e.target.value)}
@@ -578,6 +582,7 @@ export function StepTexts({
                   <TextInput
                     id={id}
                     value={draft.partnerTwo}
+                    disabled={eventIdentityLocked}
                     maxLength={24}
                     placeholder={isOther ? "" : "Kaan"}
                     onChange={(e) => update("partnerTwo", e.target.value)}
@@ -717,7 +722,7 @@ export function StepTexts({
   );
 }
 
-export function StepQrDetails({ draft, update, lang }: StepProps) {
+export function StepQrDetails({ draft, update, lang, eventIdentityLocked = false }: StepProps) {
   const isBirthday = draft.category === "birthday";
   const isOther = draft.category === "other";
   const isHenna = draft.category === "henna";
@@ -767,6 +772,7 @@ export function StepQrDetails({ draft, update, lang }: StepProps) {
             <TextInput
               id={id}
               value={draft.partnerOne}
+              disabled={eventIdentityLocked}
               maxLength={24}
               placeholder={
                 isBirthday ? (lang === "tr" ? "Can" : "Alex") : lang === "tr" ? "Minel" : "Alex"
@@ -781,6 +787,7 @@ export function StepQrDetails({ draft, update, lang }: StepProps) {
               <TextInput
                 id={id}
                 value={draft.partnerTwo}
+                disabled={eventIdentityLocked}
                 maxLength={24}
                 placeholder={isOther ? "" : lang === "tr" ? "Barış" : "Taylor"}
                 onChange={(event) => update("partnerTwo", event.target.value)}
@@ -900,7 +907,7 @@ function EventProgramEditor({ draft, update, lang }: Pick<StepProps, "draft" | "
   );
 }
 
-export function StepDetails({ draft, update, copy, lang }: StepProps) {
+export function StepDetails({ draft, update, copy, lang, eventIdentityLocked = false }: StepProps) {
   const c = copy.details;
   const days = countdownDays(draft.date);
   return (
@@ -913,6 +920,7 @@ export function StepDetails({ draft, update, copy, lang }: StepProps) {
               id={id}
               type="date"
               value={draft.date}
+              disabled={eventIdentityLocked}
               onChange={(e) => update("date", e.target.value)}
             />
           )}

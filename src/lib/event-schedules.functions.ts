@@ -20,6 +20,52 @@ function requestOrThrow() {
   return request;
 }
 
+async function loadPaidScheduleLock(
+  admin: ReturnType<typeof import("./supabase-admin").getServiceSupabase>,
+  invitationId: string,
+) {
+  const { data: invitation, error } = await admin
+    .from("invitations")
+    .select(
+      "is_paid,event_identity_locked_at,entitlement_event_date,event_type,primary_schedule_id",
+    )
+    .eq("id", invitationId)
+    .maybeSingle();
+  if (error || !invitation) throw new Error("Etkinlik kilidi doğrulanamadı.");
+  return invitation;
+}
+
+function assertEventDayNotCompleted(lock: Awaited<ReturnType<typeof loadPaidScheduleLock>>) {
+  if (!lock.is_paid || !lock.event_identity_locked_at || !lock.entitlement_event_date) return;
+  const eventDayEnd = new Date(`${lock.entitlement_event_date}T23:59:59.999+03:00`);
+  if (Date.now() > eventDayEnd.getTime()) {
+    throw new Error(
+      "Bu etkinlik tamamlandı. Yeni bir etkinlik için yeni davetiye oluşturup yeniden ödeme yapmalısınız.",
+    );
+  }
+}
+
+function assertPrimaryScheduleIdentity(
+  lock: Awaited<ReturnType<typeof loadPaidScheduleLock>>,
+  scheduleId: string | undefined,
+  schedule: { is_primary?: boolean; event_date?: string | null; event_type?: string },
+) {
+  if (!lock.is_paid || !lock.event_identity_locked_at) return;
+  const targetsPrimary = scheduleId === lock.primary_schedule_id || schedule.is_primary === true;
+  if (!targetsPrimary) return;
+  if (scheduleId !== lock.primary_schedule_id) {
+    throw new Error("Ödenmiş davetiyenin ana etkinliği değiştirilemez.");
+  }
+  if (
+    schedule.event_date !== lock.entitlement_event_date ||
+    schedule.event_type !== lock.event_type
+  ) {
+    throw new Error(
+      "Ödeme ana etkinlik türü ve tarihine bağlıdır. Yeni etkinlik için yeni davetiye oluşturmalısınız.",
+    );
+  }
+}
+
 async function syncLegacyPrimary(
   admin: ReturnType<typeof import("./supabase-admin").getServiceSupabase>,
   invitationId: string,
@@ -57,6 +103,9 @@ export const saveEventSchedule = createServerFn({ method: "POST" })
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
     const { id, version, ...values } = data.schedule;
+    const paidLock = await loadPaidScheduleLock(admin, data.invitationId);
+    assertEventDayNotCompleted(paidLock);
+    assertPrimaryScheduleIdentity(paidLock, id, values);
 
     if (values.is_primary) {
       await admin
@@ -128,6 +177,9 @@ export const syncPrimaryScheduleFromLegacy = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw error;
     if (!primary) return null;
+    const paidLock = await loadPaidScheduleLock(admin, invitationId);
+    assertEventDayNotCompleted(paidLock);
+    assertPrimaryScheduleIdentity(paidLock, primary.id, { ...values, is_primary: true });
     const unchanged = Object.entries(values).every(
       ([key, value]) => JSON.stringify(primary[key] ?? null) === JSON.stringify(value ?? null),
     );
@@ -153,6 +205,8 @@ export const deleteEventSchedule = createServerFn({ method: "POST" })
     });
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
+    const paidLock = await loadPaidScheduleLock(admin, data.invitationId);
+    assertEventDayNotCompleted(paidLock);
     const { data: rows, error: readError } = await admin
       .from("event_schedules")
       .select("id,is_primary,sort_order")
@@ -164,6 +218,9 @@ export const deleteEventSchedule = createServerFn({ method: "POST" })
     }
     const target = rows.find((row) => row.id === data.scheduleId);
     if (!target) throw new EventAccessError("Etkinlik bulunamadı.", 404);
+    if (paidLock.is_paid && paidLock.event_identity_locked_at && target.is_primary) {
+      throw new EventAccessError("Ödenmiş davetiyenin ana etkinliği silinemez.", 409);
+    }
     const { error } = await admin
       .from("event_schedules")
       .delete()
@@ -201,6 +258,8 @@ export const reorderEventSchedules = createServerFn({ method: "POST" })
     }
     const { getServiceSupabase } = await import("./supabase-admin");
     const admin = getServiceSupabase();
+    const paidLock = await loadPaidScheduleLock(admin, data.invitationId);
+    assertEventDayNotCompleted(paidLock);
     const { data: existing } = await admin
       .from("event_schedules")
       .select("id,version")

@@ -73,6 +73,8 @@ export type Database = {
           city: string;
           created_at: string;
           event_date: string | null;
+          entitlement_event_date: string | null;
+          event_identity_locked_at: string | null;
           event_time: string | null;
           event_type: Database["public"]["Enums"]["event_type"];
           family_info: Json | null;
@@ -90,6 +92,7 @@ export type Database = {
           our_story: Json | null;
           package_id: string | null;
           package_type: string;
+          paid_at: string | null;
           primary_schedule_id: string | null;
           partner_one: string;
           partner_two: string;
@@ -116,6 +119,8 @@ export type Database = {
           city?: string;
           created_at?: string;
           event_date?: string | null;
+          entitlement_event_date?: string | null;
+          event_identity_locked_at?: string | null;
           event_time?: string | null;
           event_type?: Database["public"]["Enums"]["event_type"];
           family_info?: Json | null;
@@ -133,6 +138,7 @@ export type Database = {
           our_story?: Json | null;
           package_id?: string | null;
           package_type?: string;
+          paid_at?: string | null;
           primary_schedule_id?: string | null;
           partner_one?: string;
           partner_two?: string;
@@ -159,6 +165,8 @@ export type Database = {
           city?: string;
           created_at?: string;
           event_date?: string | null;
+          entitlement_event_date?: string | null;
+          event_identity_locked_at?: string | null;
           event_time?: string | null;
           event_type?: Database["public"]["Enums"]["event_type"];
           family_info?: Json | null;
@@ -176,6 +184,7 @@ export type Database = {
           our_story?: Json | null;
           package_id?: string | null;
           package_type?: string;
+          paid_at?: string | null;
           primary_schedule_id?: string | null;
           partner_one?: string;
           partner_two?: string;

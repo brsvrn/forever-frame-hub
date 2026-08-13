@@ -48,6 +48,12 @@ export function DashboardSchedule({ invitation }: { invitation: InvitationRow })
   const [editing, setEditing] = useState<EventScheduleInput | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const identityLocked = Boolean(invitation.is_paid && invitation.event_identity_locked_at);
+  const eventCompleted = Boolean(
+    identityLocked &&
+    invitation.entitlement_event_date &&
+    Date.now() > new Date(`${invitation.entitlement_event_date}T23:59:59.999+03:00`).getTime(),
+  );
 
   const reload = useCallback(async () => {
     const content = await getCoreEventContent({ data: { invitationId: invitation.id } });
@@ -129,11 +135,24 @@ export function DashboardSchedule({ invitation }: { invitation: InvitationRow })
               is_primary: schedules.length === 0,
             })
           }
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-5 font-medium text-black"
+          disabled={eventCompleted}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-5 font-medium text-black disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus className="size-4" /> Etkinlik Ekle
         </button>
       </div>
+
+      {eventCompleted ? (
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/8 p-4 text-sm text-muted-foreground">
+          Etkinlik günü tamamlandığı için program yeni bir etkinliğe dönüştürülemez. Fotoğraf
+          yükleme ve etkinlik sahibinin indirme süreleri kendi kapanış tarihlerine kadar devam eder.
+        </div>
+      ) : identityLocked ? (
+        <div className="rounded-2xl border border-gold/25 bg-gold/5 p-4 text-sm text-muted-foreground">
+          Ödeme ana etkinliğe bağlıdır; ana etkinliğin türü ve tarihi değiştirilemez. Mekân ve
+          program ayrıntılarını düzenleyebilirsiniz.
+        </div>
+      ) : null}
 
       <div className="space-y-3">
         {schedules.map((schedule, index) => (
@@ -163,7 +182,7 @@ export function DashboardSchedule({ invitation }: { invitation: InvitationRow })
                 <button
                   type="button"
                   onClick={() => void move(index, -1)}
-                  disabled={index === 0}
+                  disabled={eventCompleted || index === 0}
                   aria-label="Yukarı taşı"
                   className="grid size-11 place-items-center rounded-xl border border-border disabled:opacity-30"
                 >
@@ -172,7 +191,7 @@ export function DashboardSchedule({ invitation }: { invitation: InvitationRow })
                 <button
                   type="button"
                   onClick={() => void move(index, 1)}
-                  disabled={index === schedules.length - 1}
+                  disabled={eventCompleted || index === schedules.length - 1}
                   aria-label="Aşağı taşı"
                   className="grid size-11 place-items-center rounded-xl border border-border disabled:opacity-30"
                 >
@@ -187,6 +206,7 @@ export function DashboardSchedule({ invitation }: { invitation: InvitationRow })
                 </a>
                 <button
                   type="button"
+                  disabled={eventCompleted}
                   onClick={() =>
                     setEditing({
                       ...schedule,
@@ -198,23 +218,25 @@ export function DashboardSchedule({ invitation }: { invitation: InvitationRow })
                     })
                   }
                   aria-label="Çoğalt"
-                  className="grid size-11 place-items-center rounded-xl border border-border"
+                  className="grid size-11 place-items-center rounded-xl border border-border disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <Copy className="size-4" />
                 </button>
                 <button
                   type="button"
+                  disabled={eventCompleted}
                   onClick={() => setEditing(schedule)}
                   aria-label="Düzenle"
-                  className="grid size-11 place-items-center rounded-xl border border-border"
+                  className="grid size-11 place-items-center rounded-xl border border-border disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <Pencil className="size-4" />
                 </button>
                 <button
                   type="button"
+                  disabled={eventCompleted || (identityLocked && schedule.is_primary)}
                   onClick={() => void remove(schedule)}
                   aria-label="Sil"
-                  className="grid size-11 place-items-center rounded-xl border border-rose/30 text-rose"
+                  className="grid size-11 place-items-center rounded-xl border border-rose/30 text-rose disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <Trash2 className="size-4" />
                 </button>
@@ -234,6 +256,7 @@ export function DashboardSchedule({ invitation }: { invitation: InvitationRow })
               <span>Tür</span>
               <select
                 value={editing.event_type}
+                disabled={identityLocked && editing.is_primary}
                 onChange={(event) => setEditing({ ...editing, event_type: event.target.value })}
                 className="field-base min-h-11 w-full bg-background"
               >
@@ -258,6 +281,7 @@ export function DashboardSchedule({ invitation }: { invitation: InvitationRow })
               <input
                 type="date"
                 value={editing.event_date || ""}
+                disabled={identityLocked && editing.is_primary}
                 onChange={(event) =>
                   setEditing({ ...editing, event_date: event.target.value || null })
                 }
