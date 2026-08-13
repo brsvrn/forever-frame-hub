@@ -94,9 +94,12 @@ export function InvitationIntro({
 
   const names = [partnerOne, partnerTwo].filter(Boolean).join(" & ") || "Davetiyemiz";
   const nameFadeDuration = reduceMotion ? 0.6 : 1.2;
+  const isColorburst = theme.id === "colorburst-fiesta";
+  const isSilverScreen = theme.id === "silver-screen-romance";
 
   return (
     <motion.div
+      data-invitation-intro-theme={theme.id}
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.03, filter: "blur(12px)" }}
       transition={{ duration: 0.8, ease: easeSilk }}
@@ -108,7 +111,18 @@ export function InvitationIntro({
     >
       {/* Background Media */}
       <div className="absolute inset-0 select-none pointer-events-none">
-        <img src={theme.image} alt="" className="h-full w-full object-cover" aria-hidden="true" />
+        <img
+          src={theme.image}
+          alt=""
+          className={`h-full w-full object-cover ${
+            isColorburst
+              ? "saturate-[1.12]"
+              : isSilverScreen
+                ? "grayscale contrast-[1.08] brightness-[.82]"
+                : ""
+          }`}
+          aria-hidden="true"
+        />
         {theme.coverVideoUrl ? (
           <video
             ref={videoRef}
@@ -124,8 +138,19 @@ export function InvitationIntro({
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : null}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/80" />
+        <div
+          className={`absolute inset-0 bg-gradient-to-b ${
+            isColorburst
+              ? "from-[#32105A]/20 via-[#32105A]/5 to-[#21083F]/75"
+              : isSilverScreen
+                ? "from-black/25 via-black/20 to-black/85"
+                : "from-black/35 via-black/20 to-black/80"
+          }`}
+        />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_5%,rgba(0,0,0,.4)_100%)]" />
+        {isSilverScreen ? (
+          <div className="absolute inset-5 border border-white/20 shadow-[inset_0_0_70px_rgba(0,0,0,.45)] sm:inset-8" />
+        ) : null}
       </div>
 
       {/* Main Container - perfectly centered and responsive on all mobile viewports */}
