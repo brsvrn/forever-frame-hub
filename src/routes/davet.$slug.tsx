@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AnimatePresence } from "framer-motion";
 import { z } from "zod";
@@ -35,6 +35,10 @@ import { resolveCustomizedTheme } from "@/lib/theme-customization";
 import { getInvitationTheme, getThemeCatalog } from "@/lib/theme-registry.functions";
 import { getDemoInvitationDraft } from "@/lib/demo-invitations";
 import { useInvitationFont } from "@/lib/invitation-fonts";
+import {
+  normalizeInvitationSectionOrder,
+  type InvitationSectionId,
+} from "@/lib/invitation-section-order";
 
 export const Route = createFileRoute("/davet/$slug")({
   validateSearch: z.object({ theme: z.string().optional() }),
@@ -199,6 +203,108 @@ function PremiumInvitePage() {
     return () => window.removeEventListener("message", receivePersonalGuest);
   }, []);
 
+  const sectionOrder = normalizeInvitationSectionOrder(eventFeatures?.section_order);
+  const renderInvitationSection = (section: InvitationSectionId) => {
+    switch (section) {
+      case "audio_greeting":
+        return features.digital_invitation !== false &&
+          eventFeatures?.audio_greeting_enabled !== false &&
+          advanced?.audio?.url ? (
+          <LueurSection active={isLueur}>
+            <VoiceGreeting
+              theme={theme}
+              url={advanced.audio.url}
+              title={advanced.audio.title}
+              description={advanced.audio.description}
+              alternativeText={advanced.audio.alternative_text}
+            />
+          </LueurSection>
+        ) : null;
+      case "story":
+        return features.digital_invitation !== false && eventFeatures?.story_enabled !== false ? (
+          <LueurSection active={isLueur} tone="wine">
+            <StoryTimeline draft={draft} theme={theme} />
+          </LueurSection>
+        ) : null;
+      case "gallery":
+        return features.digital_invitation !== false &&
+          eventFeatures?.gallery_enabled !== false &&
+          draft.galleryImages.length > 0 ? (
+          <LueurSection active={isLueur} tone="wine">
+            <InvitationPhotoGallery images={draft.galleryImages} theme={theme} lang={lang} />
+          </LueurSection>
+        ) : null;
+      case "countdown":
+        return features.digital_invitation !== false &&
+          eventFeatures?.countdown_enabled !== false ? (
+          <LueurSection active={isLueur}>
+            <CountdownTimer
+              eventDate={draft.date}
+              eventTime={draft.time || (schedules.length > 0 ? schedules[0].starts_at : null)}
+              theme={theme}
+              lang={lang}
+            />
+          </LueurSection>
+        ) : null;
+      case "schedule":
+        return features.digital_invitation !== false &&
+          eventFeatures?.schedule_enabled !== false ? (
+          <>
+            <LueurSection active={isLueur}>
+              <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
+            </LueurSection>
+            {schedules.length > 0 ? (
+              <LueurSection active={isLueur}>
+                <MultiEventDetails
+                  schedules={schedules}
+                  theme={theme}
+                  lang={lang}
+                  calendarEnabled={eventFeatures?.calendar_enabled !== false}
+                />
+              </LueurSection>
+            ) : (
+              <LueurSection active={isLueur}>
+                <EventDetails
+                  draft={draft}
+                  theme={theme}
+                  lang={lang}
+                  calendarEnabled={eventFeatures?.calendar_enabled !== false}
+                />
+              </LueurSection>
+            )}
+          </>
+        ) : null;
+      case "rsvp":
+        return features.digital_invitation !== false && eventFeatures?.rsvp_enabled !== false ? (
+          <LueurSection active={isLueur} tone="wine">
+            <PremiumRSVP
+              theme={theme}
+              invitationId={invitation.id}
+              guestToken={personalGuestToken}
+            />
+          </LueurSection>
+        ) : null;
+      case "memory_box":
+        return features.qr_gallery !== false && eventFeatures?.memory_box_enabled !== false ? (
+          <LueurSection active={isLueur} tone="wine">
+            <MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} />
+          </LueurSection>
+        ) : null;
+      case "qr_upload":
+        return features.qr_gallery !== false && eventFeatures?.qr_upload_enabled !== false ? (
+          <LueurSection active={isLueur}>
+            <PremiumQRExperience theme={theme} invitationId={invitation.id} />
+          </LueurSection>
+        ) : null;
+      case "gift":
+        return eventFeatures?.gift_enabled !== false && advanced?.gift ? (
+          <LueurSection active={isLueur}>
+            <GiftSection settings={advanced.gift} theme={theme} />
+          </LueurSection>
+        ) : null;
+    }
+  };
+
   return (
     <div
       data-invitation-custom-font={Boolean(draft.themeCustomization.fontFamily)}
@@ -259,102 +365,16 @@ function PremiumInvitePage() {
 
           <main className="relative z-10 h-dvh snap-y snap-mandatory overflow-y-auto scroll-smooth pb-24">
             {features.digital_invitation !== false ? (
-              <>
-                {isLueur ? (
-                  <LueurHero draft={draft} lang={lang} />
-                ) : (
-                  <HeroExperience draft={draft} theme={theme} lang={lang} />
-                )}
-                {eventFeatures?.audio_greeting_enabled !== false && advanced?.audio?.url ? (
-                  <LueurSection active={isLueur}>
-                    <VoiceGreeting
-                      theme={theme}
-                      url={advanced.audio.url}
-                      title={advanced.audio.title}
-                      description={advanced.audio.description}
-                      alternativeText={advanced.audio.alternative_text}
-                    />
-                  </LueurSection>
-                ) : null}
-                {eventFeatures?.story_enabled !== false ? (
-                  <LueurSection active={isLueur} tone="wine">
-                    <StoryTimeline draft={draft} theme={theme} />
-                  </LueurSection>
-                ) : null}
-                {draft.galleryImages.length > 0 ? (
-                  <LueurSection active={isLueur} tone="wine">
-                    <InvitationPhotoGallery
-                      images={draft.galleryImages}
-                      theme={theme}
-                      lang={lang}
-                    />
-                  </LueurSection>
-                ) : null}
-                <LueurSection active={isLueur}>
-                  <CountdownTimer
-                    eventDate={draft.date}
-                    eventTime={draft.time || (schedules.length > 0 ? schedules[0].starts_at : null)}
-                    theme={theme}
-                    lang={lang}
-                  />
-                </LueurSection>
-                {eventFeatures?.schedule_enabled !== false ? (
-                  <>
-                    <LueurSection active={isLueur}>
-                      <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
-                    </LueurSection>
-                    {schedules.length > 0 ? (
-                      <LueurSection active={isLueur}>
-                        <MultiEventDetails
-                          schedules={schedules}
-                          theme={theme}
-                          lang={lang}
-                          calendarEnabled={eventFeatures?.calendar_enabled !== false}
-                        />
-                      </LueurSection>
-                    ) : (
-                      <LueurSection active={isLueur}>
-                        <EventDetails
-                          draft={draft}
-                          theme={theme}
-                          lang={lang}
-                          calendarEnabled={eventFeatures?.calendar_enabled !== false}
-                        />
-                      </LueurSection>
-                    )}
-                  </>
-                ) : null}
-                {eventFeatures?.rsvp_enabled !== false ? (
-                  <LueurSection active={isLueur} tone="wine">
-                    <PremiumRSVP
-                      theme={theme}
-                      invitationId={invitation.id}
-                      guestToken={personalGuestToken}
-                    />
-                  </LueurSection>
-                ) : null}
-              </>
+              isLueur ? (
+                <LueurHero draft={draft} lang={lang} />
+              ) : (
+                <HeroExperience draft={draft} theme={theme} lang={lang} />
+              )
             ) : null}
 
-            {features.qr_gallery !== false ? (
-              <>
-                {eventFeatures?.memory_box_enabled !== false ? (
-                  <LueurSection active={isLueur} tone="wine">
-                    <MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} />
-                  </LueurSection>
-                ) : null}
-                {eventFeatures?.qr_upload_enabled !== false ? (
-                  <LueurSection active={isLueur}>
-                    <PremiumQRExperience theme={theme} invitationId={invitation.id} />
-                  </LueurSection>
-                ) : null}
-              </>
-            ) : null}
-            {eventFeatures?.gift_enabled !== false && advanced?.gift ? (
-              <LueurSection active={isLueur}>
-                <GiftSection settings={advanced.gift} theme={theme} />
-              </LueurSection>
-            ) : null}
+            {sectionOrder.map((section) => (
+              <Fragment key={section}>{renderInvitationSection(section)}</Fragment>
+            ))}
 
             <LueurSection active={isLueur} tone="wine">
               <InvitationFooter draft={draft} theme={theme} lang={lang} />

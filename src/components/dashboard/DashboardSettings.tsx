@@ -1,6 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Loader2, Plus, Save, Settings2, Trash2 } from "lucide-react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  type DragEndEvent,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Loader2, Plus, Save, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { InvitationRow } from "@/lib/invitations.api";
 import {
@@ -17,6 +34,7 @@ import {
   normalizeBoundedIntegerDraft,
   parseBoundedIntegerDraft,
 } from "@/lib/bounded-integer-input";
+import type { InvitationSectionId } from "@/lib/invitation-section-order";
 
 type Question = {
   id: string;
@@ -37,11 +55,15 @@ type Question = {
   sort_order: number;
 };
 
-const featureLabels: Array<[keyof FeatureSettings, string]> = [
+type ToggleFeatureKey = Exclude<keyof FeatureSettings, "section_order">;
+
+const featureLabels: Array<[ToggleFeatureKey, string]> = [
   ["opening_enabled", "Açılış animasyonu"],
   ["music_enabled", "Arka plan müziği"],
   ["audio_greeting_enabled", "Sesli karşılama"],
   ["story_enabled", "Çiftin hikâyesi"],
+  ["gallery_enabled", "Fotoğraf galerisi"],
+  ["countdown_enabled", "Geri sayım"],
   ["schedule_enabled", "Etkinlik programı"],
   ["rsvp_enabled", "LCV formu"],
   ["memory_box_enabled", "Anı Duvarı"],
@@ -50,6 +72,21 @@ const featureLabels: Array<[keyof FeatureSettings, string]> = [
   ["gift_enabled", "IBAN ve dijital hediye"],
   ["share_enabled", "Sosyal paylaşım kartı"],
 ];
+
+const sectionOrderLabels: Record<
+  InvitationSectionId,
+  { label: string; feature: ToggleFeatureKey }
+> = {
+  audio_greeting: { label: "Sesli karşılama", feature: "audio_greeting_enabled" },
+  story: { label: "Çiftin hikâyesi", feature: "story_enabled" },
+  gallery: { label: "Fotoğraf galerisi", feature: "gallery_enabled" },
+  countdown: { label: "Geri sayım", feature: "countdown_enabled" },
+  schedule: { label: "Etkinlik programı ve mekân", feature: "schedule_enabled" },
+  rsvp: { label: "LCV formu", feature: "rsvp_enabled" },
+  memory_box: { label: "Anı Duvarı", feature: "memory_box_enabled" },
+  qr_upload: { label: "QR ile anı yükleme", feature: "qr_upload_enabled" },
+  gift: { label: "IBAN ve dijital hediye", feature: "gift_enabled" },
+};
 
 const rsvpLabels: Array<[keyof RsvpSettings, string]> = [
   ["collect_phone", "Telefon numarası"],
@@ -96,6 +133,48 @@ function Toggle({
         className="size-5 accent-gold"
       />
     </label>
+  );
+}
+
+function SortableSectionRow({
+  section,
+  enabled,
+}: {
+  section: InvitationSectionId;
+  enabled: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: section,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`flex min-h-14 items-center gap-3 rounded-xl border bg-background px-3 shadow-sm transition-colors ${
+        isDragging ? "z-10 border-gold/60 opacity-70 shadow-lg" : "border-border"
+      }`}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="grid size-10 shrink-0 cursor-grab touch-none place-items-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label={`${sectionOrderLabels[section].label} bölümünü sırala`}
+      >
+        <GripVertical className="size-5" aria-hidden="true" />
+      </button>
+      <span className="min-w-0 flex-1 text-sm font-medium">
+        {sectionOrderLabels[section].label}
+      </span>
+      <span
+        className={`rounded-full px-2.5 py-1 text-xs ${
+          enabled ? "bg-emerald-500/10 text-emerald-700" : "bg-muted text-muted-foreground"
+        }`}
+      >
+        {enabled ? "Açık" : "Kapalı"}
+      </span>
+    </div>
   );
 }
 
@@ -175,6 +254,10 @@ export function DashboardSettings({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [featureDirty, setFeatureDirty] = useState<Set<keyof FeatureSettings>>(new Set());
+  const sectionOrderSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   const shows = (section: DashboardSettingsSection) =>
     !visibleSections || visibleSections.includes(section);
 
@@ -205,6 +288,18 @@ export function DashboardSettings({
     void load();
   }, [load]);
 
+  const reorderSections = ({ active, over }: DragEndEvent) => {
+    if (!features || !over || active.id === over.id) return;
+    const oldIndex = features.section_order.indexOf(active.id as InvitationSectionId);
+    const newIndex = features.section_order.indexOf(over.id as InvitationSectionId);
+    if (oldIndex < 0 || newIndex < 0) return;
+    setFeatures({
+      ...features,
+      section_order: arrayMove(features.section_order, oldIndex, newIndex),
+    });
+    setFeatureDirty((current) => new Set(current).add("section_order"));
+  };
+
   const save = async () => {
     if (!features || !memory || !rsvp || saving) return;
     setSaving(true);
@@ -212,9 +307,9 @@ export function DashboardSettings({
       const nextVersions = { ...versions };
       if (shows("modules") && featureDirty.size > 0) {
         const latest = await getCoreEventContent({ data: { invitationId: invitation.id } });
-        const merged = featureSettingsSchema.parse(latest.features);
+        const merged = { ...featureSettingsSchema.parse(latest.features) };
         featureDirty.forEach((key) => {
-          merged[key] = features[key];
+          Object.assign(merged, { [key]: features[key] });
         });
         const savedFeatures = await saveCoreEventSection({
           data: {
@@ -355,6 +450,34 @@ export function DashboardSettings({
                 }}
               />
             ))}
+          </div>
+
+          <div className="mt-7 border-t border-border pt-6">
+            <h4 className="font-medium">Davetiye bölüm sırası</h4>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Bölümleri tutamaçlarından sürükleyerek sıralayın. Kapak en başta, alt bilgi en sonda
+              sabit kalır.
+            </p>
+            <DndContext
+              sensors={sectionOrderSensors}
+              collisionDetection={closestCenter}
+              onDragEnd={reorderSections}
+            >
+              <SortableContext
+                items={features.section_order}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="mt-4 grid gap-2">
+                  {features.section_order.map((section) => (
+                    <SortableSectionRow
+                      key={section}
+                      section={section}
+                      enabled={Boolean(features[sectionOrderLabels[section].feature])}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
         </section>
       ) : null}

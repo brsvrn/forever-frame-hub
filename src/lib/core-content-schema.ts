@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { invitationSectionIds, normalizeInvitationSectionOrder } from "./invitation-section-order";
 
 const optionalText = (max: number) => z.string().trim().max(max).nullable();
 
@@ -39,6 +40,10 @@ export const featureSettingsSchema = z.object({
   reactions_enabled: z.boolean(),
   share_enabled: z.boolean(),
   calendar_enabled: z.boolean(),
+  section_order: z
+    .array(z.enum(invitationSectionIds))
+    .transform(normalizeInvitationSectionOrder)
+    .default([...invitationSectionIds]),
 });
 
 export const nullableIsoDatetime = z
@@ -73,13 +78,19 @@ export const memorySettingsSchema = z
     audio_message_enabled: z.boolean().default(false),
     guest_name_required: z.boolean().default(false),
     moderation_required: z.boolean().default(true),
-    gallery_visibility: z.enum(["private", "public_after_approval"]).default("public_after_approval"),
+    gallery_visibility: z
+      .enum(["private", "public_after_approval"])
+      .default("public_after_approval"),
     upload_starts_at: nullableIsoDatetime.default(null),
     upload_ends_at: nullableIsoDatetime.default(null),
     max_image_size_mb: z.number().int().min(1).max(100).default(25),
     max_video_size_mb: z.number().int().min(1).max(500).default(100),
     max_audio_seconds: z.union([z.literal(30), z.literal(60)]).default(30),
-    thank_you_message: z.string().trim().max(1000).default("Anınızı paylaştığınız için teşekkür ederiz."),
+    thank_you_message: z
+      .string()
+      .trim()
+      .max(1000)
+      .default("Anınızı paylaştığınız için teşekkür ederiz."),
   })
   .refine(
     (value) =>
