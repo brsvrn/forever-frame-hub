@@ -44,7 +44,9 @@ export async function getAdminAccessCodes(): Promise<AdminAccessCode[]> {
     packageId: null,
     maxUses: row.max_uses || 1,
     usedCount: row.used_count || 0,
-    remainingUses: row.is_owner_code ? 999999 : Math.max(0, (row.max_uses || 1) - (row.used_count || 0)),
+    remainingUses: row.is_owner_code
+      ? 999999
+      : Math.max(0, (row.max_uses || 1) - (row.used_count || 0)),
     startsAt: row.starts_at,
     expiresAt: row.expires_at,
     restrictedUserEmail: row.restricted_user_email,
@@ -72,7 +74,7 @@ export async function createAdminAccessCode(
     isOwnerCode?: boolean;
     isTestCode?: boolean;
     adminNotes?: string | null;
-  }
+  },
 ) {
   const normalizedRaw = params.rawCode.trim().toUpperCase();
   const codeHash = await hashCode(normalizedRaw);
@@ -113,7 +115,7 @@ export async function createAdminAccessCode(
 export async function toggleAccessCodeStatus(
   adminEmail: string,
   codeId: string,
-  isActive: boolean
+  isActive: boolean,
 ) {
   const { data, error } = await supabase
     .from("access_codes")
@@ -131,14 +133,16 @@ export async function toggleAccessCodeStatus(
 export async function getAccessCodeRedemptions(codeId: string) {
   const { data, error } = await supabase
     .from("access_code_redemptions")
-    .select(`
+    .select(
+      `
       id,
       user_id,
       invitation_id,
       redeemed_at,
       ip_address,
       user_agent
-    `)
+    `,
+    )
     .eq("code_id", codeId)
     .order("redeemed_at", { ascending: false });
 
@@ -146,7 +150,7 @@ export async function getAccessCodeRedemptions(codeId: string) {
 
   // Enhance with user profiles
   const userIds = Array.from(new Set((data || []).map((r) => r.user_id)));
-  let userMap: Record<string, string> = {};
+  const userMap: Record<string, string> = {};
 
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
@@ -176,123 +180,37 @@ export async function getAccessCodeRedemptions(codeId: string) {
  */
 export async function redeemAccessCode(
   rawCode: string,
-  invitationId: string
+  invitationId: string,
 ): Promise<{ success: boolean; message: string; packageType?: string }> {
   const { data: authData } = await supabase.auth.getUser();
   if (!authData?.user) {
     throw new Error("Kodu kullanmak için giriş yapmalısınız.");
   }
 
-  const normalizedCode = rawCode.trim().toUpperCase();
-  const nowIso = new Date().toISOString();
-
-  // 1. Fetch code
-  const { data: codeData, error: codeErr } = await supabase
-    .from("access_codes")
-    .select("*")
-    .eq("code_label", normalizedCode)
-    .single();
-
-  if (codeErr || !codeData) {
-    return { success: false, message: "Geçersiz veya bulunamayan erişim kodu." };
-  }
-
-  // 2. Validate status & active
-  if (!codeData.is_active) {
-    return { success: false, message: "Bu erişim kodu devre dışı bırakılmış." };
-  }
-
-  // 3. Validate start date
-  if (codeData.starts_at && new Date(codeData.starts_at) > new Date()) {
-    return { success: false, message: "Bu kodun kullanım tarihi henüz başlamadı." };
-  }
-
-  // 4. Validate expiration
-  if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
-    return { success: false, message: "Bu erişim kodunun süresi dolmuş." };
-  }
-
-  // 5. Validate usage limit (unless owner code)
-  if (!codeData.is_owner_code && codeData.used_count >= codeData.max_uses) {
-    return { success: false, message: "Bu kodun kullanım limiti dolmuştur." };
-  }
-
-  // 6. Validate restricted email
-  if (
-    codeData.restricted_user_email &&
-    codeData.restricted_user_email.toLowerCase() !== (authData.user.email || "").toLowerCase()
-  ) {
-    return {
-      success: false,
-      message: "Bu kod yalnızca belirtilen e-posta adresi için tanımlanmıştır.",
-    };
-  }
-
-  // 7. Verify invitation ownership
-  const { data: inv, error: invErr } = await supabase
-    .from("invitations")
-    .select("id, event_date, user_id")
-    .eq("id", invitationId)
-    .single();
-
-  if (invErr || !inv) {
-    return { success: false, message: "Etkinlik bulunamadı." };
-  }
-
-  if (inv.user_id !== authData.user.id) {
-    return { success: false, message: "Bu etkinliği güncelleme yetkiniz yok." };
-  }
-
-  // 8. Calculate lifecycle dates
-  const eventDateObj = inv.event_date ? new Date(inv.event_date) : new Date();
-  const qrClosingAt = new Date(eventDateObj.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString();
-  const retentionExpiresAt = new Date(
-    eventDateObj.getTime() + 60 * 24 * 60 * 60 * 1000
-  ).toISOString();
-  const invitationExpiresAt = new Date(
-    new Date(eventDateObj).setFullYear(eventDateObj.getFullYear() + 1)
-  ).toISOString();
-
-  // 9. Update invitation to paid & activated
-  const { error: updateInvErr } = await supabase
-    .from("invitations")
-    .update({
-      is_paid: true,
-      package_type: codeData.package_type || "all_in_one",
-      is_published: true,
-      qr_closing_at: qrClosingAt,
-      retention_expires_at: retentionExpiresAt,
-      invitation_expires_at: invitationExpiresAt,
-      updated_at: nowIso,
-    })
-    .eq("id", invitationId);
-
-  if (updateInvErr) {
-    throw new Error("Etkinlik güncellenirken hata oluştu.");
-  }
-
-  // 10. Record redemption
-  await supabase.from("access_code_redemptions").insert({
-    code_id: codeData.id,
-    user_id: authData.user.id,
-    invitation_id: invitationId,
-    redeemed_at: nowIso,
-    user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+  const { data, error } = await supabase.rpc("redeem_access_code_atomic", {
+    p_code_label: rawCode.trim().toUpperCase(),
+    p_invitation_id: invitationId,
+    p_user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
   });
 
-  // 11. Increment code used count
-  await supabase
-    .from("access_codes")
-    .update({
-      used_count: (codeData.used_count || 0) + 1,
-      updated_at: nowIso,
-    })
-    .eq("id", codeData.id);
+  if (error) {
+    console.error("Access code redemption failed", error);
+    throw new Error("Kod doğrulanırken bir hata oluştu. Lütfen tekrar deneyin.");
+  }
 
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Kod doğrulama yanıtı alınamadı. Lütfen tekrar deneyin.");
+  }
+
+  const result = data as Record<string, unknown>;
   return {
-    success: true,
-    message: "VIP / Promosyon kodu başarıyla uygulandı! Etkinliğiniz ve tüm özellikler aktif edildi.",
-    packageType: codeData.package_type,
+    success: result.success === true,
+    message:
+      typeof result.message === "string"
+        ? result.message
+        : result.success === true
+          ? "Kullanım kodu başarıyla uygulandı."
+          : "Kod uygulanamadı.",
+    packageType: typeof result.packageType === "string" ? result.packageType : undefined,
   };
 }
-
