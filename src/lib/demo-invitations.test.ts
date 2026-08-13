@@ -18,7 +18,6 @@ const selectableThemeIds = [
   "tuscan-golden-hills",
   "lake-como-garden",
   "grand-ballroom",
-  "cinematic-flow",
   "boho-motion",
   "ethereal-light",
   "royal-envelope",

@@ -19,6 +19,8 @@ import themeBohoChic from "@/assets/theme-boho-chic.jpg";
 import themeEtherealLight from "@/assets/theme-ethereal-light.jpg";
 import midnightConservatory from "@/assets/theme-midnight-conservatory.webp";
 import evergreenVows from "@/assets/theme-evergreen-vows.webp";
+import lueurButterfly from "@/assets/lueur-de-minuit-butterfly.png";
+import royalEnvelope from "@/assets/theme-royal-envelope.webp";
 import {
   buildThemeCapabilities,
   type ThemeCapabilities,
@@ -258,7 +260,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     name: "Lueur de Minuit",
     category: "cinematic",
     tag: { tr: "Kelebeğe dokun", en: "Touch the butterfly" },
-    image: themeBlush,
+    image: lueurButterfly,
     selectable: true,
     primaryColor: "#07152f",
     secondaryColor: "#f5f1e8",
@@ -858,7 +860,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     category: "cinematic",
     tag: { tr: "Sinematik akış", en: "Cinematic flow" },
     image: themeNoir, // Fallback image while video loads
-    selectable: true,
+    selectable: false,
     primaryColor: "#FFFFFF",
     secondaryColor: "#000000",
     font: "Montserrat",
@@ -985,7 +987,7 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     name: "Royal Envelope",
     category: "luxury",
     tag: { tr: "Lüks zarf açılışı", en: "Royal envelope" },
-    image: evergreenVows,
+    image: royalEnvelope,
     selectable: true,
     primaryColor: "#0A1F18",
     secondaryColor: "#C9A96E",
@@ -1003,7 +1005,8 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
     styles: {
       overlay: "bg-[#0A1F18]/40",
       typography: {
-        display: "font-playfair font-normal tracking-tight text-[#F7F0E3] drop-shadow-[0_4px_16px_rgba(0,0,0,.6)]",
+        display:
+          "font-playfair font-normal tracking-tight text-[#F7F0E3] drop-shadow-[0_4px_16px_rgba(0,0,0,.6)]",
         sans: "font-sans",
         subheading: "font-cinzel uppercase tracking-[0.3em] text-[#C9A96E] text-xs font-semibold",
         ampersand: "font-pinyon text-[#C9A96E] text-[1.15em] font-normal mx-2",
