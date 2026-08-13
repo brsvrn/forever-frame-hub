@@ -28,7 +28,11 @@ import { CountdownTimer } from "@/components/invitation/CountdownTimer";
 import { InvitationPhotoGallery } from "@/components/invitation/InvitationPhotoGallery";
 import { InvitationFooter } from "@/components/invitation/InvitationFooter";
 import { LueurHero, LueurOpening, LueurSection } from "@/components/invitation/PapillonRouge";
-import { RoyalEnvelopeOpening } from "@/components/invitation/RoyalEnvelopeOpening";
+import {
+  RoyalEnvelopeBackground,
+  RoyalEnvelopeHero,
+  RoyalEnvelopeOpening,
+} from "@/components/invitation/RoyalEnvelopeOpening";
 import { EvergreenVowsHero, EvergreenVowsOpening } from "@/components/invitation/EvergreenVows";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
 import type { InviteThemeId, ThemeCategory, ThemeConfig } from "@/lib/theme-engine";
@@ -370,7 +374,11 @@ function PremiumInvitePage() {
 
       {(hasOpened || !openingEnabled || features.digital_invitation === false) && (
         <div key={`invite-${theme.id}`}>
-          {!isLueur ? <LivingBackground theme={theme} /> : null}
+          {isRoyal ? (
+            <RoyalEnvelopeBackground />
+          ) : !isLueur ? (
+            <LivingBackground theme={theme} />
+          ) : null}
 
           <main className="relative z-10 h-dvh snap-y snap-mandatory overflow-y-auto scroll-smooth pb-24">
             {features.digital_invitation !== false ? (
@@ -378,6 +386,8 @@ function PremiumInvitePage() {
                 <EvergreenVowsHero draft={draft} lang={lang} />
               ) : isLueur ? (
                 <LueurHero draft={draft} lang={lang} />
+              ) : isRoyal ? (
+                <RoyalEnvelopeHero draft={draft} lang={lang} />
               ) : (
                 <HeroExperience draft={draft} theme={theme} lang={lang} />
               )
