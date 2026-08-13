@@ -416,6 +416,10 @@
   font-family: var(--invite-display);
 }
 
+[data-invitation-custom-font="true"] :where(h1, h2, h3, .invite-display) {
+  font-family: var(--invite-display) !important;
+}
+
 @utility invite-soft {
   color: var(--invite-soft);
 }

@@ -1,4 +1,4 @@
-import { Check, Palette, RotateCcw, Save, Type } from "lucide-react";
+import { Check, Palette, RotateCcw, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveTheme } from "@/lib/theme-engine";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/lib/theme-customization";
 import type { InvitationDraft } from "@/lib/invitation";
 import { Field } from "./Field";
+import { FontLibraryPicker } from "./FontLibraryPicker";
 
 type StudioProps = {
   draft: InvitationDraft;
@@ -17,8 +18,6 @@ type StudioProps = {
   lang: "tr" | "en";
   compact?: boolean;
 };
-
-const fontOptions = ["Cormorant Garamond", "Playfair Display", "Bodoni Moda", "Inter"];
 
 const coverOptions: Array<{
   id: ThemeCoverStyle;
@@ -170,25 +169,16 @@ export function ThemeCustomizationStudio({ draft, update, lang, compact = false 
           )}
         </Field>
 
-        <Field label={lang === "tr" ? "Yazı karakteri" : "Typeface"}>
-          {(id) => (
-            <div className="flex items-center gap-3 rounded-2xl border border-input bg-background/60 px-3">
-              <Type className="size-4 text-muted-foreground" aria-hidden="true" />
-              <select
-                id={id}
-                value={fontFamily}
-                onChange={(event) => setCustomization({ fontFamily: event.target.value })}
-                className="min-h-11 w-full bg-transparent text-sm outline-none"
-              >
-                {fontOptions.map((font) => (
-                  <option key={font} value={font} className="bg-background text-foreground">
-                    {font}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </Field>
+        <div>
+          <p className="mb-2 text-sm font-medium">
+            {lang === "tr" ? "Yazı karakteri" : "Typeface"}
+          </p>
+          <FontLibraryPicker
+            value={fontFamily}
+            onChange={(font) => setCustomization({ fontFamily: font })}
+            lang={lang}
+          />
+        </div>
       </div>
 
       <div className="mt-6">

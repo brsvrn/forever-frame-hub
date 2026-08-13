@@ -33,6 +33,8 @@ import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
 import type { InviteThemeId, ThemeCategory, ThemeConfig } from "@/lib/theme-engine";
 import { resolveCustomizedTheme } from "@/lib/theme-customization";
 import { getInvitationTheme, getThemeCatalog } from "@/lib/theme-registry.functions";
+import { getDemoInvitationDraft } from "@/lib/demo-invitations";
+import { useInvitationFont } from "@/lib/invitation-fonts";
 
 export const Route = createFileRoute("/davet/$slug")({
   validateSearch: z.object({ theme: z.string().optional() }),
@@ -154,12 +156,13 @@ function PremiumInvitePage() {
     Route.useLoaderData();
   const search = Route.useSearch();
   const { lang } = useI18n();
-  const draft = rowToDraft(invitation as InvitationRow);
+  const storedDraft = rowToDraft(invitation as InvitationRow);
   const isDemo = invitation.slug === "demo";
   const initialDemoTheme = themeCatalog.some((theme) => theme.id === search.theme)
     ? (search.theme as InviteThemeId)
-    : draft.theme;
+    : storedDraft.theme;
   const [previewThemeId, setPreviewThemeId] = useState<InviteThemeId>(initialDemoTheme);
+  const draft = isDemo ? getDemoInvitationDraft(previewThemeId) : storedDraft;
   const themeBase = isDemo ? themeCatalog.find((item) => item.id === previewThemeId) : managedTheme;
   const theme = resolveCustomizedTheme(
     isDemo ? previewThemeId : draft.theme,
@@ -167,6 +170,7 @@ function PremiumInvitePage() {
     isDemo ? undefined : draft.coverPhoto,
     themeBase ?? undefined,
   );
+  useInvitationFont(theme.font);
   const pkg = (invitation as InvitationRow & { package?: { features?: Record<string, boolean> } })
     .package;
   const features = pkg?.features || {
@@ -197,11 +201,15 @@ function PremiumInvitePage() {
 
   return (
     <div
+      data-invitation-custom-font={Boolean(draft.themeCustomization.fontFamily)}
       className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30"
-      style={{
-        backgroundColor: theme.secondaryColor,
-        fontFamily: theme.font ? `"${theme.font}", sans-serif` : undefined,
-      }}
+      style={
+        {
+          backgroundColor: theme.secondaryColor,
+          fontFamily: theme.font ? `"${theme.font}", sans-serif` : undefined,
+          "--invite-display": theme.font ? `"${theme.font}", serif` : undefined,
+        } as React.CSSProperties & Record<string, string | undefined>
+      }
     >
       {isDemo ? (
         <DemoThemeSwitcher

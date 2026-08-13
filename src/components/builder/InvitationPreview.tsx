@@ -5,6 +5,7 @@ import type { BuilderContent } from "@/lib/builder-content";
 import { countdownDays, formatInviteDate, type InvitationDraft } from "@/lib/invitation";
 import { easeSilk } from "@/components/landing/motion-primitives";
 import { resolveCustomizedTheme } from "@/lib/theme-customization";
+import { useInvitationFont } from "@/lib/invitation-fonts";
 
 export function InvitationPreview({
   draft,
@@ -26,6 +27,7 @@ export function InvitationPreview({
     draft.themeCustomization,
     draft.coverPhoto,
   );
+  useInvitationFont(themeConfig.font);
 
   const showAmpersand =
     draft.partnerTwo ||
@@ -61,6 +63,7 @@ export function InvitationPreview({
   return (
     <div
       data-invite-theme={draft.theme}
+      data-invitation-custom-font={Boolean(draft.themeCustomization.fontFamily)}
       className={cn(
         "invite-canvas overflow-hidden border border-border",
         radiusMap["full"],
