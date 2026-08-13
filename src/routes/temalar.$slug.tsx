@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/marketing/layout/Navbar";
 import { Footer } from "@/components/marketing/layout/Footer";
-import { selectableThemes } from "@/lib/theme-engine";
+import { getThemeCatalog } from "@/lib/theme-registry.functions";
 import {
   relatedThemes,
   themeCategoryLabels,
@@ -24,26 +24,27 @@ import {
 } from "@/lib/theme-pages";
 
 export const Route = createFileRoute("/temalar/$slug")({
-  loader: ({ params }) => {
-    const theme = selectableThemes.find((item) => item.id === params.slug);
+  loader: async ({ params }) => {
+    const themes = await getThemeCatalog();
+    const theme = themes.find((item) => item.id === params.slug);
     if (!theme) throw notFound();
-    return theme;
+    return { theme, themes };
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Tema bulunamadı | MemoryWedding" }] };
-    const description = themePageDescription(loaderData);
-    const image = new URL(loaderData.image, "https://www.memory-wedding.com").toString();
+    const description = themePageDescription(loaderData.theme);
+    const image = new URL(loaderData.theme.image, "https://www.memory-wedding.com").toString();
     return {
       meta: [
-        { title: `${loaderData.name} Dijital Davetiye Teması | MemoryWedding` },
+        { title: `${loaderData.theme.name} Dijital Davetiye Teması | MemoryWedding` },
         { name: "description", content: description },
-        { property: "og:title", content: `${loaderData.name} | MemoryWedding` },
+        { property: "og:title", content: `${loaderData.theme.name} | MemoryWedding` },
         { property: "og:description", content: description },
         { property: "og:image", content: image },
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [
-        { rel: "canonical", href: `https://www.memory-wedding.com/temalar/${loaderData.id}` },
+        { rel: "canonical", href: `https://www.memory-wedding.com/temalar/${loaderData.theme.id}` },
       ],
     };
   },
@@ -51,11 +52,11 @@ export const Route = createFileRoute("/temalar/$slug")({
 });
 
 function ThemeDetailPage() {
-  const theme = Route.useLoaderData();
+  const { theme, themes } = Route.useLoaderData();
   const features = themeFeatureLabels(theme);
   const editorial = themeEditorialContent(theme);
   const scenes = themeExperienceScenes(theme);
-  const similarThemes = relatedThemes(theme, selectableThemes);
+  const similarThemes = relatedThemes(theme, themes);
   const faqs = themeFaqs(theme);
   const faqStructuredData = {
     "@context": "https://schema.org",

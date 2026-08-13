@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   getInvitationById,
   getPublicPackages,
+  getPublicThemes,
   rowToDraft,
   saveInvitation,
   type PackageFeatures,
@@ -44,7 +45,7 @@ import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { DashboardTeam } from "@/components/dashboard/DashboardTeam";
 import type { InvitationRow } from "@/lib/invitations.api";
-import { selectableThemes, type InviteThemeId } from "@/lib/theme-engine";
+import type { InviteThemeId } from "@/lib/theme-engine";
 import { trackDemoStep } from "@/lib/analytics/analytics";
 
 const builderStepIds = builderSteps.map((step) => step.id);
@@ -290,11 +291,18 @@ function BuilderPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("edit")) return;
     const requestedTheme = params.get("theme");
-    if (!requestedTheme || !selectableThemes.some((theme) => theme.id === requestedTheme)) return;
-    setDraft((current) => ({ ...current, theme: requestedTheme as InviteThemeId }));
-    params.delete("theme");
-    const query = params.toString();
-    window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+    if (!requestedTheme) return;
+    let active = true;
+    getPublicThemes().then((themes) => {
+      if (!active || !themes.some((theme) => theme.theme_id === requestedTheme)) return;
+      setDraft((current) => ({ ...current, theme: requestedTheme as InviteThemeId }));
+      params.delete("theme");
+      const query = params.toString();
+      window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+    });
+    return () => {
+      active = false;
+    };
   }, [hydrated, setDraft]);
 
   useEffect(() => {

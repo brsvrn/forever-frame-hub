@@ -1,110 +1,150 @@
-import { supabase } from "@/integrations/supabase/client";
-import { resolveTheme, type ThemeConfig, type InviteThemeId } from "./theme-engine";
+import type { Database, Json } from "@/integrations/supabase/types";
+import {
+  resolveTheme,
+  selectableThemes,
+  themes as staticThemes,
+  type InviteThemeId,
+  type ThemeCategory,
+  type ThemeConfig,
+} from "./theme-engine";
 
-export class ThemeRegistry {
-  private static instance: ThemeRegistry;
-  private themesCache: Map<string, ThemeConfig> = new Map();
-  private isLoaded = false;
+export type ManagedThemeRow = Pick<
+  Database["public"]["Tables"]["themes"]["Row"],
+  | "id"
+  | "theme_id"
+  | "name"
+  | "description"
+  | "preview_image_url"
+  | "config"
+  | "is_active"
+  | "deleted_at"
+  | "updated_at"
+>;
 
-  private constructor() {}
+const THEME_CATEGORIES: ThemeCategory[] = [
+  "coastal",
+  "nature",
+  "italy",
+  "luxury",
+  "cinematic",
+  "classic",
+];
 
-  static getInstance(): ThemeRegistry {
-    if (!ThemeRegistry.instance) {
-      ThemeRegistry.instance = new ThemeRegistry();
-    }
-    return ThemeRegistry.instance;
-  }
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
 
-  /**
-   * Fetch all active themes from Supabase database.
-   * If DB fetch fails, it falls back to local cache or defaults.
-   */
-  async loadThemes(): Promise<ThemeConfig[]> {
-    try {
-      const { data, error } = await supabase.from("themes").select("*").eq("is_active", true);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        data.forEach((dbTheme) => {
-          const config =
-            typeof dbTheme.config === "string" ? JSON.parse(dbTheme.config) : dbTheme.config;
-          const fallback = resolveTheme(dbTheme.theme_id);
-          const themeConfig: ThemeConfig = {
-            ...fallback,
-            id: dbTheme.theme_id as InviteThemeId,
-            name: dbTheme.name,
-            tag: config.tag || { tr: dbTheme.name, en: dbTheme.name },
-            image: dbTheme.preview_image_url || fallback.image,
-            isActive: dbTheme.is_active !== false,
-            isFeatured: config.isFeatured ?? fallback.isFeatured,
-            isPremium: config.isPremium ?? fallback.isPremium,
-            sortOrder: config.sortOrder ?? fallback.sortOrder,
-            capabilities: config.capabilities || fallback.capabilities,
-            coverVideoUrl: config.coverVideoUrl || fallback.coverVideoUrl,
-            qr: config.qr || fallback.qr,
-            music: config.music || fallback.music,
-            ambientEffect: config.ambientEffect || fallback.ambientEffect,
-            openingAnimation: config.openingAnimation || fallback.openingAnimation,
-            styles: config.styles || fallback.styles,
-          };
-          this.themesCache.set(dbTheme.theme_id, themeConfig);
-        });
-        this.isLoaded = true;
-      }
-      return Array.from(this.themesCache.values());
-    } catch (error) {
-      console.error("Failed to load themes from registry:", error);
-      return [];
-    }
-  }
-
-  /**
-   * Get a specific theme by ID. If not found in DB, falls back to static theme-engine definitions.
-   */
-  async getTheme(themeId: string): Promise<ThemeConfig | null> {
-    if (this.themesCache.has(themeId)) {
-      return this.themesCache.get(themeId) || null;
-    }
-
-    // Attempt lazy load if not in cache
-    try {
-      const { data, error } = await supabase
-        .from("themes")
-        .select("*")
-        .eq("theme_id", themeId)
-        .single();
-
-      if (!error && data) {
-        const config = typeof data.config === "string" ? JSON.parse(data.config) : data.config;
-        const fallback = resolveTheme(data.theme_id);
-        const themeConfig: ThemeConfig = {
-          ...fallback,
-          id: data.theme_id as InviteThemeId,
-          name: data.name,
-          tag: config.tag || { tr: data.name, en: data.name },
-          image: data.preview_image_url || fallback.image,
-          isActive: data.is_active !== false,
-          isFeatured: config.isFeatured ?? fallback.isFeatured,
-          isPremium: config.isPremium ?? fallback.isPremium,
-          sortOrder: config.sortOrder ?? fallback.sortOrder,
-          capabilities: config.capabilities || fallback.capabilities,
-          coverVideoUrl: config.coverVideoUrl || fallback.coverVideoUrl,
-          qr: config.qr || fallback.qr,
-          music: config.music || fallback.music,
-          ambientEffect: config.ambientEffect || fallback.ambientEffect,
-          openingAnimation: config.openingAnimation || fallback.openingAnimation,
-          styles: config.styles || fallback.styles,
-        };
-        this.themesCache.set(themeId, themeConfig);
-        return themeConfig;
-      }
-    } catch (e) {
-      console.warn("Theme not found in DB, falling back to static config", e);
-    }
-
-    return null;
+function parseConfig(value: Json): Record<string, unknown> {
+  if (isRecord(value)) return value;
+  if (typeof value !== "string") return {};
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return isRecord(parsed) ? parsed : {};
+  } catch {
+    return {};
   }
 }
 
-export const themeRegistry = ThemeRegistry.getInstance();
+function mergeKnownShape<T>(fallback: T, override: unknown): T {
+  if (Array.isArray(fallback)) {
+    return (Array.isArray(override) ? override : fallback) as T;
+  }
+  if (!isRecord(fallback) || !isRecord(override)) {
+    return (typeof override === typeof fallback ? override : fallback) as T;
+  }
+
+  const merged: Record<string, unknown> = { ...fallback };
+  for (const key of Object.keys(fallback)) {
+    if (key in override) {
+      merged[key] = mergeKnownShape(fallback[key], override[key]);
+    }
+  }
+  return merged as T;
+}
+
+function safeAssetUrl(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 2_048) return undefined;
+  if (trimmed.startsWith("/") || /^https?:\/\//i.test(trimmed)) return trimmed;
+  return undefined;
+}
+
+function safeText(value: unknown, fallback: string, maxLength = 120): string {
+  return typeof value === "string" && value.trim() && value.length <= maxLength
+    ? value.trim()
+    : fallback;
+}
+
+function safeNumber(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+/**
+ * Applies the admin-managed record on top of a render-safe static definition.
+ * Unknown IDs inherit the default renderer, while malformed config values are ignored.
+ */
+export function mergeManagedTheme(row: ManagedThemeRow): ThemeConfig {
+  const fallback = resolveTheme(row.theme_id);
+  const config = parseConfig(row.config);
+  const category = THEME_CATEGORIES.includes(config.category as ThemeCategory)
+    ? (config.category as ThemeCategory)
+    : fallback.category;
+  const configuredImage = safeAssetUrl(config.thumbnailUrl) ?? safeAssetUrl(config.image);
+
+  return {
+    ...fallback,
+    id: row.theme_id as InviteThemeId,
+    name: safeText(row.name, fallback.name),
+    category,
+    tag: mergeKnownShape(fallback.tag, config.tag),
+    image: safeAssetUrl(row.preview_image_url) ?? configuredImage ?? fallback.image,
+    selectable: typeof config.selectable === "boolean" ? config.selectable : fallback.selectable,
+    isActive: row.is_active && !row.deleted_at,
+    isFeatured: typeof config.isFeatured === "boolean" ? config.isFeatured : fallback.isFeatured,
+    isPremium: typeof config.isPremium === "boolean" ? config.isPremium : fallback.isPremium,
+    sortOrder: safeNumber(config.sortOrder, fallback.sortOrder),
+    capabilities: mergeKnownShape(fallback.capabilities, config.capabilities),
+    primaryColor: safeText(config.primaryColor, fallback.primaryColor ?? "", 64) || undefined,
+    secondaryColor: safeText(config.secondaryColor, fallback.secondaryColor ?? "", 64) || undefined,
+    coverVideoUrl: safeAssetUrl(config.coverVideoUrl) ?? fallback.coverVideoUrl,
+    font: safeText(config.font, fallback.font ?? "", 80) || undefined,
+    qr: mergeKnownShape(fallback.qr, config.qr),
+    music: mergeKnownShape(fallback.music, config.music),
+    ambientEffect: mergeKnownShape(fallback.ambientEffect, config.ambientEffect),
+    openingAnimation: mergeKnownShape(fallback.openingAnimation, config.openingAnimation),
+    styles: mergeKnownShape(fallback.styles, config.styles),
+  };
+}
+
+/**
+ * Produces the customer-facing catalog. Static definitions are the availability fallback;
+ * a matching database row can override or archive them, and active database-only IDs are added.
+ */
+export function buildThemeCatalog(rows?: ManagedThemeRow[] | null): ThemeConfig[] {
+  if (!rows) return [...selectableThemes];
+
+  const rowByThemeId = new Map(rows.map((row) => [row.theme_id, row]));
+  const catalog = Object.values(staticThemes).flatMap((theme) => {
+    const row = rowByThemeId.get(theme.id);
+    const resolved = row ? mergeManagedTheme(row) : theme;
+    return resolved.isActive && resolved.selectable !== false ? [resolved] : [];
+  });
+
+  for (const row of rows) {
+    if (row.theme_id in staticThemes) continue;
+    const resolved = mergeManagedTheme(row);
+    if (resolved.isActive && resolved.selectable !== false) catalog.push(resolved);
+  }
+
+  return catalog.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "tr"));
+}
+
+/** Resolves an existing invitation even when its managed theme was archived or deleted. */
+export function resolveInvitationTheme(
+  themeId?: string | null,
+  row?: ManagedThemeRow | null,
+): ThemeConfig {
+  if (row && row.theme_id === themeId) return mergeManagedTheme(row);
+  return resolveTheme(themeId);
+}

@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { emptyDraft, slugify, type InvitationDraft, type InviteThemeId } from "./invitation";
-import { selectableThemes } from "./theme-engine";
+import { getThemeCatalog } from "./theme-registry.functions";
 import { extractThemeCustomization, storeThemeCustomization } from "./theme-customization";
 import { extractInvitationGallery, storeInvitationGallery } from "./invitation-media";
 import { getGuestUploadViewUrl } from "./r2-actions";
@@ -248,17 +248,25 @@ export async function getInvitationTextTemplates() {
   return data ?? [];
 }
 
-export async function getPublicThemes() {
-  return selectableThemes.map((t, idx) => ({
-    id: String(idx + 1),
-    theme_id: t.id,
-    name: t.name,
-    config: {
-      ...t,
-      thumbnailUrl: t.image,
-    },
+let publicThemesPromise: ReturnType<typeof loadPublicThemes> | undefined;
+
+async function loadPublicThemes() {
+  const themes = await getThemeCatalog();
+  return themes.map((theme, index) => ({
+    id: String(index + 1),
+    theme_id: theme.id,
+    name: theme.name,
+    config: { ...theme, thumbnailUrl: theme.image },
     is_active: true,
   }));
+}
+
+export function getPublicThemes() {
+  publicThemesPromise ??= loadPublicThemes().catch((error) => {
+    publicThemesPromise = undefined;
+    throw error;
+  });
+  return publicThemesPromise;
 }
 
 export async function getPublicPackages(): Promise<PublicPackage[]> {

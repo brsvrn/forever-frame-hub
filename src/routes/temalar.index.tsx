@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Layers3 } from "lucide-react";
 import { Navbar } from "@/components/marketing/layout/Navbar";
 import { Footer } from "@/components/marketing/layout/Footer";
-import { selectableThemes } from "@/lib/theme-engine";
+import { getThemeCatalog } from "@/lib/theme-registry.functions";
 import {
   filterThemesByCategory,
   themeCategoryLabels,
@@ -12,6 +12,7 @@ import {
 } from "@/lib/theme-pages";
 
 export const Route = createFileRoute("/temalar/")({
+  loader: () => getThemeCatalog(),
   head: () => ({
     meta: [
       { title: "Dijital Davetiye Temaları | MemoryWedding" },
@@ -27,8 +28,9 @@ export const Route = createFileRoute("/temalar/")({
 });
 
 function ThemeIndexPage() {
+  const themes = Route.useLoaderData();
   const [category, setCategory] = useState<ThemeCategoryFilter>("all");
-  const visibleThemes = filterThemesByCategory(selectableThemes, category);
+  const visibleThemes = filterThemesByCategory(themes, category);
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -49,8 +51,7 @@ function ThemeIndexPage() {
           <div className="inline-flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 text-sm text-muted-foreground">
             <Layers3 className="size-5 text-gold" aria-hidden="true" />
             <span>
-              <strong className="block text-lg text-foreground">{selectableThemes.length}</strong>{" "}
-              özgün tema
+              <strong className="block text-lg text-foreground">{themes.length}</strong> özgün tema
             </span>
           </div>
         </div>
@@ -60,7 +61,7 @@ function ThemeIndexPage() {
           aria-label="Tema koleksiyonu filtresi"
         >
           {(["all", ...themeCategoryOrder] as const).map((item) => {
-            const count = filterThemesByCategory(selectableThemes, item).length;
+            const count = filterThemesByCategory(themes, item).length;
             return (
               <button
                 key={item}
