@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, Leaf } from "lucide-react";
-import evergreenGarden from "@/assets/theme-evergreen-vows.webp";
+import evergreenGarden from "@/assets/theme-evergreen-vows-optimized.webp";
 import { formatInviteDate, type InvitationDraft } from "@/lib/invitation";
 
 export function EvergreenVowsOpening({

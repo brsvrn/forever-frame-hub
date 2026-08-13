@@ -28,8 +28,11 @@ export function BrandLogo({
   const content = (
     <>
       <img
-        src="/logo.jpg"
+        src="/logo-96.webp"
         alt="MemoryWedding Logo"
+        width={96}
+        height={96}
+        decoding="async"
         className={cn(sizeMap[size].img, "object-cover shrink-0 shadow-sm", imageClassName)}
       />
       <span
@@ -47,18 +50,13 @@ export function BrandLogo({
 
   if (to) {
     return (
-      <Link
-        to={to}
-        className={cn("inline-flex items-center gap-2.5 select-none group", className)}
-      >
+      <Link to={to} className={cn("inline-flex items-center gap-2.5 select-none group", className)}>
         {content}
       </Link>
     );
   }
 
   return (
-    <div className={cn("inline-flex items-center gap-2.5 select-none", className)}>
-      {content}
-    </div>
+    <div className={cn("inline-flex items-center gap-2.5 select-none", className)}>{content}</div>
   );
 }

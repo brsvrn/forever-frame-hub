@@ -3,7 +3,10 @@ import { CheckCircle2, Globe2, QrCode, ImageIcon } from "lucide-react";
 
 export function Features() {
   return (
-    <section id="features" className="py-24 bg-background relative overflow-hidden">
+    <section
+      id="features"
+      className="performance-section py-24 bg-background relative overflow-hidden"
+    >
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24">
           <SlideUp>

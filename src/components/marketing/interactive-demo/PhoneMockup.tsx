@@ -61,7 +61,7 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
       className={`relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[600px] w-[300px] shadow-[0_0_50px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(0,0,0,0.3)] overflow-hidden ${className}`}
     >
       {/* Hidden audio element for interactive demo */}
-      <audio ref={audioRef} src={themeConfig.music.defaultTrack} loop preload="auto" playsInline />
+      <audio ref={audioRef} src={themeConfig.music.defaultTrack} loop preload="none" playsInline />
 
       {/* Dynamic Island / Notch */}
       <div className="absolute top-0 inset-x-0 h-7 flex justify-center z-50">
@@ -91,19 +91,24 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
               className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden p-5"
               style={{ backgroundColor: themeConfig.qr.paper }}
             >
-              {themeConfig.coverVideoUrl ? (
+              {themeConfig.coverVideoUrl && isPlaying ? (
                 <video
                   src={themeConfig.coverVideoUrl}
                   autoPlay
                   muted
                   loop
                   playsInline
+                  preload="none"
+                  poster={themeConfig.image}
                   className="absolute inset-0 h-full w-full object-cover opacity-20"
                 />
               ) : (
                 <img
                   src={themeConfig.image}
                   alt=""
+                  width={1000}
+                  height={1500}
+                  decoding="async"
                   className="absolute inset-0 h-full w-full object-cover opacity-20"
                   style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
                 />
@@ -162,6 +167,9 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                   <img
                     src={themeConfig.image}
                     alt={themeConfig.name}
+                    width={1000}
+                    height={1500}
+                    decoding="async"
                     className="h-full w-full object-cover"
                     style={{ objectPosition: themeConfig.qr.imagePosition || "center" }}
                   />

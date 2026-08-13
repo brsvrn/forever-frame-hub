@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { formatInviteDate, type InvitationDraft } from "@/lib/invitation";
-import lueurButterfly from "@/assets/lueur-de-minuit-butterfly.png";
+import lueurButterfly from "@/assets/lueur-de-minuit-butterfly.webp";
 
 export function LueurOpening({
   partnerOne,

@@ -25,6 +25,7 @@ export function ThemeGalleryContent({ themes }: { themes: ThemeConfig[] }) {
     useState<Exclude<ThemeCategory, "classic">>("coastal");
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
+  const shouldLoadMedia = useInView(ref, { margin: "500px 0px", once: true });
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
 
@@ -42,7 +43,7 @@ export function ThemeGalleryContent({ themes }: { themes: ThemeConfig[] }) {
   return (
     <section
       ref={ref}
-      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden border-t bg-white py-24  lg:py-32"
+      className="performance-section relative flex min-h-[100dvh] flex-col justify-center overflow-hidden border-t bg-white py-24 lg:py-32"
     >
       <div className="pointer-events-none absolute right-0 top-0 z-0 h-[500px] w-full bg-gradient-to-b from-primary/5 to-transparent" />
 
@@ -97,12 +98,25 @@ export function ThemeGalleryContent({ themes }: { themes: ThemeConfig[] }) {
                           : "border-white/15 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
                       }`}
                     >
-                      <img
-                        src={theme.image}
-                        alt={theme.name}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        style={{ objectPosition: theme.qr.imagePosition || "center" }}
-                      />
+                      {shouldLoadMedia ? (
+                        <img
+                          src={theme.image}
+                          alt={theme.name}
+                          width={1000}
+                          height={1500}
+                          loading="lazy"
+                          decoding="async"
+                          fetchPriority="low"
+                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          style={{ objectPosition: theme.qr.imagePosition || "center" }}
+                        />
+                      ) : (
+                        <span
+                          className="absolute inset-0"
+                          style={{ backgroundColor: theme.secondaryColor || theme.qr.ink }}
+                          aria-hidden="true"
+                        />
+                      )}
                       <div
                         className="absolute inset-0"
                         style={{ background: theme.qr.overlay }}
@@ -133,7 +147,14 @@ export function ThemeGalleryContent({ themes }: { themes: ThemeConfig[] }) {
 
           <div className="flex w-full items-center justify-center lg:w-[350px] lg:shrink-0">
             <motion.div style={{ y }} className="z-30 h-[600px] w-[300px]">
-              <PhoneMockup />
+              {shouldLoadMedia ? (
+                <PhoneMockup />
+              ) : (
+                <div
+                  className="h-full w-full rounded-[2.5rem] border-[14px] border-gray-800 bg-muted/40"
+                  aria-hidden="true"
+                />
+              )}
             </motion.div>
           </div>
         </div>

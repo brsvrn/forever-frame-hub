@@ -25,6 +25,24 @@ const googleSiteVerification =
     ? process.env?.GOOGLE_SITE_VERIFICATION || process.env?.VITE_GOOGLE_SITE_VERIFICATION
     : undefined) || import.meta.env.VITE_GOOGLE_SITE_VERIFICATION;
 
+const decorativeFontStylesheet =
+  "https://fonts.googleapis.com/css2?family=Alex+Brush&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;1,6..96,400;1,6..96,600;1,6..96,700&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;800&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Italiana&family=Manrope:wght@300;400;500;600;700;800&family=Marcellus&family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Parisienne&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700&family=Prata&display=swap";
+
+function appendGoogleTagManager(gtmId: string) {
+  if (!gtmId || document.querySelector("script[data-memorywedding-gtm]")) return;
+  const analyticsWindow = window as Window & {
+    dataLayer?: Array<Record<string, unknown>>;
+  };
+  const dataLayer = (analyticsWindow.dataLayer ??= []);
+  dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.dataset.memoryweddingGtm = "true";
+  script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmId)}`;
+  document.head.appendChild(script);
+}
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -124,8 +142,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Alex+Brush&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;1,6..96,400;1,6..96,600;1,6..96,700&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Italiana&family=Manrope:wght@300;400;500;600;700;800&family=Marcellus&family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Parisienne&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Prata&display=swap",
+        rel: "preload",
+        href: "/fonts/cormorant-garamond-latin.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: "/fonts/plus-jakarta-sans-latin.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
       },
       { rel: "icon", href: "/logo.jpg", type: "image/jpeg" },
     ],
@@ -138,26 +166,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  const gtmId = "GTM-KSV2TJVL";
-  const gaId = import.meta.env.VITE_GA4_MEASUREMENT_ID || ANALYTICS_CONFIG.gaMeasurementId;
+  const gtmId = ANALYTICS_CONFIG.gtmId;
   const pixelId = import.meta.env.VITE_META_PIXEL_ID || ANALYTICS_CONFIG.metaPixelId;
-  const googleAdsId = import.meta.env.VITE_GOOGLE_ADS_ID || ANALYTICS_CONFIG.googleAdsId;
 
   return (
     <html lang="tr">
       <head>
-        {/* Google Tag Manager */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-KSV2TJVL');`,
-          }}
-        />
-        {/* End Google Tag Manager */}
-
         <HeadContent />
         {/* Google Consent Mode v2 Default Setup */}
         <script
@@ -174,27 +188,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             `,
           }}
         />
-
-        {/* Google Analytics 4 & Google Ads */}
-        {(gaId || googleAdsId) && (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId || googleAdsId}`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  ${gaId ? `gtag('config', '${gaId}', { send_page_view: false });` : ""}
-                  ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ""}
-                `,
-              }}
-            />
-          </>
-        )}
+        <link
+          rel="stylesheet"
+          href={decorativeFontStylesheet}
+          media="print"
+          onLoad={(event) => {
+            event.currentTarget.media = "all";
+          }}
+        />
+        <noscript>
+          <link rel="stylesheet" href={decorativeFontStylesheet} />
+        </noscript>
 
         {/* Meta Pixel */}
         {pixelId && (
@@ -258,6 +262,16 @@ function RootComponent() {
     const consent = getStoredConsent();
     applyConsentToThirdParties(consent);
 
+    let analyticsTimer: number | undefined;
+    const scheduleAnalytics = () => {
+      analyticsTimer = window.setTimeout(
+        () => appendGoogleTagManager(ANALYTICS_CONFIG.gtmId),
+        2500,
+      );
+    };
+    if (document.readyState === "complete") scheduleAnalytics();
+    else window.addEventListener("load", scheduleAnalytics, { once: true });
+
     const onWindowError = (event: ErrorEvent) => {
       reportAdminError(event.error ?? event.message, { source: "window_error" });
     };
@@ -267,6 +281,8 @@ function RootComponent() {
     window.addEventListener("error", onWindowError);
     window.addEventListener("unhandledrejection", onUnhandledRejection);
     return () => {
+      window.removeEventListener("load", scheduleAnalytics);
+      if (analyticsTimer !== undefined) window.clearTimeout(analyticsTimer);
       window.removeEventListener("error", onWindowError);
       window.removeEventListener("unhandledrejection", onUnhandledRejection);
     };
