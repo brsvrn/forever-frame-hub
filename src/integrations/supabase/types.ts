@@ -1226,7 +1226,12 @@ export type Database = {
       retention_jobs: {
         Row: {
           id: string;
-          job_type: "close_qr_upload" | "retention_warning" | "delete_expired_media" | "expire_invitation" | "expire_codes";
+          job_type:
+            | "close_qr_upload"
+            | "retention_warning"
+            | "delete_expired_media"
+            | "expire_invitation"
+            | "expire_codes";
           invitation_id: string | null;
           status: "pending" | "processing" | "completed" | "failed";
           files_count: number | null;
@@ -1237,7 +1242,12 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          job_type: "close_qr_upload" | "retention_warning" | "delete_expired_media" | "expire_invitation" | "expire_codes";
+          job_type:
+            | "close_qr_upload"
+            | "retention_warning"
+            | "delete_expired_media"
+            | "expire_invitation"
+            | "expire_codes";
           invitation_id?: string | null;
           status?: "pending" | "processing" | "completed" | "failed";
           files_count?: number | null;
@@ -1248,7 +1258,12 @@ export type Database = {
         };
         Update: {
           id?: string;
-          job_type?: "close_qr_upload" | "retention_warning" | "delete_expired_media" | "expire_invitation" | "expire_codes";
+          job_type?:
+            | "close_qr_upload"
+            | "retention_warning"
+            | "delete_expired_media"
+            | "expire_invitation"
+            | "expire_codes";
           invitation_id?: string | null;
           status?: "pending" | "processing" | "completed" | "failed";
           files_count?: number | null;
@@ -1267,6 +1282,14 @@ export type Database = {
       accept_event_member_invitation: {
         Args: { _token_hash: string };
         Returns: string;
+      };
+      redeem_access_code_atomic: {
+        Args: {
+          p_code_label: string;
+          p_invitation_id: string;
+          p_user_agent?: string | null;
+        };
+        Returns: Json;
       };
       has_role: {
         Args: {
