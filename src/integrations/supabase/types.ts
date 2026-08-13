@@ -780,6 +780,7 @@ export type Database = {
           reactions_enabled: boolean;
           share_enabled: boolean;
           calendar_enabled: boolean;
+          section_order: string[];
           version: number;
           created_at: string;
           updated_at: string;
@@ -803,6 +804,7 @@ export type Database = {
           reactions_enabled?: boolean;
           share_enabled?: boolean;
           calendar_enabled?: boolean;
+          section_order?: string[];
           version?: number;
           created_at?: string;
           updated_at?: string;
@@ -826,6 +828,7 @@ export type Database = {
           reactions_enabled?: boolean;
           share_enabled?: boolean;
           calendar_enabled?: boolean;
+          section_order?: string[];
           version?: number;
           created_at?: string;
           updated_at?: string;
