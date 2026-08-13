@@ -8,6 +8,7 @@ import { trackBeginCheckout } from "@/lib/analytics/analytics";
 import { redeemAccessCode } from "@/lib/admin/codes.api";
 import { Key, Sparkles, Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { pageSeo } from "@/lib/seo";
 
 declare global {
   interface Window {
@@ -16,6 +17,13 @@ declare global {
 }
 
 export const Route = createFileRoute("/odeme/")({
+  head: () =>
+    pageSeo({
+      title: "Güvenli Ödeme | MemoryWedding",
+      description: "MemoryWedding paketiniz için güvenli ödeme işlemini tamamlayın.",
+      path: "/odeme",
+      noIndex: true,
+    }),
   component: PaymentRoute,
 });
 
@@ -256,4 +264,3 @@ function PaymentRoute() {
     </div>
   );
 }
-

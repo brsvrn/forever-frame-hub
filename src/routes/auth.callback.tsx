@@ -5,8 +5,16 @@ import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { consumeAuthReturnTo } from "@/lib/auth-helpers";
+import { pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/auth/callback")({
+  head: () =>
+    pageSeo({
+      title: "Giriş Tamamlanıyor | MemoryWedding",
+      description: "MemoryWedding hesap girişi tamamlanıyor.",
+      path: "/auth/callback",
+      noIndex: true,
+    }),
   component: AuthCallbackPage,
 });
 

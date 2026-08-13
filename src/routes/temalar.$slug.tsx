@@ -24,6 +24,7 @@ import {
   themeFeatureLabels,
   themePageDescription,
 } from "@/lib/theme-pages";
+import { breadcrumbJsonLd, pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/temalar/$slug")({
   loader: async ({ params }) => {
@@ -33,20 +34,36 @@ export const Route = createFileRoute("/temalar/$slug")({
     return { theme, themes };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Tema bulunamadı | MemoryWedding" }] };
+    if (!loaderData) {
+      return pageSeo({
+        title: "Tema bulunamadı | MemoryWedding",
+        description: "Aradığınız dijital davetiye teması bulunamadı.",
+        path: "/temalar",
+        noIndex: true,
+      });
+    }
     const description = themePageDescription(loaderData.theme);
     const image = new URL(loaderData.theme.image, "https://www.memory-wedding.com").toString();
+    const path = `/temalar/${loaderData.theme.id}`;
     return {
-      meta: [
-        { title: `${loaderData.theme.name} Dijital Davetiye Teması | MemoryWedding` },
-        { name: "description", content: description },
-        { property: "og:title", content: `${loaderData.theme.name} | MemoryWedding` },
-        { property: "og:description", content: description },
-        { property: "og:image", content: image },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-      links: [
-        { rel: "canonical", href: `https://www.memory-wedding.com/temalar/${loaderData.theme.id}` },
+      ...pageSeo({
+        title: `${loaderData.theme.name} Dijital Davetiye Teması | MemoryWedding`,
+        description,
+        path,
+        image,
+        imageAlt: `${loaderData.theme.name} dijital davetiye teması önizlemesi`,
+      }),
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "Ana Sayfa", path: "/" },
+              { name: "Temalar", path: "/temalar" },
+              { name: loaderData.theme.name, path },
+            ]),
+          ),
+        },
       ],
     };
   },

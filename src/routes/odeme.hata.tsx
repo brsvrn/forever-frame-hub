@@ -2,8 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useEffect } from "react";
 import { XCircle } from "lucide-react";
+import { pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/odeme/hata")({
+  head: () =>
+    pageSeo({
+      title: "Ödeme Tamamlanamadı | MemoryWedding",
+      description:
+        "MemoryWedding ödeme işlemi tamamlanamadı. Bilgilerinizi kontrol ederek yeniden deneyin.",
+      path: "/odeme/hata",
+      noIndex: true,
+    }),
   component: ErrorRoute,
 });
 
@@ -29,9 +38,12 @@ function ErrorRoute() {
         <XCircle className="size-10" />
       </div>
       <h1 className="text-3xl font-bold mb-2">Ödeme Başarısız</h1>
-      <p className="text-muted-foreground mb-8">Ödeme işlemi sırasında bir hata oluştu. Lütfen kart bilgilerinizi kontrol edip tekrar deneyin.</p>
+      <p className="text-muted-foreground mb-8">
+        Ödeme işlemi sırasında bir hata oluştu. Lütfen kart bilgilerinizi kontrol edip tekrar
+        deneyin.
+      </p>
       <div className="flex gap-4">
-        <Link 
+        <Link
           to="/olustur"
           className="px-6 py-3 bg-foreground text-background rounded-full hover:bg-foreground/90 transition-colors font-medium"
         >
