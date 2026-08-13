@@ -66,6 +66,8 @@ function safeAssetUrl(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
   if (!trimmed || trimmed.length > 2_048) return undefined;
+  // Vite dev URLs were stored by the legacy admin seeder but do not exist in production builds.
+  if (/^\/src\/assets\//i.test(trimmed)) return undefined;
   if (trimmed.startsWith("/") || /^https?:\/\//i.test(trimmed)) return trimmed;
   return undefined;
 }

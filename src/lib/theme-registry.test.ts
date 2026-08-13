@@ -109,4 +109,14 @@ describe("managed theme registry", () => {
     expect(theme.qr.accent).toMatch(/^#/);
     expect(theme.styles.buttons.primary).toBeTruthy();
   });
+
+  it("rejects legacy Vite development asset paths in database records", () => {
+    const theme = mergeManagedTheme(
+      row({
+        preview_image_url: "/src/assets/theme-turquoise-cove.webp",
+        config: { thumbnailUrl: "/src/assets/another-theme.webp" },
+      }),
+    );
+    expect(theme.image).toBe("/theme.webp");
+  });
 });
