@@ -13,6 +13,10 @@ import {
 } from "@/lib/core-content-schema";
 import { getCoreEventContent, saveCoreEventSection } from "@/lib/core-content.functions";
 import { deleteCustomQuestion, saveCustomQuestion } from "@/lib/event-schedules.functions";
+import {
+  normalizeBoundedIntegerDraft,
+  parseBoundedIntegerDraft,
+} from "@/lib/bounded-integer-input";
 
 type Question = {
   id: string;
@@ -95,6 +99,52 @@ function Toggle({
   );
 }
 
+function BoundedIntegerInput({
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState(String(value));
+
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  const commitDraft = () => {
+    const normalized = normalizeBoundedIntegerDraft(draft, value, min, max);
+    setDraft(String(normalized));
+    if (normalized !== value) onChange(normalized);
+  };
+
+  return (
+    <input
+      type="number"
+      inputMode="numeric"
+      min={min}
+      max={max}
+      step={1}
+      value={draft}
+      onChange={(event) => {
+        const nextDraft = event.target.value;
+        setDraft(nextDraft);
+        const parsed = parseBoundedIntegerDraft(nextDraft, min, max);
+        if (parsed !== null) onChange(parsed);
+      }}
+      onBlur={commitDraft}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") event.currentTarget.blur();
+      }}
+      className="field-base min-h-11 w-full"
+    />
+  );
+}
+
 export type DashboardSettingsSection = "modules" | "memory" | "rsvp";
 
 export function DashboardSettings({
@@ -143,8 +193,7 @@ export function DashboardSettings({
       });
       setQuestions(content.questions as Question[]);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Etkinlik ayarları yüklenemedi.";
+      const message = error instanceof Error ? error.message : "Etkinlik ayarları yüklenemedi.";
       setLoadError(message);
       toast.error(message);
     } finally {
@@ -382,28 +431,20 @@ export function DashboardSettings({
             </label>
             <label className="space-y-2 text-sm">
               <span>Fotoğraf sınırı (MB)</span>
-              <input
-                type="number"
+              <BoundedIntegerInput
                 min={1}
                 max={100}
                 value={memory.max_image_size_mb}
-                onChange={(event) =>
-                  setMemory({ ...memory, max_image_size_mb: Number(event.target.value) })
-                }
-                className="field-base min-h-11 w-full"
+                onChange={(value) => setMemory({ ...memory, max_image_size_mb: value })}
               />
             </label>
             <label className="space-y-2 text-sm">
               <span>Video sınırı (MB)</span>
-              <input
-                type="number"
+              <BoundedIntegerInput
                 min={1}
                 max={500}
                 value={memory.max_video_size_mb}
-                onChange={(event) =>
-                  setMemory({ ...memory, max_video_size_mb: Number(event.target.value) })
-                }
-                className="field-base min-h-11 w-full"
+                onChange={(value) => setMemory({ ...memory, max_video_size_mb: value })}
               />
             </label>
             <label className="space-y-2 text-sm sm:col-span-2">
