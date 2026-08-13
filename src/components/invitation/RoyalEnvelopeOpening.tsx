@@ -74,6 +74,13 @@ export function RoyalEnvelopeOpening({
         style={{ perspective: "1600px" }}
       >
         <motion.div
+          data-royal-envelope-back
+          className="absolute inset-0 z-10 rounded-sm border border-[#C9A96E]/80 bg-[#D6C3A3] shadow-[0_24px_70px_rgba(0,0,0,.55)]"
+          animate={isRevealing ? { opacity: 0, y: 120, scale: 0.9 } : { opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0.22 : 0.8, ease: "easeInOut" }}
+        />
+
+        <motion.div
           data-royal-card
           className="absolute inset-x-5 top-4 z-20 h-[210px] overflow-hidden rounded-sm border border-[#C9A96E] bg-[#F7F0E3] text-center text-[#173127] shadow-[0_20px_55px_rgba(0,0,0,.48)] sm:inset-x-7 sm:h-[260px]"
           initial={{ y: 18, scale: 0.92 }}
@@ -110,13 +117,11 @@ export function RoyalEnvelopeOpening({
         </motion.div>
 
         <motion.div
-          data-royal-envelope-shell
-          className="absolute inset-0 z-30"
+          data-royal-envelope-pocket
+          className="pointer-events-none absolute inset-0 z-30"
           animate={isRevealing ? { opacity: 0, y: 120, scale: 0.9 } : { opacity: 1, y: 0 }}
           transition={{ duration: reduceMotion ? 0.22 : 0.8, ease: "easeInOut" }}
         >
-          <div className="absolute inset-0 rounded-sm border border-[#C9A96E]/80 bg-[#E9DCC5] shadow-[0_24px_70px_rgba(0,0,0,.55)]" />
-
           <div
             className="absolute inset-y-0 left-0 z-30 w-[61%] bg-[linear-gradient(135deg,#F7EEDC,#D8C09B)]"
             style={{ clipPath: "polygon(0 0,100% 50%,0 100%)" }}
@@ -134,41 +139,45 @@ export function RoyalEnvelopeOpening({
             className="absolute inset-0 z-[32] bg-[#C9A96E]"
             style={{ clipPath: "polygon(0 99.4%,50% 33.3%,100% 99.4%,100% 100%,50% 35%,0 100%)" }}
           />
-
-          <motion.div
-            data-royal-flap
-            className="absolute inset-x-0 top-0 z-40 h-[62%] origin-top bg-[linear-gradient(180deg,#FBF3E4,#D8C19B)] shadow-[0_8px_18px_rgba(79,50,20,.18)]"
-            style={{
-              clipPath: "polygon(0 0,100% 0,50% 100%)",
-              backfaceVisibility: "visible",
-              transformStyle: "preserve-3d",
-            }}
-            animate={{ rotateX: hasOpened ? 180 : 0 }}
-            transition={{ duration: reduceMotion ? 0.25 : 0.85, ease: [0.65, 0, 0.2, 1] }}
-          >
-            <span
-              className="absolute inset-0 bg-[#C9A96E]"
-              style={{
-                clipPath: "polygon(0 0,100% 0,50% 100%,50% 97%,99% 1%,1% 1%,50% 97%,50% 100%)",
-              }}
-            />
-          </motion.div>
-
-          <motion.button
-            type="button"
-            onClick={open}
-            data-royal-seal
-            aria-label="Royal Envelope davetiyesini aç"
-            className="absolute left-1/2 top-1/2 z-50 grid size-[72px] -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center rounded-full border border-[#E3B767]/70 bg-[radial-gradient(circle_at_32%_28%,#B13B38,#7C1719_55%,#4C0C0E)] shadow-[0_8px_22px_rgba(38,5,7,.5),inset_0_0_0_5px_rgba(69,5,9,.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F7E2AD] focus-visible:ring-offset-4 focus-visible:ring-offset-[#071F18] sm:size-20"
-            animate={hasOpened ? { opacity: 0, scale: 1.35 } : { opacity: 1, scale: 1 }}
-            transition={{ duration: 0.35 }}
-          >
-            <span className="absolute inset-2 rounded-full border border-[#E8C47B]/50" />
-            <span className="relative font-pinyon text-xl text-[#F1D28C] drop-shadow sm:text-2xl">
-              {partnerOne?.[0] || "A"}&{partnerTwo?.[0] || "D"}
-            </span>
-          </motion.button>
         </motion.div>
+
+        <motion.div
+          data-royal-flap
+          className="absolute inset-x-0 top-0 z-40 h-[62%] origin-top bg-[linear-gradient(180deg,#FBF3E4,#D8C19B)] shadow-[0_8px_18px_rgba(79,50,20,.18)]"
+          style={{
+            clipPath: "polygon(0 0,100% 0,50% 100%)",
+            backfaceVisibility: "visible",
+            transformStyle: "preserve-3d",
+          }}
+          animate={
+            isRevealing
+              ? { rotateX: 180, opacity: 0, y: 120, scale: 0.9 }
+              : { rotateX: hasOpened ? 180 : 0, opacity: 1, y: 0, scale: 1 }
+          }
+          transition={{ duration: reduceMotion ? 0.25 : 0.85, ease: [0.65, 0, 0.2, 1] }}
+        >
+          <span
+            className="absolute inset-0 bg-[#C9A96E]"
+            style={{
+              clipPath: "polygon(0 0,100% 0,50% 100%,50% 97%,99% 1%,1% 1%,50% 97%,50% 100%)",
+            }}
+          />
+        </motion.div>
+
+        <motion.button
+          type="button"
+          onClick={open}
+          data-royal-seal
+          aria-label="Royal Envelope davetiyesini aç"
+          className="absolute left-1/2 top-1/2 z-50 grid size-[72px] -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center rounded-full border border-[#E3B767]/70 bg-[radial-gradient(circle_at_32%_28%,#B13B38,#7C1719_55%,#4C0C0E)] shadow-[0_8px_22px_rgba(38,5,7,.5),inset_0_0_0_5px_rgba(69,5,9,.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F7E2AD] focus-visible:ring-offset-4 focus-visible:ring-offset-[#071F18] sm:size-20"
+          animate={hasOpened ? { opacity: 0, scale: 1.35 } : { opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35 }}
+        >
+          <span className="absolute inset-2 rounded-full border border-[#E8C47B]/50" />
+          <span className="relative font-pinyon text-xl text-[#F1D28C] drop-shadow sm:text-2xl">
+            {partnerOne?.[0] || "A"}&{partnerTwo?.[0] || "D"}
+          </span>
+        </motion.button>
       </div>
 
       <motion.p
