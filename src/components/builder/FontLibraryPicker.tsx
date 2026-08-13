@@ -42,7 +42,7 @@ export function FontLibraryPicker({
   }, [filteredFonts, open]);
 
   return (
-    <div className="relative">
+    <div>
       <button
         type="button"
         aria-expanded={open}
@@ -64,7 +64,7 @@ export function FontLibraryPicker({
       </button>
 
       {open ? (
-        <div className="absolute inset-x-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-3xl border border-border bg-background shadow-2xl">
+        <div className="relative z-50 mt-2 overflow-hidden rounded-3xl border border-border bg-background shadow-2xl">
           <div className="flex items-center gap-3 border-b border-border p-3">
             <label className="flex min-h-11 flex-1 items-center gap-2 rounded-xl border border-input bg-card px-3">
               <Search className="size-4 text-muted-foreground" aria-hidden="true" />
