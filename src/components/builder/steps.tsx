@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Check,
@@ -9,9 +9,12 @@ import {
   Leaf,
   Link2,
   Lock,
+  Maximize2,
+  Minimize2,
   Monitor,
   Smartphone,
   Sparkles,
+  Tablet,
   Waves,
   Clapperboard,
 } from "lucide-react";
@@ -32,6 +35,7 @@ import { QrGalleryPreview } from "./QrGalleryPreview";
 import { ThemeCustomizationStudio } from "./ThemeCustomizationStudio";
 import { MediaUploadStudio } from "./MediaUploadStudio";
 import { trackBeginCheckout, trackSelectItem } from "@/lib/analytics/analytics";
+import { previewDeviceWidthClass, type PreviewDevice } from "@/lib/preview-device";
 
 type StepProps = {
   draft: InvitationDraft;
@@ -1011,11 +1015,35 @@ export function StepPreview({
   features,
 }: StepProps & { features: PackageFeatures }) {
   const c = copy.preview;
-  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const [device, setDevice] = useState<PreviewDevice>("desktop");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const previewAreaRef = useRef<HTMLDivElement>(null);
   const hasInvitation = features.digital_invitation !== false;
   const hasQrGallery = features.qr_gallery === true;
   const state = checklistState(draft, features);
   const allDone = Object.values(state).every(Boolean);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === previewAreaRef.current);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement === previewAreaRef.current) {
+        await document.exitFullscreen();
+        return;
+      }
+      await previewAreaRef.current?.requestFullscreen();
+    } catch {
+      setIsFullscreen(false);
+    }
+  };
+
+  const previewWidth = previewDeviceWidthClass(device);
 
   return (
     <div className="space-y-8">
@@ -1032,49 +1060,88 @@ export function StepPreview({
         }
       />
 
-      {hasInvitation ? (
-        <div className="flex items-center gap-2">
-          {(
-            [
-              ["desktop", c.desktop, Monitor],
-              ["mobile", c.mobile, Smartphone],
-            ] as const
-          ).map(([key, label, Icon]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setDevice(key)}
-              aria-pressed={device === key}
-              className={cn(
-                "inline-flex min-h-11 items-center gap-2 rounded-full px-5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                device === key
-                  ? "bg-gradient-to-r from-rose to-gold font-semibold text-background"
-                  : "border border-border text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Icon className="size-4" aria-hidden="true" />
-              {label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      <motion.div
-        key={hasInvitation ? device : "qr"}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: easeSilk }}
-        className={cn(
-          "mx-auto w-full",
-          !hasInvitation || device === "mobile" ? "max-w-[22rem]" : "max-w-3xl",
-        )}
+      <div
+        ref={previewAreaRef}
+        className={cn("rounded-3xl", isFullscreen && "overflow-y-auto bg-background p-4 sm:p-8")}
       >
         {hasInvitation ? (
-          <InvitationPreview draft={draft} copy={copy} lang={lang} compact={device === "mobile"} />
-        ) : (
-          <QrGalleryPreview draft={draft} lang={lang} />
-        )}
-      </motion.div>
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            {(
+              [
+                ["desktop", c.desktop, Monitor],
+                ["tablet", "Tablet", Tablet],
+                ["mobile", c.mobile, Smartphone],
+              ] as const
+            ).map(([key, label, Icon]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setDevice(key)}
+                aria-pressed={device === key}
+                className={cn(
+                  "inline-flex min-h-11 items-center gap-2 rounded-full px-5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  device === key
+                    ? "bg-gradient-to-r from-rose to-gold font-semibold text-background"
+                    : "border border-border text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon className="size-4" aria-hidden="true" />
+                {label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => void toggleFullscreen()}
+              className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm text-muted-foreground transition-colors hover:border-gold/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={
+                isFullscreen
+                  ? lang === "tr"
+                    ? "Tam ekran önizlemeden çık"
+                    : "Exit full-screen preview"
+                  : lang === "tr"
+                    ? "Tam ekran önizle"
+                    : "Preview full screen"
+              }
+            >
+              {isFullscreen ? (
+                <Minimize2 className="size-4" aria-hidden="true" />
+              ) : (
+                <Maximize2 className="size-4" aria-hidden="true" />
+              )}
+              {isFullscreen
+                ? lang === "tr"
+                  ? "Tam ekrandan çık"
+                  : "Exit full screen"
+                : lang === "tr"
+                  ? "Tam ekran"
+                  : "Full screen"}
+            </button>
+          </div>
+        ) : null}
+
+        <motion.div
+          key={hasInvitation ? device : "qr"}
+          data-preview-device={hasInvitation ? device : "qr"}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: easeSilk }}
+          className={cn(
+            "mx-auto w-full transition-[max-width] duration-300",
+            hasInvitation ? previewWidth : "max-w-[22rem]",
+          )}
+        >
+          {hasInvitation ? (
+            <InvitationPreview
+              draft={draft}
+              copy={copy}
+              lang={lang}
+              compact={device === "mobile"}
+            />
+          ) : (
+            <QrGalleryPreview draft={draft} lang={lang} />
+          )}
+        </motion.div>
+      </div>
 
       {hasInvitation && hasQrGallery ? (
         <div className="space-y-4 border-t border-border pt-8">
