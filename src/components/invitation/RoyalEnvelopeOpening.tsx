@@ -143,8 +143,10 @@ export function RoyalEnvelopeOpening({
 
         <motion.div
           data-royal-flap
-          className="absolute inset-x-0 top-0 z-40 h-[62%] origin-top bg-[linear-gradient(180deg,#FBF3E4,#D8C19B)] shadow-[0_8px_18px_rgba(79,50,20,.18)]"
+          data-royal-flap-layer={hasOpened ? "behind-card" : "above-card"}
+          className="absolute inset-x-0 top-0 h-[62%] origin-top bg-[linear-gradient(180deg,#FBF3E4,#D8C19B)] shadow-[0_8px_18px_rgba(79,50,20,.18)]"
           style={{
+            zIndex: hasOpened ? 15 : 40,
             clipPath: "polygon(0 0,100% 0,50% 100%)",
             backfaceVisibility: "visible",
             transformStyle: "preserve-3d",
