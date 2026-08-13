@@ -97,16 +97,23 @@ export async function saveInvitation(
   const slug = resolveSlug(draft);
   const rowData = draftToRow(draft, slug);
 
-  // If updating an existing invitation, check if it's already paid to lock the package
+  // A paid entitlement belongs to one event. Preserve its identity even if an
+  // outdated browser draft tries to send different values; the database trigger
+  // is the final security boundary.
   if (invitationId) {
     const { data: existing } = await supabase
       .from("invitations")
-      .select("package_id, is_paid")
+      .select("package_id,is_paid,partner_one,partner_two,event_type,event_date,slug")
       .eq("id", invitationId)
       .maybeSingle();
 
-    if (existing?.is_paid && existing.package_id) {
+    if (existing?.is_paid) {
       rowData.package_id = existing.package_id;
+      rowData.partner_one = existing.partner_one;
+      rowData.partner_two = existing.partner_two;
+      rowData.event_type = existing.event_type;
+      rowData.event_date = existing.event_date;
+      rowData.slug = existing.slug;
     }
   }
 

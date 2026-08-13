@@ -80,7 +80,7 @@ async function loadUploadPolicy(invitationId: string) {
   const admin = getServiceSupabase();
   const { data: invitation } = await admin
     .from("invitations")
-    .select("id,is_published,is_paid")
+    .select("id,is_published,is_paid,qr_closing_at")
     .eq("id", invitationId)
     .maybeSingle();
   if (!invitation) throw new Error("Davetiye bulunamadı.");
@@ -101,6 +101,9 @@ async function loadUploadPolicy(invitationId: string) {
     throw new Error("Anı yükleme alanı kapalı.");
   }
   const now = new Date();
+  if (invitation.qr_closing_at && now > new Date(invitation.qr_closing_at)) {
+    throw new Error("Fotoğraf ve video yükleme süresi sona erdi.");
+  }
   if (memory.upload_starts_at && now < new Date(memory.upload_starts_at)) {
     throw new Error("Anı yükleme süresi henüz başlamadı.");
   }

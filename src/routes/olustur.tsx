@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Eraser, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eraser, Lock, Sparkles } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 import { builderContent } from "@/lib/builder-content";
@@ -172,6 +172,21 @@ function BuilderPage() {
   const progressVersion = useRef<number | undefined>(undefined);
   const activeStepIds = useRef<BuilderStepId[]>(builderStepIds);
   const resumedPublish = useRef(false);
+  const eventIdentityLocked = Boolean(isPaid && savedInvitation?.event_identity_locked_at);
+  const updateDraft: typeof update = useCallback(
+    (key, value) => {
+      if (
+        eventIdentityLocked &&
+        (["packageId", "category", "partnerOne", "partnerTwo", "date", "slug"] as const).includes(
+          key as "packageId",
+        )
+      ) {
+        return;
+      }
+      update(key, value);
+    },
+    [eventIdentityLocked, update],
+  );
 
   const syncCoreSections = useCallback(
     async (invitationId: string) => {
@@ -609,7 +624,7 @@ function BuilderPage() {
     journeyStages.findIndex((stage) => stage.activeSteps.some((item) => item === stepId)),
   );
   const currentStepLabel = steps[currentStep];
-  const stepProps = { draft, update, copy, lang };
+  const stepProps = { draft, update: updateDraft, copy, lang, eventIdentityLocked };
   const last = steps.length - 1;
 
   return (
@@ -675,11 +690,53 @@ function BuilderPage() {
           </p>
         </div>
 
+        {eventIdentityLocked ? (
+          <div className="mt-6 max-w-3xl rounded-3xl border border-gold/35 bg-gold/8 p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <div className="grid size-10 shrink-0 place-items-center rounded-2xl border border-gold/30 bg-gold/10 text-gold">
+                <Lock className="size-4" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="font-medium">
+                  {lang === "tr" ? "Ödeme bu etkinliğe bağlı" : "Payment is tied to this event"}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  {lang === "tr"
+                    ? "Paket, etkinlik türü, isimler, ana tarih ve davetiye adresi değiştirilemez. Yeni bir etkinlik için yeni davetiye oluşturup yeniden ödeme yapmalısınız. Tema ve içerikleri düzenlemeye devam edebilirsiniz."
+                    : "The package, event type, names, primary date, and invitation address cannot be changed. Create and pay for a new invitation for a new event. Theme and content editing remain available."}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+                  {savedInvitation?.qr_closing_at ? (
+                    <span>
+                      {lang === "tr" ? "Fotoğraf yükleme sonu" : "Photo uploads close"}:{" "}
+                      {new Date(savedInvitation.qr_closing_at).toLocaleString(
+                        lang === "tr" ? "tr-TR" : "en-GB",
+                      )}
+                    </span>
+                  ) : null}
+                  {savedInvitation?.retention_expires_at ? (
+                    <span>
+                      {lang === "tr"
+                        ? "Sahip indirme/saklama sonu"
+                        : "Owner download/retention until"}
+                      :{" "}
+                      {new Date(savedInvitation.retention_expires_at).toLocaleString(
+                        lang === "tr" ? "tr-TR" : "en-GB",
+                      )}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div className="mt-8 flex flex-wrap gap-2">
           <button
             type="button"
             onClick={fillSample}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50"
+            disabled={eventIdentityLocked}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm transition-colors hover:bg-accent/50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Sparkles className="size-4 text-gold" aria-hidden="true" />
             {copy.sample}
@@ -687,7 +744,8 @@ function BuilderPage() {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
+            disabled={eventIdentityLocked}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-5 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Eraser className="size-4" aria-hidden="true" />
             {copy.clear}
