@@ -99,8 +99,8 @@ export function DroppableTable({
         {guests.length > 0 && (
           <div className="flex flex-col items-center gap-0.5 mt-1 overflow-hidden w-full px-2 max-h-24">
             {guests.map((g, idx) => (
-              <span key={g.id} className="text-[9px] text-muted-foreground/80 text-center truncate w-full" title={g.name}>
-                {g.name}
+              <span key={g.id} className="text-[9px] text-muted-foreground/80 text-center truncate w-full" title={g.guest_name}>
+                {g.guest_name}
                 {idx === guests.length - 1 && guests.length > 6 ? "..." : ""}
               </span>
             )).slice(0, 6)}

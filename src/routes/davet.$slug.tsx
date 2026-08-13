@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AnimatePresence } from "framer-motion";
 import { z } from "zod";
-import { House, Palette, RotateCcw } from "lucide-react";
+import { House, Palette, RotateCcw, Sparkles } from "lucide-react";
 import {
   getPublicInvitation,
   getPublicFeatureSettings,
@@ -25,16 +25,13 @@ import { MemoryWall } from "@/components/invitation/MemoryWall";
 import { VoiceGreeting } from "@/components/invitation/VoiceGreeting";
 import { GiftSection } from "@/components/invitation/GiftSection";
 import { CountdownTimer } from "@/components/invitation/CountdownTimer";
+import { InvitationPhotoGallery } from "@/components/invitation/InvitationPhotoGallery";
 import { InvitationFooter } from "@/components/invitation/InvitationFooter";
 import { LueurHero, LueurOpening, LueurSection } from "@/components/invitation/PapillonRouge";
 import { RoyalEnvelopeOpening } from "@/components/invitation/RoyalEnvelopeOpening";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
-import {
-  resolveTheme,
-  selectableThemes,
-  type InviteThemeId,
-  type ThemeCategory,
-} from "@/lib/theme-engine";
+import { selectableThemes, type InviteThemeId, type ThemeCategory } from "@/lib/theme-engine";
+import { resolveCustomizedTheme } from "@/lib/theme-customization";
 
 export const Route = createFileRoute("/davet/$slug")({
   validateSearch: z.object({ theme: z.string().optional() }),
@@ -55,6 +52,8 @@ export const Route = createFileRoute("/davet/$slug")({
           venue: "Çırağan Sarayı",
           address: "Yıldız, Çırağan Cd. No:32, Beşiktaş/İstanbul",
           city: "İstanbul",
+          map_url:
+            "https://www.google.com/maps/search/?api=1&query=%C3%87%C4%B1ra%C4%9Fan+Saray%C4%B1+Be%C5%9Fikta%C5%9F+%C4%B0stanbul",
           event_program: [
             { time: "18:30", title: "Karşılama", desc: "Kokteyl ve hoş geldiniz ikramları" },
             { time: "19:00", title: "Nikâh Töreni", desc: "Mutluluğumuza evet diyoruz" },
@@ -155,7 +154,11 @@ function PremiumInvitePage() {
     ? (search.theme as InviteThemeId)
     : draft.theme;
   const [previewThemeId, setPreviewThemeId] = useState<InviteThemeId>(initialDemoTheme);
-  const theme = resolveTheme(isDemo ? previewThemeId : draft.theme);
+  const theme = resolveCustomizedTheme(
+    isDemo ? previewThemeId : draft.theme,
+    isDemo ? undefined : draft.themeCustomization,
+    isDemo ? undefined : draft.coverPhoto,
+  );
   const pkg = (invitation as InvitationRow & { package?: { features?: Record<string, boolean> } })
     .package;
   const features = pkg?.features || {
@@ -185,7 +188,13 @@ function PremiumInvitePage() {
   }, []);
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30">
+    <div
+      className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30"
+      style={{
+        backgroundColor: theme.secondaryColor,
+        fontFamily: theme.font ? `"${theme.font}", sans-serif` : undefined,
+      }}
+    >
       {isDemo ? (
         <DemoThemeSwitcher
           value={previewThemeId}
@@ -201,11 +210,28 @@ function PremiumInvitePage() {
       <AnimatePresence>
         {!hasOpened && features.digital_invitation !== false && openingEnabled ? (
           isRoyal ? (
-            <RoyalEnvelopeOpening key={`intro-${theme.id}`} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} date={draft.date} />
+            <RoyalEnvelopeOpening
+              key={`intro-${theme.id}`}
+              partnerOne={draft.partnerOne}
+              partnerTwo={draft.partnerTwo}
+              onComplete={() => setHasOpened(true)}
+              date={draft.date}
+            />
           ) : isLueur ? (
-            <LueurOpening key={`intro-${theme.id}`} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
+            <LueurOpening
+              key={`intro-${theme.id}`}
+              partnerOne={draft.partnerOne}
+              partnerTwo={draft.partnerTwo}
+              onComplete={() => setHasOpened(true)}
+            />
           ) : (
-            <InvitationIntro key={`intro-${theme.id}`} theme={theme} partnerOne={draft.partnerOne} partnerTwo={draft.partnerTwo} onComplete={() => setHasOpened(true)} />
+            <InvitationIntro
+              key={`intro-${theme.id}`}
+              theme={theme}
+              partnerOne={draft.partnerOne}
+              partnerTwo={draft.partnerTwo}
+              onComplete={() => setHasOpened(true)}
+            />
           )
         ) : null}
       </AnimatePresence>
@@ -217,51 +243,78 @@ function PremiumInvitePage() {
           <main className="relative z-10 h-dvh snap-y snap-mandatory overflow-y-auto scroll-smooth pb-24">
             {features.digital_invitation !== false ? (
               <>
-                {isLueur ? <LueurHero draft={draft} lang={lang} /> : <HeroExperience draft={draft} theme={theme} lang={lang} />}
+                {isLueur ? (
+                  <LueurHero draft={draft} lang={lang} />
+                ) : (
+                  <HeroExperience draft={draft} theme={theme} lang={lang} />
+                )}
                 {eventFeatures?.audio_greeting_enabled !== false && advanced?.audio?.url ? (
-                  <LueurSection active={isLueur}><VoiceGreeting
-                    theme={theme}
-                    url={advanced.audio.url}
-                    title={advanced.audio.title}
-                    description={advanced.audio.description}
-                    alternativeText={advanced.audio.alternative_text}
-                  /></LueurSection>
+                  <LueurSection active={isLueur}>
+                    <VoiceGreeting
+                      theme={theme}
+                      url={advanced.audio.url}
+                      title={advanced.audio.title}
+                      description={advanced.audio.description}
+                      alternativeText={advanced.audio.alternative_text}
+                    />
+                  </LueurSection>
                 ) : null}
                 {eventFeatures?.story_enabled !== false ? (
-                  <LueurSection active={isLueur} tone="wine"><StoryTimeline draft={draft} theme={theme} /></LueurSection>
+                  <LueurSection active={isLueur} tone="wine">
+                    <StoryTimeline draft={draft} theme={theme} />
+                  </LueurSection>
                 ) : null}
-                <LueurSection active={isLueur}><CountdownTimer
-                  eventDate={draft.date}
-                  eventTime={draft.time || (schedules.length > 0 ? schedules[0].starts_at : null)}
-                  theme={theme}
-                  lang={lang}
-                /></LueurSection>
+                {draft.galleryImages.length > 0 ? (
+                  <LueurSection active={isLueur} tone="wine">
+                    <InvitationPhotoGallery
+                      images={draft.galleryImages}
+                      theme={theme}
+                      lang={lang}
+                    />
+                  </LueurSection>
+                ) : null}
+                <LueurSection active={isLueur}>
+                  <CountdownTimer
+                    eventDate={draft.date}
+                    eventTime={draft.time || (schedules.length > 0 ? schedules[0].starts_at : null)}
+                    theme={theme}
+                    lang={lang}
+                  />
+                </LueurSection>
                 {eventFeatures?.schedule_enabled !== false ? (
                   <>
-                    <LueurSection active={isLueur}><EventProgramTimeline draft={draft} theme={theme} lang={lang} /></LueurSection>
+                    <LueurSection active={isLueur}>
+                      <EventProgramTimeline draft={draft} theme={theme} lang={lang} />
+                    </LueurSection>
                     {schedules.length > 0 ? (
-                      <LueurSection active={isLueur}><MultiEventDetails
-                        schedules={schedules}
-                        theme={theme}
-                        lang={lang}
-                        calendarEnabled={eventFeatures?.calendar_enabled !== false}
-                      /></LueurSection>
+                      <LueurSection active={isLueur}>
+                        <MultiEventDetails
+                          schedules={schedules}
+                          theme={theme}
+                          lang={lang}
+                          calendarEnabled={eventFeatures?.calendar_enabled !== false}
+                        />
+                      </LueurSection>
                     ) : (
-                      <LueurSection active={isLueur}><EventDetails
-                        draft={draft}
-                        theme={theme}
-                        lang={lang}
-                        calendarEnabled={eventFeatures?.calendar_enabled !== false}
-                      /></LueurSection>
+                      <LueurSection active={isLueur}>
+                        <EventDetails
+                          draft={draft}
+                          theme={theme}
+                          lang={lang}
+                          calendarEnabled={eventFeatures?.calendar_enabled !== false}
+                        />
+                      </LueurSection>
                     )}
                   </>
                 ) : null}
                 {eventFeatures?.rsvp_enabled !== false ? (
-                  <LueurSection active={isLueur} tone="wine"><PremiumRSVP
-                    theme={theme}
-                    invitationId={invitation.id}
-                    guestToken={personalGuestToken}
-                  /></LueurSection>
+                  <LueurSection active={isLueur} tone="wine">
+                    <PremiumRSVP
+                      theme={theme}
+                      invitationId={invitation.id}
+                      guestToken={personalGuestToken}
+                    />
+                  </LueurSection>
                 ) : null}
               </>
             ) : null}
@@ -269,18 +322,26 @@ function PremiumInvitePage() {
             {features.qr_gallery !== false ? (
               <>
                 {eventFeatures?.memory_box_enabled !== false ? (
-                  <LueurSection active={isLueur} tone="wine"><MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} /></LueurSection>
+                  <LueurSection active={isLueur} tone="wine">
+                    <MemoryWall theme={theme} invitationId={invitation.id} isDemo={isDemo} />
+                  </LueurSection>
                 ) : null}
                 {eventFeatures?.qr_upload_enabled !== false ? (
-                  <LueurSection active={isLueur}><PremiumQRExperience theme={theme} invitationId={invitation.id} /></LueurSection>
+                  <LueurSection active={isLueur}>
+                    <PremiumQRExperience theme={theme} invitationId={invitation.id} />
+                  </LueurSection>
                 ) : null}
               </>
             ) : null}
             {eventFeatures?.gift_enabled !== false && advanced?.gift ? (
-              <LueurSection active={isLueur}><GiftSection settings={advanced.gift} theme={theme} /></LueurSection>
+              <LueurSection active={isLueur}>
+                <GiftSection settings={advanced.gift} theme={theme} />
+              </LueurSection>
             ) : null}
 
-            <LueurSection active={isLueur} tone="wine"><InvitationFooter draft={draft} theme={theme} lang={lang} /></LueurSection>
+            <LueurSection active={isLueur} tone="wine">
+              <InvitationFooter draft={draft} theme={theme} lang={lang} />
+            </LueurSection>
           </main>
         </div>
       )}
@@ -359,6 +420,15 @@ function DemoThemeSwitcher({
           ))}
         </select>
       </label>
+      <a
+        href={`/olustur?theme=${encodeURIComponent(value)}&step=basic-info`}
+        className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl bg-white px-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+      >
+        <Sparkles className="size-4" aria-hidden="true" />
+        <span className="hidden md:inline">
+          {lang === "tr" ? "Bu temayla oluştur" : "Use this theme"}
+        </span>
+      </a>
       <button
         type="button"
         onClick={onReplay}

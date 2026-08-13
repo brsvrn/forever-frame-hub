@@ -14,6 +14,10 @@ describe("theme discovery and builder journey", () => {
     expect(themeIndex).toContain("Tema koleksiyonu filtresi");
     expect(themeDetail).toContain("/davet/demo?theme=");
     expect(themeDetail).toContain('step: "basic-info"');
+    expect(themeDetail).toContain("themeExperienceScenes");
+    expect(themeDetail).toContain("relatedThemes");
+    expect(themeDetail).toContain("themeFaqs");
+    expect(themeDetail).toContain("FAQPage");
   });
 
   it("redirects legacy preview URLs to the actual invitation demo", () => {
