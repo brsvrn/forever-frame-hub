@@ -40,6 +40,7 @@ import { AdminSocialContentManager } from "@/components/admin/AdminSocialContent
 import { getAuditLogs } from "@/lib/admin.api";
 import { AdminUserGuideModal } from "@/components/admin/AdminUserGuideModal";
 import { BookOpen } from "lucide-react";
+import { AdminNotificationCenter } from "@/components/admin/AdminNotificationCenter";
 
 export const Route = createFileRoute("/admin")({
   component: () => (
@@ -171,6 +172,7 @@ function AdminDashboard({ email }: { email: string }) {
   return (
     <div className="min-h-dvh bg-background text-foreground font-sans flex flex-col md:flex-row">
       <AdminUserGuideModal isOpen={showGuideModal} onClose={() => setShowGuideModal(false)} />
+      <AdminNotificationCenter onNavigateTab={handleTabChange} />
 
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-surface border-b border-border sticky top-0 z-40">
@@ -320,7 +322,7 @@ function AdminDashboard({ email }: { email: string }) {
 }
 
 function AuditLogs() {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<Awaited<ReturnType<typeof getAuditLogs>>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -376,7 +378,7 @@ function AuditLogs() {
                     </td>
                     <td className="px-5 py-3.5 text-muted-foreground">{log.target_type}</td>
                     <td className="px-5 py-3.5 text-[11px] font-mono text-muted-foreground max-w-xs truncate">
-                      {log.payload ? JSON.stringify(log.payload) : "-"}
+                      {log.details ? JSON.stringify(log.details) : "-"}
                     </td>
                   </tr>
                 ))}

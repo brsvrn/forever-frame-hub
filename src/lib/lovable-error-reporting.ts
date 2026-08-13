@@ -1,3 +1,5 @@
+import { reportAdminError } from "./admin-error-reporting";
+
 type LovableErrorOptions = {
   mechanism?: "manual" | "onerror" | "unhandledrejection" | "react_error_boundary";
   handled?: boolean;
@@ -25,6 +27,9 @@ declare global {
 
 export function reportLovableError(error: unknown, context: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
+  reportAdminError(error, {
+    source: typeof context.boundary === "string" ? context.boundary : "react_error_boundary",
+  });
   window.__lovableEvents?.captureException?.(
     error,
     {

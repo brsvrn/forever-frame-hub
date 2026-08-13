@@ -18,6 +18,7 @@ import { CookieConsentBanner } from "@/components/cookie/CookieConsentBanner";
 import { ANALYTICS_CONFIG, trackPageView } from "@/lib/analytics/analytics";
 import { captureUTMParams } from "@/lib/analytics/utm";
 import { getStoredConsent, applyConsentToThirdParties } from "@/lib/analytics/consent";
+import { reportAdminError } from "@/lib/admin-error-reporting";
 
 const googleSiteVerification =
   (typeof process !== "undefined"
@@ -254,6 +255,19 @@ function RootComponent() {
     // 2. Apply existing consent if any
     const consent = getStoredConsent();
     applyConsentToThirdParties(consent);
+
+    const onWindowError = (event: ErrorEvent) => {
+      reportAdminError(event.error ?? event.message, { source: "window_error" });
+    };
+    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      reportAdminError(event.reason, { source: "unhandled_rejection" });
+    };
+    window.addEventListener("error", onWindowError);
+    window.addEventListener("unhandledrejection", onUnhandledRejection);
+    return () => {
+      window.removeEventListener("error", onWindowError);
+      window.removeEventListener("unhandledrejection", onUnhandledRejection);
+    };
   }, []);
 
   useEffect(() => {

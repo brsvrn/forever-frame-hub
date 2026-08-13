@@ -8,6 +8,63 @@ export type Database = {
   };
   public: {
     Tables: {
+      admin_notifications: {
+        Row: {
+          id: string;
+          category: "purchase" | "event_created" | "error";
+          severity: "info" | "success" | "warning" | "error";
+          title: string;
+          message: string;
+          actor_user_id: string | null;
+          invitation_id: string | null;
+          transaction_id: string | null;
+          source: string;
+          metadata: Json;
+          dedupe_key: string;
+          occurrence_count: number;
+          is_read: boolean;
+          read_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          category: "purchase" | "event_created" | "error";
+          severity?: "info" | "success" | "warning" | "error";
+          title: string;
+          message: string;
+          actor_user_id?: string | null;
+          invitation_id?: string | null;
+          transaction_id?: string | null;
+          source?: string;
+          metadata?: Json;
+          dedupe_key: string;
+          occurrence_count?: number;
+          is_read?: boolean;
+          read_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: "purchase" | "event_created" | "error";
+          severity?: "info" | "success" | "warning" | "error";
+          title?: string;
+          message?: string;
+          actor_user_id?: string | null;
+          invitation_id?: string | null;
+          transaction_id?: string | null;
+          source?: string;
+          metadata?: Json;
+          dedupe_key?: string;
+          occurrence_count?: number;
+          is_read?: boolean;
+          read_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       invitations: {
         Row: {
           address: string;
@@ -443,6 +500,8 @@ export type Database = {
           allow_new_registrations: boolean;
           default_package_id: string | null;
           max_upload_size_mb: number;
+          support_phone: string | null;
+          whatsapp_number: string | null;
           support_email: string;
           updated_at: string;
           updated_by: string | null;
@@ -465,6 +524,8 @@ export type Database = {
           allow_new_registrations?: boolean;
           default_package_id?: string | null;
           max_upload_size_mb?: number;
+          support_phone?: string | null;
+          whatsapp_number?: string | null;
           support_email?: string;
           updated_at?: string;
           updated_by?: string | null;
@@ -487,6 +548,8 @@ export type Database = {
           allow_new_registrations?: boolean;
           default_package_id?: string | null;
           max_upload_size_mb?: number;
+          support_phone?: string | null;
+          whatsapp_number?: string | null;
           support_email?: string;
           updated_at?: string;
           updated_by?: string | null;
