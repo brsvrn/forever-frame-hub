@@ -214,6 +214,8 @@ export async function getSystemSettings() {
       default_package_id: null,
       max_upload_size_mb: 100,
       support_email: "support@memorywedding.com",
+      support_phone: "0530 381 1155",
+      whatsapp_number: "0530 381 1155",
       updated_at: new Date(0).toISOString(),
       updated_by: null,
     }

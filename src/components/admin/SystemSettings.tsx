@@ -26,6 +26,8 @@ type GeneralSettings = {
   default_package_id: string;
   max_upload_size_mb: number;
   support_email: string;
+  support_phone: string;
+  whatsapp_number: string;
 };
 
 function toLocalDateTime(value: string | null) {
@@ -72,6 +74,8 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
           default_package_id: settingsData.default_package_id ?? "",
           max_upload_size_mb: settingsData.max_upload_size_mb ?? 100,
           support_email: settingsData.support_email ?? "support@memorywedding.com",
+          support_phone: settingsData.support_phone ?? "0530 381 1155",
+          whatsapp_number: settingsData.whatsapp_number ?? "0530 381 1155",
         });
         setPackages(packageRows);
       })
@@ -424,6 +428,29 @@ export function SystemSettings({ adminEmail }: { adminEmail: string }) {
               value={general.support_email}
               onChange={(event) => setGeneral({ ...general, support_email: event.target.value })}
             />
+          </label>
+          <label className="grid gap-2 text-sm text-zinc-300">
+            Destek telefonu
+            <input
+              type="tel"
+              className={inputClassName()}
+              value={general.support_phone}
+              onChange={(event) => setGeneral({ ...general, support_phone: event.target.value })}
+              placeholder="0530 381 11 55"
+            />
+          </label>
+          <label className="grid gap-2 text-sm text-zinc-300">
+            WhatsApp destek numarası
+            <input
+              type="tel"
+              className={inputClassName()}
+              value={general.whatsapp_number}
+              onChange={(event) => setGeneral({ ...general, whatsapp_number: event.target.value })}
+              placeholder="0530 381 11 55"
+            />
+            <span className="text-xs text-zinc-500">
+              Ana sayfadaki WhatsApp düğmesi bu numaraya yönlenir.
+            </span>
           </label>
           <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950/50 p-4">
             <div>

@@ -13,6 +13,7 @@ import { SecuritySection } from "@/components/marketing/security/SecuritySection
 import { I18nProvider } from "@/lib/i18n";
 import { PhoneProvider } from "@/contexts/PhoneContext";
 import { getThemeCatalog } from "@/lib/theme-registry.functions";
+import { WhatsAppSupportButton } from "@/components/support/WhatsAppSupportButton";
 
 const title = "MemoryWedding — Dijital Davetiye, LCV ve Canlı Galeri";
 const description =
@@ -76,6 +77,7 @@ function MarketingLandingPage() {
             <PremiumCTA />
           </main>
           <Footer />
+          <WhatsAppSupportButton />
         </div>
       </PhoneProvider>
     </I18nProvider>
