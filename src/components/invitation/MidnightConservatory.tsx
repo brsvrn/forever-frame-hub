@@ -1,10 +1,10 @@
 import { useCallback, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown, KeyRound, Sparkles } from "lucide-react";
-import conservatoryAisle from "@/assets/theme-midnight-conservatory-aisle.webp";
-import conservatoryDinner from "@/assets/theme-midnight-conservatory-dinner.webp";
-import conservatoryDoors from "@/assets/theme-midnight-conservatory-doors.webp";
-import conservatoryHero from "@/assets/theme-midnight-conservatory.webp";
+import conservatoryAisle from "@/assets/theme-midnight-conservatory-aisle-optimized.webp";
+import conservatoryDinner from "@/assets/theme-midnight-conservatory-dinner-optimized.webp";
+import conservatoryDoors from "@/assets/theme-midnight-conservatory-doors-optimized.webp";
+import conservatoryHero from "@/assets/theme-midnight-conservatory-optimized.webp";
 import { formatInviteDate, type InvitationDraft } from "@/lib/invitation";
 
 export function MidnightConservatoryOpening({

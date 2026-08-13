@@ -1,7 +1,7 @@
 import type { ThemeCategory, ThemeConfig } from "./theme-engine";
-import midnightAisle from "../assets/theme-midnight-conservatory-aisle.webp";
-import midnightDinner from "../assets/theme-midnight-conservatory-dinner.webp";
-import midnightDoors from "../assets/theme-midnight-conservatory-doors.webp";
+import midnightAisle from "../assets/theme-midnight-conservatory-aisle-optimized.webp";
+import midnightDinner from "../assets/theme-midnight-conservatory-dinner-optimized.webp";
+import midnightDoors from "../assets/theme-midnight-conservatory-doors-optimized.webp";
 
 export type ThemeCategoryFilter = "all" | ThemeCategory;
 

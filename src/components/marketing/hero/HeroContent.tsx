@@ -50,7 +50,7 @@ export function HeroContent() {
               </div>
             </FadeIn>
 
-            <SlideUp delay={0.2}>
+            <div>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-[1.08]">
                 Davetiyenizi gönderin. <br className="hidden lg:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/50 drop-shadow-sm">
@@ -58,7 +58,7 @@ export function HeroContent() {
                 </span>{" "}
                 tek QR’da toplayın.
               </h1>
-            </SlideUp>
+            </div>
 
             <SlideUp delay={0.3}>
               <p className="text-lg md:text-xl text-foreground/90 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-light">

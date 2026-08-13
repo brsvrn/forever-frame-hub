@@ -84,7 +84,7 @@ export const invitationFonts: InvitationFont[] = [
 ];
 
 const knownFontFamilies = new Set(invitationFonts.map((font) => font.family));
-const requestedFontFamilies = new Set<string>();
+const requestedFontFamilies = new Set<string>(["Cormorant Garamond", "Plus Jakarta Sans"]);
 
 export function isInvitationFont(value: string): boolean {
   return knownFontFamilies.has(value);

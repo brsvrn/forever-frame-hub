@@ -56,7 +56,7 @@ export function InteractiveDemoContent() {
     <section
       id="demo"
       ref={ref}
-      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden py-24 lg:py-32"
+      className="performance-section relative flex min-h-[100dvh] flex-col justify-center overflow-hidden py-24 lg:py-32"
     >
       <div className="container relative z-10 mx-auto px-4">
         <div className="mx-auto mb-16 max-w-3xl text-center lg:mb-24">
