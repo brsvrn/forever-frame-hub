@@ -73,32 +73,33 @@ export function EvergreenVowsOpening({
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.35 } }}
-        className="relative z-30 mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6"
+        className="absolute inset-0 z-30 flex items-center justify-center px-6"
       >
-        <div className="mx-auto mb-7 flex items-center justify-center gap-3 text-[#C9A96E]">
-          <span className="h-px w-14 bg-current" />
-          <Leaf className="size-5" strokeWidth={1.2} />
-          <span className="h-px w-14 bg-current" />
-        </div>
-        <p className="font-cinzel text-[9px] uppercase tracking-[.5em] text-[#D7BC87]">
-          Evergreen Vows
-        </p>
-        <h1 className="mt-8 font-playfair text-[clamp(3rem,14vw,5.6rem)] leading-[.88]">
-          {partnerOne || "Ece"}
-          <span className="my-2 block font-pinyon text-[.62em] text-[#C9A96E]">&</span>
-          {partnerTwo || "Kaan"}
-        </h1>
         <button
           type="button"
           onClick={open}
-          className="group mt-11 rounded-full border border-[#C9A96E]/60 bg-[#071F18]/80 px-8 py-4 text-[10px] font-semibold uppercase tracking-[.32em] text-[#F7F0E3] shadow-[0_18px_45px_rgba(0,0,0,.35)] backdrop-blur transition hover:bg-[#124936]"
+          data-evergreen-seal
+          aria-label="Davetiyeyi aç"
+          className="group relative grid size-40 shrink-0 place-items-center rounded-full border border-[#E7D29D]/75 bg-[radial-gradient(circle_at_35%_30%,#DCC28A_0%,#AE8245_42%,#70471F_100%)] text-[#102E23] shadow-[0_20px_60px_rgba(0,0,0,.55),inset_0_0_0_5px_rgba(68,39,15,.22),inset_0_0_0_8px_rgba(247,240,227,.17)] transition duration-300 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F7F0E3] sm:size-44"
         >
-          Davetiyeyi aç
+          <span className="absolute inset-3 rounded-full border border-[#4E3219]/55" />
+          <span className="absolute inset-5 rounded-full border border-[#F7F0E3]/25" />
+          <span className="relative flex flex-col items-center">
+            <Leaf className="mb-2 size-5" strokeWidth={1.25} aria-hidden="true" />
+            <span className="max-w-28 font-playfair text-xl leading-tight sm:text-2xl">
+              {partnerOne?.[0] || "E"}
+              <span className="mx-1 font-pinyon text-[#5C3718]">&</span>
+              {partnerTwo?.[0] || "K"}
+            </span>
+            <span className="mt-2 font-cinzel text-[7px] uppercase tracking-[.28em]">
+              Davetiyeyi aç
+            </span>
+          </span>
         </button>
-        <p className="mt-5 text-[8px] uppercase tracking-[.34em] text-[#D8DFD4]">
+        <p className="absolute bottom-8 text-[8px] uppercase tracking-[.34em] text-[#D8DFD4] sm:bottom-10">
           Daima yeşil · Daima birlikte
         </p>
       </motion.div>
