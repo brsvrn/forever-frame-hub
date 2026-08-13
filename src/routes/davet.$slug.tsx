@@ -313,6 +313,7 @@ function PremiumInvitePage() {
 
   return (
     <div
+      data-invitation-theme={theme.id}
       data-invitation-custom-font={Boolean(draft.themeCustomization.fontFamily)}
       className="relative min-h-dvh overflow-x-hidden bg-black font-sans antialiased selection:bg-white/30"
       style={

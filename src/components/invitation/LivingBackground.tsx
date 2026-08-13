@@ -5,6 +5,8 @@ export function LivingBackground({ theme }: { theme: ThemeConfig }) {
   const reduceMotion = useReducedMotion();
   const isLightTheme = theme.id === "soft-sand-dunes" || theme.id === "wildflower-meadow";
   const isConservatory = theme.id === "midnight-conservatory";
+  const isColorburst = theme.id === "colorburst-fiesta";
+  const isSilverScreen = theme.id === "silver-screen-romance";
 
   return (
     <div
@@ -15,7 +17,13 @@ export function LivingBackground({ theme }: { theme: ThemeConfig }) {
         className="absolute -inset-6 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url(${theme.image})`,
-          filter: isLightTheme ? "brightness(1.02) saturate(0.96)" : undefined,
+          filter: isLightTheme
+            ? "brightness(1.02) saturate(0.96)"
+            : isColorburst
+              ? "brightness(1.03) saturate(1.16)"
+              : isSilverScreen
+                ? "grayscale(1) contrast(1.08) brightness(.88)"
+                : undefined,
         }}
         initial={reduceMotion ? false : { scale: 1.08 }}
         animate={{ scale: 1.02 }}
@@ -26,7 +34,9 @@ export function LivingBackground({ theme }: { theme: ThemeConfig }) {
       <div className={`absolute inset-0 ${theme.styles.overlay}`} />
       {theme.secondaryColor ? (
         <div
-          className="absolute inset-0 opacity-20 mix-blend-color"
+          className={`absolute inset-0 mix-blend-color ${
+            isColorburst ? "opacity-[0.07]" : isSilverScreen ? "opacity-0" : "opacity-20"
+          }`}
           style={{ backgroundColor: theme.secondaryColor }}
         />
       ) : null}
@@ -38,6 +48,13 @@ export function LivingBackground({ theme }: { theme: ThemeConfig }) {
         <>
           <div className="absolute inset-3 rounded-[2.5rem] border border-[#d6b96f]/25 shadow-[inset_0_0_50px_rgba(214,185,111,.06)]" />
           <div className="absolute inset-6 rounded-[2rem] border border-[#d6b96f]/10" />
+        </>
+      ) : null}
+
+      {isSilverScreen ? (
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,.62)_100%)]" />
+          <div className="absolute inset-4 border border-white/15 sm:inset-7" />
         </>
       ) : null}
 
@@ -75,9 +92,80 @@ function AmbientMotion({ theme }: { theme: ThemeConfig }) {
       return <LakeShimmer accent={theme.qr.accent} />;
     case "fireflies":
       return <Fireflies accent={theme.qr.accent} />;
+    case "confetti":
+      return <Confetti />;
+    case "filmGrain":
+      return <FilmGrain />;
     default:
       return null;
   }
+}
+
+function Confetti() {
+  const pieces = [
+    [7, "#FFE45E", -24],
+    [16, "#FF5FA2", 32],
+    [28, "#35D5D0", -38],
+    [39, "#FF7A32", 26],
+    [53, "#7C5CFC", -30],
+    [66, "#FFE45E", 38],
+    [78, "#24C98B", -26],
+    [90, "#FF4D87", 34],
+  ] as const;
+
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {pieces.map(([left, color, drift], index) => (
+        <motion.span
+          key={`${left}-${color}`}
+          className="absolute -top-8 h-4 w-2 rounded-[35%] opacity-75 shadow-sm"
+          style={{ left: `${left}%`, backgroundColor: color }}
+          animate={{
+            y: ["-8vh", "112vh"],
+            x: [0, drift, drift / -2, 0],
+            rotate: [0, 240 + index * 45, 620 + index * 28],
+          }}
+          transition={{
+            duration: 10 + (index % 4) * 1.7,
+            delay: -index * 1.4,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FilmGrain() {
+  return (
+    <>
+      <motion.div
+        className="absolute -inset-12 opacity-[0.13] mix-blend-screen"
+        style={{
+          backgroundImage:
+            "repeating-radial-gradient(circle at 22% 37%,rgba(255,255,255,.8) 0 .45px,transparent .6px 3px)",
+          backgroundSize: "7px 7px",
+        }}
+        animate={{ x: [0, -7, 5, -3, 0], y: [0, 5, -4, 6, 0] }}
+        transition={{ duration: 0.42, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div
+        className="absolute inset-0 bg-white"
+        animate={{ opacity: [0.018, 0.045, 0.012, 0.032, 0.018] }}
+        transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
+      />
+      {[18, 73].map((left, index) => (
+        <motion.span
+          key={left}
+          className="absolute top-0 h-full w-px bg-white/15"
+          style={{ left: `${left}%` }}
+          animate={{ opacity: [0, 0.35, 0], x: [0, index ? -2 : 2, 0] }}
+          transition={{ duration: 3.8 + index, repeat: Infinity, delay: index * 1.9 }}
+        />
+      ))}
+    </>
+  );
 }
 
 function Fireflies({ accent }: { accent: string }) {

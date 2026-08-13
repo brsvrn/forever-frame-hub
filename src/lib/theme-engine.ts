@@ -21,6 +21,8 @@ import midnightConservatory from "@/assets/theme-midnight-conservatory.webp";
 import evergreenVows from "@/assets/theme-evergreen-vows.webp";
 import lueurButterfly from "@/assets/lueur-de-minuit-butterfly.png";
 import royalEnvelope from "@/assets/theme-royal-envelope.webp";
+import colorburstFiesta from "@/assets/theme-colorburst-fiesta.webp";
+import silverScreenRomance from "@/assets/theme-silver-screen-romance.webp";
 import {
   buildThemeCapabilities,
   type ThemeCapabilities,
@@ -52,7 +54,13 @@ export type NatureThemeId = "emerald-forest" | "wildflower-meadow" | "alpine-mis
 export type ItalianThemeId = "amalfi-lemon-terrace" | "tuscan-golden-hills" | "lake-como-garden";
 export type LuxuryThemeId = "grand-ballroom" | "midnight-conservatory" | "evergreen-vows";
 export type CinematicThemeId =
-  "cinematic-flow" | "boho-motion" | "ethereal-light" | "lueur-de-minuit" | "royal-envelope";
+  | "cinematic-flow"
+  | "boho-motion"
+  | "ethereal-light"
+  | "lueur-de-minuit"
+  | "royal-envelope"
+  | "colorburst-fiesta"
+  | "silver-screen-romance";
 export type ThemeCategory = "coastal" | "nature" | "italy" | "luxury" | "cinematic" | "classic";
 export type InviteThemeId =
   | CoastalThemeId
@@ -113,6 +121,8 @@ export interface ThemeConfig {
       | "tuscanGlow"
       | "lakeShimmer"
       | "fireflies"
+      | "confetti"
+      | "filmGrain"
       | "none";
     intensity: "light" | "medium" | "heavy";
   };
@@ -979,6 +989,103 @@ const themeDefinitions: Record<InviteThemeId, ThemeDefinition> = {
       cards: { wrapper: "bg-black/35 backdrop-blur-xl border-white/25" },
       gallery: { gridStyle: "masonry" },
       icons: { color: "text-[#FFFFFF]" },
+    },
+  },
+
+  "colorburst-fiesta": {
+    id: "colorburst-fiesta",
+    name: "Colorburst Fiesta",
+    category: "cinematic",
+    tag: { tr: "Aşkın bütün renkleri", en: "Every color of love" },
+    image: colorburstFiesta,
+    selectable: true,
+    primaryColor: "#FFF8E8",
+    secondaryColor: "#C91C73",
+    font: "DM Serif Display",
+    qr: {
+      accent: "#FFD84D",
+      ink: "#32105A",
+      paper: "#FFF8E8",
+      overlay:
+        "linear-gradient(180deg, rgba(255,80,130,.08), rgba(46,15,86,.74) 72%, rgba(30,10,60,.9))",
+      imagePosition: "center",
+    },
+    music: coastalMusic,
+    ambientEffect: { type: "confetti", intensity: "medium" },
+    openingAnimation: { duration: 1.8, style: "scale" },
+    styles: {
+      overlay: "bg-gradient-to-b from-[#2E0F56]/10 via-[#B71368]/12 to-[#17072E]/70",
+      typography: {
+        display:
+          "font-prata font-normal tracking-tight text-[#FFF8E8] drop-shadow-[0_4px_22px_rgba(57,8,79,.75)]",
+        sans: "font-sans",
+        subheading: "font-sans uppercase tracking-[0.32em] text-[#FFE45E] text-[10px] font-black",
+        ampersand: "font-pinyon text-[#FFD84D] text-[1.2em] font-normal mx-2",
+      },
+      textColor: "text-[#FFF8E8]",
+      mutedTextColor: "text-[#FFF3D2]/85",
+      accentColor: "text-[#FFE45E]",
+      motion: "ease-out",
+      buttons: {
+        primary:
+          "bg-[#FFE45E] text-[#32105A] font-black tracking-wide hover:bg-[#FFF08F] shadow-[0_10px_32px_rgba(255,82,157,.35)]",
+        secondary:
+          "border border-white/35 bg-[#EC4899]/25 text-white backdrop-blur-xl hover:bg-[#EC4899]/40",
+      },
+      cards: {
+        wrapper:
+          "bg-[#32105A]/55 backdrop-blur-xl border-[#FFE45E]/35 shadow-[0_20px_60px_rgba(37,9,65,.3)]",
+      },
+      gallery: { gridStyle: "masonry" },
+      icons: { color: "text-[#FFE45E]" },
+    },
+  },
+
+  "silver-screen-romance": {
+    id: "silver-screen-romance",
+    name: "Silver Screen Romance",
+    category: "cinematic",
+    tag: { tr: "Eski bir film gibi", en: "Like an old film" },
+    image: silverScreenRomance,
+    selectable: true,
+    primaryColor: "#F5F5F0",
+    secondaryColor: "#080808",
+    font: "Cormorant Garamond",
+    qr: {
+      accent: "#E8E8E2",
+      ink: "#111111",
+      paper: "#F4F3EC",
+      overlay: "linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.82))",
+      imagePosition: "center",
+    },
+    music: gentleWaltzMusic,
+    ambientEffect: { type: "filmGrain", intensity: "light" },
+    openingAnimation: { duration: 2.4, style: "fade" },
+    styles: {
+      overlay: "bg-gradient-to-b from-black/20 via-black/22 to-black/75",
+      typography: {
+        display:
+          "font-playfair font-normal italic tracking-tight text-[#F5F5F0] drop-shadow-[0_3px_16px_rgba(0,0,0,.8)]",
+        sans: "font-sans",
+        subheading:
+          "font-cinzel uppercase tracking-[0.38em] text-[#E5E5DF] text-[10px] font-semibold",
+        ampersand: "font-pinyon text-white text-[1.15em] font-normal mx-2",
+      },
+      textColor: "text-[#F5F5F0]",
+      mutedTextColor: "text-[#D6D6D0]/80",
+      accentColor: "text-white",
+      motion: "ease-in-out",
+      buttons: {
+        primary: "bg-[#F3F3EE] text-black font-semibold tracking-[0.15em] uppercase hover:bg-white",
+        secondary:
+          "border border-white/30 bg-black/35 text-white backdrop-blur-md hover:bg-white/15",
+      },
+      cards: {
+        wrapper:
+          "bg-black/60 backdrop-blur-md border-white/20 shadow-[0_24px_70px_rgba(0,0,0,.45)]",
+      },
+      gallery: { gridStyle: "portrait" },
+      icons: { color: "text-[#F5F5F0]" },
     },
   },
 

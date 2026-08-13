@@ -20,6 +20,8 @@ const selectableThemeIds = [
   "grand-ballroom",
   "boho-motion",
   "ethereal-light",
+  "colorburst-fiesta",
+  "silver-screen-romance",
   "royal-envelope",
 ];
 
