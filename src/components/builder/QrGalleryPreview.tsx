@@ -3,6 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
 import { slugify, type InvitationDraft } from "@/lib/invitation";
 import { resolveCustomizedTheme } from "@/lib/theme-customization";
+import { useInvitationFont } from "@/lib/invitation-fonts";
 
 export function getGalleryUrl(draft: InvitationDraft) {
   const slug =
@@ -24,20 +25,26 @@ export function QrGalleryPreview({
   const url = getGalleryUrl(draft);
   const names = [draft.partnerOne, draft.partnerTwo].filter(Boolean).join(" & ");
   const theme = resolveCustomizedTheme(draft.theme, draft.themeCustomization, draft.coverPhoto);
+  useInvitationFont(theme.font);
   const { accent, ink, paper, overlay, imagePosition = "center" } = theme.qr;
 
   return (
     <div
       data-qr-theme={theme.id}
+      data-invitation-custom-font={Boolean(draft.themeCustomization.fontFamily)}
       className={cn(
         "relative overflow-hidden rounded-3xl border border-white/20 bg-black text-white shadow-xl",
         compact ? "p-5" : "p-7 sm:p-9",
       )}
-      style={{
-        backgroundImage: `url(${theme.image})`,
-        backgroundPosition: imagePosition,
-        backgroundSize: "cover",
-      }}
+      style={
+        {
+          fontFamily: theme.font ? `"${theme.font}", sans-serif` : undefined,
+          "--invite-display": theme.font ? `"${theme.font}", serif` : undefined,
+          backgroundImage: `url(${theme.image})`,
+          backgroundPosition: imagePosition,
+          backgroundSize: "cover",
+        } as React.CSSProperties & Record<string, string | undefined>
+      }
     >
       <div aria-hidden="true" className="absolute inset-0" style={{ background: overlay }} />
       <div

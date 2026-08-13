@@ -13,6 +13,8 @@ import {
 import { Navbar } from "@/components/marketing/layout/Navbar";
 import { Footer } from "@/components/marketing/layout/Footer";
 import { getThemeCatalog } from "@/lib/theme-registry.functions";
+import { getDemoInvitationProfile } from "@/lib/demo-invitations";
+import { useInvitationFont } from "@/lib/invitation-fonts";
 import {
   relatedThemes,
   themeCategoryLabels,
@@ -53,6 +55,8 @@ export const Route = createFileRoute("/temalar/$slug")({
 
 function ThemeDetailPage() {
   const { theme, themes } = Route.useLoaderData();
+  const demo = getDemoInvitationProfile(theme.id);
+  useInvitationFont(theme.font);
   const features = themeFeatureLabels(theme);
   const editorial = themeEditorialContent(theme);
   const scenes = themeExperienceScenes(theme);
@@ -137,8 +141,19 @@ function ThemeDetailPage() {
                 </div>
                 <div className="absolute inset-x-5 bottom-16 text-center text-white">
                   <p className="text-xs uppercase tracking-[0.3em] text-white/70">Evleniyoruz</p>
-                  <p className="mt-3 font-display text-4xl">Elif & Kaan</p>
-                  <p className="mt-4 text-sm text-white/75">14 Haziran 2026</p>
+                  <p
+                    className="mt-3 text-4xl"
+                    style={{ fontFamily: theme.font ? `"${theme.font}", serif` : undefined }}
+                  >
+                    {demo.partnerOne} & {demo.partnerTwo}
+                  </p>
+                  <p className="mt-4 text-sm text-white/75">
+                    {new Intl.DateTimeFormat("tr-TR", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }).format(new Date(`${demo.date}T00:00:00`))}
+                  </p>
                 </div>
               </div>
             </div>

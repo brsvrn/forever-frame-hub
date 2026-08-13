@@ -1,5 +1,8 @@
 import { usePhone } from "@/contexts/PhoneContext";
 import { resolveTheme } from "@/lib/theme-engine";
+import { getDemoInvitationProfile } from "@/lib/demo-invitations";
+import { formatInviteDate } from "@/lib/invitation";
+import { useInvitationFont } from "@/lib/invitation-fonts";
 import { type CSSProperties, type ReactNode, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -23,6 +26,8 @@ interface PhoneMockupProps {
 export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
   const { activeScreen, setActiveScreen, activeTheme, isPlaying, setIsPlaying } = usePhone();
   const themeConfig = resolveTheme(activeTheme);
+  const demo = getDemoInvitationProfile(activeTheme);
+  useInvitationFont(themeConfig.font);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const theme = {
@@ -134,7 +139,7 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                   className={`text-2xl z-0 mt-8 tracking-widest ${theme.font}`}
                   style={{ color: themeConfig.qr.ink }}
                 >
-                  A & E
+                  {demo.partnerOne.charAt(0)} & {demo.partnerTwo.charAt(0)}
                 </span>
               </motion.div>
               <p className="relative z-10 mt-8 animate-pulse text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-600">
@@ -188,11 +193,15 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                   >
                     Davetlisiniz
                   </span>
-                  <h2 className={`text-3xl mb-1 ${theme.font} ${theme.textColor}`}>Ayşe</h2>
+                  <h2 className={`text-3xl mb-1 ${theme.font} ${theme.textColor}`}>
+                    {demo.partnerOne}
+                  </h2>
                   <span className={`text-lg mb-1 block py-0.5 opacity-70 ${theme.textColor}`}>
                     &
                   </span>
-                  <h2 className={`text-3xl mb-6 ${theme.font} ${theme.textColor}`}>Emre</h2>
+                  <h2 className={`text-3xl mb-6 ${theme.font} ${theme.textColor}`}>
+                    {demo.partnerTwo}
+                  </h2>
 
                   <div
                     className={`h-[1px] w-12 mx-auto mb-8 opacity-20 bg-current ${theme.textColor}`}
@@ -201,10 +210,10 @@ export function PhoneMockup({ className = "", children }: PhoneMockupProps) {
                   <p
                     className={`text-xs font-semibold tracking-[0.2em] uppercase mb-2 ${theme.textColor}`}
                   >
-                    24 Ağustos 2026
+                    {formatInviteDate(demo.date, "tr")}
                   </p>
                   <p className={`text-[11px] mb-8 font-medium opacity-90 ${theme.textColor}`}>
-                    Saat 19:30 • Çırağan Sarayı
+                    Saat {demo.time} · {demo.venue}
                   </p>
 
                   <button className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-stone-700 text-[10px] tracking-widest uppercase font-semibold rounded-sm border border-stone-200 shadow-sm mb-4 hover:bg-stone-50 transition-colors">
