@@ -12,6 +12,7 @@ import { PremiumCTA } from "@/components/marketing/cta/PremiumCTA";
 import { SecuritySection } from "@/components/marketing/security/SecuritySection";
 import { I18nProvider } from "@/lib/i18n";
 import { PhoneProvider } from "@/contexts/PhoneContext";
+import { getThemeCatalog } from "@/lib/theme-registry.functions";
 
 const title = "MemoryWedding — Dijital Davetiye, LCV ve Canlı Galeri";
 const description =
@@ -19,6 +20,7 @@ const description =
 const siteUrl = "https://www.memory-wedding.com/";
 
 export const Route = createFileRoute("/")({
+  loader: () => getThemeCatalog(),
   head: () => ({
     meta: [
       { title },
@@ -56,13 +58,14 @@ export const Route = createFileRoute("/")({
 });
 
 function MarketingLandingPage() {
+  const themes = Route.useLoaderData();
   return (
     <I18nProvider>
       <PhoneProvider>
         <div className="relative min-h-[100dvh] overflow-x-hidden bg-background text-foreground selection:bg-primary/30 antialiased font-sans">
           <Navbar />
           <main>
-            <ProductExperience />
+            <ProductExperience themes={themes} />
             <Features />
             <VersusTable />
             <PricingCards />

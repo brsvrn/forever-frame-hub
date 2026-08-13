@@ -13,7 +13,8 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const { selectableThemes } = await import("@/lib/theme-engine");
+        const { getThemeCatalog } = await import("@/lib/theme-registry.functions");
+        const themes = await getThemeCatalog();
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/nasil-calisir", changefreq: "monthly", priority: "0.9" },
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/sozlesmeler/mesafeli-satis", changefreq: "yearly", priority: "0.3" },
           { path: "/sozlesmeler/teslimat", changefreq: "yearly", priority: "0.3" },
           { path: "/sozlesmeler/iptal-iade", changefreq: "yearly", priority: "0.3" },
-          ...selectableThemes.map((theme) => ({
+          ...themes.map((theme) => ({
             path: `/temalar/${theme.id}`,
             changefreq: "monthly" as const,
             priority: "0.8",

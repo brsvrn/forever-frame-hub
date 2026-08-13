@@ -1,6 +1,6 @@
 import { FadeIn, SlideUp } from "@/components/motion";
 import { usePhone } from "@/contexts/PhoneContext";
-import { selectableThemes, type ThemeCategory } from "@/lib/theme-engine";
+import type { ThemeCategory, ThemeConfig } from "@/lib/theme-engine";
 import { CheckCircle2, Crown, Landmark, Leaf, Waves, Clapperboard } from "lucide-react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -18,7 +18,7 @@ const categories: Array<{
   { id: "cinematic", label: "Sinematik", icon: Clapperboard },
 ];
 
-export function ThemeGalleryContent() {
+export function ThemeGalleryContent({ themes }: { themes: ThemeConfig[] }) {
   const { activeTheme, setActiveTheme, setActiveScreen, activeSection, setActiveSection } =
     usePhone();
   const [activeCategory, setActiveCategory] =
@@ -32,7 +32,7 @@ export function ThemeGalleryContent() {
     if (isInView) setActiveSection("gallery");
   }, [isInView, setActiveSection]);
 
-  const visibleThemes = selectableThemes.filter((theme) => theme.category === activeCategory);
+  const visibleThemes = themes.filter((theme) => theme.category === activeCategory);
 
   const chooseTheme = (themeId: string) => {
     setActiveTheme(themeId);
@@ -132,10 +132,7 @@ export function ThemeGalleryContent() {
           </div>
 
           <div className="flex w-full items-center justify-center lg:w-[350px] lg:shrink-0">
-            <motion.div
-              style={{ y }}
-              className="z-30 h-[600px] w-[300px]"
-            >
+            <motion.div style={{ y }} className="z-30 h-[600px] w-[300px]">
               <PhoneMockup />
             </motion.div>
           </div>

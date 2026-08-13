@@ -30,13 +30,15 @@ import { InvitationFooter } from "@/components/invitation/InvitationFooter";
 import { LueurHero, LueurOpening, LueurSection } from "@/components/invitation/PapillonRouge";
 import { RoyalEnvelopeOpening } from "@/components/invitation/RoyalEnvelopeOpening";
 import { getPublicAdvancedEvent } from "@/lib/advanced-event.functions";
-import { selectableThemes, type InviteThemeId, type ThemeCategory } from "@/lib/theme-engine";
+import type { InviteThemeId, ThemeCategory, ThemeConfig } from "@/lib/theme-engine";
 import { resolveCustomizedTheme } from "@/lib/theme-customization";
+import { getInvitationTheme, getThemeCatalog } from "@/lib/theme-registry.functions";
 
 export const Route = createFileRoute("/davet/$slug")({
   validateSearch: z.object({ theme: z.string().optional() }),
   loader: async ({ params }) => {
     if (params.slug === "demo") {
+      const themeCatalog = await getThemeCatalog();
       return {
         invitation: {
           id: "demo-id",
@@ -68,17 +70,20 @@ export const Route = createFileRoute("/davet/$slug")({
         schedules: [],
         eventFeatures: null,
         advanced: null,
+        themeCatalog,
+        managedTheme: null,
       };
     }
 
     const invitation = await getPublicInvitation(params.slug);
     if (!invitation) throw notFound();
-    const [schedules, eventFeatures, advanced] = await Promise.all([
+    const [schedules, eventFeatures, advanced, managedTheme] = await Promise.all([
       getPublicSchedules(invitation.id),
       getPublicFeatureSettings(invitation.id),
       getPublicAdvancedEvent({ data: { invitationId: invitation.id } }),
+      getInvitationTheme({ data: { themeId: invitation.theme } }),
     ]);
-    return { invitation, schedules, eventFeatures, advanced };
+    return { invitation, schedules, eventFeatures, advanced, managedTheme, themeCatalog: [] };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -145,19 +150,22 @@ export const Route = createFileRoute("/davet/$slug")({
 });
 
 function PremiumInvitePage() {
-  const { invitation, schedules, eventFeatures, advanced } = Route.useLoaderData();
+  const { invitation, schedules, eventFeatures, advanced, managedTheme, themeCatalog } =
+    Route.useLoaderData();
   const search = Route.useSearch();
   const { lang } = useI18n();
   const draft = rowToDraft(invitation as InvitationRow);
   const isDemo = invitation.slug === "demo";
-  const initialDemoTheme = selectableThemes.some((theme) => theme.id === search.theme)
+  const initialDemoTheme = themeCatalog.some((theme) => theme.id === search.theme)
     ? (search.theme as InviteThemeId)
     : draft.theme;
   const [previewThemeId, setPreviewThemeId] = useState<InviteThemeId>(initialDemoTheme);
+  const themeBase = isDemo ? themeCatalog.find((item) => item.id === previewThemeId) : managedTheme;
   const theme = resolveCustomizedTheme(
     isDemo ? previewThemeId : draft.theme,
     isDemo ? undefined : draft.themeCustomization,
     isDemo ? undefined : draft.coverPhoto,
+    themeBase ?? undefined,
   );
   const pkg = (invitation as InvitationRow & { package?: { features?: Record<string, boolean> } })
     .package;
@@ -198,6 +206,7 @@ function PremiumInvitePage() {
       {isDemo ? (
         <DemoThemeSwitcher
           value={previewThemeId}
+          themes={themeCatalog}
           lang={lang}
           onChange={(themeId) => {
             setPreviewThemeId(themeId);
@@ -369,11 +378,13 @@ function PremiumInvitePage() {
 
 function DemoThemeSwitcher({
   value,
+  themes,
   lang,
   onChange,
   onReplay,
 }: {
   value: InviteThemeId;
+  themes: ThemeConfig[];
   lang: "tr" | "en";
   onChange: (themeId: InviteThemeId) => void;
   onReplay: () => void;
@@ -409,7 +420,7 @@ function DemoThemeSwitcher({
         >
           {categories.map((category) => (
             <optgroup key={category.id} label={category.label} className="bg-slate-950 text-white">
-              {selectableThemes
+              {themes
                 .filter((theme) => theme.category === category.id)
                 .map((theme) => (
                   <option key={theme.id} value={theme.id} className="bg-slate-950 text-white">

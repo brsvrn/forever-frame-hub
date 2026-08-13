@@ -11,11 +11,13 @@ export const Route = createFileRoute("/api/share-image/$slug")({
         const [
           { getServiceSupabase },
           { extractThemeCustomization, resolveCustomizedTheme },
+          { resolveInvitationTheme },
           shareImage,
           sharpModule,
         ] = await Promise.all([
           import("@/lib/supabase-admin"),
           import("@/lib/theme-customization"),
+          import("@/lib/theme-registry"),
           import("@/lib/share-image"),
           import("sharp"),
         ]);
@@ -28,6 +30,7 @@ export const Route = createFileRoute("/api/share-image/$slug")({
         let shareCoverUrl: string | null = null;
         let useThemeImage: boolean | null = true;
         let customSections: unknown = [];
+        let managedTheme: ReturnType<typeof resolveInvitationTheme> | undefined;
 
         if (params.slug !== "demo") {
           try {
@@ -47,6 +50,15 @@ export const Route = createFileRoute("/api/share-image/$slug")({
               themeId = invitation.theme || themeId;
               coverPhoto = invitation.cover_photo;
               customSections = invitation.custom_sections;
+
+              const managedThemeResult = await admin
+                .from("themes")
+                .select(
+                  "id,theme_id,name,description,preview_image_url,config,is_active,deleted_at,updated_at",
+                )
+                .eq("theme_id", themeId)
+                .maybeSingle();
+              managedTheme = resolveInvitationTheme(themeId, managedThemeResult.data);
 
               const { data: share } = await admin
                 .from("event_share_settings")
@@ -77,6 +89,7 @@ export const Route = createFileRoute("/api/share-image/$slug")({
           themeId,
           extractThemeCustomization(customSections),
           coverPhoto || undefined,
+          managedTheme,
         );
         const candidates = [
           shareCoverUrl,

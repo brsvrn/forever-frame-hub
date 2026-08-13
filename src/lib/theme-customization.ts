@@ -128,8 +128,9 @@ export function resolveCustomizedTheme(
   themeId?: string | null,
   customization?: ThemeCustomization,
   coverPhoto?: string,
+  managedBase?: ThemeConfig,
 ): ThemeConfig {
-  const base = resolveTheme(themeId);
+  const base = managedBase && managedBase.id === themeId ? managedBase : resolveTheme(themeId);
   const normalized = normalizeThemeCustomization(customization);
   const accent = normalized.accentColor || base.primaryColor || base.qr.accent;
   const background = normalized.backgroundColor || base.secondaryColor;
