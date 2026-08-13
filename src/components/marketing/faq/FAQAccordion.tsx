@@ -17,7 +17,7 @@ const FAQS = [
   },
   {
     q: "Satın aldıktan sonra tema değiştirebilir miyim?",
-    a: "Evet, yönetim panelinizden dilediğiniz zaman temanızı, müzik seçiminizi ve tüm bilgilerinizi ücretsiz olarak güncelleyebilirsiniz. Değişiklikler anında canlıya yansır.",
+    a: "Evet; temanızı, müziğinizi, metinlerinizi ve görsel içeriklerinizi güncelleyebilirsiniz. Satın alınan paket, çift isimleri, etkinlik türü ve ana tarih ise satın alınan etkinliğe bağlı kalır.",
   },
   {
     q: "Yurtdışından gelecek misafirlerim için dil desteği var mı?",

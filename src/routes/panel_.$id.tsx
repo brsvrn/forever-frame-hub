@@ -27,7 +27,9 @@ import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardStorage } from "@/components/dashboard/DashboardStorage";
 import { DashboardGallery } from "@/components/dashboard/DashboardGallery";
 import { DashboardRSVP } from "@/components/dashboard/DashboardRSVP";
-const DashboardSeating = lazy(() => import("@/components/dashboard/DashboardSeating").then(m => ({ default: m.DashboardSeating })));
+const DashboardSeating = lazy(() =>
+  import("@/components/dashboard/DashboardSeating").then((m) => ({ default: m.DashboardSeating })),
+);
 import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics";
 import { DashboardSettings } from "@/components/dashboard/DashboardSettings";
 import { DashboardSchedule } from "@/components/dashboard/DashboardSchedule";
@@ -35,8 +37,16 @@ import { DashboardTeam } from "@/components/dashboard/DashboardTeam";
 import { DashboardExperience } from "@/components/dashboard/DashboardExperience";
 import { PrintableQR } from "@/components/dashboard/PrintableQR";
 import { resolveTheme } from "@/lib/theme-engine";
+import { pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/panel_/$id")({
+  head: () =>
+    pageSeo({
+      title: "Etkinlik Yönetimi | MemoryWedding",
+      description: "MemoryWedding etkinlik yönetim alanı.",
+      path: "/panel",
+      noIndex: true,
+    }),
   component: () => (
     <AuthProvider>
       <PremiumDashboardGate />
@@ -238,7 +248,13 @@ function PremiumDashboard({ invitationId }: { invitationId: string }) {
         {activeTab === "gallery" && <DashboardGallery invitation={invitation} />}
         {activeTab === "rsvp" && <DashboardRSVP invitation={invitation} />}
         {activeTab === "seating" && (
-          <Suspense fallback={<div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-gold" /></div>}>
+          <Suspense
+            fallback={
+              <div className="flex h-64 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gold" />
+              </div>
+            }
+          >
             <DashboardSeating invitation={invitation} />
           </Suspense>
         )}

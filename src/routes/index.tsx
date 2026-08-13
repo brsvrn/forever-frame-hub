@@ -14,11 +14,12 @@ import { I18nProvider } from "@/lib/i18n";
 import { PhoneProvider } from "@/contexts/PhoneContext";
 import { getThemeCatalog } from "@/lib/theme-registry.functions";
 import { WhatsAppSupportButton } from "@/components/support/WhatsAppSupportButton";
+import { DEFAULT_OG_IMAGE, SITE_ORIGIN } from "@/lib/seo";
 
 const title = "MemoryWedding — Dijital Davetiye, LCV ve Canlı Galeri";
 const description =
   "Dijital düğün davetiyesi, LCV takibi ve QR ile fotoğraf-video toplama tek platformda. Ücretsiz önizleyin; paketler ₺500'den başlar.";
-const siteUrl = "https://www.memory-wedding.com/";
+const siteUrl = `${SITE_ORIGIN}/`;
 
 export const Route = createFileRoute("/")({
   loader: () => getThemeCatalog(),
@@ -38,19 +39,62 @@ export const Route = createFileRoute("/")({
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          name: "MemoryWedding",
-          operatingSystem: "Web",
-          applicationCategory: "LifestyleApplication",
-          offers: {
-            "@type": "AggregateOffer",
-            lowPrice: "500",
-            highPrice: "1000",
-            offerCount: "3",
-            priceCurrency: "TRY",
-          },
-          description: description,
-          url: siteUrl,
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": `${siteUrl}#organization`,
+              name: "MemoryWedding",
+              alternateName: "Memory Wedding",
+              url: siteUrl,
+              logo: {
+                "@type": "ImageObject",
+                url: DEFAULT_OG_IMAGE,
+                width: 1024,
+                height: 1024,
+              },
+              email: "brsvrn@gmail.com",
+              telephone: "+90-530-381-1155",
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Nilüfer",
+                addressRegion: "Bursa",
+                addressCountry: "TR",
+              },
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer service",
+                telephone: "+90-530-381-1155",
+                email: "brsvrn@gmail.com",
+                availableLanguage: ["Turkish", "English"],
+              },
+            },
+            {
+              "@type": "WebSite",
+              "@id": `${siteUrl}#website`,
+              name: "MemoryWedding",
+              alternateName: "Memory Wedding",
+              url: siteUrl,
+              inLanguage: "tr-TR",
+              publisher: { "@id": `${siteUrl}#organization` },
+            },
+            {
+              "@type": "SoftwareApplication",
+              "@id": `${siteUrl}#application`,
+              name: "MemoryWedding",
+              operatingSystem: "Web",
+              applicationCategory: "LifestyleApplication",
+              provider: { "@id": `${siteUrl}#organization` },
+              offers: {
+                "@type": "AggregateOffer",
+                lowPrice: "500",
+                highPrice: "1000",
+                offerCount: "3",
+                priceCurrency: "TRY",
+              },
+              description,
+              url: siteUrl,
+            },
+          ],
         }),
       },
     ],

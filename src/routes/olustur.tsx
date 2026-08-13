@@ -65,7 +65,7 @@ export const Route = createFileRoute("/olustur")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "/olustur" }],
+    links: [{ rel: "canonical", href: "https://www.memory-wedding.com/olustur" }],
   }),
   component: BuilderRoute,
 });

@@ -4,8 +4,16 @@ import { useEffect, useRef } from "react";
 import { CheckCircle } from "lucide-react";
 import { trackPurchase } from "@/lib/analytics/analytics";
 import { verifyAndConsumePurchaseEvent } from "@/lib/payment-actions";
+import { pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/odeme/basarili")({
+  head: () =>
+    pageSeo({
+      title: "Ödeme Başarılı | MemoryWedding",
+      description: "MemoryWedding ödemeniz başarıyla tamamlandı.",
+      path: "/odeme/basarili",
+      noIndex: true,
+    }),
   component: SuccessRoute,
 });
 

@@ -10,19 +10,29 @@ import {
   themeCategoryOrder,
   type ThemeCategoryFilter,
 } from "@/lib/theme-pages";
+import { breadcrumbJsonLd, pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/temalar/")({
   loader: () => getThemeCatalog(),
   head: () => ({
-    meta: [
-      { title: "Dijital Davetiye Temaları | MemoryWedding" },
+    ...pageSeo({
+      title: "Dijital Davetiye Temaları | MemoryWedding",
+      description:
+        "Deniz, doğa, İtalya, lüks ve sinematik MemoryWedding davetiye temalarını canlı önizleyin.",
+      path: "/temalar",
+      imageAlt: "MemoryWedding dijital davetiye tema koleksiyonları",
+    }),
+    scripts: [
       {
-        name: "description",
-        content:
-          "Deniz, doğa, İtalya, lüks ve sinematik MemoryWedding davetiye temalarını canlı önizleyin.",
+        type: "application/ld+json",
+        children: JSON.stringify(
+          breadcrumbJsonLd([
+            { name: "Ana Sayfa", path: "/" },
+            { name: "Temalar", path: "/temalar" },
+          ]),
+        ),
       },
     ],
-    links: [{ rel: "canonical", href: "https://www.memory-wedding.com/temalar" }],
   }),
   component: ThemeIndexPage,
 });

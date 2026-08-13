@@ -41,8 +41,16 @@ import { getAuditLogs } from "@/lib/admin.api";
 import { AdminUserGuideModal } from "@/components/admin/AdminUserGuideModal";
 import { BookOpen } from "lucide-react";
 import { AdminNotificationCenter } from "@/components/admin/AdminNotificationCenter";
+import { pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin")({
+  head: () =>
+    pageSeo({
+      title: "Yönetim | MemoryWedding",
+      description: "MemoryWedding yönetim alanı.",
+      path: "/admin",
+      noIndex: true,
+    }),
   component: () => (
     <AuthProvider>
       <AdminGate />
