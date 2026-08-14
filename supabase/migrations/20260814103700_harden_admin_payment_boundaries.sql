@@ -1,5 +1,24 @@
 -- Bring the historical one-off analytics SQL into versioned migrations so a
 -- fresh environment has the same transaction shape as production.
+CREATE TABLE IF NOT EXISTS public.support_tickets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  email TEXT,
+  subject TEXT,
+  message TEXT,
+  status TEXT NOT NULL DEFAULT 'open',
+  priority TEXT NOT NULL DEFAULT 'normal',
+  admin_notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE public.invitations ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+ALTER TABLE public.packages ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+ALTER TABLE public.system_settings 
+  ADD COLUMN IF NOT EXISTS support_email TEXT,
+  ADD COLUMN IF NOT EXISTS support_phone TEXT,
+  ADD COLUMN IF NOT EXISTS whatsapp_number TEXT,
+  ADD COLUMN IF NOT EXISTS working_hours TEXT DEFAULT 'Hafta içi: 09:00 - 18:00';
 ALTER TABLE public.transactions
   ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'TL',
   ADD COLUMN IF NOT EXISTS is_test_order BOOLEAN NOT NULL DEFAULT false,
@@ -220,7 +239,6 @@ AS $$
     'package_type', i.package_type,
     'theme', i.theme,
     'event_type', i.event_type,
-    'category', i.category,
     'partner_one', i.partner_one,
     'partner_two', i.partner_two,
     'headline', i.headline,
