@@ -73,6 +73,8 @@ export function validatePayTRCallback(
     .createHmac("sha256", merchant_key)
     .update(hash_str)
     .digest("base64");
-    
-  return expected_hash === postData.hash;
+
+  const expected = Buffer.from(expected_hash, "utf8");
+  const received = Buffer.from(postData.hash, "utf8");
+  return expected.length === received.length && crypto.timingSafeEqual(expected, received);
 }

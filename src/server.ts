@@ -22,6 +22,26 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
+function withSecurityHeaders(response: Response, request: Request): Response {
+  const headers = new Headers(response.headers);
+  headers.set("x-content-type-options", "nosniff");
+  headers.set("referrer-policy", "strict-origin-when-cross-origin");
+  headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
+  headers.set("x-frame-options", "SAMEORIGIN");
+  headers.set(
+    "content-security-policy",
+    "base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests",
+  );
+  if (new URL(request.url).protocol === "https:") {
+    headers.set("strict-transport-security", "max-age=31536000; includeSubDomains");
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 // h3 swallows in-handler throws into a normal 500 Response with body
 // {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(
@@ -55,29 +75,31 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 import { validatePayTRCallback } from "./lib/paytr";
 import { getServiceSupabase } from "./lib/supabase-admin";
-import { sendMetaServerEvent } from "./lib/analytics/meta-capi";
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
       if (request.method === "POST" && url.pathname === "/api/paytr-webhook") {
-        return await handlePayTRWebhook(request);
+        return withSecurityHeaders(await handlePayTRWebhook(request), request);
       }
       if (request.method === "POST" && url.pathname === "/api/admin-notifications/error") {
-        return await handleClientErrorReport(request);
+        return withSecurityHeaders(await handleClientErrorReport(request), request);
       }
 
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response, request);
+      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response, request), request);
     } catch (error) {
       console.error(error);
       await safelyRecordServerError(error, "server_fetch", new URL(request.url).pathname);
-      return new Response(renderErrorPage(), {
-        status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
+      return withSecurityHeaders(
+        new Response(renderErrorPage(), {
+          status: 500,
+          headers: { "content-type": "text/html; charset=utf-8" },
+        }),
+        request,
+      );
     }
   },
 };
@@ -96,6 +118,12 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
     if (!merchant_oid || !status || !total_amount || !hash) {
       return new Response("Missing parameters", { status: 400 });
     }
+    if (!merchant_key || !merchant_salt) {
+      throw new Error("PayTR callback credentials are not configured.");
+    }
+    if (!/^\d+$/.test(total_amount) || !Number.isSafeInteger(Number(total_amount))) {
+      return new Response("Invalid total amount", { status: 400 });
+    }
 
     const isValid = validatePayTRCallback(
       { hash, merchant_oid, status, total_amount },
@@ -111,106 +139,22 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
     const admin = getServiceSupabase();
 
     if (status === "success") {
-      const { data: transaction } = await admin
-        .from("transactions")
-        .select(
-          "invitation_id, package_type, amount, user_id, status, is_test_order, meta_purchase_sent",
-        )
-        .eq("merchant_oid", merchant_oid)
-        .maybeSingle();
+      const { data: result, error } = await admin.rpc("finalize_paytr_payment", {
+        p_merchant_oid: merchant_oid,
+        p_total_amount: Number(total_amount),
+      });
+      if (error) throw error;
 
-      if (transaction) {
-        // Idempotency: If already marked success, acknowledge immediately
-        if (transaction.status === "success") {
-          return new Response("OK", {
-            status: 200,
-            headers: { "Content-Type": "text/plain" },
-          });
-        }
-
-        // 1. Mark transaction as success in database
-        await admin
-          .from("transactions")
-          .update({ status: "success", updated_at: new Date().toISOString() })
-          .eq("merchant_oid", merchant_oid)
-          .eq("status", "pending");
-
-        // 2. Activate invitation
-        await admin
-          .from("invitations")
-          .update({
-            is_paid: true,
-            package_type: transaction.package_type,
-            package_id: transaction.package_type,
-          })
-          .eq("id", transaction.invitation_id);
-
-        // 3. Asynchronously trigger Meta CAPI (never blocks or fails the PayTR response)
-        const isTestOrder =
-          transaction.is_test_order === true ||
-          process.env.PAYTR_TEST_MODE !== "0" ||
-          Number(transaction.amount) <= 0;
-
-        if (!isTestOrder && transaction.meta_purchase_sent !== true) {
-          const clientIp =
-            request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-            request.headers.get("x-real-ip") ||
-            undefined;
-          const clientUserAgent = request.headers.get("user-agent") || undefined;
-
-          // Background task to send Meta CAPI
-          (async () => {
-            try {
-              let userEmail = "";
-              let userPhone = "";
-              if (transaction.user_id) {
-                const { data: userData } = await admin.auth.admin.getUserById(transaction.user_id);
-                if (userData?.user?.email) userEmail = userData.user.email;
-                if (userData?.user?.phone) userPhone = userData.user.phone;
-              }
-
-              const rawAmount = transaction.amount ? Number(transaction.amount) : 100000;
-              const finalValue = rawAmount > 1000 ? rawAmount / 100 : rawAmount;
-              const eventId = `mw_purchase_${merchant_oid}`;
-
-              const capiRes = await sendMetaServerEvent({
-                eventName: "Purchase",
-                eventId,
-                eventSourceUrl: `${process.env.VITE_SITE_URL || "https://www.memory-wedding.com"}/odeme/basarili`,
-                userData: {
-                  email: userEmail || undefined,
-                  phone: userPhone || undefined,
-                  clientIp,
-                  clientUserAgent,
-                },
-                customData: {
-                  currency: "TRY",
-                  value: finalValue,
-                  content_name: transaction.package_type || "MemoryWedding Paket",
-                  content_type: "product",
-                  order_id: merchant_oid,
-                },
-              });
-
-              if (capiRes.success) {
-                await admin
-                  .from("transactions")
-                  .update({
-                    meta_purchase_sent: true,
-                    analytics_sent_at: new Date().toISOString(),
-                  })
-                  .eq("merchant_oid", merchant_oid);
-              }
-            } catch (capiErr) {
-              console.error("Meta CAPI async execution error:", capiErr);
-            }
-          })();
-        }
-      } else {
-        console.warn("PayTR Webhook: Transaction not found for", merchant_oid);
+      const outcome = result as { status?: string } | null;
+      if (outcome?.status === "amount_mismatch") {
+        console.error("PayTR Webhook: Amount mismatch for", merchant_oid);
+        return new Response("PAYTR notification failed: amount mismatch", { status: 400 });
+      }
+      if (outcome?.status !== "processed" && outcome?.status !== "already_processed") {
+        throw new Error(`PayTR payment could not be finalized: ${outcome?.status || "unknown"}`);
       }
     } else {
-      await admin
+      const { error } = await admin
         .from("transactions")
         .update({
           status: "failed",
@@ -219,6 +163,7 @@ async function handlePayTRWebhook(request: Request): Promise<Response> {
         })
         .eq("merchant_oid", merchant_oid)
         .eq("status", "pending");
+      if (error) throw error;
     }
 
     // Always respond 200 OK to PayTR on valid hash processing

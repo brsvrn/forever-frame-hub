@@ -35,53 +35,50 @@ export const Route = createFileRoute("/api/share-image/$slug")({
         if (params.slug !== "demo") {
           try {
             const admin = getServiceSupabase();
-            const { data: invitation } = await admin
+            const { data: invitation, error: invitationError } = await admin
               .from("invitations")
               .select(
                 "id,slug,is_published,is_paid,partner_one,partner_two,event_date,theme,cover_photo,custom_sections,updated_at",
               )
               .eq("slug", params.slug)
+              .eq("is_published", true)
+              .eq("is_paid", true)
+              .is("deleted_at", null)
+              .or(`invitation_expires_at.is.null,invitation_expires_at.gt.${new Date().toISOString()}`)
               .maybeSingle();
 
-            if (invitation) {
-              partnerOne = invitation.partner_one || partnerOne;
-              partnerTwo = invitation.partner_two || partnerTwo;
-              eventDate = invitation.event_date || null;
-              themeId = invitation.theme || themeId;
-              coverPhoto = invitation.cover_photo;
-              customSections = invitation.custom_sections;
+            if (invitationError) throw invitationError;
+            if (!invitation) return new Response("Not Found", { status: 404 });
 
-              const managedThemeResult = await admin
-                .from("themes")
-                .select(
-                  "id,theme_id,name,description,preview_image_url,config,is_active,deleted_at,updated_at",
-                )
-                .eq("theme_id", themeId)
-                .maybeSingle();
-              managedTheme = resolveInvitationTheme(themeId, managedThemeResult.data);
+            partnerOne = invitation.partner_one || partnerOne;
+            partnerTwo = invitation.partner_two || partnerTwo;
+            eventDate = invitation.event_date || null;
+            themeId = invitation.theme || themeId;
+            coverPhoto = invitation.cover_photo;
+            customSections = invitation.custom_sections;
 
-              const { data: share } = await admin
-                .from("event_share_settings")
-                .select("cover_image_url,use_theme_image,version,updated_at")
-                .eq("invitation_id", invitation.id)
-                .maybeSingle();
+            const managedThemeResult = await admin
+              .from("themes")
+              .select(
+                "id,theme_id,name,description,preview_image_url,config,is_active,deleted_at,updated_at",
+              )
+              .eq("theme_id", themeId)
+              .maybeSingle();
+            managedTheme = resolveInvitationTheme(themeId, managedThemeResult.data);
 
-              if (share) {
-                shareCoverUrl = share.cover_image_url;
-                useThemeImage = share.use_theme_image;
-              }
-            } else {
-              // Try interpreting slug like "elif-kaan"
-              const parts = params.slug.split("-").filter(Boolean);
-              if (parts.length >= 2) {
-                partnerOne = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-                partnerTwo =
-                  parts.slice(1).join(" ").charAt(0).toUpperCase() +
-                  parts.slice(1).join(" ").slice(1);
-              }
+            const { data: share } = await admin
+              .from("event_share_settings")
+              .select("cover_image_url,use_theme_image,version,updated_at")
+              .eq("invitation_id", invitation.id)
+              .maybeSingle();
+
+            if (share) {
+              shareCoverUrl = share.cover_image_url;
+              useThemeImage = share.use_theme_image;
             }
-          } catch {
-            // Use defaults gracefully
+          } catch (error) {
+            console.error("Share image invitation lookup failed", error);
+            return new Response("Internal Server Error", { status: 500 });
           }
         }
 

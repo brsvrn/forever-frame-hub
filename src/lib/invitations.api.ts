@@ -166,24 +166,9 @@ export async function getInvitationById(id: string) {
 }
 
 export async function getPublicInvitation(slug: string) {
-  const { data, error } = await supabase
-    .from("invitations")
-    .select("*, package:packages(*)")
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Join query failed, falling back to simple query:", error);
-    const { data: fallbackData, error: fallbackError } = await supabase
-      .from("invitations")
-      .select("*")
-      .eq("slug", slug)
-      .maybeSingle();
-    if (fallbackError) throw fallbackError;
-    return fallbackData;
-  }
-
-  return data;
+  const { data, error } = await supabase.rpc("get_public_invitation", { p_slug: slug });
+  if (error) throw error;
+  return data as (InvitationRow & { package?: Tables<"packages"> | null }) | null;
 }
 
 export async function submitRsvp(input: {

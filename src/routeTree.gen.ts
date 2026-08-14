@@ -41,6 +41,7 @@ import { Route as ApiAdminSocialContentRouteImport } from './routes/api.admin.so
 import { Route as ApiAdminSystemSettingsRouteImport } from './routes/api.admin.system-settings'
 import { Route as ApiCalendarScheduleIdRouteImport } from './routes/api.calendar.$scheduleId'
 import { Route as ApiCronInstagramPublishRouteImport } from './routes/api.cron.instagram-publish'
+import { Route as ApiCronPaymentEventsRouteImport } from './routes/api.cron.payment-events'
 import { Route as ApiShareImageSlugRouteImport } from './routes/api.share-image.$slug'
 import { Route as DSlugTokenRouteImport } from './routes/d.$slug.$token'
 import { Route as TemalarSlugOnizlemeRouteImport } from './routes/temalar.$slug.onizleme'
@@ -209,6 +210,11 @@ const ApiCronInstagramPublishRoute = ApiCronInstagramPublishRouteImport.update({
   path: '/api/cron/instagram-publish',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronPaymentEventsRoute = ApiCronPaymentEventsRouteImport.update({
+  id: '/api/cron/payment-events',
+  path: '/api/cron/payment-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiShareImageSlugRoute = ApiShareImageSlugRouteImport.update({
   id: '/api/share-image/$slug',
   path: '/api/share-image/$slug',
@@ -258,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
   '/api/cron/instagram-publish': typeof ApiCronInstagramPublishRoute
+  '/api/cron/payment-events': typeof ApiCronPaymentEventsRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
   '/temalar/$slug/onizleme': typeof TemalarSlugOnizlemeRoute
@@ -295,6 +302,7 @@ export interface FileRoutesByTo {
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
   '/api/cron/instagram-publish': typeof ApiCronInstagramPublishRoute
+  '/api/cron/payment-events': typeof ApiCronPaymentEventsRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
   '/temalar/$slug/onizleme': typeof TemalarSlugOnizlemeRoute
@@ -333,6 +341,7 @@ export interface FileRoutesById {
   '/api/admin/system-settings': typeof ApiAdminSystemSettingsRoute
   '/api/calendar/$scheduleId': typeof ApiCalendarScheduleIdRoute
   '/api/cron/instagram-publish': typeof ApiCronInstagramPublishRoute
+  '/api/cron/payment-events': typeof ApiCronPaymentEventsRoute
   '/api/share-image/$slug': typeof ApiShareImageSlugRoute
   '/d/$slug/$token': typeof DSlugTokenRoute
   '/temalar/$slug/onizleme': typeof TemalarSlugOnizlemeRoute
@@ -372,6 +381,7 @@ export interface FileRouteTypes {
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
     | '/api/cron/instagram-publish'
+    | '/api/cron/payment-events'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
     | '/temalar/$slug/onizleme'
@@ -409,6 +419,7 @@ export interface FileRouteTypes {
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
     | '/api/cron/instagram-publish'
+    | '/api/cron/payment-events'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
     | '/temalar/$slug/onizleme'
@@ -446,6 +457,7 @@ export interface FileRouteTypes {
     | '/api/admin/system-settings'
     | '/api/calendar/$scheduleId'
     | '/api/cron/instagram-publish'
+    | '/api/cron/payment-events'
     | '/api/share-image/$slug'
     | '/d/$slug/$token'
     | '/temalar/$slug/onizleme'
@@ -484,6 +496,7 @@ export interface RootRouteChildren {
   ApiAdminSystemSettingsRoute: typeof ApiAdminSystemSettingsRoute
   ApiCalendarScheduleIdRoute: typeof ApiCalendarScheduleIdRoute
   ApiCronInstagramPublishRoute: typeof ApiCronInstagramPublishRoute
+  ApiCronPaymentEventsRoute: typeof ApiCronPaymentEventsRoute
   ApiShareImageSlugRoute: typeof ApiShareImageSlugRoute
   DSlugTokenRoute: typeof DSlugTokenRoute
 }
@@ -714,6 +727,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronInstagramPublishRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/payment-events': {
+      id: '/api/cron/payment-events'
+      path: '/api/cron/payment-events'
+      fullPath: '/api/cron/payment-events'
+      preLoaderRoute: typeof ApiCronPaymentEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/share-image/$slug': {
       id: '/api/share-image/$slug'
       path: '/api/share-image/$slug'
@@ -783,6 +803,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminSystemSettingsRoute: ApiAdminSystemSettingsRoute,
   ApiCalendarScheduleIdRoute: ApiCalendarScheduleIdRoute,
   ApiCronInstagramPublishRoute: ApiCronInstagramPublishRoute,
+  ApiCronPaymentEventsRoute: ApiCronPaymentEventsRoute,
   ApiShareImageSlugRoute: ApiShareImageSlugRoute,
   DSlugTokenRoute: DSlugTokenRoute,
 }

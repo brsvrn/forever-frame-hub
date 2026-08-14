@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   CreditCard,
   Search,
@@ -46,7 +46,7 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
     "none" | "requested" | "under_review" | "externally_refunded"
   >("none");
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getAdminOrders({
@@ -58,11 +58,11 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterStatus]);
 
   useEffect(() => {
-    loadOrders();
-  }, [filterStatus]);
+    void loadOrders();
+  }, [loadOrders]);
 
   const openDetailModal = (order: AdminOrderSummary) => {
     setSelectedOrder(order);
@@ -121,7 +121,7 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
   };
 
   const formatCurrency = (amount: number) => {
-    const valInTL = amount >= 100 ? amount / 100 : amount;
+    const valInTL = amount / 100;
     return new Intl.NumberFormat("tr-TR", {
       style: "currency",
       currency: "TRY",
@@ -350,14 +350,16 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
                           <span>Detay</span>
                           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
                         </button>
-                        <button
-                          onClick={() => handleDeleteOrder(order.id, order.merchantOid)}
-                          disabled={deletingId === order.id}
-                          className="p-1.5 rounded-xl bg-surface hover:bg-rose-500/20 border border-border hover:border-rose-500/30 text-muted-foreground hover:text-rose-400 transition-all"
-                          title="Siparişi Sil"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        {order.isTestOrder && (
+                          <button
+                            onClick={() => handleDeleteOrder(order.id, order.merchantOid)}
+                            disabled={deletingId === order.id}
+                            className="p-1.5 rounded-xl bg-surface hover:bg-rose-500/20 border border-border hover:border-rose-500/30 text-muted-foreground hover:text-rose-400 transition-all"
+                            title="Test Siparişini Sil"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -501,14 +503,20 @@ export function AdminOrdersManager({ adminEmail }: AdminOrdersManagerProps) {
 
             {/* Modal Actions */}
             <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
-              <button
-                type="button"
-                onClick={() => handleDeleteOrder(selectedOrder.id, selectedOrder.merchantOid)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-semibold text-rose-400 transition-all"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Siparişi Sil</span>
-              </button>
+              {selectedOrder.isTestOrder ? (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteOrder(selectedOrder.id, selectedOrder.merchantOid)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-semibold text-rose-400 transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Test Siparişini Sil</span>
+                </button>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  Gerçek sipariş kayıtları denetim için korunur.
+                </span>
+              )}
 
               <div className="flex items-center gap-3">
                 <button
