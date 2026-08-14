@@ -56,6 +56,7 @@ describe("Core Web Vitals performance foundation", () => {
     const hero = read("src/components/marketing/hero/HeroContent.tsx");
     expect(hero).toContain("Davetiyenizi gönderin.");
     expect(hero).not.toContain("<SlideUp delay={0.2}>");
+    expect(hero).not.toContain('from "framer-motion"');
   });
 
   it("defers below-fold media and third-party analytics work", () => {
@@ -65,7 +66,20 @@ describe("Core Web Vitals performance foundation", () => {
     expect(gallery).toContain('fetchPriority="low"');
     expect(root).toContain("appendGoogleTagManager");
     expect(root).toContain("window.setTimeout");
+    expect(root).toContain("8000");
     expect(root).not.toContain("googletagmanager.com/gtag/js?id=");
+  });
+
+  it("hydrates motion-heavy homepage sections only when they enter the viewport", () => {
+    const route = read("src/routes/index.tsx");
+    const experience = read("src/components/marketing/experience/ProductExperience.tsx");
+    const deferred = read("src/components/marketing/DeferredSection.tsx");
+
+    expect(route).toContain("lazy(() =>");
+    expect(route).toContain("<DeferredLandingSection");
+    expect(experience).toContain("<DeferredSection");
+    expect(deferred).toContain("IntersectionObserver");
+    expect(deferred).toContain('rootMargin: "0px"');
   });
 
   it("serves compact local brand assets on the critical path", () => {
@@ -79,5 +93,8 @@ describe("Core Web Vitals performance foundation", () => {
       expect(existsSync(`public/fonts/${font}`)).toBe(true);
     }
     expect(read("src/components/brand/BrandLogo.tsx")).toContain("/logo-96.webp");
+    expect(read("src/routes/__root.tsx")).toContain(
+      '{ rel: "icon", href: "/logo-96.webp", type: "image/webp" }',
+    );
   });
 });

@@ -1,35 +1,32 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { FadeIn, SlideUp, MagneticButton, FloatingElement } from "@/components/motion";
 import { CheckCircle2, PlayCircle } from "lucide-react";
-import { useInView, motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useEffect } from "react";
-import { usePhone } from "@/contexts/PhoneContext";
-import { PhoneMockup } from "../interactive-demo/PhoneMockup";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { trackMarketingCta, trackViewDemo } from "@/lib/analytics/analytics";
 
-export function HeroContent() {
-  const { activeSection, setActiveSection } = usePhone();
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
+const PhoneMockup = lazy(() =>
+  import("../interactive-demo/PhoneMockup").then((module) => ({ default: module.PhoneMockup })),
+);
 
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
-  // Parallax effect: moves down as you scroll down
-  const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+function useDesktopViewport() {
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    if (isInView) setActiveSection("hero");
-  }, [isInView, setActiveSection]);
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const syncViewport = () => setIsDesktop(mediaQuery.matches);
+    syncViewport();
+    mediaQuery.addEventListener("change", syncViewport);
+    return () => mediaQuery.removeEventListener("change", syncViewport);
+  }, []);
+
+  return isDesktop;
+}
+
+export function HeroContent() {
+  const isDesktop = useDesktopViewport();
 
   return (
-    <section
-      ref={ref}
-      className="relative min-h-[100dvh] flex items-center pt-28 pb-16 overflow-hidden"
-    >
+    <section className="relative min-h-[100dvh] flex items-center pt-28 pb-16 overflow-hidden">
       {/* Premium Cinematic Background - Dynamic Mesh Gradient */}
       <div className="absolute inset-0 bg-background z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] opacity-60 translate-x-1/3 -translate-y-1/4 z-0 pointer-events-none animate-pulse duration-10000"></div>
@@ -43,12 +40,12 @@ export function HeroContent() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-8 items-center h-full">
           {/* Left Content - Typography & CTA */}
           <div className="max-w-2xl text-center lg:text-left mx-auto lg:mx-0 pt-8 lg:pt-0">
-            <FadeIn delay={0.1}>
+            <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8 backdrop-blur-md">
                 <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.8)]"></span>
                 Davetiye, LCV ve QR anıları tek bağlantıda
               </div>
-            </FadeIn>
+            </div>
 
             <div>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6 leading-[1.08]">
@@ -60,19 +57,16 @@ export function HeroContent() {
               </h1>
             </div>
 
-            <SlideUp delay={0.3}>
+            <div>
               <p className="text-lg md:text-xl text-foreground/90 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-light">
                 Düğünden önce davetiyenizi paylaşın ve LCV yanıtlarını yönetin. Düğün günü
                 misafirlerinizin fotoğraf ve videolarını uygulama gerektirmeden aynı özel galeride
                 biriktirin.
               </p>
-            </SlideUp>
+            </div>
 
-            <SlideUp
-              delay={0.4}
-              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
-            >
-              <MagneticButton intensity={0.1}>
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <div>
                 <Button
                   size="lg"
                   asChild
@@ -85,8 +79,8 @@ export function HeroContent() {
                     Ücretsiz Önizle
                   </Link>
                 </Button>
-              </MagneticButton>
-              <MagneticButton intensity={0.1}>
+              </div>
+              <div>
                 <Button
                   size="lg"
                   variant="outline"
@@ -106,41 +100,33 @@ export function HeroContent() {
                     Canlı Örneği Gör
                   </Link>
                 </Button>
-              </MagneticButton>
-            </SlideUp>
+              </div>
+            </div>
 
-            <FadeIn
-              delay={0.6}
-              className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground lg:justify-start"
-            >
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground lg:justify-start">
               {["Ücretsiz önizleme", "Tek seferlik ödeme", "Uygulama gerekmez"].map((label) => (
                 <span key={label} className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="size-4 text-primary" aria-hidden="true" />
                   {label}
                 </span>
               ))}
-            </FadeIn>
+            </div>
           </div>
 
           {/* Right side is intentionally empty to let the sticky phone show through */}
           <div className="hidden lg:flex items-center justify-center relative h-full w-[350px] shrink-0 lg:ml-auto lg:mr-8 xl:mr-16">
-            {activeSection === "hero" && (
-              <motion.div
-                layoutId="global-phone"
-                style={{ y }}
-                className="w-[300px] h-[600px] z-30"
+            {isDesktop && (
+              <Suspense
+                fallback={<div className="z-30 h-[600px] w-[300px] rounded-[2.5rem] bg-muted/40" />}
               >
-                <PhoneMockup />
-              </motion.div>
+                <div className="w-[300px] h-[600px] z-30">
+                  <PhoneMockup />
+                </div>
+              </Suspense>
             )}
 
             {/* The floating feature chips will be placed globally in ProductExperience or here, but let's put them here with absolute positioning so they scroll with Hero */}
-            <FloatingElement
-              delay={0}
-              amplitude={12}
-              duration={3500}
-              className="absolute top-[20%] -right-8 xl:-right-16 z-20 cursor-default"
-            >
+            <div className="absolute top-[20%] -right-8 xl:-right-16 z-20 cursor-default">
               <div className="bg-background/80 border border-border/50 shadow-2xl rounded-2xl p-3 flex items-center gap-3 backdrop-blur-xl hover:scale-105 transition-transform">
                 <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
                   <svg
@@ -162,14 +148,9 @@ export function HeroContent() {
                   <p className="text-[10px] text-foreground/70">Kaan & Ece (+2 Kişi)</p>
                 </div>
               </div>
-            </FloatingElement>
+            </div>
 
-            <FloatingElement
-              delay={1500}
-              amplitude={15}
-              duration={4500}
-              className="absolute bottom-[25%] -left-8 xl:-left-16 z-20 cursor-default"
-            >
+            <div className="absolute bottom-[25%] -left-8 xl:-left-16 z-20 cursor-default">
               <div className="bg-background/80 border border-border/50 shadow-2xl rounded-2xl p-3 flex items-center gap-3 backdrop-blur-xl hover:scale-105 transition-transform">
                 <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <svg
@@ -191,7 +172,7 @@ export function HeroContent() {
                   <p className="text-[10px] text-foreground/70">Masadaki QR'dan eklendi</p>
                 </div>
               </div>
-            </FloatingElement>
+            </div>
           </div>
         </div>
       </div>

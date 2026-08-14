@@ -155,7 +155,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         type: "font/woff2",
         crossOrigin: "anonymous",
       },
-      { rel: "icon", href: "/logo.jpg", type: "image/jpeg" },
+      { rel: "icon", href: "/logo-96.webp", type: "image/webp" },
     ],
   }),
 
@@ -266,7 +266,7 @@ function RootComponent() {
     const scheduleAnalytics = () => {
       analyticsTimer = window.setTimeout(
         () => appendGoogleTagManager(ANALYTICS_CONFIG.gtmId),
-        2500,
+        8000,
       );
     };
     if (document.readyState === "complete") scheduleAnalytics();
