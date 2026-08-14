@@ -1,20 +1,80 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Navbar } from "@/components/marketing/layout/Navbar";
 import { Footer } from "@/components/marketing/layout/Footer";
-import { TrustBand } from "@/components/marketing/layout/TrustBand";
 import { ProductExperience } from "@/components/marketing/experience/ProductExperience";
-import { Features } from "@/components/marketing/features/BentoGrid";
-import { VersusTable } from "@/components/marketing/comparison/VersusTable";
-import { PricingCards } from "@/components/marketing/pricing/PricingCards";
-import { ProofSection } from "@/components/marketing/testimonials/Testimonials";
-import { FAQAccordion } from "@/components/marketing/faq/FAQAccordion";
-import { PremiumCTA } from "@/components/marketing/cta/PremiumCTA";
-import { SecuritySection } from "@/components/marketing/security/SecuritySection";
+import { DeferredSection } from "@/components/marketing/DeferredSection";
 import { I18nProvider } from "@/lib/i18n";
 import { PhoneProvider } from "@/contexts/PhoneContext";
 import { getThemeCatalog } from "@/lib/theme-registry.functions";
 import { WhatsAppSupportButton } from "@/components/support/WhatsAppSupportButton";
 import { DEFAULT_OG_IMAGE, SITE_ORIGIN } from "@/lib/seo";
+
+const Features = lazy(() =>
+  import("@/components/marketing/features/BentoGrid").then((module) => ({
+    default: module.Features,
+  })),
+);
+const VersusTable = lazy(() =>
+  import("@/components/marketing/comparison/VersusTable").then((module) => ({
+    default: module.VersusTable,
+  })),
+);
+const PricingCards = lazy(() =>
+  import("@/components/marketing/pricing/PricingCards").then((module) => ({
+    default: module.PricingCards,
+  })),
+);
+const ProofSection = lazy(() =>
+  import("@/components/marketing/testimonials/Testimonials").then((module) => ({
+    default: module.ProofSection,
+  })),
+);
+const FAQAccordion = lazy(() =>
+  import("@/components/marketing/faq/FAQAccordion").then((module) => ({
+    default: module.FAQAccordion,
+  })),
+);
+const SecuritySection = lazy(() =>
+  import("@/components/marketing/security/SecuritySection").then((module) => ({
+    default: module.SecuritySection,
+  })),
+);
+const TrustBand = lazy(() =>
+  import("@/components/marketing/layout/TrustBand").then((module) => ({
+    default: module.TrustBand,
+  })),
+);
+const PremiumCTA = lazy(() =>
+  import("@/components/marketing/cta/PremiumCTA").then((module) => ({
+    default: module.PremiumCTA,
+  })),
+);
+
+function DeferredLandingSection({
+  children,
+  title,
+  description,
+}: {
+  children: ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <DeferredSection
+      placeholder={
+        <section className="flex min-h-[70vh] items-center justify-center px-4 text-center">
+          <div className="max-w-2xl">
+            <h2 className="font-serif text-4xl font-semibold">{title}</h2>
+            <p className="mt-4 text-lg text-muted-foreground">{description}</p>
+          </div>
+        </section>
+      }
+    >
+      <Suspense fallback={<div className="min-h-[70vh]" aria-hidden="true" />}>{children}</Suspense>
+    </DeferredSection>
+  );
+}
 
 const title = "MemoryWedding — Dijital Davetiye, LCV ve Canlı Galeri";
 const description =
@@ -111,14 +171,54 @@ function MarketingLandingPage() {
           <Navbar />
           <main>
             <ProductExperience themes={themes} />
-            <Features />
-            <VersusTable />
-            <PricingCards />
-            <ProofSection />
-            <FAQAccordion />
-            <SecuritySection />
-            <TrustBand />
-            <PremiumCTA />
+            <DeferredLandingSection
+              title="Düğününüz için eksiksiz dijital deneyim"
+              description="Dijital davetiye, LCV takibi, QR anı albümü ve etkinlik yönetimi tek platformda."
+            >
+              <Features />
+            </DeferredLandingSection>
+            <DeferredLandingSection
+              title="Kağıt davetiyeden daha fazlası"
+              description="Anlık güncelleme, kolay paylaşım, misafir takibi ve ortak fotoğraf galerisiyle tüm süreç kontrolünüzde."
+            >
+              <VersusTable />
+            </DeferredLandingSection>
+            <DeferredLandingSection
+              title="Tek seferlik, şeffaf paketler"
+              description="İhtiyacınıza uygun davetiye ve anı albümü paketini seçin; abonelik olmadan etkinliğinizi yönetin."
+            >
+              <PricingCards />
+            </DeferredLandingSection>
+            <DeferredLandingSection
+              title="Çiftlerin düğün anıları güvende"
+              description="MemoryWedding ile davetli yanıtlarını ve paylaşılan anıları tek bağlantıda bir araya getirin."
+            >
+              <ProofSection />
+            </DeferredLandingSection>
+            <DeferredLandingSection
+              title="Sık sorulan sorular"
+              description="Dijital davetiye, QR fotoğraf yükleme, depolama süreleri ve paket kullanımı hakkında yanıtlar."
+            >
+              <FAQAccordion />
+            </DeferredLandingSection>
+            <DeferredLandingSection
+              title="Özel anılarınız için güvenli altyapı"
+              description="Davetli içerikleri yalnızca etkinliğiniz için saklanır ve erişim izinleri sizin kontrolünüzdedir."
+            >
+              <SecuritySection />
+            </DeferredLandingSection>
+            <DeferredLandingSection
+              title="Uygulama indirmeden kolay kullanım"
+              description="Misafirler bağlantıyı açar, LCV yanıtını verir ve QR kodla fotoğrafını doğrudan yükler."
+            >
+              <TrustBand />
+            </DeferredLandingSection>
+            <DeferredLandingSection
+              title="Davetiyenizi ücretsiz önizleyin"
+              description="Temanızı seçin, bilgilerinizi girin ve satın almadan önce davetiyenizin tamamını görün."
+            >
+              <PremiumCTA />
+            </DeferredLandingSection>
           </main>
           <Footer />
           <WhatsAppSupportButton />
