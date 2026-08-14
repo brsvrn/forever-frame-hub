@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/instagram-publish",
       "schedule": "35 17 * * *"
+    },
+    {
+      "path": "/api/cron/payment-events",
+      "schedule": "5 6 * * *"
     }
   ]
 }

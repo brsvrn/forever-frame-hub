@@ -117,27 +117,27 @@ ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.retention_jobs ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY access_codes_admin_all ON public.access_codes FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+  USING (public.has_role('admin'::public.app_role, auth.uid()))
+  WITH CHECK (public.has_role('admin'::public.app_role, auth.uid()));
 
 CREATE POLICY access_code_redemptions_admin_all ON public.access_code_redemptions FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+  USING (public.has_role('admin'::public.app_role, auth.uid()))
+  WITH CHECK (public.has_role('admin'::public.app_role, auth.uid()));
 
 CREATE POLICY support_tickets_public_insert ON public.support_tickets FOR INSERT TO anon, authenticated
   WITH CHECK (true);
 
 CREATE POLICY support_tickets_admin_all ON public.support_tickets FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+  USING (public.has_role('admin'::public.app_role, auth.uid()))
+  WITH CHECK (public.has_role('admin'::public.app_role, auth.uid()));
 
 CREATE POLICY retention_jobs_admin_all ON public.retention_jobs FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+  USING (public.has_role('admin'::public.app_role, auth.uid()))
+  WITH CHECK (public.has_role('admin'::public.app_role, auth.uid()));
 
 CREATE POLICY transactions_admin_all ON public.transactions FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+  USING (public.has_role('admin'::public.app_role, auth.uid()))
+  WITH CHECK (public.has_role('admin'::public.app_role, auth.uid()));
 
 -- 9. Atomic Code Redemption Function
 CREATE OR REPLACE FUNCTION public.redeem_access_code_atomic(

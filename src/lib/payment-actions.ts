@@ -220,11 +220,17 @@ export const verifyAndConsumePurchaseEvent = createServerFn({ method: "POST" })
   .validator((data: unknown) => z.object({ merchantOid: z.string().min(3) }).parse(data))
   .handler(async ({ data }) => {
     try {
+      const request = getRequest();
+      const { requireAuthenticatedUser } = await import("./event-access.server");
+      const { user } = await requireAuthenticatedUser(request, { mutation: true });
       const admin = getServiceSupabase();
       const { data: transaction, error } = await admin
         .from("transactions")
-        .select("id, merchant_oid, amount, package_type, status, is_test_order, analytics_purchase_sent")
+        .select(
+          "id, user_id, merchant_oid, amount, package_type, status, is_test_order, analytics_purchase_sent",
+        )
         .eq("merchant_oid", data.merchantOid)
+        .eq("user_id", user.id)
         .maybeSingle();
 
       if (error || !transaction) {
@@ -248,7 +254,7 @@ export const verifyAndConsumePurchaseEvent = createServerFn({ method: "POST" })
       }
 
       // Atomically mark as sent in database
-      const { error: updateError } = await admin
+      const { data: consumed, error: updateError } = await admin
         .from("transactions")
         .update({
           analytics_purchase_sent: true,
@@ -256,9 +262,14 @@ export const verifyAndConsumePurchaseEvent = createServerFn({ method: "POST" })
           analytics_sent_at: new Date().toISOString(),
         })
         .eq("merchant_oid", data.merchantOid)
-        .eq("analytics_purchase_sent", false);
+        .eq("user_id", user.id)
+        .eq("status", "success")
+        .eq("is_test_order", false)
+        .eq("analytics_purchase_sent", false)
+        .select("id")
+        .maybeSingle();
 
-      if (updateError) {
+      if (updateError || !consumed) {
         return { verified: false, reason: "Concurrency conflict updating transaction" };
       }
 
@@ -273,8 +284,8 @@ export const verifyAndConsumePurchaseEvent = createServerFn({ method: "POST" })
         if (pkg?.name) packageName = pkg.name;
       }
 
-      const rawAmount = Number(transaction.amount) || 100000;
-      const valueTL = rawAmount > 1000 ? rawAmount / 100 : rawAmount;
+      const rawAmount = Number(transaction.amount) || 0;
+      const valueTL = rawAmount / 100;
 
       return {
         verified: true,

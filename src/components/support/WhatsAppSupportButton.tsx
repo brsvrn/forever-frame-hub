@@ -16,13 +16,13 @@ export function WhatsAppSupportButton() {
   useEffect(() => {
     let cancelled = false;
     void supabase
-      .from("system_settings")
-      .select("whatsapp_number, support_phone")
-      .limit(1)
-      .maybeSingle()
+      .rpc("get_public_support_settings")
       .then(({ data }) => {
+        const settings = data as { whatsapp_number?: string; support_phone?: string } | null;
         if (!cancelled) {
-          setNumber(data?.whatsapp_number || data?.support_phone || DEFAULT_WHATSAPP_NUMBER);
+          setNumber(
+            settings?.whatsapp_number || settings?.support_phone || DEFAULT_WHATSAPP_NUMBER,
+          );
         }
       });
     return () => {

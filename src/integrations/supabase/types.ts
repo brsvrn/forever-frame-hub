@@ -1354,6 +1354,40 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      finalize_paytr_payment: {
+        Args: { p_merchant_oid: string; p_total_amount: number };
+        Returns: Json;
+      };
+      get_public_invitation: {
+        Args: { p_slug: string };
+        Returns: Json;
+      };
+      get_public_support_settings: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      is_public_invitation: {
+        Args: { _invitation_id: string };
+        Returns: boolean;
+      };
+      is_public_invitation_path: {
+        Args: { _invitation_id: string };
+        Returns: boolean;
+      };
+      is_public_memory_gallery: {
+        Args: { _invitation_id: string };
+        Returns: boolean;
+      };
+      set_admin_role_atomic: {
+        Args: {
+          p_actor_user_id: string;
+          p_actor_email: string | null;
+          p_target_user_id: string;
+          p_target_email: string | null;
+          p_grant_admin: boolean;
+        };
+        Returns: Json;
+      };
       accept_event_member_invitation: {
         Args: { _token_hash: string };
         Returns: string;

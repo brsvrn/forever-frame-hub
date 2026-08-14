@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run --config vitest.config.ts --configLoader native --pool threads",
     "typecheck": "tsc --noEmit",
+    "lint:critical": "eslint src/lib/admin/admin.functions.ts src/lib/admin/orders.api.ts src/lib/admin/users.api.ts src/lib/invitations.api.ts src/lib/payment-actions.ts src/lib/paytr.ts src/lib/payment-outbox.server.ts src/routes/api.share-image.*.ts src/routes/api.cron.payment-events.ts src/server.ts src/components/admin/AdminOrdersManager.tsx src/components/support/WhatsAppSupportButton.tsx tests/payment-hardening.test.ts --rule \"prettier/prettier:off\"",
     "check": "npm run typecheck && npm run lint && npm run build",
     "lint": "eslint .",
     "format": "prettier --write ."

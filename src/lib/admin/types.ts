@@ -67,7 +67,7 @@ export interface AdminOrderSummary {
   invitationSlug?: string | null;
   partnerNames?: string;
   packageType: string;
-  amount: number; // in kuruş or TL
+  amount: number; // always in kuruş
   currency: string;
   status: "pending" | "success" | "failed" | "cancelled" | "refunded" | "expired";
   isTestOrder: boolean;

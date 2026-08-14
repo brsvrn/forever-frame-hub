@@ -1,6 +1,35 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import type { AdminOrderSummary, AdminStats, AdminUserSummary, AdminEventSummary } from "./types";
+import type { Json } from "@/integrations/supabase/types";
+import type { AdminOrderSummary, AdminUserSummary } from "./types";
+
+async function authorizeAdmin(mutation = false) {
+  const request = getRequest();
+  const { assertSameOrigin, requireAdmin } = await import("@/lib/admin-auth.server");
+  if (mutation) assertSameOrigin(request);
+  return requireAdmin(request);
+}
+
+async function writeAdminAudit(input: {
+  adminId: string;
+  adminEmail?: string;
+  action: string;
+  targetType: string;
+  targetId: string | null;
+  details?: Record<string, unknown>;
+}) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.from("admin_audit_logs").insert({
+    admin_id: input.adminId,
+    admin_email: input.adminEmail || "unknown@memorywedding.com",
+    action: input.action,
+    target_type: input.targetType,
+    target_id: input.targetId,
+    details: (input.details || {}) as Json,
+  });
+  if (error) console.error("Failed to write admin audit log", error);
+}
 
 export const getAdminOrdersServer = createServerFn({ method: "GET" })
   .validator((input: unknown) =>
@@ -12,6 +41,7 @@ export const getAdminOrdersServer = createServerFn({ method: "GET" })
       .parse(input)
   )
   .handler(async ({ data: options }) => {
+    await authorizeAdmin();
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -101,10 +131,7 @@ export const getAdminOrdersServer = createServerFn({ method: "GET" })
       const list: AdminOrderSummary[] = (rows || []).map((r: any) => {
         const userProfile = userMap[r.user_id];
         const invInfo = r.invitation_id ? invMap[r.invitation_id] : undefined;
-        const isTestOrder =
-          r.is_test_order === true ||
-          (r.merchant_oid || "").toLowerCase().includes("test") ||
-          Number(r.amount) <= 100;
+        const isTestOrder = r.is_test_order === true;
 
         return {
           id: r.id,
@@ -162,49 +189,63 @@ export const deleteAdminOrderServer = createServerFn({ method: "POST" })
       .parse(input)
   )
   .handler(async ({ data }) => {
+    const { user } = await authorizeAdmin(true);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("transactions").delete().eq("id", data.orderId);
+
+    const { data: order, error: fetchError } = await supabaseAdmin
+      .from("transactions")
+      .select("id, merchant_oid, is_test_order")
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (fetchError) throw fetchError;
+    if (!order) throw new Error("Sipariş bulunamadı.");
+    if (order.is_test_order !== true) {
+      throw new Error("Gerçek sipariş kayıtları kalıcı olarak silinemez.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("transactions")
+      .delete()
+      .eq("id", data.orderId)
+      .eq("is_test_order", true);
     if (error) throw error;
+    await writeAdminAudit({
+      adminId: user.id,
+      adminEmail: user.email,
+      action: "delete_test_order",
+      targetType: "transaction",
+      targetId: data.orderId,
+      details: { merchantOid: order.merchant_oid },
+    });
     return { success: true };
   });
 
 export const purgeTestOrdersServer = createServerFn({ method: "POST" }).handler(async () => {
+  const { user } = await authorizeAdmin(true);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: rows, error: fetchError } = await supabaseAdmin
     .from("transactions")
-    .select("id, merchant_oid, is_test_order, amount");
+    .select("id")
+    .eq("is_test_order", true);
 
   if (fetchError) throw fetchError;
 
-  const testIds = (rows || [])
-    .filter(
-      (r: any) =>
-        r.is_test_order === true ||
-        (r.merchant_oid || "").toLowerCase().includes("test") ||
-        Number(r.amount) <= 100
-    )
-    .map((r: any) => r.id);
+  const testIds = (rows || []).map((row) => row.id);
 
   if (testIds.length > 0) {
     const { error: delError } = await supabaseAdmin.from("transactions").delete().in("id", testIds);
     if (delError) throw delError;
   }
 
+  await writeAdminAudit({
+    adminId: user.id,
+    adminEmail: user.email,
+    action: "purge_test_orders",
+    targetType: "transaction",
+    targetId: null,
+    details: { count: testIds.length },
+  });
   return { success: true, count: testIds.length };
-});
-
-export const purgeAllOrdersServer = createServerFn({ method: "POST" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: rows, error: fetchError } = await supabaseAdmin.from("transactions").select("id");
-  if (fetchError) throw fetchError;
-
-  const allIds = (rows || []).map((r: any) => r.id);
-  if (allIds.length > 0) {
-    const { error: delError } = await supabaseAdmin.from("transactions").delete().in("id", allIds);
-    if (delError) throw delError;
-  }
-
-  return { success: true, count: allIds.length };
 });
 
 export const updateOrderAdminNotesServer = createServerFn({ method: "POST" })
@@ -218,6 +259,7 @@ export const updateOrderAdminNotesServer = createServerFn({ method: "POST" })
       .parse(input)
   )
   .handler(async ({ data }) => {
+    const { user } = await authorizeAdmin(true);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const payload: Record<string, any> = {
       updated_at: new Date().toISOString(),
@@ -232,11 +274,20 @@ export const updateOrderAdminNotesServer = createServerFn({ method: "POST" })
       .single();
 
     if (error) throw error;
+    await writeAdminAudit({
+      adminId: user.id,
+      adminEmail: user.email,
+      action: "update_order",
+      targetType: "transaction",
+      targetId: data.orderId,
+      details: { notesChanged: data.notes !== undefined, refundStatus: data.refundStatus },
+    });
     return result;
   });
 
 export const getAdminUsersServer = createServerFn({ method: "GET" }).handler(
   async (): Promise<AdminUserSummary[]> => {
+    await authorizeAdmin();
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -280,7 +331,7 @@ export const getAdminUsersServer = createServerFn({ method: "GET" }).handler(
           orderCountMap[tx.user_id] = (orderCountMap[tx.user_id] || 0) + 1;
           if (tx.status === "success" || tx.status === "paid") {
             const amt = Number(tx.amount) || 0;
-            const inTL = amt > 10000 ? amt / 100 : amt;
+            const inTL = amt / 100;
             spentMap[tx.user_id] = (spentMap[tx.user_id] || 0) + inTL;
           }
         }
@@ -333,3 +384,28 @@ export const getAdminUsersServer = createServerFn({ method: "GET" }).handler(
     }
   }
 );
+
+export const setAdminRoleServer = createServerFn({ method: "POST" })
+  .validator((input: unknown) =>
+    z
+      .object({
+        targetUserId: z.string().uuid(),
+        targetEmail: z.string().email().optional(),
+        grantAdmin: z.boolean(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { user } = await authorizeAdmin(true);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: result, error } = await (supabaseAdmin as any).rpc("set_admin_role_atomic", {
+      p_actor_user_id: user.id,
+      p_actor_email: user.email || null,
+      p_target_user_id: data.targetUserId,
+      p_target_email: data.targetEmail || null,
+      p_grant_admin: data.grantAdmin,
+    });
+    if (error) throw error;
+    if (result?.success !== true) throw new Error(result?.error || "Rol güncellenemedi.");
+    return { success: true };
+  });
